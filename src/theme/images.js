@@ -36,9 +36,9 @@ export const LOCAL_FALLBACKS = [
   '/dish-images/dish-20.webp',
 ]
 
-// 暗调渐变占位（终极回退，无图时也不开天窗）
+// 暖骨白→浅陶渐变占位（终极回退，无图时也不开天窗）
 export const INK_PLACEHOLDER =
-  'linear-gradient(135deg, #211B12 0%, #16130F 55%, #0E0C0A 100%)'
+  'linear-gradient(135deg, #F7F3EC 0%, #EFE7DA 100%)'
 
 // 给 <img onError> 用的三级回退：先本地 webp，再 ink 渐变
 export function heroFallback(e, index = 0) {
