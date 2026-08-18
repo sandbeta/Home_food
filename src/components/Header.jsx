@@ -10,7 +10,7 @@ export default function Header({ title, subtitle, right }) {
       className="sticky top-0 z-40"
       style={{
         background:
-          'linear-gradient(180deg, rgba(14,12,10,0.74) 0%, rgba(14,12,10,0.42) 70%, rgba(14,12,10,0) 100%)',
+          'linear-gradient(180deg, rgba(247,243,236,0.78) 0%, rgba(247,243,236,0) 100%)',
         backdropFilter: 'blur(14px)',
         WebkitBackdropFilter: 'blur(14px)',
       }}
@@ -22,8 +22,8 @@ export default function Header({ title, subtitle, right }) {
               initial={{ width: 0, opacity: 0 }}
               animate={{ width: 52, opacity: 1 }}
               transition={{ delay: 0.12, type: 'spring', stiffness: 300, damping: 24 }}
-              className="h-[3px] rounded-full mb-3.5 bg-gradient-to-r from-[var(--color-gold-soft)] to-[var(--color-gold)]"
-              style={{ boxShadow: '0 0 8px rgba(230,178,90,0.35), 0 0 16px rgba(230,178,90,0.12)' }}
+              className="h-[3px] rounded-full mb-3.5 bg-gradient-to-r from-[var(--color-clay-soft)] to-[var(--color-clay)]"
+              style={{ boxShadow: '0 0 8px rgba(200,104,63,0.35), 0 0 16px rgba(200,104,63,0.12)' }}
             />
             <h1 className="font-serif text-[32px] font-bold text-[var(--color-bone)] leading-tight tracking-[-0.02em] truncate">
               {title}

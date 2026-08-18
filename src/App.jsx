@@ -35,11 +35,11 @@ function App() {
   return (
     <CartProvider>
       <div className="min-h-screen max-w-[480px] mx-auto relative overflow-hidden border-x border-[var(--color-glass-border)] bg-[var(--color-ink-900)]">
-        {/* 暗房环境光：暖金主光（左） + 冷铂辅光（右），极弱，仅作氛围 */}
-        <div className="fixed top-[-120px] left-[calc(50%-260px)] w-80 h-80 rounded-full blur-[90px] opacity-30 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(230,178,90,0.16) 0%, transparent 70%)' }} />
-        <div className="fixed top-1/3 right-[calc(50%-260px)] w-64 h-64 rounded-full blur-[90px] opacity-22 pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(194,199,210,0.10) 0%, transparent 70%)' }} />
+        {/* 晨光环境光：赤陶主光（左） + 鼠尾草绿辅光（右），低透，仅作氛围 */}
+        <div className="fixed top-[-120px] left-[calc(50%-260px)] w-80 h-80 rounded-full blur-[90px] pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.10) 0%, transparent 70%)' }} />
+        <div className="fixed top-1/3 right-[calc(50%-260px)] w-64 h-64 rounded-full blur-[90px] pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(127,163,122,0.10) 0%, transparent 70%)' }} />
 
         <main className="pb-28 relative z-10">
           <AnimatePresence mode="wait">
