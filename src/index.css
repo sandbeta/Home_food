@@ -2,38 +2,39 @@
 @import "tailwindcss";
 
 /* ============================================================
-   暗房晚宴 · Midnight Supper 设计系统
-   暖调近黑胶片底 + 全屏美食大图发光 + 双人格温度对比
-   我(me)=暖金 #E6B25A / TA(partner)=冷铂 #C2C7D2
+   晨光厨房 · Sunlit Kitchen 设计系统
+   暖调亮色晨光底 + 轻量玻璃质感 + 双人格温度对比
+   我(me)=暖赤陶 #C8683F / TA(partner)=冷鼠尾草绿 #7FA37A
    ============================================================ */
 @theme {
-  /* —— 表面 / 底（暖调近黑） —— */
-  --color-ink-900: #0E0C0A;
-  --color-ink-850: #16130F;
-  --color-ink-800: #1E1A15;
+  /* —— 表面 / 底（晨光暖骨白） —— */
+  --color-ink-900: #F7F3EC;   /* 主底 暖骨白 */
+  --color-ink-850: #EFE7DA;   /* 区块底 浅陶 */
+  --color-ink-800: #E4DACC;   /* 次级底 */
 
   /* —— 文字 —— */
-  --color-bone: #F5F1EA;       /* 主文字 骨白 */
-  --color-ash: #A89F92;        /* 次文字 暖灰 */
-  --color-mist: #6E665C;       /* 三级 / 占位 */
+  --color-bone: #2B2620;      /* 主文字 墨 */
+  --color-ash: #6B6155;       /* 次文字 */
+  --color-mist: #9A9082;      /* 三级 / 占位 */
 
   /* —— 双人格强调（温度对比） —— */
-  --color-gold: #E6B25A;       /* 我(me) 暖金 */
-  --color-gold-soft: #F0CE92;  /* 金高光 */
-  --color-platinum: #C2C7D2;   /* TA(partner) 冷铂 */
-  --color-platinum-soft: #DDE0E8; /* 铂高光 */
+  --color-clay: #C8683F;      /* 我(me) 赤陶(暖) */
+  --color-clay-soft: #E0A07E; /* 赤陶高光 */
+  --color-sage: #7FA37A;      /* TA(partner) 鼠尾草绿(冷) */
+  --color-sage-soft: #A9C4A4; /* 鼠尾草高光 */
 
   /* —— 状态 —— */
-  --color-sage: #9DB39A;       /* 已完成 鼠尾草绿 */
-  --color-love: #E8A6A0;       /* 浪漫细节 暖陶土粉 */
-  --color-danger: #D7736B;     /* 删除 / 警示 */
+  --color-caramel: #B5793F;   /* 中性暖强调 焦糖 */
+  --color-love: #D98C84;      /* 喜爱 / 删除 柔红 */
+  --color-danger: #C2543F;    /* 危险 / 删除强调 */
 
   /* —— 玻璃 —— */
-  --color-glass: rgba(245,241,234,0.06);
-  --color-glass-border: rgba(245,241,234,0.12);
+  --color-glass: rgba(255,253,249,0.62);
+  --color-glass-border: rgba(43,38,32,0.10);
 
-  /* —— 品牌金渐变 —— */
-  --color-gold-gradient: linear-gradient(135deg, #F0CE92 0%, #E6B25A 100%);
+  /* —— 品牌渐变 —— */
+  --color-clay-gradient: linear-gradient(135deg, #E0A07E 0%, #C8683F 100%);
+  --color-sage-gradient: linear-gradient(135deg, #A9C4A4 0%, #7FA37A 100%);
 
   /* —— 圆角语义 —— */
   --radius-card: 28px;
@@ -42,32 +43,39 @@
 
   /* —— 字体 —— */
   --font-serif: "Playfair Display", "Noto Serif SC", serif;
-  --font-sans: "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-sans: "Noto Sans SC", "Inter", system-ui, sans-serif;
 
   /* —— 历史名重映射（向后兼容既有 var() 引用；不删名，只换值） —— */
-  --color-primary: #E6B25A;            /* 金 */
-  --color-primary-light: rgba(230,178,90,0.14);
-  --color-primary-dark: #B8863C;
-  --color-peach: #F0CE92;
-  --color-peach-light: rgba(240,206,146,0.16);
-  --color-secondary: #C2C7D2;          /* 铂 */
-  --color-secondary-light: rgba(194,199,210,0.14);
-  --color-haze: #C2C7D2;
-  --color-haze-light: rgba(194,199,210,0.14);
-  --color-cream: #0E0C0A;              /* → 暗底 */
-  --color-cream-dark: #16130F;
-  --color-card: #1E1A15;
-  --color-card-side: #16130F;
-  --color-surface: #1E1A15;
-  --color-text: #F5F1EA;
-  --color-text-secondary: #A89F92;
-  --color-text-tertiary: #6E665C;
-  --color-border: rgba(245,241,234,0.12);
-  --color-success: #9DB39A;
-  --color-warning: #E6B25A;
-  --color-info: #C2C7D2;
-  --color-love: #E8A6A0;
-  --color-primary-gradient: linear-gradient(135deg, #F0CE92 0%, #E6B25A 100%);
+  --color-primary: #C8683F;
+  --color-primary-light: rgba(200,104,63,0.14);
+  --color-primary-dark: #9A4E2C;
+  --color-peach: #E0A07E;
+  --color-peach-light: rgba(224,160,126,0.16);
+  --color-secondary: #7FA37A;
+  --color-secondary-light: rgba(127,163,122,0.14);
+  --color-haze: #7FA37A;
+  --color-haze-light: rgba(127,163,122,0.14);
+  --color-cream: #F7F3EC;            /* → 暖骨白 */
+  --color-cream-dark: #EFE7DA;
+  --color-card: #FFFDF9;
+  --color-card-side: #EFE7DA;
+  --color-surface: #FFFDF9;
+  --color-text: #2B2620;
+  --color-text-secondary: #6B6155;
+  --color-text-tertiary: #9A9082;
+  --color-border: rgba(43,38,32,0.10);
+  --color-success: #7FA37A;
+  --color-warning: #C8683F;
+  --color-info: #7FA37A;
+  --color-love: #D98C84;
+  --color-primary-gradient: linear-gradient(135deg, #E0A07E 0%, #C8683F 100%);
+
+  /* —— 向后兼容别名（旧页引用，映射到新赤陶/鼠尾草语义） —— */
+  --color-gold: var(--color-clay);
+  --color-gold-soft: var(--color-clay-soft);
+  --color-gold-gradient: var(--color-clay-gradient);
+  --color-platinum: var(--color-sage);
+  --color-platinum-soft: var(--color-sage-soft);
 }
 
 /* ========== Reset & Base ========== */
@@ -84,19 +92,19 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
-  /* 暗房胶片底：中心略亮、四周压暗，让全屏美食图成为最亮处 */
+  /* 晨光暖骨白底：顶部微亮、四周轻 vignette，让美食图成为最亮处 */
   background:
-    radial-gradient(120% 80% at 50% 0%, #1A1611 0%, var(--color-ink-900) 55%, #080604 100%);
+    radial-gradient(120% 80% at 50% 0%, #FBF8F2 0%, var(--color-ink-900) 55%, #EDE4D6 100%);
 }
 
-/* 暗角 vignette，强化「底片」质感（极弱，不抢图） */
+/* 晨光 vignette，极弱，仅给页面一点包裹感（不抢图） */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(130% 100% at 50% 40%, transparent 55%, rgba(0,0,0,0.45) 100%);
+    radial-gradient(130% 100% at 50% 40%, transparent 60%, rgba(43,38,32,0.06) 100%);
   z-index: 0;
 }
 
@@ -144,19 +152,19 @@ textarea:focus-visible, select:focus-visible {
 }
 /* 低配 / 不支持 backdrop-filter 时退为实底半透明 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass { background: rgba(30, 26, 21, 0.92); }
-  .d3-card-face { background: rgba(30, 26, 21, 0.92) !important; }
+  .glass { background: rgba(255, 253, 249, 0.92); }
+  .d3-card-face { background: rgba(255, 253, 249, 0.92) !important; }
 }
-.glass-elevated { box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45); }
+.glass-elevated { box-shadow: 0 18px 50px rgba(43, 38, 32, 0.10); }
 .glass-me {
-  border: 1px solid rgba(230, 178, 90, 0.40);
-  background: linear-gradient(180deg, rgba(230,178,90,0.10) 0%, rgba(245,241,234,0.04) 100%);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(230,178,90,0.10);
+  border: 1px solid rgba(200, 104, 63, 0.40);
+  background: linear-gradient(180deg, rgba(200,104,63,0.10) 0%, rgba(255,253,249,0.04) 100%);
+  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px rgba(200,104,63,0.10);
 }
 .glass-partner {
-  border: 1px solid rgba(194, 199, 210, 0.40);
-  background: linear-gradient(180deg, rgba(194,199,210,0.10) 0%, rgba(245,241,234,0.04) 100%);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(194,199,210,0.10);
+  border: 1px solid rgba(127, 163, 122, 0.40);
+  background: linear-gradient(180deg, rgba(127,163,122,0.10) 0%, rgba(255,253,249,0.04) 100%);
+  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px rgba(127,163,122,0.10);
 }
 
 /* ========== Card ========== */
@@ -169,11 +177,11 @@ textarea:focus-visible, select:focus-visible {
   border: 1px solid var(--color-glass-border);
   -webkit-backdrop-filter: blur(20px) saturate(120%);
   backdrop-filter: blur(20px) saturate(120%);
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.40);
+  box-shadow: 0 10px 34px rgba(43, 38, 32, 0.10);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
 }
 .d3-card:hover .d3-card-face {
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.50);
+  box-shadow: 0 16px 44px rgba(43, 38, 32, 0.14);
 }
 
 /* ========== Button ========== */
@@ -184,13 +192,13 @@ textarea:focus-visible, select:focus-visible {
   transition: opacity 0.15s ease, transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease;
 }
 .d3-btn-primary {
-  background: var(--color-gold-gradient);
-  color: #2A1E0E;
-  box-shadow: 0 8px 22px rgba(230, 178, 90, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: var(--color-clay-gradient);
+  color: #FFFDF9;
+  box-shadow: 0 8px 22px rgba(200, 104, 63, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .d3-btn-primary:hover {
   filter: brightness(1.04);
-  box-shadow: 0 10px 26px rgba(230, 178, 90, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 10px 26px rgba(200, 104, 63, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 .d3-btn-primary:active { transform: scale(0.98); filter: brightness(0.97); }
 
@@ -205,7 +213,7 @@ textarea:focus-visible, select:focus-visible {
 
 /* ========== Input ========== */
 .d3-input {
-  background: rgba(245, 241, 234, 0.04);
+  background: rgba(43, 38, 32, 0.04);
   border: 1px solid var(--color-glass-border);
   border-radius: var(--radius-btn);
   -webkit-backdrop-filter: blur(10px);
@@ -215,8 +223,8 @@ textarea:focus-visible, select:focus-visible {
 .d3-input::placeholder { color: var(--color-mist); }
 .d3-input:focus {
   outline: none;
-  border-color: rgba(230, 178, 90, 0.55);
-  box-shadow: 0 0 0 4px rgba(230, 178, 90, 0.14);
+  border-color: rgba(200, 104, 63, 0.55);
+  box-shadow: 0 0 0 4px rgba(200, 104, 63, 0.14);
 }
 
 /* ========== Badge ========== */
@@ -228,42 +236,49 @@ textarea:focus-visible, select:focus-visible {
   font-size: 0.6875rem;
   font-weight: 700;
   border-radius: 999px;
-  background: rgba(230, 178, 90, 0.14);
-  color: var(--color-gold-soft);
-  border: 1px solid rgba(230, 178, 90, 0.28);
+  background: rgba(200, 104, 63, 0.14);
+  color: var(--color-clay);
+  border: 1px solid rgba(200, 104, 63, 0.28);
 }
 
 /* ========== Avatar & Backgrounds ========== */
 .avatar-me {
-  background: linear-gradient(135deg, #F0CE92 0%, #E6B25A 100%);
-  color: #2A1E0E;
+  background: linear-gradient(135deg, #E0A07E 0%, #C8683F 100%);
+  color: #FFFDF9;
 }
 .avatar-partner {
-  background: linear-gradient(135deg, #DDE0E8 0%, #C2C7D2 100%);
-  color: #1A1D22;
+  background: linear-gradient(135deg, #A9C4A4 0%, #7FA37A 100%);
+  color: #1A2417;
 }
-/* 旧 bg-warm / bg-cool 在新语言里退为暗调，避免旧页开天窗 */
-.bg-warm { background: linear-gradient(135deg, #211B12 0%, #1A140D 100%); }
-.bg-cool { background: linear-gradient(135deg, #181B20 0%, #121519 100%); }
+/* 旧 bg-warm / bg-cool 在新语言里退为亮色，避免旧页开天窗 */
+.bg-warm { background: linear-gradient(135deg, #F0E4D8 0%, #E4DACC 100%); }
+.bg-cool { background: linear-gradient(135deg, #E3ECE0 0%, #D5E0D2 100%); }
 
 /* 双人格辉光 */
-.glow-gold     { box-shadow: 0 0 0 3px rgba(230,178,90,0.18), 0 6px 20px rgba(230,178,90,0.22); }
-.glow-platinum { box-shadow: 0 0 0 3px rgba(194,199,210,0.18), 0 6px 20px rgba(194,199,210,0.22); }
-.glow-sage     { box-shadow: 0 0 0 3px rgba(157,179,154,0.18), 0 6px 20px rgba(157,179,154,0.22); }
-.glow-love     { box-shadow: 0 6px 20px rgba(232,166,160,0.25); }
+.glow-clay     { box-shadow: 0 0 0 3px rgba(200,104,63,0.18), 0 6px 20px rgba(200,104,63,0.22); }
+.glow-gold     { box-shadow: 0 0 0 3px rgba(200,104,63,0.18), 0 6px 20px rgba(200,104,63,0.22); } /* 向后兼容别名 */
+.glow-sage     { box-shadow: 0 0 0 3px rgba(127,163,122,0.18), 0 6px 20px rgba(127,163,122,0.22); }
+.glow-platinum { box-shadow: 0 0 0 3px rgba(127,163,122,0.18), 0 6px 20px rgba(127,163,122,0.22); } /* 向后兼容别名 */
+.glow-love     { box-shadow: 0 6px 20px rgba(217,140,132,0.25); }
 /* 激活态脉冲（配合 is-active 使用） */
 .avatar-me.is-active    { animation: pulse-glow-gold 2.4s ease-in-out infinite; }
 .avatar-partner.is-active { animation: pulse-glow-platinum 2.4s ease-in-out infinite; }
 
 /* ========== Utility Components ========== */
+.gradient-text-clay {
+  background: var(--color-clay-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 .gradient-text-gold {
-  background: var(--color-gold-gradient);
+  background: var(--color-clay-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .gradient-text {
-  background: var(--color-gold-gradient);
+  background: var(--color-clay-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -288,12 +303,12 @@ textarea:focus-visible, select:focus-visible {
   width: 30px;
   height: 3px;
   border-radius: 2px;
-  background: var(--color-gold-gradient);
+  background: var(--color-clay-gradient);
 }
 
 /* 软卡 — 轻量容器，用于分组块 */
 .soft-block {
-  background: rgba(245, 241, 234, 0.04);
+  background: rgba(43, 38, 32, 0.04);
   border: 1px solid var(--color-glass-border);
   border-radius: 18px;
 }
@@ -336,7 +351,7 @@ textarea:focus-visible, select:focus-visible {
 /* ========== Project-specific utilities ========== */
 @keyframes shimmer-fade { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 .animate-shimmer-fade {
-  background: rgba(245, 241, 234, 0.05);
+  background: rgba(43, 38, 32, 0.05);
   border-radius: 9999px;
   animation: shimmer-fade 1.4s ease-in-out infinite;
 }
@@ -344,14 +359,25 @@ textarea:focus-visible, select:focus-visible {
 @keyframes float-gentle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 .animate-float-gentle { animation: float-gentle 6s ease-in-out infinite; }
 
+@keyframes pulse-glow-clay {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 104, 63, 0.40); }
+  50% { box-shadow: 0 0 22px 4px rgba(200, 104, 63, 0.32); }
+}
+@keyframes pulse-glow-sage {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(127, 163, 122, 0.40); }
+  50% { box-shadow: 0 0 22px 4px rgba(127, 163, 122, 0.30); }
+}
+/* 向后兼容别名（旧名沿用新色值） */
 @keyframes pulse-glow-gold {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(230, 178, 90, 0.40); }
-  50% { box-shadow: 0 0 22px 4px rgba(230, 178, 90, 0.32); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 104, 63, 0.40); }
+  50% { box-shadow: 0 0 22px 4px rgba(200, 104, 63, 0.32); }
 }
 @keyframes pulse-glow-platinum {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(194, 199, 210, 0.40); }
-  50% { box-shadow: 0 0 22px 4px rgba(194, 199, 210, 0.30); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(127, 163, 122, 0.40); }
+  50% { box-shadow: 0 0 22px 4px rgba(127, 163, 122, 0.30); }
 }
+.animate-pulse-glow-clay { animation: pulse-glow-clay 2.4s ease-in-out infinite; }
+.animate-pulse-glow-sage { animation: pulse-glow-sage 2.4s ease-in-out infinite; }
 .animate-pulse-glow-gold { animation: pulse-glow-gold 2.4s ease-in-out infinite; }
 .animate-pulse-glow-platinum { animation: pulse-glow-platinum 2.4s ease-in-out infinite; }
 
