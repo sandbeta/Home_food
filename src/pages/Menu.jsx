@@ -31,7 +31,7 @@ function WhoSelector({ whoAmI, setWhoAmI }) {
         const active = whoAmI === opt.value
         return (
           <motion.button key={opt.value} whileTap={{ scale: 0.95 }} onClick={() => setWhoAmI(opt.value)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-2xl text-sm font-bold transition-all duration-300 ease-out ${active ? (opt.value === 'me' ? 'avatar-me glow-gold' : 'avatar-partner glow-platinum') : 'text-[var(--color-ash)] hover:bg-white/5'}`}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-2xl text-sm font-bold transition-all duration-300 ease-out ${active ? (opt.value === 'me' ? 'avatar-me glow-clay' : 'avatar-partner glow-sage') : 'text-[var(--color-ash)] hover:bg-white/5'}`}
             animate={active ? { scale: 1.02 } : { scale: 1 }}>
             <motion.span className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center text-[10px]"
               animate={active ? { rotate: [0, -8, 8, 0] } : { rotate: 0 }}
@@ -55,18 +55,18 @@ function RecommendCard({ dishes, onAdd, spawnParticle }) {
   return (
     <GlassCard className="p-4 mb-4 overflow-hidden relative">
       <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full animate-float-gentle"
-        style={{ background: 'radial-gradient(circle, rgba(230,178,90,0.14), transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.14), transparent 70%)' }} />
       <div className="absolute -left-6 -bottom-6 w-20 h-20 rounded-full animate-float"
-        style={{ background: 'radial-gradient(circle, rgba(194,199,210,0.10), transparent 70%)', animationDelay: '1s' }} />
+        style={{ background: 'radial-gradient(circle, rgba(127,163,122,0.10), transparent 70%)', animationDelay: '1s' }} />
 
       <div className="relative flex items-center justify-between mb-3">
         <span className="badge-soft text-xs font-extrabold px-2.5 py-1 rounded-full"
-          style={{ background: 'rgba(230,178,90,0.14)', color: 'var(--color-gold-soft)' }}>今日灵感</span>
+          style={{ background: 'rgba(200,104,63,0.14)', color: 'var(--color-gold-soft)' }}>今日灵感</span>
         <span className="text-xs text-[var(--color-ash)]">不知道吃啥就选它</span>
       </div>
       <div className="relative flex items-center gap-3">
         <div className="w-16 h-16 rounded-[22px] flex items-center justify-center shrink-0 overflow-hidden"
-          style={{ background: 'linear-gradient(145deg, #211B12 0%, #16130F 60%, rgba(230,178,90,0.08) 100%)' }}>
+          style={{ background: 'linear-gradient(145deg, #F7F3EC 0%, #EFE7DA 60%, rgba(200,104,63,0.08) 100%)' }}>
           {randomDish.image_url ? <img src={randomDish.image_url} className="w-full h-full object-cover" alt={randomDish.name} /> : <span className="text-3xl">{CATEGORY_CONFIG[randomDish.category]?.emoji || '🍽️'}</span>}
         </div>
         <div className="flex-1 min-w-0">
@@ -181,7 +181,7 @@ export default function Menu() {
                   whileTap={{ scale: 0.95 }}
                   whileHover={{ y: -1 }}
                   onClick={() => setActiveCategory(cat)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${active ? 'd3-btn d3-btn-primary text-[#2A1E0E]' : 'd3-btn-sm text-[var(--color-ash)] hover:text-[var(--color-bone)]'}`}>
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${active ? 'd3-btn d3-btn-primary text-[#FFFDF9]' : 'd3-btn-sm text-[var(--color-ash)] hover:text-[var(--color-bone)]'}`}>
                   <span className="text-xs">{cfg.emoji}</span>{cat}
                 </motion.button>
               )
@@ -234,7 +234,7 @@ export default function Menu() {
                               whileTap={{ scale: 0.95 }}
                               whileHover={{ y: -1 }}
                               onClick={() => setActiveCategory(cat)}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${active ? 'd3-btn d3-btn-primary text-[#2A1E0E]' : 'd3-btn-sm text-[var(--color-ash)] hover:text-[var(--color-bone)]'}`}>
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${active ? 'd3-btn d3-btn-primary text-[#FFFDF9]' : 'd3-btn-sm text-[var(--color-ash)] hover:text-[var(--color-bone)]'}`}>
                               <span className="text-xs">{cfg.emoji}</span>{cat}
                             </motion.button>
                           )
@@ -266,11 +266,11 @@ export default function Menu() {
             className="d3-card flex flex-col items-center justify-center py-16 px-4">
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
               <div className="w-32 h-32 rounded-full animate-pulse-soft"
-                style={{ background: 'radial-gradient(circle, rgba(230,178,90,0.08), transparent 70%)' }} />
+                style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.08), transparent 70%)' }} />
             </div>
             <div className="relative">
               <div className="w-20 h-20 rounded-full flex items-center justify-center mb-5 animate-float"
-                style={{ background: 'linear-gradient(135deg, rgba(230,178,90,0.12), rgba(194,199,210,0.08))' }}>
+                style={{ background: 'linear-gradient(135deg, rgba(200,104,63,0.12), rgba(127,163,122,0.08))' }}>
                 <span className="text-5xl">🔍</span>
               </div>
             </div>
@@ -297,7 +297,7 @@ export default function Menu() {
                   </motion.button>
                   <div className="d3-card-face p-3.5 flex items-center gap-3">
                     <div className="w-[70px] h-[70px] rounded-[24px] flex items-center justify-center shrink-0 overflow-hidden"
-                      style={{ background: 'linear-gradient(145deg, #211B12 0%, #16130F 50%, rgba(230,178,90,0.06) 100%)' }}>
+                      style={{ background: 'linear-gradient(145deg, #F7F3EC 0%, #EFE7DA 50%, rgba(200,104,63,0.06) 100%)' }}>
                       {dish.image_url ? <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" /> : <span className="text-3xl drop-shadow-sm">{CATEGORY_CONFIG[dish.category]?.emoji || '🍽️'}</span>}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -345,7 +345,7 @@ export default function Menu() {
             className="fixed z-[100] pointer-events-none"
             style={{ left: p.x, top: p.y }}
           >
-            <div className="flex items-center gap-0.5 bg-gradient-to-r from-[var(--color-gold-soft)] to-[var(--color-gold)] text-[#2A1E0E] text-xs font-extrabold px-2 py-1 rounded-full shadow-lg">
+            <div className="flex items-center gap-0.5 bg-gradient-to-r from-[var(--color-clay-soft)] to-[var(--color-clay)] text-[#FFFDF9] text-xs font-extrabold px-2 py-1 rounded-full shadow-lg">
               <span>+1</span>
               <KissIcon className="w-3 h-3" />
             </div>
@@ -358,7 +358,7 @@ export default function Menu() {
         <motion.div initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
           className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[448px] z-40">
           <motion.button whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }} onClick={() => navigate('/cart')}
-            className="d3-btn d3-btn-primary block w-full text-center py-3.5 rounded-2xl font-extrabold text-[15px] animate-pulse-glow-gold relative overflow-hidden">
+            className="d3-btn d3-btn-primary block w-full text-center py-3.5 rounded-2xl font-extrabold text-[15px] animate-pulse-glow-clay relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
               <div className="absolute -top-1/2 -left-1/4 w-[60%] h-[200%] rotate-[20deg] animate-pulse-soft"
                 style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)' }} />

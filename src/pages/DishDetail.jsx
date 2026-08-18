@@ -85,7 +85,7 @@ export default function DishDetail() {
               <motion.span key={quantity} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="w-6 text-center font-bold text-lg text-[var(--color-bone)]">{quantity}</motion.span>
               <motion.button whileTap={{ scale: 0.8 }} onClick={() => setQuantity(quantity + 1)}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-lg"
-                style={{ background: 'linear-gradient(135deg, var(--color-gold-soft), var(--color-gold))' }}>+</motion.button>
+                style={{ background: 'var(--color-clay-gradient)' }}>+</motion.button>
             </div>
           </div>
         </GlassCard>
@@ -95,7 +95,7 @@ export default function DishDetail() {
           <motion.button whileTap={{ scale: 0.97, y: 2 }} whileHover={{ y: -1 }}
             onClick={handleAdd}
             className="d3-btn w-full py-4 text-center rounded-2xl font-extrabold text-[15px]"
-            style={{ background: persona.gradient, color: whoAmI === 'me' ? '#2A1E0E' : '#1A1D22' }}>
+            style={{ background: persona.gradient, color: '#FFFDF9' }}>
             <span className="relative z-10">{persona.emoji} 加入购物车</span>
           </motion.button>
         </GlassCard>

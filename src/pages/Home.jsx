@@ -88,7 +88,7 @@ export default function Home() {
                 className="absolute inset-0 cursor-pointer preserve-3d"
                 onClick={() => navigate(`/dish/${banners[bannerIndex]?.id}`)}
               >
-                <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #211B12, #16130F)' }}>
+                <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #F7F3EC, #EFE7DA)' }}>
                   {banners[bannerIndex]?.image_url ? (
                     <img src={banners[bannerIndex].image_url} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -171,7 +171,7 @@ export default function Home() {
                 className="shrink-0 w-[140px] cursor-pointer"
               >
                 <div className="d3-card-face w-[140px] h-[140px] rounded-2xl flex items-center justify-center mb-2 overflow-hidden"
-                  style={{ background: 'linear-gradient(145deg, #211B12, #16130F)' }}>
+                  style={{ background: 'linear-gradient(145deg, #F7F3EC, #EFE7DA)' }}>
                   {getDishImage(dish) ? (
                     <img src={getDishImage(dish)} className="w-full h-full object-cover" alt={dish.name} />
                   ) : (
@@ -205,7 +205,7 @@ export default function Home() {
                   className="d3-card-face p-3 cursor-pointer flex items-center gap-3"
                 >
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
-                    style={{ background: 'linear-gradient(145deg, #211B12, #16130F)' }}>
+                    style={{ background: 'linear-gradient(145deg, #F7F3EC, #EFE7DA)' }}>
                     {getDishImage(dish) ? <img src={getDishImage(dish)} className='w-full h-full object-cover rounded-xl' alt={dish.name} /> : <span className='text-2xl'>{getCategoryEmoji(dish?.category)}</span>}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -240,7 +240,7 @@ export default function Home() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                      style={{ background: 'linear-gradient(135deg, #211B12, #16130F)' }}>📦</div>
+                      style={{ background: 'linear-gradient(135deg, #F7F3EC, #EFE7DA)' }}>📦</div>
                     <div>
                       <p className="text-sm font-bold text-[var(--color-bone)]">订单 #{order.id}</p>
                       <p className="text-[11px] text-[var(--color-ash)] mt-0.5">
