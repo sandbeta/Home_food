@@ -1,0 +1,11 @@
+export default function KissIcon({ className = 'w-4 h-4' }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none">
+      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+        fill="currentColor" opacity="0.9"/>
+      <ellipse cx="9" cy="8" rx="2.5" ry="1.8" fill="white" opacity="0.35" transform="rotate(-20 9 8)"/>
+      <path d="M15.5 11c-.8 1.2-1.5 2-1.5 3.5 0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5c0-2-2-3.5-3.5-3.5z"
+        fill="currentColor" opacity="0.7"/>
+    </svg>
+  )
+}

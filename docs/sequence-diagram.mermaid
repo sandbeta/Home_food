@@ -1,0 +1,33 @@
+sequenceDiagram
+  %% ===== 页面组合（Home 为例） =====
+  participant U as 用户
+  participant App as App.jsx
+  participant Hero as FullBleedHero
+  participant H as Header
+  participant GC as GlassCard
+  participant Nav as FloatingPillNav
+  participant Orb as D3CartOrb
+  participant Ctx as CartContext
+
+  App->>Hero: 渲染 HERO_IMAGES.home + vignette/KenBurns
+  App->>H: 透明叠 hero 标题(font-serif)
+  App->>GC: 快捷入口/推荐/订单 玻璃卡(入场 y:24→0)
+  App->>Nav: 底部药丸(激活=home, 金辉光)
+  App->>Orb: totalCount>0? 悬浮金 orb
+  U->>Nav: 点「吃什么」
+  App->>App: 路由 → /menu
+
+  %% ===== 结算下单流（双人格贯通） =====
+  Note over U,Ctx: 双人格数据流向（逻辑零改动）
+  U->>U: 选 whoAmI = me / partner
+  U->>GC: Menu 点「为我加 / 为TA加」
+  GC->>Ctx: addItem(dish) → added_by = whoAmI
+  U->>GC: 进入 Cart 查看 split
+  Ctx-->>GC: split = { me, partner }
+  GC->>GC: 双栏 GlassCard(glass-me / glass-partner)
+  U->>GC: Checkout 选买单 AA/我请/TA请 + 留言
+  GC->>GC: PAYER 描边+辉光
+  GC->>Ctx: POST /api/orders {items, added_by, payer, note}
+  Ctx-->>GC: order { id, status:'pending' }
+  GC->>Ctx: clearCart()
+  GC->>Hero: 跳转 /orders/:id → OrderDetail + D3StatusRing(ORDER_STATUS)
