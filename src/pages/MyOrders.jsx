@@ -36,11 +36,11 @@ export default function MyOrders() {
               <motion.div className="absolute -inset-4 rounded-full opacity-20"
                 animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.25, 0.1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                style={{ background: 'radial-gradient(circle, rgba(230,178,90,0.20), transparent 70%)' }} />
+                style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.20), transparent 70%)' }} />
             </div>
             <div className="flex items-center gap-1.5 mt-4">
               {[0, 1, 2].map(i => (
-                <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)]"
+                <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--color-clay)]"
                   animate={{ scale: [1, 1.4, 1], opacity: [0.3, 1, 0.3] }}
                   transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
               ))}
@@ -50,9 +50,9 @@ export default function MyOrders() {
         ) : orders.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 relative overflow-hidden">
             <div className="absolute top-8 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full opacity-15"
-              style={{ background: 'radial-gradient(circle, rgba(230,178,90,0.18), transparent 70%)' }} />
+              style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.18), transparent 70%)' }} />
             <div className="absolute bottom-12 left-1/4 w-24 h-24 rounded-full opacity-10"
-              style={{ background: 'radial-gradient(circle, rgba(194,199,210,0.16), transparent 70%)' }} />
+              style={{ background: 'radial-gradient(circle, rgba(127,163,122,0.16), transparent 70%)' }} />
             <motion.div
               className="text-7xl mb-5 relative z-10"
               animate={{ y: [0, -8, 0], rotate: [0, -3, 3, 0] }}
@@ -63,7 +63,7 @@ export default function MyOrders() {
             <p className="text-[var(--color-bone)] mb-1 font-bold relative z-10">还没有下过单</p>
             <p className="text-[var(--color-ash)] text-sm mb-6 relative z-10">快去一起选点好吃的吧~</p>
             <Link to="/menu" className="d3-btn d3-btn-primary text-[#2A1E0E] px-8 py-3 rounded-2xl text-sm font-bold relative z-10"
-              style={{ boxShadow: '0 4px 15px rgba(230,178,90,0.30)' }}>去选菜</Link>
+              style={{ boxShadow: '0 4px 15px rgba(200,104,63,0.30)' }}>去选菜</Link>
           </motion.div>
         ) : (
           <motion.div className="space-y-3" variants={container} initial="hidden" animate="show">
@@ -93,7 +93,7 @@ export default function MyOrders() {
                           <div className="flex items-center justify-between mt-2.5 pt-2.5 border-t border-[var(--color-glass-border)]">
                             <div className="flex items-center gap-1.5">
                               <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-                              <span className="text-[15px] font-bold text-[var(--color-gold-soft)]">{order.total_price}</span>
+                              <span className="text-[15px] font-bold text-[var(--color-clay-soft)]">{order.total_price}</span>
                             </div>
                             {order.items.length > 0 && (
                               <div className="flex items-center gap-2">

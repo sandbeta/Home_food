@@ -33,7 +33,7 @@ export default function Favorites() {
                   transition={{ delay: Math.min(i * 0.04, 0.3) }}
                   className="d3-card-face p-3.5 flex items-center gap-3 group">
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 overflow-hidden"
-                    style={{ background: 'linear-gradient(145deg, #211B12, #16130F)' }}
+                    style={{ background: 'linear-gradient(145deg, #F7F3EC 0%, #EFE7DA 60%, rgba(200,104,63,0.08) 100%)' }}
                     onClick={() => navigate(`/dish/${dish.id}`)}>
                     {getDishImage(dish) ? (
                       <img src={getDishImage(dish)} alt={dish.name} className="w-full h-full object-cover" />
@@ -47,7 +47,7 @@ export default function Favorites() {
                   </div>
                   <div className="flex items-center gap-1 mr-1">
                     <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-                    <span className="text-sm font-bold text-[var(--color-gold-soft)]">{dish.price}</span>
+                    <span className="text-sm font-bold text-[var(--color-clay-soft)]">{dish.price}</span>
                   </div>
                   <motion.button whileTap={{ scale: 0.8 }} onClick={() => remove(dish.id)}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-mist)] hover:text-[var(--color-danger)] active:scale-90 transition-colors"
