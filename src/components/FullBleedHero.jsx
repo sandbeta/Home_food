@@ -2,16 +2,16 @@ import { motion } from 'framer-motion'
 import { usePrefersReducedMotion } from '../theme/motion'
 import { heroFallback } from '../theme/images'
 
-// 全屏底片层：object-cover 美食大图 + 暗角/压暗，衬于页面内容之下
-// variant: 'immersive'（仅暗角，图本身清晰）| 'functional'（模糊+压暗 40-60%，作功能页背景）
-// 宽度与 App 容器(480)对齐，桌面预览也不溢出
+// 全屏底片层：object-cover 美食大图 + 晨光浅叠层，衬于页面内容之下
+// variant: 'immersive'（图清晰微提亮 + 顶部浅渐隐）| 'functional'（轻模糊 + 浅遮罩，作功能页背景）
+// 宽度与 App 容器(480)对齐，桌面预览也不溢出；KenBurns 在 reduced-motion 下关闭
 export default function FullBleedHero({ src, variant = 'immersive', alt = '', children, className = '' }) {
   const reduce = usePrefersReducedMotion()
   const functional = variant === 'functional'
   return (
     <div
       className={`fixed top-0 bottom-0 z-0 overflow-hidden ${className}`}
-      style={{ left: '50%', transform: 'translateX(-50%)', width: 'min(480px, 100%)', background: '#0E0C0A' }}
+      style={{ left: '50%', transform: 'translateX(-50%)', width: 'min(480px, 100%)', background: '#F7F3EC' }}
     >
       <motion.img
         src={src}
@@ -23,17 +23,17 @@ export default function FullBleedHero({ src, variant = 'immersive', alt = '', ch
         className="absolute inset-0 w-full h-full object-cover"
         style={{
           filter: functional
-            ? 'blur(20px) brightness(0.42) saturate(1.05)'
-            : 'brightness(0.9) saturate(1.06) contrast(1.02)',
+            ? 'blur(14px) brightness(0.96)'
+            : 'brightness(1.04) saturate(1.05)',
         }}
       />
-      {/* 暗角 / 压暗叠层 */}
+      {/* 晨光浅叠层：保证浅底文字可读 */}
       <div
         className="absolute inset-0"
         style={{
           background: functional
-            ? 'linear-gradient(180deg, rgba(8,6,4,0.55) 0%, rgba(8,6,4,0.62) 100%)'
-            : 'radial-gradient(125% 85% at 50% 32%, transparent 38%, rgba(8,6,4,0.55) 100%), linear-gradient(180deg, rgba(8,6,4,0.15) 0%, rgba(8,6,4,0.45) 100%)',
+            ? 'rgba(247,243,236,0.5)'
+            : 'linear-gradient(180deg, rgba(247,243,236,0.55) 0%, transparent 35%)',
         }}
       />
       {children}

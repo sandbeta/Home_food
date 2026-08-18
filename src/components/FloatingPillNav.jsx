@@ -25,7 +25,10 @@ export default function FloatingPillNav() {
   return (
     <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50" style={{ width: 'min(480px, 100%)' }}>
       <div className="flex justify-center px-3">
-        <div className="glass glass-elevated rounded-full px-2.5 py-2 flex items-center gap-1 safe-bottom">
+        <div
+          className="glass glass-elevated rounded-full px-2.5 py-2 flex items-center gap-1 safe-bottom"
+          style={{ background: 'var(--color-glass)', border: '1px solid var(--color-glass-border)' }}
+        >
           {tabs.map((tab) => {
             const active = isActive(tab)
             return (
@@ -40,18 +43,15 @@ export default function FloatingPillNav() {
                     layoutId="navGlow"
                     className="absolute inset-0 rounded-full"
                     style={{
-                      background:
-                        'linear-gradient(135deg, rgba(240,206,146,0.24) 0%, rgba(230,178,90,0.14) 100%)',
-                      boxShadow: '0 0 18px 2px rgba(230,178,90,0.30)',
+                      background: 'var(--color-clay-gradient)',
+                      boxShadow: '0 6px 18px rgba(200,104,63,0.28)',
                     }}
                     transition={{ type: 'spring', stiffness: 500, damping: 28 }}
                   />
                 )}
                 <span
                   className="relative text-[22px] transition-transform"
-                  style={{
-                    filter: active ? 'none' : 'grayscale(0.3) opacity(0.7)',
-                  }}
+                  style={{ color: active ? 'var(--color-clay)' : 'var(--color-ash)' }}
                 >
                   {tab.emoji}
                 </span>

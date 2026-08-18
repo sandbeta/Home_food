@@ -8,7 +8,12 @@ export default function GlassCard({ as: _Tag = 'div', className = '', delay = 0,
     <motion.div
       {...cardEntrance(delay)}
       className={`glass rounded-[var(--radius-card)] ${className}`}
-      style={{ ...(glow ? { boxShadow: glow } : {}), ...style }}
+      style={{
+        ...style,
+        ...(glow
+          ? { boxShadow: glow }
+          : { boxShadow: '0 8px 24px rgba(43,38,32,0.08)' }),
+      }}
       {...rest}
     >
       {children}
