@@ -47,7 +47,8 @@ export default function Checkout() {
 
   if (celebrating) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[rgba(14,12,10,0.95)] backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-sm"
+        style={{ background: 'color-mix(in srgb, var(--color-ink-900) 96%, transparent)' }}>
         <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', stiffness: 200, damping: 12 }} className="text-8xl mb-4">🎉</motion.div>
         <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
@@ -73,7 +74,7 @@ export default function Checkout() {
             <span className="text-sm font-bold text-[var(--color-bone)]">×{item.quantity}</span>
             <div className="flex items-center gap-1">
               <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-              <span className="text-sm font-bold text-[var(--color-gold-soft)]">{item.price * item.quantity}</span>
+              <span className="text-sm font-bold text-[var(--color-clay-soft)]">{item.price * item.quantity}</span>
             </div>
           </GlassCard>
         ))}
@@ -93,7 +94,7 @@ export default function Checkout() {
               const active = payer === opt.value
               return (
                 <motion.button key={opt.value} whileTap={{ scale: 0.95 }} onClick={() => setPayer(opt.value)}
-                  className={`flex-1 py-3 rounded-xl text-center transition-all duration-300 relative overflow-hidden ${active ? 'd3-btn-primary' : 'bg-white/5 text-[var(--color-ash)]'}`}
+                  className={`flex-1 py-3 rounded-xl text-center transition-all duration-300 relative overflow-hidden ${active ? 'd3-btn-primary' : 'bg-black/5 text-[var(--color-ash)]'}`}
                   style={active ? { borderColor: p.border, boxShadow: p.glow } : {}}>
                   <div className="text-xl mb-1">{opt.emoji}</div>
                   <div className="text-xs font-bold text-[var(--color-bone)]">{opt.label}</div>
@@ -108,12 +109,12 @@ export default function Checkout() {
             <span className="text-[var(--color-ash)] font-bold">合计</span>
             <div className="flex items-center gap-1">
               <KissIcon className="w-5 h-5 text-[var(--color-love)]" />
-              <span className="text-[26px] font-bold text-[var(--color-gold-soft)] tabular-nums">{totalPrice}</span>
+              <span className="text-[26px] font-bold text-[var(--color-clay-soft)] tabular-nums">{totalPrice}</span>
             </div>
           </div>
           <motion.button whileTap={{ scale: 0.97, y: 2 }} whileHover={{ y: -1 }}
             onClick={handleSubmit} disabled={submitting}
-            className="d3-btn d3-btn-primary w-full py-3.5 rounded-2xl font-bold text-[15px] disabled:opacity-50 text-[#2A1E0E]">
+            className="d3-btn d3-btn-primary w-full py-3.5 rounded-2xl font-bold text-[15px] disabled:opacity-50">
             {submitting ? '提交中...' : '确认下单'}
           </motion.button>
         </GlassCard>

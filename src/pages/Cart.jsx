@@ -23,13 +23,13 @@ function CartRow({ item, onUpdate, onRemove }) {
         <h3 className="font-semibold text-[14px] text-[var(--color-bone)] truncate">{item.name}</h3>
         <div className="flex items-center gap-1 mt-0.5">
           <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-          <span className="text-[13px] font-bold text-[var(--color-gold-soft)]">{item.price}</span>
+          <span className="text-[13px] font-bold text-[var(--color-clay-soft)]">{item.price}</span>
         </div>
       </div>
       <div className="flex items-center gap-1.5">
         <motion.button whileTap={{ scale: 0.85 }} whileHover={{ scale: 1.06 }}
           onClick={() => onUpdate(item.dish_id, item.quantity - 1, item.added_by)}
-          className="w-[30px] h-[30px] rounded-full bg-white/5 flex items-center justify-center text-[var(--color-bone)] transition-all duration-200 hover:scale-105 active:scale-90">
+          className="w-[30px] h-[30px] rounded-full bg-black/5 flex items-center justify-center text-[var(--color-bone)] transition-all duration-200 hover:scale-105 active:scale-90">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12" /></svg>
         </motion.button>
         <motion.span key={item.quantity} initial={{ scale: 1.5, rotate: -10 }} animate={{ scale: 1, rotate: 0 }}
@@ -38,7 +38,7 @@ function CartRow({ item, onUpdate, onRemove }) {
         <motion.button whileTap={{ scale: 0.85 }} whileHover={{ scale: 1.06 }}
           onClick={() => onUpdate(item.dish_id, item.quantity + 1, item.added_by)}
           className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-105 active:scale-90"
-          style={{ background: 'linear-gradient(135deg, var(--color-gold-soft), var(--color-gold))' }}>
+          style={{ background: 'linear-gradient(135deg, var(--color-clay-soft), var(--color-clay))' }}>
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
         </motion.button>
       </div>
@@ -74,19 +74,19 @@ export default function Cart() {
           className="flex flex-col items-center justify-center py-20 px-4">
           <div className="relative mb-6">
             <div className="w-24 h-24 rounded-full animate-cart-empty-bounce"
-              style={{ background: 'linear-gradient(135deg, rgba(230,178,90,0.12), rgba(194,199,210,0.08))' }}>
+              style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-clay) 12%, transparent), color-mix(in srgb, var(--color-sage) 8%, transparent))' }}>
               <div className="w-full h-full flex items-center justify-center"><span className="text-6xl">🛒</span></div>
             </div>
             <motion.div className="absolute -top-2 -right-3 w-6 h-6 rounded-full"
               animate={{ y: [0, -5, 0], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.5, repeat: Infinity }}
-              style={{ background: 'radial-gradient(circle, rgba(230,178,90,0.22), transparent)' }}>
+              style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-clay) 22%, transparent), transparent)' }}>
               <div className="w-full h-full flex items-center justify-center text-xs">✨</div>
             </motion.div>
           </div>
           <p className="text-[var(--color-bone)] mb-1.5 text-base font-bold">还没选好呀</p>
           <p className="text-[var(--color-ash)] text-sm mb-8 text-center leading-relaxed max-w-[220px]">饿了吗？<br />去点点好吃的吧~</p>
           <motion.button whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.04 }} onClick={() => navigate('/menu')}
-            className="d3-btn d3-btn-primary text-[#2A1E0E] px-8 py-3 rounded-2xl text-sm font-bold">去选菜</motion.button>
+            className="d3-btn d3-btn-primary px-8 py-3 rounded-2xl text-sm font-bold">去选菜</motion.button>
         </motion.div>
       </div>
     )
@@ -104,7 +104,7 @@ export default function Cart() {
             <div className="flex items-center gap-2 mb-3">
               <div className="avatar-me w-7 h-7 rounded-full flex items-center justify-center text-xs">🐱</div>
               <span className="font-bold text-[var(--color-bone)]">我点的</span>
-              <span className="ml-auto text-sm font-bold text-[var(--color-gold-soft)] tabular-nums">{meTotal}</span>
+              <span className="ml-auto text-sm font-bold text-[var(--color-clay-soft)] tabular-nums">{meTotal}</span>
             </div>
             <div className="space-y-1.5">
               <AnimatePresence>
@@ -120,7 +120,7 @@ export default function Cart() {
             <div className="flex items-center gap-2 mb-3">
               <div className="avatar-partner w-7 h-7 rounded-full flex items-center justify-center text-xs">🐰</div>
               <span className="font-bold text-[var(--color-bone)]">TA 点的</span>
-              <span className="ml-auto text-sm font-bold text-[var(--color-platinum-soft)] tabular-nums">{partnerTotal}</span>
+              <span className="ml-auto text-sm font-bold text-[var(--color-sage-soft)] tabular-nums">{partnerTotal}</span>
             </div>
             <div className="space-y-1.5">
               <AnimatePresence>
@@ -148,15 +148,15 @@ export default function Cart() {
             {PAYER_OPTIONS.map(opt => {
               const p = PAYER[opt.value]
               const active = payer === opt.value
-              const activeColor = opt.value === 'me' ? 'var(--color-gold)' : opt.value === 'partner' ? 'var(--color-platinum)' : 'var(--color-ash)'
+              const activeColor = opt.value === 'me' ? 'var(--color-clay)' : opt.value === 'partner' ? 'var(--color-sage)' : 'var(--color-caramel)'
               return (
                 <motion.button key={opt.value} whileTap={{ scale: 0.95 }} whileHover={{ scale: 1.02 }}
                   onClick={() => setPayer(opt.value)}
-                  className={`flex-1 py-3 rounded-xl text-center transition-all duration-300 relative overflow-hidden ${active ? 'd3-btn-primary' : 'bg-white/5 text-[var(--color-ash)]'}`}
+                  className={`flex-1 py-3 rounded-xl text-center transition-all duration-300 relative overflow-hidden ${active ? 'd3-btn-primary' : 'bg-black/5 text-[var(--color-ash)]'}`}
                   style={active ? { borderColor: p.border, boxShadow: p.glow } : {}}>
                   {active && (
                     <motion.div className="absolute inset-0 pointer-events-none" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                      style={{ background: `radial-gradient(circle at 50% 30%, ${activeColor}22, transparent 70%)` }} />
+                      style={{ background: `radial-gradient(circle at 50% 30%, color-mix(in srgb, ${activeColor} 13%, transparent), transparent 70%)` }} />
                   )}
                   <motion.div className="text-2xl mb-1 relative" animate={active ? { scale: [1, 1.15, 1] } : { scale: 1 }} transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}>{opt.emoji}</motion.div>
                   <div className="text-sm font-bold text-[var(--color-bone)] relative">{opt.label}</div>
@@ -175,16 +175,16 @@ export default function Cart() {
               <KissIcon className="w-5 h-5 text-[var(--color-love)]" />
               <motion.span key={totalPrice} initial={{ scale: 1.3, y: -4 }} animate={{ scale: 1, y: 0 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                className="text-[28px] font-bold text-[var(--color-gold-soft)] tabular-nums">{totalPrice}</motion.span>
+                className="text-[28px] font-bold text-[var(--color-clay-soft)] tabular-nums">{totalPrice}</motion.span>
             </div>
           </div>
           <div className="flex items-center gap-1.5 mb-3.5 py-1.5 px-2.5 rounded-xl self-start"
-            style={{ background: 'linear-gradient(135deg, rgba(230,178,90,0.08), rgba(194,199,210,0.05))' }}>
+            style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-clay) 8%, transparent), color-mix(in srgb, var(--color-sage) 5%, transparent))' }}>
             <span className="text-xs">⏱️</span>
             <span className="text-xs text-[var(--color-ash)]">预估等待约 20-30 分钟</span>
           </div>
           <motion.button whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.01 }} onClick={handleSubmit} disabled={submitting}
-            className="d3-btn d3-btn-primary w-full disabled:opacity-50 text-[#2A1E0E] py-3.5 rounded-2xl font-bold text-[15px] relative overflow-hidden animate-pulse-glow-gold">
+            className="d3-btn d3-btn-primary w-full disabled:opacity-50 py-3.5 rounded-2xl font-bold text-[15px] relative overflow-hidden animate-pulse-glow-clay">
             <span className="relative">{submitting ? '提交中...' : '下单啦~'}</span>
           </motion.button>
         </GlassCard>

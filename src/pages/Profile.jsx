@@ -50,11 +50,11 @@ export default function Profile() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="grid grid-cols-2 gap-3">
           <div className="d3-card-face p-4 text-center">
-            <div className="text-2xl font-bold text-[var(--color-gold-soft)]">{stats.orders}</div>
+            <div className="text-2xl font-bold text-[var(--color-clay-soft)]">{stats.orders}</div>
             <div className="text-xs text-[var(--color-ash)] mt-1">订单总数</div>
           </div>
           <div className="d3-card-face p-4 text-center">
-            <div className="text-2xl font-bold text-[var(--color-gold-soft)]">{stats.total}</div>
+            <div className="text-2xl font-bold text-[var(--color-clay-soft)]">{stats.total}</div>
             <div className="text-xs text-[var(--color-ash)] mt-1">累计消费</div>
           </div>
         </motion.div>
