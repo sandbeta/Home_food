@@ -62,7 +62,7 @@ export default function MyOrders() {
             </motion.div>
             <p className="text-[var(--color-bone)] mb-1 font-bold relative z-10">还没有下过单</p>
             <p className="text-[var(--color-ash)] text-sm mb-6 relative z-10">快去一起选点好吃的吧~</p>
-            <Link to="/menu" className="d3-btn d3-btn-primary text-[#2A1E0E] px-8 py-3 rounded-2xl text-sm font-bold relative z-10"
+            <Link to="/menu" className="d3-btn d3-btn-primary px-8 py-3 rounded-2xl text-sm font-bold relative z-10"
               style={{ boxShadow: '0 4px 15px rgba(200,104,63,0.30)' }}>去选菜</Link>
           </motion.div>
         ) : (

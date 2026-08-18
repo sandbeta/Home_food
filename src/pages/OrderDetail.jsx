@@ -44,7 +44,7 @@ export default function OrderDetail() {
         style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.18), transparent 70%)' }} />
       <motion.div className="text-7xl mb-4 relative z-10" animate={{ y: [0, -6, 0] }} transition={{ duration: 2.5, repeat: Infinity }}>😵</motion.div>
       <p className="text-[var(--color-ash)] relative z-10 font-medium">找不到这个订单了</p>
-      <Link to="/orders" className="mt-4 d3-btn d3-btn-primary text-[#2A1E0E] text-xs font-semibold px-4 py-2 rounded-full relative z-10">
+      <Link to="/orders" className="mt-4 d3-btn d3-btn-primary text-xs font-semibold px-4 py-2 rounded-full relative z-10">
         回到订单列表
       </Link>
     </motion.div>
