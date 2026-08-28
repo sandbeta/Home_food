@@ -36,7 +36,7 @@
   --color-clay-gradient: linear-gradient(135deg, #E0A07E 0%, #C8683F 100%);
   --color-sage-gradient: linear-gradient(135deg, #A9C4A4 0%, #7FA37A 100%);
 
-  /* —— 圆角语义 —— */
+  /* 圆角语义（见下方 @theme static 中的完整标尺） */
   --radius-card: 28px;
   --radius-btn: 16px;
   --radius-ctl: 12px;
@@ -76,6 +76,60 @@
   --color-gold-gradient: var(--color-clay-gradient);
   --color-platinum: var(--color-sage);
   --color-platinum-soft: var(--color-sage-soft);
+}
+
+/* ============================================================
+   设计标尺 —— 用 @theme static 强制常驻
+   Tailwind v4 默认会树摇掉「未被引用」的主题变量；而这类令牌是
+   给运行时 var() / 内联样式消费的，必须无条件输出，故用 static。
+   ============================================================ */
+@theme static {
+  /* —— 圆角 ——
+     刻意不覆盖 Tailwind 默认的 rounded-lg/xl/2xl：那会让既有用法静默位移数 px。
+     这里只补默认集里没有的档位，硬编码圆角在 P5 统一映射过来。 */
+  --radius-card: 28px;   /* 主卡片 */
+  --radius-tile: 20px;   /* 小卡 / 网格瓦片 */
+  --radius-btn: 16px;    /* 按钮 */
+  --radius-ctl: 12px;    /* 输入 / 小控件 */
+  --radius-sheet: 32px;  /* 底部浮层顶部 */
+
+  /* —— 字阶补充 ——
+     同样不覆盖 text-xs/sm/base/lg 的默认值（会让全站字号变小），
+     仅补一档 display，用于页面大标题与大数字。 */
+  --text-display: 2.125rem;
+  --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.02em;
+
+  /* —— 布局语义间距 —— */
+  --space-page-x: 16px;    /* 页面左右边距（PageHeader 也要对齐到这里） */
+  --space-section: 20px;   /* 区块之间的纵向节奏 */
+  --space-card-p: 16px;    /* 卡片内边距 */
+
+  /* —— 底部停靠层 ——
+     唯一底部固定层（导航 + 购物车球同容器），
+     取代原先的 pb-28 与各处 bottom-24 魔法数。 */
+  --dock-h: 68px;    /* 导航条高 */
+  --dock-orb: 64px;  /* 购物车球直径 */
+  --dock-gap: 10px;  /* 球与导航之间 */
+  --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+  --bottom-inset: calc(var(--dock-h) + var(--dock-orb) + var(--dock-gap) + var(--safe-bottom));
+  --bottom-inset-compact: calc(var(--dock-h) + var(--safe-bottom) + 16px);
+
+  /* —— 暖调阴影（不用纯黑，与晨光底协调） —— */
+  --shadow-1: 0 1px 2px rgba(43, 38, 32, 0.05);
+  --shadow-2: 0 2px 8px rgba(43, 38, 32, 0.06);
+  --shadow-3: 0 8px 24px rgba(43, 38, 32, 0.08);
+  --shadow-4: 0 16px 44px rgba(43, 38, 32, 0.12);
+  --shadow-5: 0 30px 70px rgba(43, 38, 32, 0.16);
+  /* 双人格辉光 */
+  --shadow-glow-clay: 0 0 0 3px rgba(200, 104, 63, 0.18), 0 6px 20px rgba(200, 104, 63, 0.22);
+  --shadow-glow-sage: 0 0 0 3px rgba(127, 163, 122, 0.18), 0 6px 20px rgba(127, 163, 122, 0.22);
+
+  /* —— 动效 —— */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 0.15s;
+  --dur-base: 0.25s;
+  --dur-slow: 0.45s;
 }
 
 /* ========== Reset & Base ========== */
