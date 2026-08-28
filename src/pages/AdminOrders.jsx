@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import Header from '../components/Header'
 import KissIcon from '../components/KissIcon'
@@ -12,10 +12,10 @@ const STATUS_FILTERS = [
 ]
 const PAYER_LABEL = { aa: 'AA', me: '我请', partner: 'TA请' }
 
-// 状态推进按钮：pending→preparing 用铂；preparing→completed 用鼠尾草绿
+// 状态推进按钮：pending→preparing 用赤陶（暖·开做）；preparing→completed 用鼠尾草绿（冷·完成）
 const STATUS_ACTIONS = {
-  pending: { next: 'preparing', text: '开始做', emoji: '🔥', gradient: PERSONA.partner.gradient, color: '#1A1D22', glow: 'rgba(194,199,210,0.3)' },
-  preparing: { next: 'completed', text: '做好了', emoji: '✅', gradient: 'linear-gradient(135deg, #9DB39A, #7A9476)', color: '#14210F', glow: 'rgba(157,179,154,0.3)' },
+  pending: { next: 'preparing', text: '开始做', emoji: '🔥', gradient: PERSONA.me.gradient, color: '#FFFDF9', glow: 'rgba(200,104,63,0.3)' },
+  preparing: { next: 'completed', text: '做好了', emoji: '✅', gradient: 'linear-gradient(135deg, var(--color-sage-soft), var(--color-sage))', color: 'var(--color-bone)', glow: 'rgba(127,163,122,0.3)' },
 }
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } }
@@ -26,11 +26,11 @@ export default function AdminOrders() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
 
-  const loadOrders = () => {
+  const loadOrders = useCallback(() => {
     const url = filter ? `/api/orders?status=${filter}` : '/api/orders'
     fetch(url).then(r => r.json()).then(d => { setOrders(d); setLoading(false) })
-  }
-  useEffect(() => { loadOrders() }, [filter])
+  }, [filter])
+  useEffect(() => { loadOrders() }, [loadOrders])
 
   const handleStatusChange = async (id, s) => {
     await fetch(`/api/orders/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: s }) })
@@ -46,7 +46,7 @@ export default function AdminOrders() {
           {STATUS_FILTERS.map(f => (
             <motion.button key={f.value} whileTap={{ scale: 0.95 }} onClick={() => setFilter(f.value)}
               className={`shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold transition-all ${
-                filter === f.value ? 'd3-btn d3-btn-primary text-[#2A1E0E]' : 'text-[var(--color-ash)] border border-[var(--color-glass-border)] bg-[var(--color-glass)]'
+                filter === f.value ? 'd3-btn d3-btn-primary' : 'text-[var(--color-ash)] border border-[var(--color-glass-border)] bg-[var(--color-glass)]'
               }`}>
               <span>{f.emoji}</span>{f.label}
             </motion.button>
@@ -60,11 +60,11 @@ export default function AdminOrders() {
               <motion.div className="absolute -inset-4 rounded-full opacity-20"
                 animate={{ scale: [1, 1.15, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                style={{ background: 'radial-gradient(circle, rgba(230,178,90,0.35), transparent 70%)' }} />
+                style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.35), transparent 70%)' }} />
             </div>
             <div className="flex items-center gap-1.5 mt-4">
               {[0, 1, 2].map(i => (
-                <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--color-gold)]"
+                <motion.div key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--color-clay)]"
                   animate={{ scale: [1, 1.4, 1], opacity: [0.3, 1, 0.3] }}
                   transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} />
               ))}
@@ -74,7 +74,7 @@ export default function AdminOrders() {
         ) : orders.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 relative overflow-hidden">
             <div className="absolute top-8 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full opacity-15"
-              style={{ background: 'radial-gradient(circle, rgba(230,178,90,0.35), transparent 70%)' }} />
+              style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.35), transparent 70%)' }} />
             <motion.div className="text-7xl mb-5 animate-float relative z-10">📋</motion.div>
             <p className="text-[var(--color-ash)] relative z-10">暂时没有订单</p>
           </motion.div>
@@ -101,7 +101,7 @@ export default function AdminOrders() {
                       <p className="text-sm text-[var(--color-bone)] line-clamp-1 font-medium">{itemNames}</p>
                       {order.note && (
                         <div className="mt-1.5 px-2 py-1.5 rounded-lg relative overflow-hidden bg-[var(--color-glass)] border border-[var(--color-glass-border)]">
-                          <div className="absolute left-0 top-0 bottom-0 w-0.5 rounded-full" style={{ background: 'var(--color-gold)' }} />
+                          <div className="absolute left-0 top-0 bottom-0 w-0.5 rounded-full" style={{ background: 'var(--color-clay)' }} />
                           <p className="text-xs text-[var(--color-ash)] pl-1.5 flex items-center gap-1">💬 {order.note}</p>
                         </div>
                       )}
@@ -109,7 +109,7 @@ export default function AdminOrders() {
                         <div className="flex items-center gap-1.5">
                           <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[var(--color-glass)] border border-[var(--color-glass-border)]">
                             <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-                            <span className="text-[15px] font-bold text-[var(--color-gold-soft)]">¥{order.total_price}</span>
+                            <span className="text-[15px] font-bold text-[var(--color-clay)]">¥{order.total_price}</span>
                           </div>
                           <span className="text-[11px] text-[var(--color-ash)]">
                             {new Date(order.created_at).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
