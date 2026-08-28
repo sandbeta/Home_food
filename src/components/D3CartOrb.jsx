@@ -21,7 +21,7 @@ export default function D3CartOrb() {
             className="relative w-16 h-16 rounded-full flex items-center justify-center"
             style={{
               background: PERSONA.me.gradient,
-              boxShadow: '0 6px 20px rgba(230,178,90,0.40), 0 12px 32px rgba(0,0,0,0.45), inset 0 2px 4px rgba(255,255,255,0.45), inset 0 -2px 4px rgba(184,134,60,0.30)',
+              boxShadow: '0 6px 20px rgba(200,104,63,0.40), 0 12px 32px rgba(43,38,32,0.22), inset 0 2px 4px rgba(255,255,255,0.45), inset 0 -2px 4px rgba(154,78,44,0.30)',
             }}
             whileHover={{ scale: 1.1, y: -2 }}
             whileTap={{ scale: 0.92 }}
@@ -34,7 +34,7 @@ export default function D3CartOrb() {
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: 'spring', stiffness: 500, damping: 15 }}
               className="absolute -top-1 -right-1 min-w-[22px] h-[22px] rounded-full text-white text-[11px] font-bold flex items-center justify-center px-1 border-2 border-[var(--color-cream)]"
-              style={{ background: 'var(--color-love)', boxShadow: '0 2px 8px rgba(255,90,110,0.45)' }}
+              style={{ background: 'var(--color-love)', boxShadow: '0 2px 8px rgba(217,140,132,0.45)' }}
             >
               {totalCount}
             </motion.span>

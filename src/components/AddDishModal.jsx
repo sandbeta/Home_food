@@ -31,7 +31,7 @@ export default function AddDishModal({ dish, onClose, onSave }) {
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="fixed inset-0 z-50"
-        style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(8,6,4,0.6)' }} />
+        style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,38,32,0.35)' }} />
       <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
         className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto z-50">
@@ -96,7 +96,7 @@ export default function AddDishModal({ dish, onClose, onSave }) {
                 style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)', background: 'transparent' }}>算了</motion.button>
               <motion.button type="submit" whileTap={{ scale: 0.97 }}
                 className="d3-btn d3-btn-primary flex-1 py-3 rounded-2xl text-white font-bold text-sm transition-shadow duration-200"
-                style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', boxShadow: '0 4px 15px rgba(212,165,116,0.35)' }}>好啦</motion.button>
+                style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))', boxShadow: '0 4px 15px rgba(200,104,63,0.35)' }}>好啦</motion.button>
             </div>
           </form>
         </div>

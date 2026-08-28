@@ -21,7 +21,7 @@ export default function D3FlipCard({ front, back, className = '' }) {
         </div>
         <div
           className="absolute inset-0 backface-hidden rounded-3xl overflow-hidden shadow-xl flex items-center justify-center p-6 border border-[var(--color-glass-border)]"
-          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: 'linear-gradient(135deg, #1E1A15, #0E0C0A)' }}
+          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', background: 'linear-gradient(135deg, var(--color-cream), var(--color-cream-dark))' }}
         >
           {back}
         </div>
