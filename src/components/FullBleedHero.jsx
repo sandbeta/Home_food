@@ -11,7 +11,12 @@ export default function FullBleedHero({ src, variant = 'immersive', alt = '', ch
   return (
     <div
       className={`fixed top-0 bottom-0 z-0 overflow-hidden ${className}`}
-      style={{ left: '50%', transform: 'translateX(-50%)', width: 'min(480px, 100%)', background: 'var(--color-cream)' }}
+      style={{
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: 'min(var(--shell-w), 100%)',
+        background: 'var(--color-cream)',
+      }}
     >
       <motion.img
         src={src}

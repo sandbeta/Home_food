@@ -2,8 +2,8 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CartProvider } from './components/CartContext'
-import FloatingPillNav from './components/FloatingPillNav'
-import D3CartOrb from './components/D3CartOrb'
+import DockLayer from './components/DockLayer'
+import { pageEnter } from './theme/motion'
 
 // 路由懒加载 — 按需加载页面，减小初始 bundle 体积
 const Home = lazy(() => import('./pages/Home'))
@@ -34,22 +34,41 @@ function App() {
 
   return (
     <CartProvider>
-      <div className="min-h-screen max-w-[480px] mx-auto relative overflow-hidden border-x border-[var(--color-glass-border)] bg-[var(--color-ink-900)]">
+      <div
+        className="min-h-screen mx-auto relative border-x border-[var(--color-glass-border)] bg-[var(--color-ink-900)]"
+        style={{ maxWidth: 'var(--shell-w)' }}
+      >
         {/* 晨光环境光：赤陶主光（左） + 鼠尾草绿辅光（右），低透，仅作氛围 */}
-        <div className="fixed top-[-120px] left-[calc(50%-260px)] w-80 h-80 rounded-full blur-[90px] pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.10) 0%, transparent 70%)' }} />
-        <div className="fixed top-1/3 right-[calc(50%-260px)] w-64 h-64 rounded-full blur-[90px] pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(127,163,122,0.10) 0%, transparent 70%)' }} />
+        <div
+          className="fixed top-[-120px] w-80 h-80 rounded-full blur-[90px] pointer-events-none"
+          style={{
+            left: 'calc(50% - var(--shell-w) / 2 - 20px)',
+            background: 'radial-gradient(circle, rgba(200,104,63,0.10) 0%, transparent 70%)',
+          }}
+        />
+        <div
+          className="fixed top-1/3 w-64 h-64 rounded-full blur-[90px] pointer-events-none"
+          style={{
+            right: 'calc(50% - var(--shell-w) / 2 - 20px)',
+            background: 'radial-gradient(circle, rgba(127,163,122,0.10) 0%, transparent 70%)',
+          }}
+        />
 
-        <main className="pb-28 relative z-10">
+        {/*
+          底部留白由令牌给出，取代原先硬编码的 pb-28：
+          admin 路由没有停靠层，用 compact 档。
+        */}
+        <main
+          className="relative z-10"
+          style={{ paddingBottom: isAdmin ? 'var(--bottom-inset-compact)' : 'var(--bottom-inset)' }}
+        >
+          {/*
+            页面转场：pageEnter 只动 opacity，绝不能带 transform。
+            带 transform 会让本元素成为 fixed/sticky 后代的包含块，
+            导致 PageHeader 的吸顶失效、FullBleedHero 的 fixed 定位错乱。
+          */}
           <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            >
+            <motion.div key={location.pathname} {...pageEnter}>
               <Suspense fallback={<PageLoader />}>
                 <Routes location={location}>
                   <Route path="/" element={<Navigate to="/home" replace />} />
@@ -71,8 +90,7 @@ function App() {
           </AnimatePresence>
         </main>
 
-        {!isAdmin && <FloatingPillNav />}
-        {!isAdmin && <D3CartOrb />}
+        {!isAdmin && <DockLayer />}
       </div>
     </CartProvider>
   )

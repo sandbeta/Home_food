@@ -8,8 +8,11 @@ const tabs = [
   { path: '/profile', label: '我的', emoji: '👤' },
 ]
 
-// 底部居中悬浮玻璃药丸导航（取代旧 TabBar）
-// 仅图标 + 激活态品牌金辉光脉冲
+/**
+ * 底部玻璃药丸导航 —— 只渲染药丸本体，不做定位、不处理安全区。
+ * 定位与安全区由 DockLayer 统一管理。
+ * 药丸宽度自适应（flex-1），与购物车球同行排布，任何屏宽下都不可能重叠。
+ */
 export default function FloatingPillNav() {
   const location = useLocation()
   const path = location.pathname
@@ -23,43 +26,45 @@ export default function FloatingPillNav() {
   }
 
   return (
-    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50" style={{ width: 'min(480px, 100%)' }}>
-      <div className="flex justify-center px-3">
-        <div
-          className="glass glass-elevated rounded-full px-2.5 py-2 flex items-center gap-1 safe-bottom"
-          style={{ background: 'var(--color-glass)', border: '1px solid var(--color-glass-border)' }}
-        >
-          {tabs.map((tab) => {
-            const active = isActive(tab)
-            return (
-              <Link
-                key={tab.path}
-                to={tab.path}
-                aria-label={tab.label}
-                className="relative flex items-center justify-center w-[60px] h-[48px] rounded-full"
-              >
-                {active && (
-                  <motion.div
-                    layoutId="navGlow"
-                    className="absolute inset-0 rounded-full"
-                    style={{
-                      background: 'var(--color-clay-gradient)',
-                      boxShadow: '0 6px 18px rgba(200,104,63,0.28)',
-                    }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 28 }}
-                  />
-                )}
-                <span
-                  className="relative text-[22px] transition-transform"
-                  style={{ color: active ? 'var(--color-clay)' : 'var(--color-ash)' }}
-                >
-                  {tab.emoji}
-                </span>
-              </Link>
-            )
-          })}
-        </div>
-      </div>
-    </div>
+    <nav
+      className="flex-1 glass rounded-full px-2.5 py-2 flex items-center justify-around gap-1"
+      style={{
+        minHeight: 'var(--dock-h)',
+        background: 'var(--color-glass)',
+        border: '1px solid var(--color-glass-border)',
+        boxShadow: 'var(--shadow-3)',
+      }}
+    >
+      {tabs.map((tab) => {
+        const active = isActive(tab)
+        return (
+          <Link
+            key={tab.path}
+            to={tab.path}
+            aria-label={tab.label}
+            aria-current={active ? 'page' : undefined}
+            className="relative flex items-center justify-center flex-1 h-[48px] rounded-full"
+          >
+            {active && (
+              <motion.div
+                layoutId="navGlow"
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: 'var(--color-clay-gradient)',
+                  boxShadow: '0 6px 18px rgba(200,104,63,0.28)',
+                }}
+                transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+              />
+            )}
+            <span
+              className="relative text-[22px] transition-transform"
+              style={{ color: active ? 'var(--color-clay)' : 'var(--color-ash)' }}
+            >
+              {tab.emoji}
+            </span>
+          </Link>
+        )
+      })}
+    </nav>
   )
 }

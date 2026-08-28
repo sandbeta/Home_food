@@ -101,19 +101,21 @@
   --text-display--letter-spacing: -0.02em;
 
   /* —— 布局语义间距 —— */
+  --shell-w: 480px;        /* 手机框宽度，全站唯一真源（原散落 5 处硬编码） */
   --space-page-x: 16px;    /* 页面左右边距（PageHeader 也要对齐到这里） */
   --space-section: 20px;   /* 区块之间的纵向节奏 */
   --space-card-p: 16px;    /* 卡片内边距 */
 
   /* —— 底部停靠层 ——
-     唯一底部固定层（导航 + 购物车球同容器），
+     唯一底部固定层：导航药丸与购物车球**并排同一行**（而非上下叠放），
+     既消除重叠可能，也把底部留白从上下叠放方案的 ~162px 压到 ~104px。
      取代原先的 pb-28 与各处 bottom-24 魔法数。 */
-  --dock-h: 68px;    /* 导航条高 */
+  --dock-h: 72px;    /* 停靠行总高（取药丸与球二者较大） */
   --dock-orb: 64px;  /* 购物车球直径 */
-  --dock-gap: 10px;  /* 球与导航之间 */
+  --dock-gap: 12px;  /* 球与药丸之间的间距 */
   --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
-  --bottom-inset: calc(var(--dock-h) + var(--dock-orb) + var(--dock-gap) + var(--safe-bottom));
-  --bottom-inset-compact: calc(var(--dock-h) + var(--safe-bottom) + 16px);
+  --bottom-inset: calc(var(--dock-h) + var(--safe-bottom) + 16px);
+  --bottom-inset-compact: calc(var(--safe-bottom) + 24px);
 
   /* —— 暖调阴影（不用纯黑，与晨光底协调） —— */
   --shadow-1: 0 1px 2px rgba(43, 38, 32, 0.05);
