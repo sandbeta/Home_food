@@ -33,7 +33,7 @@ export default function Favorites() {
                   transition={{ delay: Math.min(i * 0.04, 0.3) }}
                   className="d3-card-face p-3.5 flex items-center gap-3 group">
                   <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 overflow-hidden"
-                    style={{ background: 'linear-gradient(145deg, #F7F3EC 0%, #EFE7DA 60%, rgba(200,104,63,0.08) 100%)' }}
+                    style={{ background: 'linear-gradient(145deg, var(--color-cream) 0%, var(--color-cream-dark) 60%, rgba(200,104,63,0.08) 100%)' }}
                     onClick={() => navigate(`/dish/${dish.id}`)}>
                     {getDishImage(dish) ? (
                       <img src={getDishImage(dish)} alt={dish.name} className="w-full h-full object-cover" />

@@ -66,7 +66,7 @@ function RecommendCard({ dishes, onAdd, spawnParticle }) {
       </div>
       <div className="relative flex items-center gap-3">
         <div className="w-16 h-16 rounded-[22px] flex items-center justify-center shrink-0 overflow-hidden"
-          style={{ background: 'linear-gradient(145deg, #F7F3EC 0%, #EFE7DA 60%, rgba(200,104,63,0.08) 100%)' }}>
+          style={{ background: 'linear-gradient(145deg, var(--color-cream) 0%, var(--color-cream-dark) 60%, rgba(200,104,63,0.08) 100%)' }}>
           {randomDish.image_url ? <img src={randomDish.image_url} className="w-full h-full object-cover" alt={randomDish.name} /> : <span className="text-3xl">{CATEGORY_CONFIG[randomDish.category]?.emoji || '🍽️'}</span>}
         </div>
         <div className="flex-1 min-w-0">
@@ -297,7 +297,7 @@ export default function Menu() {
                   </motion.button>
                   <div className="d3-card-face p-3.5 flex items-center gap-3">
                     <div className="w-[70px] h-[70px] rounded-[24px] flex items-center justify-center shrink-0 overflow-hidden"
-                      style={{ background: 'linear-gradient(145deg, #F7F3EC 0%, #EFE7DA 50%, rgba(200,104,63,0.06) 100%)' }}>
+                      style={{ background: 'linear-gradient(145deg, var(--color-cream) 0%, var(--color-cream-dark) 50%, rgba(200,104,63,0.06) 100%)' }}>
                       {dish.image_url ? <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" /> : <span className="text-3xl drop-shadow-sm">{CATEGORY_CONFIG[dish.category]?.emoji || '🍽️'}</span>}
                     </div>
                     <div className="flex-1 min-w-0">
