@@ -10,7 +10,6 @@ const Home = lazy(() => import('./pages/Home'))
 const Menu = lazy(() => import('./pages/Menu'))
 const DishDetail = lazy(() => import('./pages/DishDetail'))
 const Cart = lazy(() => import('./pages/Cart'))
-const Checkout = lazy(() => import('./pages/Checkout'))
 const OrderDetail = lazy(() => import('./pages/OrderDetail'))
 const MyOrders = lazy(() => import('./pages/MyOrders'))
 const Profile = lazy(() => import('./pages/Profile'))
@@ -76,7 +75,8 @@ function App() {
                   <Route path="/menu" element={<Menu />} />
                   <Route path="/dish/:id" element={<DishDetail />} />
                   <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
+                  {/* 结算已并入购物车：旧路由保留重定向，避免外链失效 */}
+                  <Route path="/checkout" element={<Navigate to="/cart" replace />} />
                   <Route path="/orders" element={<MyOrders />} />
                   <Route path="/orders/:id" element={<OrderDetail />} />
                   <Route path="/favorites" element={<Favorites />} />
