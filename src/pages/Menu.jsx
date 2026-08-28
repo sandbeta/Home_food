@@ -10,7 +10,7 @@ import { useFavorites } from '../lib/favorites'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 
-// 仅保留 emoji；旧版彩虹色全部移除，改用暗房玻璃 + 金/铂强调
+// 仅保留 emoji；旧版彩虹色全部移除，改用晨光玻璃 + 赤陶/鼠尾草绿强调
 const CATEGORY_CONFIG = {
   '全部': { emoji: '✨' }, '家常菜': { emoji: '🍳' }, '硬菜': { emoji: '🥩' }, '素菜': { emoji: '🥬' },
   '主食': { emoji: '🍚' }, '小吃': { emoji: '🍢' }, '水果': { emoji: '🍎' }, '饮品': { emoji: '🧋' },
