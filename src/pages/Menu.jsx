@@ -1,11 +1,14 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../components/CartContext'
-import Header from '../components/Header'
+import PageHeader from '../components/PageHeader'
 import GlassCard from '../components/GlassCard'
 import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
+import DishRow from '../components/ui/DishRow'
+import PageContainer from '../components/ui/PageContainer'
+import EmptyState from '../components/ui/EmptyState'
 import { useFavorites } from '../lib/favorites'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
@@ -19,9 +22,6 @@ const CATEGORY_CONFIG = {
   '徽菜': { emoji: '🍲' }, '东北菜': { emoji: '🥟' }, '西北菜': { emoji: '🍖' }, '云贵菜': { emoji: '🍄' },
   '其他': { emoji: '🍽️' },
 }
-
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.045 } } }
-const item = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }
 
 function WhoSelector({ whoAmI, setWhoAmI }) {
   return (
@@ -105,9 +105,15 @@ export default function Menu() {
   const [showAllCategories, setShowAllCategories] = useState(false)
   const searchRef = useRef(null)
   const [particles, setParticles] = useState([])
-  const { addItem, totalCount, whoAmI, setWhoAmI } = useCart()
-  const { has, toggle } = useFavorites()
+  const { addItem, whoAmI, setWhoAmI } = useCart()
+  const { favorites, has, toggle } = useFavorites()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  // 收藏已并入本页：'all'=全部菜品，'fav'=我的收藏
+  // 支持 ?fav=1 直达收藏（/favorites 旧路由重定向到这里）
+  const [scope, setScope] = useState(() => (searchParams.get('fav') ? 'fav' : 'all'))
+  const isFavScope = scope === 'fav'
 
   useEffect(() => {
     setLoading(true)
@@ -117,11 +123,13 @@ export default function Menu() {
       .catch(() => setLoading(false))
   }, [activeCategory])
 
+  // 收藏页签的数据源是本地收藏夹，全部页签是服务端返回；关键词对两者都生效
   const filteredDishes = useMemo(() => {
     const q = keyword.trim().toLowerCase()
-    if (!q) return dishes
-    return dishes.filter(d => `${d.name} ${d.category} ${d.description || ''}`.toLowerCase().includes(q))
-  }, [dishes, keyword])
+    const base = isFavScope ? favorites : dishes
+    if (!q) return base
+    return base.filter(d => `${d.name} ${d.category} ${d.description || ''}`.toLowerCase().includes(q))
+  }, [isFavScope, favorites, dishes, keyword])
 
   const spawnParticle = (x, y) => {
     const id = Date.now() + Math.random()
@@ -137,10 +145,42 @@ export default function Menu() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.menu} variant="immersive" alt="菜单" />
 
-      <Header title="今天吃什么？" subtitle="一起选点好吃的吧~" />
+      <PageHeader title="今天吃什么？" subtitle="一起选点好吃的吧~" />
 
-      <div className="px-4 pb-4">
+      <PageContainer>
         <WhoSelector whoAmI={whoAmI} setWhoAmI={setWhoAmI} />
+
+        {/* 分段控件：收藏并入点菜页（收藏的下一步动作永远是加购，不该埋两级深） */}
+        <div className="d3-card-face p-1.5 flex items-center gap-1.5">
+          {[
+            { value: 'all', label: '全部菜品', emoji: '🍜' },
+            { value: 'fav', label: '我的收藏', emoji: '⭐' },
+          ].map((opt) => {
+            const active = scope === opt.value
+            return (
+              <motion.button
+                key={opt.value}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setScope(opt.value)}
+                aria-pressed={active}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-all duration-300"
+                style={{
+                  borderRadius: 'var(--radius-ctl)',
+                  ...(active
+                    ? {
+                        background: 'var(--color-clay-gradient)',
+                        color: '#FFFDF9',
+                        boxShadow: '0 4px 12px rgba(200,104,63,0.26)',
+                      }
+                    : { color: 'var(--color-ash)' }),
+                }}
+              >
+                <span>{opt.emoji}</span>
+                {opt.label}
+              </motion.button>
+            )
+          })}
+        </div>
 
         {/* 搜索框 */}
         <div className={`d3-card-face flex items-center gap-2 px-3 py-2.5 mb-4 bg-[var(--color-ink-800)]/80 transition-all duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}
@@ -261,6 +301,22 @@ export default function Menu() {
               </div>
             ))}
           </div>
+        ) : isFavScope && favorites.length === 0 ? (
+          <EmptyState
+            emoji="⭐"
+            title="还没有收藏的菜"
+            desc="看到想吃的点个⭐，下次直接从这里找"
+            action={
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setScope('all')}
+                className="d3-btn d3-btn-primary px-6 py-2.5 text-sm font-bold"
+                style={{ borderRadius: 'var(--radius-btn)' }}
+              >
+                去逛逛
+              </motion.button>
+            }
+          />
         ) : filteredDishes.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             className="d3-card flex flex-col items-center justify-center py-16 px-4">
@@ -278,60 +334,27 @@ export default function Menu() {
             <p className="text-[var(--color-ash)] text-sm mt-1.5 text-center max-w-[200px] leading-relaxed">换个关键词试试~<br />也许换个名字就能找到啦</p>
           </motion.div>
         ) : (
-          <motion.div className="space-y-3.5" variants={container} initial="hidden" animate="show">
-            {filteredDishes.map(dish => {
-              return (
-                <motion.div key={`${dish.id}-${dish.name}`} variants={item}
-                  whileTap={{ scale: 0.985 }}
-                  whileHover={{ y: -1 }}
-                  className="d3-card cursor-pointer overflow-hidden group">
-                  <motion.button
-                    whileTap={{ scale: 0.8 }}
-                    onClick={(e) => { e.stopPropagation(); toggle(dish) }}
-                    aria-label={has(dish.id) ? '取消收藏' : '收藏'}
-                    className="absolute top-2 right-2 z-20 w-8 h-8 rounded-full flex items-center justify-center text-base glass"
-                  >
-                    <motion.span animate={has(dish.id) ? { scale: [1, 1.3, 1] } : { scale: 1 }} transition={{ duration: 0.3 }}>
-                      {has(dish.id) ? '⭐' : '🤍'}
-                    </motion.span>
-                  </motion.button>
-                  <div className="d3-card-face p-3.5 flex items-center gap-3">
-                    <div className="w-[70px] h-[70px] rounded-[24px] flex items-center justify-center shrink-0 overflow-hidden"
-                      style={{ background: 'linear-gradient(145deg, var(--color-cream) 0%, var(--color-cream-dark) 50%, rgba(200,104,63,0.06) 100%)' }}>
-                      {dish.image_url ? <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" /> : <span className="text-3xl drop-shadow-sm">{CATEGORY_CONFIG[dish.category]?.emoji || '🍽️'}</span>}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <h3 className="font-extrabold text-[16px] text-[var(--color-bone)] truncate">{dish.name}</h3>
-                        <span className="badge-soft text-[10px] px-1.5 py-0.5 rounded-full font-bold text-[var(--color-ash)] bg-white/5">{dish.category}</span>
-                      </div>
-                      {dish.description && <p className="text-[13px] text-[var(--color-ash)] mt-1 line-clamp-1 leading-relaxed">{dish.description}</p>}
-                      <div className="flex items-center justify-between mt-2.5">
-                        <div className="flex items-center gap-1">
-                          <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-                          <span className="text-[18px] font-extrabold text-[var(--color-clay)] leading-tight">{dish.price}</span>
-                        </div>
-                        <motion.button whileTap={{ scale: 0.82 }} whileHover={{ scale: 1.08 }} onClick={(e) => {
-                          const rect = e.currentTarget.getBoundingClientRect()
-                          spawnParticle(rect.left + rect.width / 2, rect.top)
-                          addItem(dish)
-                        }} aria-label={`添加${dish.name}`}
-                          className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-90"
-                          style={{
-                            background: partner.gradient,
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.25)',
-                          }}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.8" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                        </motion.button>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            })}
-          </motion.div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-card-p)' }}>
+            {filteredDishes.map(dish => (
+              <DishRow
+                key={`${dish.id}-${dish.name}`}
+                dish={dish}
+                showFav
+                favorited={has(dish.id)}
+                onToggleFav={toggle}
+                onClick={() => navigate(`/dish/${dish.id}`)}
+                addLabel={`添加${dish.name}`}
+                accent={partner.gradient}
+                onAdd={(d, e) => {
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  spawnParticle(rect.left + rect.width / 2, rect.top)
+                  addItem(d)
+                }}
+              />
+            ))}
+          </div>
         )}
-      </div>
+      </PageContainer>
 
       {/* +1 飘升粒子 */}
       <AnimatePresence>
@@ -353,23 +376,6 @@ export default function Menu() {
         ))}
       </AnimatePresence>
 
-      {/* 底部悬浮按钮 */}
-      {totalCount > 0 && (
-        <motion.div initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[448px] z-40">
-          <motion.button whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }} onClick={() => navigate('/cart')}
-            className="d3-btn d3-btn-primary block w-full text-center py-3.5 rounded-2xl font-extrabold text-[15px] animate-pulse-glow-clay relative overflow-hidden">
-            <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-              <div className="absolute -top-1/2 -left-1/4 w-[60%] h-[200%] rotate-[20deg] animate-pulse-soft"
-                style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)' }} />
-            </div>
-            <span className="relative flex items-center justify-center gap-2">
-              <span className="text-lg">🛒</span>
-              去看我们选了啥 ({totalCount}件)
-            </span>
-          </motion.button>
-        </motion.div>
-      )}
     </div>
   )
 }
