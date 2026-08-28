@@ -61,7 +61,7 @@ function RecommendCard({ dishes, onAdd, spawnParticle }) {
 
       <div className="relative flex items-center justify-between mb-3">
         <span className="badge-soft text-xs font-extrabold px-2.5 py-1 rounded-full"
-          style={{ background: 'rgba(200,104,63,0.14)', color: 'var(--color-gold-soft)' }}>今日灵感</span>
+          style={{ background: 'rgba(200,104,63,0.14)', color: 'var(--color-clay)' }}>今日灵感</span>
         <span className="text-xs text-[var(--color-ash)]">不知道吃啥就选它</span>
       </div>
       <div className="relative flex items-center gap-3">
@@ -74,7 +74,7 @@ function RecommendCard({ dishes, onAdd, spawnParticle }) {
           <p className="text-xs text-[var(--color-ash)] mt-0.5 line-clamp-1">{randomDish.description || '好吃的~'}</p>
           <div className="flex items-center gap-1 mt-1.5">
             <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-            <span className="text-[15px] font-extrabold text-[var(--color-gold-soft)]">{randomDish.price}</span>
+            <span className="text-[15px] font-extrabold text-[var(--color-clay)]">{randomDish.price}</span>
           </div>
         </div>
         <motion.button whileTap={{ scale: 0.92 }} whileHover={{ scale: 1.04 }} onClick={(e) => {
@@ -143,9 +143,9 @@ export default function Menu() {
         <WhoSelector whoAmI={whoAmI} setWhoAmI={setWhoAmI} />
 
         {/* 搜索框 */}
-        <div className={`d3-card-face flex items-center gap-2 px-3 py-2.5 mb-4 bg-[var(--color-ink-800)]/80 transition-all duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-gold)]/25 border-[var(--color-gold)]/40' : ''}`}
+        <div className={`d3-card-face flex items-center gap-2 px-3 py-2.5 mb-4 bg-[var(--color-ink-800)]/80 transition-all duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}
           ref={searchRef}>
-          <motion.svg className={`w-4 h-4 text-[var(--color-ash)] transition-colors duration-300 ${searchFocused ? 'text-[var(--color-gold)]' : ''}`}
+          <motion.svg className={`w-4 h-4 text-[var(--color-ash)] transition-colors duration-300 ${searchFocused ? 'text-[var(--color-clay)]' : ''}`}
             viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
             animate={searchFocused ? { rotate: 90 } : { rotate: 0 }}
             transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}>
@@ -163,7 +163,7 @@ export default function Menu() {
                 animate={{ opacity: 1, scale: 1, width: 'auto' }}
                 exit={{ opacity: 0, scale: 0.8, width: 0 }}
                 transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
-                className="text-xs text-[var(--color-gold)] font-bold px-1 whitespace-nowrap overflow-hidden">清空</motion.button>
+                className="text-xs text-[var(--color-clay)] font-bold px-1 whitespace-nowrap overflow-hidden">清空</motion.button>
             )}
           </AnimatePresence>
         </div>
@@ -191,7 +191,7 @@ export default function Menu() {
                 key="toggle-btn"
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowAllCategories(true)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border border-[var(--color-gold)]/30 text-[var(--color-gold)] hover:bg-[var(--color-gold)]/5 transition-all duration-300">
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border border-[var(--color-clay)]/30 text-[var(--color-clay)] hover:bg-[var(--color-clay)]/5 transition-all duration-300">
                 更多菜系
                 <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 4.5L6 7.5L9 4.5" />
@@ -215,7 +215,7 @@ export default function Menu() {
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setShowAllCategories(false)}
-                      className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold text-[var(--color-ash)] hover:text-[var(--color-gold)] transition-colors duration-200">
+                      className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold text-[var(--color-ash)] hover:text-[var(--color-clay)] transition-colors duration-200">
                       收起
                       <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 7.5L6 4.5L9 7.5" />
@@ -224,7 +224,7 @@ export default function Menu() {
                   </div>
                   {CATEGORY_GROUPS.slice(1).map(group => (
                     <div key={group.label}>
-                      <div className="text-[10px] font-extrabold px-0.5 pb-1 text-[var(--color-gold)]">{group.label}</div>
+                      <div className="text-[10px] font-extrabold px-0.5 pb-1 text-[var(--color-clay)]">{group.label}</div>
                       <div className="flex flex-wrap gap-2">
                         {group.items.map(cat => {
                           const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG['其他']
@@ -309,7 +309,7 @@ export default function Menu() {
                       <div className="flex items-center justify-between mt-2.5">
                         <div className="flex items-center gap-1">
                           <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-                          <span className="text-[18px] font-extrabold text-[var(--color-gold-soft)] leading-tight">{dish.price}</span>
+                          <span className="text-[18px] font-extrabold text-[var(--color-clay)] leading-tight">{dish.price}</span>
                         </div>
                         <motion.button whileTap={{ scale: 0.82 }} whileHover={{ scale: 1.08 }} onClick={(e) => {
                           const rect = e.currentTarget.getBoundingClientRect()

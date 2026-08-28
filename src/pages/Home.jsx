@@ -101,7 +101,7 @@ export default function Home() {
                 </div>
                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                   {banners.map((_, i) => (
-                    <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === bannerIndex ? 'w-6 bg-[var(--color-gold)]' : 'w-1.5 bg-white/40'}`} />
+                    <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === bannerIndex ? 'w-6 bg-[var(--color-clay)]' : 'w-1.5 bg-white/40'}`} />
                   ))}
                 </div>
               </motion.div>
@@ -131,7 +131,7 @@ export default function Home() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="section-title">八大菜系</h2>
-            <button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-gold)] font-bold">全部 →</button>
+            <button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-clay)] font-bold">全部 →</button>
           </div>
           <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
             {CATEGORY_QUICK.map((cat, i) => (
@@ -158,7 +158,7 @@ export default function Home() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="section-title">为你推荐</h2>
-            <button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-gold)] font-bold">查看更多</button>
+            <button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-clay)] font-bold">查看更多</button>
           </div>
           <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
             {recommendDishes.map((dish, i) => (
@@ -181,7 +181,7 @@ export default function Home() {
                 <p className="text-xs font-bold text-[var(--color-bone)] truncate">{dish.name}</p>
                 <div className="flex items-center gap-1 mt-0.5">
                   <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-                  <span className="text-xs font-bold text-[var(--color-gold-soft)]">{dish.price}</span>
+                  <span className="text-xs font-bold text-[var(--color-clay)]">{dish.price}</span>
                 </div>
               </motion.div>
             ))}
@@ -212,7 +212,7 @@ export default function Home() {
                     <p className="text-xs font-bold text-[var(--color-bone)] truncate">{dish.name}</p>
                     <div className="flex items-center gap-1 mt-0.5">
                       <KissIcon className="w-2.5 h-2.5 text-[var(--color-love)]" />
-                      <span className="text-xs font-bold text-[var(--color-gold-soft)]">{dish.price}</span>
+                      <span className="text-xs font-bold text-[var(--color-clay)]">{dish.price}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -226,7 +226,7 @@ export default function Home() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h2 className="section-title">最近订单</h2>
-              <button onClick={() => navigate('/orders')} className="text-xs text-[var(--color-gold)] font-bold">全部</button>
+              <button onClick={() => navigate('/orders')} className="text-xs text-[var(--color-clay)] font-bold">全部</button>
             </div>
             <div className="space-y-2.5">
               {recentOrders.map((order, i) => (
@@ -250,7 +250,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-1">
                     <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-                    <span className="text-sm font-bold text-[var(--color-gold-soft)]">{order.total_price}</span>
+                    <span className="text-sm font-bold text-[var(--color-clay)]">{order.total_price}</span>
                   </div>
                 </motion.div>
               ))}

@@ -5,8 +5,8 @@ import Header from '../components/Header'
 
 // 快捷入口：菜品管理(金) / 厨房看板(铂) —— 仅取主题色，不硬编码暖色
 const QUICK_LINKS = [
-  { label: '菜品管理', emoji: '🍽️', path: '/admin/dishes', accent: 'var(--color-gold-soft)' },
-  { label: '厨房看板', emoji: '👨‍🍳', path: '/admin/orders', accent: 'var(--color-platinum-soft)' },
+  { label: '菜品管理', emoji: '🍽️', path: '/admin/dishes', accent: 'var(--color-clay-soft)' },
+  { label: '厨房看板', emoji: '👨‍🍳', path: '/admin/orders', accent: 'var(--color-sage-soft)' },
 ]
 
 export default function Admin() {
@@ -43,7 +43,7 @@ export default function Admin() {
           {statCards.map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
               className="glass rounded-[var(--radius-card)] p-4 text-center">
-              <div className="text-2xl font-bold text-[var(--color-gold-soft)] tabular-nums">{s.value}</div>
+              <div className="text-2xl font-bold text-[var(--color-clay)] tabular-nums">{s.value}</div>
               <div className="text-[11px] text-[var(--color-ash)] mt-1.5">{s.label}</div>
             </motion.div>
           ))}

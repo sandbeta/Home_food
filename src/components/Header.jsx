@@ -30,7 +30,7 @@ export default function Header({ title, subtitle, right }) {
             </h1>
             {subtitle && (
               <div className="flex items-center gap-1.5 mt-1.5">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-gold)] shrink-0" />
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-clay)] shrink-0" />
                 <p className="text-[13px] text-[var(--color-ash)] font-semibold">{subtitle}</p>
               </div>
             )}
