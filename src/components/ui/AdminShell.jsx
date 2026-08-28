@@ -35,6 +35,9 @@ export default function AdminShell({
         style={{
           paddingLeft: 'var(--space-page-x)',
           paddingRight: 'var(--space-page-x)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-section)',
         }}
       >
         {children}
