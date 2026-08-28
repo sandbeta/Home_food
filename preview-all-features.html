@@ -9,12 +9,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink-900:#0E0C0A; --ink-850:#16130F; --ink-800:#1E1A15;
-    --bone:#F5F1EA; --ash:#A89F92; --mist:#6E665C;
-    --gold:#E6B25A; --gold-soft:#F0CE92;
-    --platinum:#C2C7D2; --platinum-soft:#DDE0E8;
-    --sage:#9DB39A; --love:#E8A6A0; --danger:#D7736B;
-    --glass:rgba(245,241,234,0.06); --glass-border:rgba(245,241,234,0.12);
+    /* 晨光厨房 Sunlit Kitchen — 亮色暖调（ink=亮底 / bone=深字，语义已反转） */
+    --ink-900:#F7F3EC; --ink-850:#FBF8F2; --ink-800:#EFE7DA;
+    --bone:#2B2620; --ash:#6B6155; --mist:#9A9082;
+    --gold:#C8683F; --gold-soft:#E0A07E;
+    --platinum:#7FA37A; --platinum-soft:#A9C4A4;
+    --sage:#7FA37A; --love:#D98C84; --danger:#C2543F;
+    --glass:rgba(255,253,249,0.62); --glass-border:rgba(43,38,32,0.10);
+    /* 装饰：英雄图占位（暖棕/草绿/玫瑰/中性）· 图标块 · 机身边框 */
+    --photo-warm:#B5793F; --photo-herb:#7FA37A; --photo-rose:#D98C84; --photo-neu:#9A9082;
+    --photo-base:#E4DACC; --tile-a:#EFE7DA; --tile-b:#E4DACC;
+    --frame-a:#EFE7DA; --frame-b:#DCD3C3;
     --radius-card:28px; --radius-btn:16px;
     --serif:'Playfair Display','Noto Serif SC',serif;
     --sans:'Noto Sans SC','Inter',system-ui,sans-serif;
@@ -23,23 +28,23 @@
   html{scroll-behavior:smooth}
   body{
     font-family:var(--sans); color:var(--bone);
-    background:radial-gradient(120% 80% at 50% 0%, #1A1611 0%, var(--ink-900) 55%, #080604 100%);
+    background:radial-gradient(120% 80% at 50% 0%, var(--ink-850) 0%, var(--ink-900) 55%, var(--ink-800) 100%);
     min-height:100vh; padding:0 0 80px;
   }
   body::before{content:"";position:fixed;inset:0;pointer-events:none;
-    background:radial-gradient(140% 100% at 50% -10%, transparent 40%, rgba(0,0,0,.55) 100%);}
+    background:radial-gradient(140% 100% at 50% -10%, transparent 40%, rgba(43,38,32,.05) 100%);}
   .wrap{max-width:1280px;margin:0 auto;padding:0 20px}
 
   /* ---------- top bar ---------- */
   header.top{position:sticky;top:0;z-index:50;
-    background:rgba(14,12,10,.78);backdrop-filter:blur(14px);
+    background:rgba(247,243,236,.82);backdrop-filter:blur(14px);
     border-bottom:1px solid var(--glass-border)}
   .top-inner{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
   .brand{font-family:var(--serif);font-size:22px;letter-spacing:.5px}
   .brand b{background:linear-gradient(90deg,var(--gold-soft),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
   .anchors{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
   .anchors a{font-size:12.5px;color:var(--ash);text-decoration:none;padding:6px 11px;border:1px solid var(--glass-border);border-radius:999px;transition:.2s}
-  .anchors a:hover{color:var(--gold-soft);border-color:var(--gold);background:rgba(230,178,90,.08)}
+  .anchors a:hover{color:var(--gold-soft);border-color:var(--gold);background:rgba(200,104,63,.08)}
 
   /* ---------- intro ---------- */
   .intro{padding:38px 0 10px;text-align:center}
@@ -48,8 +53,8 @@
   .legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:22px}
   .legend .it{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--bone)}
   .dot{width:14px;height:14px;border-radius:50%}
-  .dot.me{background:linear-gradient(135deg,var(--gold-soft),var(--gold));box-shadow:0 0 12px rgba(230,178,90,.6)}
-  .dot.ta{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));box-shadow:0 0 12px rgba(194,199,210,.5)}
+  .dot.me{background:linear-gradient(135deg,var(--gold-soft),var(--gold));box-shadow:0 0 12px rgba(200,104,63,.6)}
+  .dot.ta{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));box-shadow:0 0 12px rgba(127,163,122,.5)}
 
   /* ---------- grid of phones ---------- */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:34px;margin-top:40px}
@@ -61,16 +66,16 @@
 
   /* ---------- phone frame ---------- */
   .phone{width:330px;height:680px;border-radius:46px;position:relative;flex:none;
-    background:linear-gradient(160deg,#1c1813,#0c0a08);
-    border:1px solid rgba(245,241,234,.14);
-    box-shadow:0 30px 70px rgba(0,0,0,.6),inset 0 0 0 6px #050403,inset 0 0 0 7px rgba(245,241,234,.06);
+    background:linear-gradient(160deg,var(--frame-a),var(--frame-b));
+    border:1px solid rgba(43,38,32,.12);
+    box-shadow:0 30px 70px rgba(43,38,32,.14),inset 0 0 0 6px #FFFDF9,inset 0 0 0 7px rgba(43,38,32,.08);
     overflow:hidden}
   .screen{position:absolute;inset:8px;border-radius:38px;overflow:hidden;background:var(--ink-900);
     display:flex;flex-direction:column}
   .hero{position:relative;height:200px;flex:none;overflow:hidden}
   .hero .img{position:absolute;inset:0;filter:saturate(1.1)}
-  .hero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,12,10,.25),rgba(14,12,10,.92))}
-  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:90px;height:18px;background:#000;border-radius:999px;z-index:5;opacity:.6}
+  .hero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(247,243,236,.12),rgba(247,243,236,.86))}
+  .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:90px;height:18px;background:var(--bone);border-radius:999px;z-index:5;opacity:.6}
   .scroll{position:absolute;left:0;right:0;top:0;bottom:0;overflow:hidden;padding:0 16px 78px}
   .pad{padding-top:42px}
   .glass{background:var(--glass);border:1px solid var(--glass-border);border-radius:18px;backdrop-filter:blur(10px)}
@@ -79,54 +84,54 @@
   .underline{width:46px;height:3px;border-radius:3px;margin-top:10px;background:linear-gradient(90deg,var(--gold-soft),var(--gold))}
   .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
   .chip{font-size:11.5px;padding:7px 12px;border-radius:999px;border:1px solid var(--glass-border);color:var(--bone);background:var(--glass)}
-  .chip.on{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#2A1E0E;border:none;font-weight:700}
-  .chip.ta.on{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:#1A1D22}
+  .chip.on{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--bone);border:none;font-weight:700}
+  .chip.ta.on{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:var(--bone)}
   .card{padding:14px;margin-top:12px}
   .card .nm{font-size:14px;font-weight:700;color:var(--bone)}
   .card .ds{font-size:11px;color:var(--ash);margin-top:4px;line-height:1.5}
-  .price{color:var(--gold-soft);font-weight:700;font-size:14px}
+  .price{color:var(--gold);font-weight:700;font-size:14px}
   .add{margin-left:auto;width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#2A1E0E;font-weight:800;font-size:16px;border:none}
+    background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--bone);font-weight:800;font-size:16px;border:none}
   .kpis{display:flex;gap:10px;margin-top:14px}
   .kpi{flex:1;text-align:center;padding:12px 6px}
-  .kpi b{font-family:var(--serif);font-size:20px;color:var(--gold-soft);display:block}
+  .kpi b{font-family:var(--serif);font-size:20px;color:var(--gold);display:block}
   .kpi span{font-size:10.5px;color:var(--ash)}
   .stat{display:flex;justify-content:space-between;padding:11px 14px;margin-top:8px;font-size:12.5px;color:var(--bone)}
   .av{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:15px;border:2px solid transparent}
-  .av.me{background:linear-gradient(135deg,var(--gold-soft),var(--gold));box-shadow:0 0 10px rgba(230,178,90,.5)}
-  .av.ta{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));box-shadow:0 0 10px rgba(194,199,210,.4)}
+  .av.me{background:linear-gradient(135deg,var(--gold-soft),var(--gold));box-shadow:0 0 10px rgba(200,104,63,.5)}
+  .av.ta{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));box-shadow:0 0 10px rgba(127,163,122,.4)}
   .pill-nav{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:8;
     display:flex;gap:6px;padding:8px 10px;border-radius:999px;
-    background:rgba(20,17,13,.72);backdrop-filter:blur(14px);border:1px solid var(--glass-border)}
+    background:rgba(255,253,249,.78);backdrop-filter:blur(14px);border:1px solid var(--glass-border)}
   .pill-nav i{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ash)}
-  .pill-nav i.act{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#2A1E0E;box-shadow:0 0 14px rgba(230,178,90,.55)}
+  .pill-nav i.act{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--bone);box-shadow:0 0 14px rgba(200,104,63,.55)}
   .orb{position:absolute;right:16px;bottom:74px;z-index:8;width:54px;height:54px;border-radius:50%;
-    background:linear-gradient(135deg,var(--gold-soft),var(--gold));box-shadow:0 8px 22px rgba(230,178,90,.45),inset 0 2px 4px rgba(255,255,255,.4);
-    display:flex;align-items:center;justify-content:center;color:#2A1E0E;font-size:22px}
-  .orb b{position:absolute;top:-4px;right:-4px;background:var(--love);color:#2A120E;font-size:10px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+    background:linear-gradient(135deg,var(--gold-soft),var(--gold));box-shadow:0 8px 22px rgba(200,104,63,.45),inset 0 2px 4px rgba(255,255,255,.4);
+    display:flex;align-items:center;justify-content:center;color:var(--bone);font-size:22px}
+  .orb b{position:absolute;top:-4px;right:-4px;background:var(--love);color:var(--bone);font-size:10px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center}
   .ring{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;
     border:3px solid;margin:8px auto}
-  .ring.pend{border-color:var(--platinum);box-shadow:0 0 14px rgba(194,199,210,.4)}
-  .ring.prep{border-color:var(--gold);box-shadow:0 0 14px rgba(230,178,90,.5)}
-  .ring.done{border-color:var(--sage);box-shadow:0 0 14px rgba(157,179,154,.45)}
+  .ring.pend{border-color:var(--platinum);box-shadow:0 0 14px rgba(127,163,122,.4)}
+  .ring.prep{border-color:var(--gold);box-shadow:0 0 14px rgba(200,104,63,.5)}
+  .ring.done{border-color:var(--sage);box-shadow:0 0 14px rgba(127,163,122,.45)}
   .status-chip{font-size:10.5px;padding:3px 9px;border-radius:999px;font-weight:700}
-  .sc-pend{background:rgba(194,199,210,.16);color:var(--platinum)}
-  .sc-prep{background:rgba(230,178,90,.16);color:var(--gold-soft)}
-  .sc-done{background:rgba(157,179,154,.16);color:var(--sage)}
+  .sc-pend{background:rgba(127,163,122,.16);color:var(--platinum)}
+  .sc-prep{background:rgba(200,104,63,.16);color:var(--gold)}
+  .sc-done{background:rgba(127,163,122,.16);color:var(--sage)}
   .payer{display:flex;gap:6px;margin-top:10px}
   .payer span{flex:1;text-align:center;font-size:11px;padding:8px 0;border-radius:10px;border:1px solid var(--glass-border);color:var(--ash)}
-  .payer span.aa.on{border-color:var(--platinum);color:var(--platinum);box-shadow:0 0 10px rgba(194,199,210,.3)}
-  .payer span.me.on{border-color:var(--gold);color:var(--gold-soft);box-shadow:0 0 10px rgba(230,178,90,.3)}
-  .payer span.ta.on{border-color:var(--platinum);color:var(--platinum);box-shadow:0 0 10px rgba(194,199,210,.3)}
+  .payer span.aa.on{border-color:var(--platinum);color:var(--platinum);box-shadow:0 0 10px rgba(127,163,122,.3)}
+  .payer span.me.on{border-color:var(--gold);color:var(--gold);box-shadow:0 0 10px rgba(200,104,63,.3)}
+  .payer span.ta.on{border-color:var(--platinum);color:var(--platinum);box-shadow:0 0 10px rgba(127,163,122,.3)}
   .btn-gold{width:100%;margin-top:10px;padding:11px;border:none;border-radius:12px;
-    background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:#2A1E0E;font-weight:800;font-size:13px}
-  .btn-sage{background:linear-gradient(135deg,#b8cdb5,var(--sage))}
-  .btn-plat{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:#1A1D22}
-  .btn-love{background:linear-gradient(135deg,#f3bcb7,var(--love));color:#2A120E}
+    background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--bone);font-weight:800;font-size:13px}
+  .btn-sage{background:linear-gradient(135deg,var(--platinum-soft),var(--sage))}
+  .btn-plat{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:var(--bone)}
+  .btn-love{background:linear-gradient(135deg,#f3bcb7,var(--love));color:var(--bone)}
   .split-h{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--bone)}
   .console-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
   .cbox{padding:14px;text-align:center}
-  .cbox b{font-family:var(--serif);font-size:22px;color:var(--gold-soft);display:block}
+  .cbox b{font-family:var(--serif);font-size:22px;color:var(--gold);display:block}
   .cbox span{font-size:10.5px;color:var(--ash)}
   .muted{color:var(--mist)}
   .kbd{font-size:10.5px;color:var(--mist);margin-top:6px}
@@ -177,7 +182,7 @@
     <div class="cell" id="home">
       <h3>🏠 首页 <span class="tag">/home</span></h3>
       <div class="phone"><div class="screen">
-        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 30% 20%,#3a2a18,#0E0C0A)"></div><div class="scrim"></div></div>
+        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 30% 20%,var(--photo-warm),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
           <div class="title-s">今天想吃什么？</div>
@@ -198,19 +203,19 @@
     <div class="cell" id="menu">
       <h3>🍽️ 菜单 <span class="tag">/menu</span></h3>
       <div class="phone"><div class="screen">
-        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 70% 20%,#2a2533,#0E0C0A)"></div><div class="scrim"></div></div>
+        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 70% 20%,var(--photo-herb),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
           <div class="title-s">菜单</div><div class="underline"></div>
           <div class="row"><span class="av me">🐱</span><span class="chip on">我点</span><span class="av ta">🐰</span><span class="chip ta">TA点</span></div>
           <div class="row"><span class="chip on">🍜</span><span class="chip">🍚</span><span class="chip">🥗</span><span class="chip">🍰</span><span class="chip">🥤</span></div>
           <div class="glass card" style="display:flex;align-items:center;gap:10px">
-            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#3a2a18,#1a1410)"></div>
+            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))"></div>
             <div style="flex:1"><div class="nm">黑松露意面</div><div class="ds">¥<span class="price">68</span></div></div>
             <button class="add">＋</button>
           </div>
           <div class="glass card" style="display:flex;align-items:center;gap:10px">
-            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#2a2533,#1a1410)"></div>
+            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))"></div>
             <div style="flex:1"><div class="nm">椰香芒果布丁</div><div class="ds">¥<span class="price">32</span></div></div>
             <button class="add">＋</button>
           </div>
@@ -225,7 +230,7 @@
     <div class="cell" id="dish">
       <h3>🍲 菜品详情 <span class="tag">/dish/:id</span></h3>
       <div class="phone"><div class="screen">
-        <div class="hero" style="height:230px"><div class="img" style="background:radial-gradient(120% 90% at 40% 30%,#3a2a18,#0E0C0A)"></div><div class="scrim"></div></div>
+        <div class="hero" style="height:230px"><div class="img" style="background:radial-gradient(120% 90% at 40% 30%,var(--photo-warm),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad" style="padding-top:18px">
           <div class="glass card"><div class="nm">黑松露意面</div><div class="ds" style="margin-top:6px">手工宽面，黑松露酱底，现磨帕玛森。两人份刚好。</div>
@@ -243,17 +248,17 @@
     <div class="cell" id="fav">
       <h3>❤️ 收藏 <span class="tag">/favorites</span></h3>
       <div class="phone"><div class="screen">
-        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 60% 30%,#3a2024,#0E0C0A)"></div><div class="scrim"></div></div>
+        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 60% 30%,var(--photo-rose),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
           <div class="title-s">我们的收藏</div><div class="underline"></div>
           <div class="glass card" style="display:flex;align-items:center;gap:10px">
-            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#3a2a18,#1a1410)"></div>
+            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))"></div>
             <div style="flex:1"><div class="nm">慢炖牛肋</div><div class="ds">¥<span class="price">98</span></div></div>
             <span style="color:var(--love);font-size:18px">♥</span>
           </div>
           <div class="glass card" style="display:flex;align-items:center;gap:10px">
-            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#2a2533,#1a1410)"></div>
+            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))"></div>
             <div style="flex:1"><div class="nm">抹茶千层</div><div class="ds">¥<span class="price">42</span></div></div>
             <span style="color:var(--love);font-size:18px">♥</span>
           </div>
@@ -267,7 +272,7 @@
     <div class="cell" id="orders">
       <h3>📦 我的订单 <span class="tag">/orders</span></h3>
       <div class="phone"><div class="screen">
-        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,#2a2a20,#0E0C0A)"></div><div class="scrim"></div></div>
+        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-neu),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
           <div class="title-s">订单</div><div class="underline"></div>
@@ -291,7 +296,7 @@
     <div class="cell" id="order">
       <h3>🔎 订单详情 <span class="tag">/order/:id</span></h3>
       <div class="phone"><div class="screen">
-        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 40% 30%,#2a2a20,#0E0C0A)"></div><div class="scrim"></div></div>
+        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 40% 30%,var(--photo-neu),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
           <div class="ring prep">🔥</div>
@@ -310,7 +315,7 @@
     <div class="cell" id="profile">
       <h3>👤 我的 <span class="tag">/profile</span></h3>
       <div class="phone"><div class="screen">
-        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,#302818,#0E0C0A)"></div><div class="scrim"></div></div>
+        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-warm),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
           <div class="glass card" style="text-align:center">
@@ -335,15 +340,15 @@
     <div class="cell" id="cart">
       <h3>🛒 购物车 <span class="tag">/cart</span></h3>
       <div class="phone"><div class="screen">
-        <div class="hero" style="height:120px;filter:blur(8px) brightness(.5)"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,#2a2a20,#0E0C0A)"></div></div>
+        <div class="hero" style="height:120px;filter:blur(8px) brightness(1.02)"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-neu),var(--photo-base))"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad" style="padding-top:30px">
           <div class="title-s">购物车</div><div class="underline"></div>
-          <div class="glass card" style="border-color:rgba(230,178,90,.3)">
+          <div class="glass card" style="border-color:rgba(200,104,63,.3)">
             <div class="split-h"><span class="av me">🐱</span><b>我的</b><span class="price" style="margin-left:auto">¥100</span></div>
             <div class="ds" style="margin-top:6px">黑松露意面 ×1</div>
           </div>
-          <div class="glass card" style="border-color:rgba(194,199,210,.3)">
+          <div class="glass card" style="border-color:rgba(127,163,122,.3)">
             <div class="split-h"><span class="av ta">🐰</span><b>TA的</b><span class="price" style="margin-left:auto">¥64</span></div>
             <div class="ds" style="margin-top:6px">抹茶千层 ×2</div>
           </div>
@@ -358,7 +363,7 @@
     <div class="cell" id="checkout">
       <h3>💳 结算 <span class="tag">/checkout</span></h3>
       <div class="phone"><div class="screen">
-        <div class="hero" style="height:120px;filter:blur(8px) brightness(.5)"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,#2a2a20,#0E0C0A)"></div></div>
+        <div class="hero" style="height:120px;filter:blur(8px) brightness(1.02)"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-neu),var(--photo-base))"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad" style="padding-top:30px">
           <div class="title-s">确认订单</div><div class="underline"></div>
@@ -400,14 +405,14 @@
         <div class="scroll" style="padding-top:42px"><div class="pad">
           <div class="title-s">菜品管理</div><div class="underline"></div>
           <div class="glass card"><div class="nm">黑松露意面</div><div class="ds">¥68 · 在售</div>
-            <div class="row"><span class="chip on" style="background:linear-gradient(135deg,#b8cdb5,var(--sage));color:#10210d;border:none">上架</span>
-            <span class="chip" style="background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:#1A1D22;border:none">编辑</span>
-            <span class="chip" style="background:linear-gradient(135deg,#f3bcb7,var(--love));color:#2A120E;border:none">删除</span></div>
+            <div class="row"><span class="chip on" style="background:linear-gradient(135deg,var(--platinum-soft),var(--sage));color:var(--bone);border:none">上架</span>
+            <span class="chip" style="background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:var(--bone);border:none">编辑</span>
+            <span class="chip" style="background:linear-gradient(135deg,#f3bcb7,var(--love));color:var(--bone);border:none">删除</span></div>
           </div>
           <div class="glass card"><div class="nm">抹茶千层</div><div class="ds">¥42 · 在售</div>
-            <div class="row"><span class="chip on" style="background:linear-gradient(135deg,#b8cdb5,var(--sage));color:#10210d;border:none">上架</span>
-            <span class="chip" style="background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:#1A1D22;border:none">编辑</span>
-            <span class="chip" style="background:linear-gradient(135deg,#f3bcb7,var(--love));color:#2A120E;border:none">删除</span></div>
+            <div class="row"><span class="chip on" style="background:linear-gradient(135deg,var(--platinum-soft),var(--sage));color:var(--bone);border:none">上架</span>
+            <span class="chip" style="background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:var(--bone);border:none">编辑</span>
+            <span class="chip" style="background:linear-gradient(135deg,#f3bcb7,var(--love));color:var(--bone);border:none">删除</span></div>
           </div>
           <button class="btn-gold">＋ 新增菜品</button>
         </div></div>
