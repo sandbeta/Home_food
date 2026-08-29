@@ -12,12 +12,14 @@ export default function AdminDishes() {
   const [showModal, setShowModal] = useState(false)
   const [editingDish, setEditingDish] = useState(null)
 
+  const [visibleCount, setVisibleCount] = useState(30)
   const loadDishes = () => {
     fetch('/api/dishes/all')
       .then((r) => r.json())
       .then((d) => { setDishes(d); setLoading(false) })
   }
   useEffect(() => { loadDishes() }, [])
+  const visibleDishes = dishes.slice(0, visibleCount)
 
   const handleSave = async (form) => {
     if (editingDish) {
@@ -78,7 +80,7 @@ export default function AdminDishes() {
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-card-p)' }}>
-          {dishes.map((dish) => (
+          {visibleDishes.map((dish) => (
             <div key={dish.id} className={dish.available ? '' : 'opacity-50'}>
               <DishRow
                 dish={dish}
@@ -138,6 +140,17 @@ export default function AdminDishes() {
             </div>
           ))}
         </div>
+      )}
+
+      {visibleDishes.length < dishes.length && (
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={() => setVisibleCount(c => c + 30)}
+          className="d3-btn-sm py-2.5 text-sm font-bold text-[var(--color-clay)] border border-[var(--color-clay)]/30 self-center px-6"
+          style={{ borderRadius: 'var(--radius-btn)' }}
+        >
+          加载更多（还有 {dishes.length - visibleDishes.length} 道）
+        </motion.button>
       )}
 
       <AnimatePresence>
