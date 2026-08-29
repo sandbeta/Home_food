@@ -16,7 +16,8 @@ function formatTime(iso) {
 }
 
 /**
- * 订单卡 —— 取代此前 MyOrders 与 AdminOrders 两份**逐行雷同**的实现。
+ * 订单卡 —— 目标是取代 MyOrders 与 AdminOrders 两份**逐行雷同**的实现。
+ * 当前已接入：AdminOrders；MyOrders 待 P4 迁移（勿据本注释误判已完成）。
  *
  * variant:
  *  - 'user'  用户端：整卡可点跳详情；元信息显示时间；尾部显示下单人头像 + 箭头
