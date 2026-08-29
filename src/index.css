@@ -31,7 +31,6 @@
   /* —— 玻璃 —— */
   --color-glass: rgba(255,253,249,0.62);
   --color-glass-border: rgba(43,38,32,0.10);
-
   /* —— 品牌渐变 —— */
   --color-clay-gradient: linear-gradient(135deg, #E0A07E 0%, #C8683F 100%);
   --color-sage-gradient: linear-gradient(135deg, #A9C4A4 0%, #7FA37A 100%);
@@ -114,6 +113,7 @@
   --dock-h: 72px;    /* 停靠行总高（取药丸与球二者较大） */
   --dock-orb: 64px;  /* 购物车球直径 */
   --dock-gap: 12px;  /* 球与药丸之间的间距 */
+  --glass-strong: rgba(255,253,249,0.88); /* 停靠层药丸底色：压在任意底图上仍可读 */
   --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
   --bottom-inset: calc(var(--dock-h) + var(--safe-bottom) + 16px);
   --bottom-inset-compact: calc(var(--safe-bottom) + 24px);

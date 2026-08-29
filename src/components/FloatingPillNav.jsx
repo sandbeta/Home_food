@@ -30,7 +30,7 @@ export default function FloatingPillNav() {
       className="flex-1 glass rounded-full px-2.5 py-2 flex items-center justify-around gap-1"
       style={{
         minHeight: 'var(--dock-h)',
-        background: 'var(--color-glass)',
+        background: 'var(--glass-strong)',
         border: '1px solid var(--color-glass-border)',
         boxShadow: 'var(--shadow-3)',
       }}

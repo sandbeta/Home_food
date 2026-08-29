@@ -32,13 +32,13 @@ export default function FullBleedHero({ src, variant = 'immersive', alt = '', ch
             : 'brightness(1.04) saturate(1.05)',
         }}
       />
-      {/* 晨光浅叠层：保证浅底文字可读 */}
+      {/* 晨光浅叠层：顶部保留照片氛围，往下溶入暖骨白，避免花哨底图与玻璃卡硬碰硬 */}
       <div
         className="absolute inset-0"
         style={{
           background: functional
-            ? 'rgba(247,243,236,0.5)'
-            : 'linear-gradient(180deg, rgba(247,243,236,0.55) 0%, transparent 35%)',
+            ? 'rgba(247,243,236,0.62)'
+            : 'linear-gradient(180deg, rgba(247,243,236,0.30) 0%, rgba(247,243,236,0.62) 22%, rgba(247,243,236,0.90) 46%, rgba(247,243,236,0.96) 100%)',
         }}
       />
       {children}
