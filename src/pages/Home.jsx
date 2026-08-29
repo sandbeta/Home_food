@@ -9,13 +9,14 @@ import SectionHeader from '../components/ui/SectionHeader'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
+import Icon from '../components/ui/Icons'
 
 // 快捷入口四色 tint：让双人格的冷暖（clay/sage）与喜爱(love)、焦糖(caramel)在首屏就出场
 const QUICK_ACTIONS = [
-  { label: '菜单', emoji: '🍜', path: '/menu', tint: 'color-mix(in srgb, var(--color-clay) 12%, transparent)' },
-  { label: '收藏', emoji: '⭐', path: '/menu?fav=1', tint: 'color-mix(in srgb, var(--color-love) 16%, transparent)' },
-  { label: '订单', emoji: '📋', path: '/orders', tint: 'color-mix(in srgb, var(--color-caramel) 12%, transparent)' },
-  { label: '我的', emoji: '👤', path: '/profile', tint: 'color-mix(in srgb, var(--color-sage) 16%, transparent)' },
+  { label: '菜单', icon: 'menu', color: 'var(--color-clay)', path: '/menu', tint: 'color-mix(in srgb, var(--color-clay) 12%, transparent)' },
+  { label: '收藏', icon: 'star', color: 'var(--color-love)', path: '/menu?fav=1', tint: 'color-mix(in srgb, var(--color-love) 16%, transparent)' },
+  { label: '订单', icon: 'orders', color: 'var(--color-caramel)', path: '/orders', tint: 'color-mix(in srgb, var(--color-caramel) 12%, transparent)' },
+  { label: '我的', icon: 'user', color: 'var(--color-sage)', path: '/profile', tint: 'color-mix(in srgb, var(--color-sage) 16%, transparent)' },
 ]
 
 const MOTIVATIONS = [
@@ -72,10 +73,10 @@ export default function Home() {
               className="flex flex-col items-center gap-1.5 py-2"
             >
               <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl glass"
+                className="w-14 h-14 rounded-2xl flex items-center justify-center glass"
                 style={{ background: action.tint, boxShadow: 'var(--shadow-2)' }}
               >
-                {action.emoji}
+                <Icon name={action.icon} size={24} style={{ color: action.color }} />
               </div>
               <span className="text-xs font-bold text-[var(--color-bone)]">{action.label}</span>
             </motion.button>

@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import Icon from './ui/Icons'
 
 const tabs = [
-  { path: '/home', label: '首页', emoji: '🏠' },
-  { path: '/menu', label: '吃什么', emoji: '🍜' },
-  { path: '/orders', label: '订单', emoji: '📋' },
-  { path: '/profile', label: '我的', emoji: '👤' },
+  { path: '/home', label: '首页', icon: 'home' },
+  { path: '/menu', label: '吃什么', icon: 'menu' },
+  { path: '/orders', label: '订单', icon: 'orders' },
+  { path: '/profile', label: '我的', icon: 'user' },
 ]
 
 /**
@@ -59,10 +60,11 @@ export default function FloatingPillNav() {
               />
             )}
             <span
-              className="relative text-2xl transition-transform"
-              style={{ color: active ? 'var(--color-clay)' : 'var(--color-ash)' }}
+              className="relative transition-colors"
+              style={{ color: active ? '#FFFDF9' : 'var(--color-ash)' }}
             >
-              {tab.emoji}
+              {/* 激活态压在 clay 渐变药丸上，图标必须转白，否则同色隐形 */}
+              <Icon name={tab.icon} size={22} strokeWidth={active ? 2.2 : 2} />
             </span>
           </Link>
         )
