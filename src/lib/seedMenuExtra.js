@@ -2,7 +2,7 @@
 // HowToCook（程序员做饭指南）开源菜谱灌库数据 —— 公有领域/Unlicense，
 // 由 scripts/build_htc_seed.py 从仓库 Markdown 自动生成，请勿手改；
 // 重新生成：python scripts/build_htc_seed.py --repo <HowToCook 克隆目录>
-// 共 342 道，其中 8 道带本地预览图（public/dish-images/htc/），
+// 共 342 道，其中 0 道带本地预览图（public/dish-images/htc/），
 // 其余由组件层品类 emoji 占位回退。
 // ============================================================
 export const SEED_MENU_EXTRA = [
