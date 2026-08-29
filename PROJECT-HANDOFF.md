@@ -1,7 +1,8 @@
 # 项目交接文档 · 晨光厨房（food-ordering-miniapp）
 
 > **给新对话的 AI / 开发者**：本文档是自包含的。读完即可接手，无需翻旧会话。
-> 最后更新：2026-08-29　当前 HEAD：`21d81b5`　工作区：干净
+> 最后更新：2026-08-29（核对修正轮）　代码 HEAD：`686a204`　工作区：干净
+> 注：本文档自身作为 docs 提交在代码 HEAD 之后，仓库实际 HEAD 会多一笔 docs 提交，属正常。
 
 ---
 
@@ -71,6 +72,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 | 重构 P3-a | **结算并入购物车**（Cart 一页完成下单；`/checkout` → 重定向 `/cart`） | `c496b76` |
 | 重构 P3-b | **后台三页 AdminShell**（消灭 AdminDishes/AdminOrders 两处断头路） | `4c2a61f` |
 | 重构 P3-c | **收藏并入点菜页**（分段控件 全部/⭐收藏；Menu 卡片补上缺失的跳详情 onClick；删与购物车球重叠的 CTA） | `21d81b5` |
+| 核对修正 | 交接文档与代码逐条核对后：Cart 圆角笔误（--radius-md→--radius-btn）；六页 Header 转发壳迁移为直接引用 PageHeader 并删除 Header.jsx（兑现第 5 节约定 3）；四个 ui 组件 docstring 的完成时态修正 | build+lint 全绿（`31f2376`→`686a204`） |
 
 ### 待做 🔴（P4–P6，按序）
 
@@ -83,7 +85,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 - [ ] 每页容器换 PageContainer
 
 **P5 质感**：
-- [ ] 43 处硬编码 px 字号 → 字阶（`text-xs/sm/base/lg/xl/2xl/3xl` + `text-display`；脚本+精确计数断言，终验 grep 到 0）
+- [ ] 19 处硬编码 px 字号 → 字阶（P0 时点审计为 43，P2/P3 重构后现存 19：10px×5、11px×4、15px×3、13px×2、9px×2、17/20/22px 各 1；用 `text-xs/sm/base/lg/xl/2xl/3xl` + `text-display`，终验 grep 到 0）
 - [ ] 卡片圆角统一到 `--radius-card/--radius-tile`（现散落 24/22/26px）；阴影统一到 `--shadow-*`
 - [ ] serif 用于页面大标题与价格/统计数字（PageHeader 已是，页面内标题与数字待改）
 
@@ -121,6 +123,8 @@ src/
 | 🟠 grep 带 alpha 的 rgba 要写 `rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*[\),]`（写 `\)` 会漏 `rgba(230,178,90,0.35)`） | 审计色值用「白名单差分」+ 此正则 |
 | 🟠 grep 大小写敏感（`#2A1E0E` ≠ `#2a1e0e`） | 审计一律加 `-i` |
 | 🟡 `pathlib.glob("src/**/*.{jsx}")` **不展开花括号**，静默匹配为空 | 用 `rglob("*.jsx")` 或显式文件列表 |
+| 🟡 内联 `var(--radius-lg/md)` 这类**默认档**令牌，靠同名工具类（rounded-lg 等）在某处被引用才进产物 | DishRow 缩略图的 `var(--radius-lg)` 目前靠 OrderDetail 的 `rounded-lg` 类「捎带」进产物；P4/P5 动这两处时需同步处理，或把内联引用改到标尺档 |
+| 🟡 zip 打包曾漏掉被跟踪的 `dist_bak_2508/`（68 个文件），解压后 `git status` 假报 68 个删除 | 对策：`git checkout -- dist_bak_2508`（对象在 .git 里，可完整恢复）；重新打包时勿再排除被跟踪目录 |
 | 🟡 vite 后台启动输出有缓冲，TaskOutput 看不到 | `netstat -ano \| grep :5173` + HTTP 探测确认 |
 | 🟡 oxlint 入口是 `./node_modules/.bin/oxlint`（`node_modules/oxlint/bin/oxlint.js` 不存在） | 用 .bin 下的脚本 |
 
