@@ -119,6 +119,66 @@ export default function DishDetail() {
             </motion.button>
           </div>
         </GlassCard>
+
+        {/* 男朋友的菜谱（HowToCook 灌库菜才有） */}
+        {dish.recipe && (
+          <GlassCard delay={0.25}>
+            <div style={{ padding: 'var(--space-card-p)' }}>
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-serif text-xl font-bold text-[var(--color-bone)]">男朋友的菜谱</h2>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {dish.recipe.difficulty && <span className="d3-badge">{dish.recipe.difficulty}</span>}
+                  {dish.recipe.calories && (
+                    <span className="text-xs font-semibold px-2 py-1 rounded-full text-[var(--color-ash)]"
+                      style={{ background: 'var(--color-glass)', border: '1px solid var(--color-glass-border)' }}>
+                      🔥 {dish.recipe.calories}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {dish.recipe.ingredients?.length > 0 && (
+                <>
+                  <p className="text-sm font-bold text-[var(--color-bone)] mt-4 mb-2">🧺 需要准备</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {dish.recipe.ingredients.map((it, i) => (
+                      <span key={i} className="text-xs px-2.5 py-1 rounded-full text-[var(--color-ash)]"
+                        style={{ background: 'var(--color-glass)', border: '1px solid var(--color-glass-border)' }}>
+                        {it}
+                      </span>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {dish.recipe.steps?.length > 0 && (
+                <>
+                  <p className="text-sm font-bold text-[var(--color-bone)] mt-4 mb-3">🔥 制作过程</p>
+                  <ol className="space-y-3">
+                    {dish.recipe.steps.map((s, i) => (
+                      <li key={i} className="flex gap-2.5">
+                        <span
+                          className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5"
+                          style={{ background: 'var(--color-clay-gradient)', color: '#FFFDF9' }}
+                        >
+                          {i + 1}
+                        </span>
+                        <p className="flex-1 text-sm text-[var(--color-bone)] leading-relaxed">{s}</p>
+                      </li>
+                    ))}
+                  </ol>
+                </>
+              )}
+
+              {dish.recipe.tip && (
+                <p className="text-xs text-[var(--color-ash)] leading-relaxed mt-4 pt-3"
+                  style={{ borderTop: '1px solid var(--color-glass-border)' }}>
+                  💡 {dish.recipe.tip}
+                </p>
+              )}
+            </div>
+          </GlassCard>
+        )}
       </PageContainer>
     </div>
   )

@@ -52,6 +52,74 @@ IMG_RE = re.compile(r'!\[[^\]]*\]\((\./[^)]+)\)')
 NUMERIC_PREVIEW = re.compile(r'^\d{3}\.(jpg|jpeg|png|webp)$', re.I)
 
 
+def sections(txt: str) -> dict:
+    """按 '## 标题' 切分 md 章节 → {标题: 正文}。"""
+    out, cur = {}, None
+    for line in txt.splitlines():
+        m = re.match(r'^##\s+(.+)', line)
+        if m:
+            cur = m.group(1).strip()
+            out[cur] = []
+        elif cur is not None:
+            out[cur].append(line)
+    return {k: '\n'.join(v) for k, v in out.items()}
+
+
+def parse_recipe(txt: str) -> dict | None:
+    """抽取 原料清单 / 步骤 / 难度 / 卡路里 / 小贴士；全是空则返回 None。"""
+    sec = sections(txt)
+    recipe = {}
+
+    ing = []
+    for line in sec.get('必备原料和工具', '').splitlines():
+        s = line.strip().lstrip('-*').strip()
+        if s and not s.startswith('#'):
+            ing.append(s[:30])
+    if ing:
+        recipe['ingredients'] = ing[:15]
+
+    steps = []
+    for line in sec.get('操作', '').splitlines():
+        s = line.strip()
+        if not s or s.startswith(('#', '![', '!')) :
+            continue
+        s = re.sub(r'^\d+[.、)）]\s*', '', s)
+        s = re.sub(r'^[-*]\s*', '', s).strip()
+        if not s:
+            continue
+        if s.startswith(('- ', '* ')):
+            s = s[2:]
+        if re.match(r'^\d+[.、)）]', line.strip()):
+            s = re.sub(r'^\d+[.、)）]\s*', '', line.strip())
+        if not s:
+            continue
+        if line.startswith((' ', '\t', '-')) and steps:
+            steps[-1] = (steps[-1] + '；' + s)[:220]   # 缩进行是上一步的补充
+        else:
+            if len(steps) < 16:
+                steps.append(s[:220])
+    if steps:
+        recipe['steps'] = steps
+
+    m = re.search(r'预估烹饪难度[：:]\s*([★☆]+)', txt)
+    if m:
+        recipe['difficulty'] = m.group(1)
+    m = re.search(r'预估卡路里[：:]\s*(\d+)\s*大卡', txt)
+    if m:
+        recipe['calories'] = f'{m.group(1)} 大卡'
+
+    tip = ''
+    for line in sec.get('小贴士', '').splitlines() + sec.get('附加内容', '').splitlines():
+        s = line.strip()
+        if s and not s.startswith(('#', '![', '[')):
+            tip = first_sentence(s, 80)
+            break
+    if tip:
+        recipe['tip'] = tip
+
+    return recipe or None
+
+
 def git_out(repo: Path, *args) -> str:
     # core.quotepath=false：默认会把中文路径转成八进制转义加引号，导致路径匹配失败
     return subprocess.run(['git', '-c', 'core.quotepath=false', *args], cwd=repo,
@@ -122,7 +190,7 @@ def parse_md(md: Path):
     name = m.group(1).strip().removesuffix('的做法') if m else md.stem
     desc = pick_desc(txt)
     refs = [unquote(m2.group(1))[2:] for m2 in IMG_RE.finditer(txt)]  # 去掉 './'
-    return name, desc, refs
+    return name, desc, refs, parse_recipe(txt)
 
 
 def main():
@@ -141,7 +209,7 @@ def main():
     existing = set(re.findall(r"name: '([^']+)'", (app_root / 'src/lib/mockApi.js').read_text(encoding='utf-8')))
 
     imgs = RepoImages(repo)
-    dishes, seen, stats = [], set(), {}
+    dishes, seen, stats, recipes = [], set(), {}, {}
     jobs = []  # (dish_id, rel_dir, path)
     next_id = ID_START
 
@@ -149,7 +217,7 @@ def main():
     for cat_dir in cat_dirs:
         mode, app_cat = CATEGORY_MAP[cat_dir.name]
         for md in sorted(cat_dir.rglob('*.md')):
-            name, desc, refs = parse_md(md)
+            name, desc, refs, recipe = parse_md(md)
             if not name or name in seen or name in existing:
                 continue
             cat = app_cat
@@ -171,6 +239,8 @@ def main():
             dishes.append({'id': dish_id, 'name': name, 'price': price, 'category': cat,
                            'description': desc, 'available': 1, 'image_url': image_url,
                            '_img': (rel_dir, chosen)})
+            if recipe:
+                recipes[dish_id] = recipe
 
     print(f'解析 {len(dishes)} 道，需图片 {len(jobs)} 张，逐个按需取 blob（走 github.com 协议）...')
 
@@ -217,7 +287,21 @@ def main():
     lines += [']', '']
     out_js.write_text('\n'.join(lines), encoding='utf-8')
 
+    # 菜谱数据独立成懒加载模块（体积较大，只在打开详情页时经动态 import 加载）
+    ap_out_recipes = out_js.with_name('seedRecipes.js')
+    import json as _json
+    rec_lines = [
+        '// ============================================================',
+        '// HowToCook 菜谱数据（原料/步骤/难度/卡路里/小贴士），与 seedMenuExtra.js',
+        '// 同源同生成器；键为菜品 id，仅详情页经 mockApi 动态 import 按需加载。',
+        '// ============================================================',
+        f'export default {_json.dumps({str(k): v for k, v in sorted(recipes.items())}, ensure_ascii=False, separators=(",", ":"))}',
+        '',
+    ]
+    ap_out_recipes.write_text('\n'.join(rec_lines), encoding='utf-8')
+
     print(f'生成 {len(dishes)} 道 -> {out_js}，其中 {saved + cached} 道带图（缓存复用 {cached}）')
+    print(f'菜谱 {len(recipes)} 份 -> {ap_out_recipes}（{ap_out_recipes.stat().st_size // 1024}KB）')
     for cat, n in sorted(stats.items(), key=lambda kv: -kv[1]):
         print(f'  {cat}: {n}')
 

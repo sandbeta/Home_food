@@ -187,7 +187,10 @@ export function installMockApi() {
     if (dishMatch && method === 'GET') {
       const id = Number(dishMatch[1])
       const dish = state.dishes.find(d => d.id === id)
-      return dish ? json(dish) : json({ message: 'Not found' }, 404)
+      if (!dish) return json({ message: 'Not found' }, 404)
+      // 菜谱（HowToCook 灌库菜才有）按需动态加载：体积较大，不进列表与首屏
+      const recipes = await import('./seedRecipes').then(m => m.default).catch(() => ({}))
+      return json({ ...dish, recipe: recipes[id] || null })
     }
     if (dishMatch && method === 'PUT') {
       const id = Number(dishMatch[1])
