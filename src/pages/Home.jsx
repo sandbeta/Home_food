@@ -10,7 +10,7 @@ import { HERO_IMAGES } from '../theme/images'
 
 const QUICK_ACTIONS = [
   { label: '菜单', emoji: '🍜', path: '/menu' },
-  { label: '收藏', emoji: '⭐', path: '/favorites' },
+  { label: '收藏', emoji: '⭐', path: '/menu?fav=1' },
   { label: '订单', emoji: '📋', path: '/orders' },
   { label: '我的', emoji: '👤', path: '/profile' },
 ]

@@ -13,7 +13,6 @@ const Cart = lazy(() => import('./pages/Cart'))
 const OrderDetail = lazy(() => import('./pages/OrderDetail'))
 const MyOrders = lazy(() => import('./pages/MyOrders'))
 const Profile = lazy(() => import('./pages/Profile'))
-const Favorites = lazy(() => import('./pages/Favorites'))
 const Admin = lazy(() => import('./pages/Admin'))
 const AdminDishes = lazy(() => import('./pages/AdminDishes'))
 const AdminOrders = lazy(() => import('./pages/AdminOrders'))
@@ -79,7 +78,8 @@ function App() {
                   <Route path="/checkout" element={<Navigate to="/cart" replace />} />
                   <Route path="/orders" element={<MyOrders />} />
                   <Route path="/orders/:id" element={<OrderDetail />} />
-                  <Route path="/favorites" element={<Favorites />} />
+                  {/* 收藏已并入点菜页（/menu 分段控件）：旧路由保留重定向，避免外链失效 */}
+                  <Route path="/favorites" element={<Navigate to="/menu?fav=1" replace />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/admin/dishes" element={<AdminDishes />} />

@@ -3,8 +3,8 @@ import KissIcon from '../KissIcon'
 import { getCategoryEmoji, getDishImage } from '../../lib/categoryIcons'
 
 /**
- * 菜品行 —— 目标是取代 Home / Menu / Favorites / AdminDishes 四份手写副本。
- * 当前已接入：Menu / AdminDishes；Home / Favorites 待 P4 迁移（勿据本注释误判已完成）。
+ * 菜品行 —— 目标是取代各页的手写菜品副本。当前已接入：Menu / AdminDishes；
+ * Home 待 P4 重排时接入（Favorites 页已删除，其功能并入 Menu）。
  *
  * variant:
  *  - 'default' 点菜场景：缩略图 + 名称/分类/描述 + 价格 + 加购按钮（可选收藏）

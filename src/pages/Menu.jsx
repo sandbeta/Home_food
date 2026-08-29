@@ -131,6 +131,11 @@ export default function Menu() {
     return base.filter(d => `${d.name} ${d.category} ${d.description || ''}`.toLowerCase().includes(q))
   }, [isFavScope, favorites, dishes, keyword])
 
+  // /favorites 旧链接会重定向到 /menu?fav=1；若此时已停在 /menu（组件未重挂载），这里热同步页签
+  useEffect(() => {
+    if (searchParams.get('fav')) setScope('fav')
+  }, [searchParams])
+
   const spawnParticle = (x, y) => {
     const id = Date.now() + Math.random()
     setParticles(prev => [...prev, { id, x, y }])
