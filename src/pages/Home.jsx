@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import PageHeader from '../components/PageHeader'
-import FullBleedHero from '../components/FullBleedHero'
-import KissIcon from '../components/KissIcon'
-import PageContainer from '../components/ui/PageContainer'
-import SectionHeader from '../components/ui/SectionHeader'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
-import { contentEnter } from '../theme/motion'
-import { HERO_IMAGES } from '../theme/images'
 import { NICKNAME, pickOne, HOME_NOTES } from '../lib/sweetCopy'
+import KissIcon from '../components/KissIcon'
+
+/*
+ * 首页 · WeUI 设计语言试点
+ * 克制扁平：#EDEDED 底 + 白色分组卡 + 0.5px 发丝线，系统字体，无阴影/渐变/弹跳动效。
+ * 业务逻辑与晨光版完全一致：主推池带图优先、「换一道」原地轮换、常点网格随动、最近订单 3 条。
+ */
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -19,14 +18,21 @@ function getGreeting() {
   return '晚上好'
 }
 
-// 常点人 mock：按菜品 id 稳定分配 🐱/🐰，让双人格出现在首页网格里
-const chefOf = (dish) => (dish.id % 2 === 0 ? 'me' : 'partner')
+const hideImg = (e) => { e.currentTarget.style.display = 'none' }
+const Chevron = () => (
+  <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="var(--color-weui-text3)" strokeWidth="1.5" strokeLinecap="round">
+    <path d="m4.5 2 4 4-4 4" />
+  </svg>
+)
 
-/**
- * 首页 —— 「主推大卡 + 2 列网格 + 竖列表」，约 1 屏出头。
- * 不设快捷入口：与底部导航功能重复（用户实测反馈后移除），
- * 收藏走点菜页分段控件，订单/我的走底部导航。
- */
+const SectHead = ({ title, action }) => (
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '8px 4px 0' }}>
+    <span className="weui-17 weui-medium weui-t1">{title}</span>
+    {action}
+  </div>
+)
+const linkBtn = { border: 'none', background: 'none', padding: 0, cursor: 'pointer' }
+
 export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
   const [dishes, setDishes] = useState([])
@@ -37,8 +43,7 @@ export default function Home() {
   useEffect(() => {
     fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3)))
     fetch('/api/dishes?category=全部').then(r => r.json()).then(d => {
-      // 主推大卡优先用带实拍图的菜（无图菜在大卡上只有一枚小 emoji，观感太素）；
-      // 两组各自洗牌后拼接，保证主推位永远有图。Fisher-Yates 无偏洗牌。
+      // 主推大卡优先用带实拍图的菜；Fisher-Yates 无偏洗牌；新数据到来时轮换指针归零
       const shuf = (arr) => {
         const a = [...arr]
         for (let i = a.length - 1; i > 0; i--) {
@@ -48,181 +53,153 @@ export default function Home() {
         return a
       }
       setDishes([...shuf(d.filter(x => getDishImage(x))), ...shuf(d.filter(x => !getDishImage(x)))])
-      setFeatIdx(0) // 新数据到来时轮换指针归零
+      setFeatIdx(0)
     })
   }, [])
 
-  // 「换一道」在池子里顺位轮换：主推卡换菜，常点网格跟着顺移一批
   const featured = dishes.length ? dishes[featIdx % dishes.length] : null
   const popular = dishes.length
     ? Array.from({ length: 6 }, (_, k) => dishes[(featIdx + 1 + k) % dishes.length])
     : []
+  const fmtTime = (iso) => new Date(iso).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
   return (
-    <div className="relative">
-      <FullBleedHero src={HERO_IMAGES.home} variant="immersive" alt="今日美食" />
+    <div className="weui-theme">
+      <header className="weui-nav"><span className="weui-nav-title">晨光厨房</span></header>
 
-      <PageHeader title={`${getGreeting()}，${NICKNAME}`} subtitle={sweetNote} />
+      {/* 问候语：男朋友口吻，每次进入随机 */}
+      <div style={{ padding: '14px 16px 0' }}>
+        <div className="weui-17 weui-medium weui-t1">{getGreeting()}，{NICKNAME}</div>
+        <div className="weui-14 weui-t2" style={{ marginTop: 2 }}>{sweetNote}</div>
+      </div>
 
-      <PageContainer>
-        {/* 今日主推 —— 全页深色锚点：clay 实底 + 白字大号 serif 价格 */}
+      <div style={{ padding: '8px 16px 76px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {/* 今日推荐 */}
         {featured && (
-          <motion.div {...contentEnter(0.05)}>
-            <SectionHeader
+          <>
+            <SectHead
               title="今日推荐"
               action={
-                <button
-                  onClick={() => setFeatIdx(i => (i + 1) % Math.max(dishes.length, 1))}
-                  className="text-xs text-[var(--color-clay)] font-bold"
-                >
-                  换一道 →
+                <button className="weui-link" style={linkBtn}
+                  onClick={() => setFeatIdx(i => (i + 1) % Math.max(dishes.length, 1))}>
+                  换一道
                 </button>
               }
             />
-            <motion.div
-              key={featured.id}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate(`/dish/${featured.id}`)}
-              className="overflow-hidden cursor-pointer mt-3"
-              style={{
-                borderRadius: 'var(--radius-card)',
-                background: 'var(--color-clay-gradient)',
-                boxShadow: 'var(--shadow-4)',
-              }}
-            >
+            <div className="weui-group">
               <div
-                className="relative h-44 overflow-hidden flex items-center justify-center"
-                style={{ background: 'rgba(255,253,249,0.16)' }}
+                style={{
+                  height: 150, overflow: 'hidden', position: 'relative',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'var(--color-weui-press)',
+                }}
               >
-                <div
-                  className="absolute w-44 h-44 rounded-full"
-                  style={{ background: 'radial-gradient(circle, rgba(255,253,249,0.22), transparent 70%)' }}
-                />
-                <span className="text-7xl relative">{getCategoryEmoji(featured.category)}</span>
+                <span style={{ fontSize: 48 }}>{getCategoryEmoji(featured.category)}</span>
                 {getDishImage(featured) && (
                   <img
-                    src={getDishImage(featured)}
-                    alt={featured.name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    onError={(e) => { e.currentTarget.style.display = 'none' }}
+                    src={getDishImage(featured)} alt={featured.name}
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={hideImg}
                   />
                 )}
               </div>
-              <div className="flex items-end justify-between gap-3 px-4 pb-3.5 pt-3">
-                <div className="min-w-0">
-                  <span
-                    className="inline-block text-xs font-extrabold px-2.5 py-1 rounded-full"
-                    style={{ background: 'rgba(255,253,249,0.22)', color: '#FFFDF9' }}
-                  >
-                    今日主推
+              <div className="weui-cell" onClick={() => navigate(`/dish/${featured.id}`)} style={{ display: 'block' }}>
+                <span style={{
+                  fontSize: 10, color: 'var(--color-weui-green)',
+                  border: '1px solid var(--color-weui-green)', borderRadius: 4, padding: '1px 4px',
+                }}>
+                  今日主推
+                </span>
+                <div className="weui-17 weui-medium weui-t1" style={{ marginTop: 4 }}>{featured.name}</div>
+                <div className="weui-14 weui-t2" style={{ marginTop: 2 }}>{featured.description || '好吃的~'}</div>
+                <div className="weui-17 weui-medium weui-t1" style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ display: 'inline-flex', color: 'var(--color-weui-text2)' }}>
+                    <KissIcon className="w-3.5 h-3.5" />
                   </span>
-                  <p className="font-serif text-xl font-bold text-[#FFFDF9] truncate mt-1.5">{featured.name}</p>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <KissIcon className="w-4 h-4 text-[#FFFDF9]" />
-                  <span className="font-serif text-2xl font-extrabold text-[#FFFDF9] tabular-nums">{featured.price}</span>
+                  {featured.price}
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </>
         )}
 
         {/* 常点的 */}
         {popular.length > 0 && (
-          <motion.div {...contentEnter(0.1)}>
-            <SectionHeader
+          <>
+            <SectHead
               title="常点的"
-              action={<button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-clay)] font-bold">全部 →</button>}
+              action={
+                <button className="weui-link" style={linkBtn} onClick={() => navigate('/menu')}>全部</button>
+              }
             />
-            <div className="grid grid-cols-2 gap-3 mt-3">
-              {popular.map((dish) => {
-                const chef = chefOf(dish)
-                return (
-                  <motion.div
-                    key={dish.id}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate(`/dish/${dish.id}`)}
-                    className="d3-card-face cursor-pointer flex items-center gap-3 relative"
-                    style={{ padding: 'var(--space-card-p)' }}
+            <div className="weui-group">
+              {popular.map((dish) => (
+                <div key={dish.id} className="weui-cell" onClick={() => navigate(`/dish/${dish.id}`)}>
+                  <div
+                    style={{
+                      width: 40, height: 40, borderRadius: 4, overflow: 'hidden', flex: 'none',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
+                      background: 'var(--color-weui-press)',
+                    }}
                   >
-                    <div
-                      className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] border-2 border-[var(--color-ink-900)] ${chef === 'me' ? 'avatar-me' : 'avatar-partner'}`}
-                      title={chef === 'me' ? '我常点' : 'TA 常点'}
-                    >
-                      {chef === 'me' ? '🐱' : '🐰'}
+                    <span style={{ fontSize: 20 }}>{getCategoryEmoji(dish?.category)}</span>
+                    {getDishImage(dish) && (
+                      <img
+                        src={getDishImage(dish)} alt={dish.name} loading="lazy"
+                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={hideImg}
+                      />
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="weui-17 weui-t1" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dish.name}</div>
+                    <div className="weui-14 weui-t2" style={{ marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {dish.description || dish.category}
                     </div>
-                    <div
-                      className="relative w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
-                      style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))' }}
-                    >
-                      <span>{getCategoryEmoji(dish?.category)}</span>
-                      {getDishImage(dish) && (
-                        <img
-                          src={getDishImage(dish)}
-                          className="absolute inset-0 w-full h-full object-cover"
-                          alt={dish.name}
-                          loading="lazy"
-                          onError={(e) => { e.currentTarget.style.display = 'none' }}
-                        />
-                      )}
+                  </div>
+                  <div style={{ textAlign: 'right', flex: 'none' }}>
+                    <div className="weui-17 weui-medium weui-t1" style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'flex-end' }}>
+                      <span style={{ display: 'inline-flex', color: 'var(--color-weui-text2)' }}>
+                        <KissIcon className="w-3 h-3" />
+                      </span>
+                      {dish.price}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-[var(--color-bone)] truncate">{dish.name}</p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-                        <span className="font-serif text-sm font-bold text-[var(--color-caramel)] tabular-nums">{dish.price}</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                )
-              })}
+                    <div style={{ marginTop: 4, display: 'flex', justifyContent: 'flex-end' }}><Chevron /></div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </motion.div>
+          </>
         )}
 
         {/* 最近订单 */}
         {recentOrders.length > 0 && (
-          <motion.div {...contentEnter(0.15)}>
-            <SectionHeader
+          <>
+            <SectHead
               title="最近订单"
-              action={<button onClick={() => navigate('/orders')} className="text-xs text-[var(--color-clay)] font-bold">全部</button>}
+              action={
+                <button className="weui-link" style={linkBtn} onClick={() => navigate('/orders')}>全部</button>
+              }
             />
-            <div className="space-y-2.5 mt-3">
+            <div className="weui-group">
               {recentOrders.map((order) => (
-                <motion.div
-                  key={order.id}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate(`/orders/${order.id}`)}
-                  className="d3-card-face flex items-center justify-between gap-3 cursor-pointer"
-                  style={{ padding: 'var(--space-card-p)' }}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
-                      style={{ background: 'linear-gradient(135deg, var(--color-ink-900), var(--color-ink-850))' }}
-                    >
-                      📦
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold text-[var(--color-bone)]">订单 #{order.id}</p>
-                      <p className="text-xs text-[var(--color-ash)] mt-0.5 truncate">
-                        {order.items.map(i => `${i.dish_name}×${i.quantity}`).join('、')}
-                      </p>
+                <div key={order.id} className="weui-cell" onClick={() => navigate(`/orders/${order.id}`)}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="weui-17 weui-t1">订单 #{order.id}</div>
+                    <div className="weui-14 weui-t2" style={{ marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {order.items.map(i => `${i.dish_name}×${i.quantity}`).join('、')}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-                    <span className="font-serif text-sm font-bold text-[var(--color-caramel)] tabular-nums">{order.total_price}</span>
+                  <div style={{ textAlign: 'right', flex: 'none' }}>
+                    <div className="weui-17 weui-medium weui-t1">{order.total_price}</div>
+                    <div className="weui-14 weui-t3" style={{ marginTop: 2 }}>{fmtTime(order.created_at)}</div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </>
         )}
-      </PageContainer>
+      </div>
     </div>
   )
 }

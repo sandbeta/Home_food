@@ -1,7 +1,9 @@
+import { useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import FloatingPillNav from './FloatingPillNav'
 import D3CartOrb from './D3CartOrb'
 import { useCart } from './CartContext'
+import WeuiTabbar from './WeuiTabbar'
 
 /**
  * 底部停靠层 —— 全站**唯一**的底部固定层。
@@ -16,6 +18,9 @@ import { useCart } from './CartContext'
  */
 export default function DockLayer() {
   const { totalCount } = useCart()
+  const { pathname } = useLocation()
+  // WeUI 试点路由：首页/点菜页底部换 WeUI TabBar（其余页保持晨光药丸导航）
+  const isWeuiPilot = pathname === '/home' || pathname === '/menu'
 
   return (
     <div
@@ -25,13 +30,13 @@ export default function DockLayer() {
       <div
         className="flex items-center pointer-events-auto"
         style={{
-          gap: 'var(--dock-gap)',
-          paddingLeft: 'var(--space-page-x)',
-          paddingRight: 'var(--space-page-x)',
-          paddingBottom: 'var(--safe-bottom)',
+          gap: isWeuiPilot ? 0 : 'var(--dock-gap)',
+          paddingLeft: isWeuiPilot ? 0 : 'var(--space-page-x)',
+          paddingRight: 0,
+          paddingBottom: 0,
         }}
       >
-        <FloatingPillNav />
+        {isWeuiPilot ? <WeuiTabbar /> : <FloatingPillNav />}
         <AnimatePresence>
           {totalCount > 0 && (
             <motion.div

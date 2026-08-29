@@ -41,6 +41,6 @@ for x in darks[:12]:
 
 pages = ['Home', 'Menu', 'DishDetail', 'Cart', 'MyOrders', 'OrderDetail', 'Profile', 'Admin', 'AdminDishes', 'AdminOrders']
 missing = [pg for pg in pages
-           if 'PageHeader' not in Path(f'src/pages/{pg}.jsx').read_text(encoding='utf-8')
-           and 'AdminShell' not in Path(f'src/pages/{pg}.jsx').read_text(encoding='utf-8')]
+           if not any(marker in Path(f'src/pages/{pg}.jsx').read_text(encoding='utf-8')
+                      for marker in ('PageHeader', 'AdminShell', 'weui-nav'))]
 print('缺页头/返回的页面:', missing or '无（断头路 0）')
