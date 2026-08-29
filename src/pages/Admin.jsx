@@ -4,10 +4,11 @@ import { motion } from 'framer-motion'
 import AdminShell from '../components/ui/AdminShell'
 import StatCard from '../components/ui/StatCard'
 import SectionHeader from '../components/ui/SectionHeader'
+import Icon from '../components/ui/Icons'
 
 const QUICK_LINKS = [
-  { label: '菜品管理', emoji: '🍽️', path: '/admin/dishes', accent: 'var(--color-clay)' },
-  { label: '厨房看板', emoji: '👨‍🍳', path: '/admin/orders', accent: 'var(--color-sage)' },
+  { label: '菜品管理', icon: 'menu', color: 'var(--color-clay)', path: '/admin/dishes', accent: 'var(--color-clay)' },
+  { label: '厨房看板', icon: 'orders', color: 'var(--color-sage)', path: '/admin/orders', accent: 'var(--color-sage)' },
 ]
 
 export default function Admin() {
@@ -53,7 +54,7 @@ export default function Admin() {
             className="d3-card-face flex-1 p-5 text-center flex flex-col items-center gap-2.5"
             style={{ borderLeft: `3px solid ${link.accent}`, padding: 'var(--space-card-p)' }}
           >
-            <span className="text-3xl">{link.emoji}</span>
+            <Icon name={link.icon} size={30} style={{ color: link.color }} />
             <span className="text-sm font-bold text-[var(--color-bone)]">{link.label}</span>
           </motion.button>
         ))}

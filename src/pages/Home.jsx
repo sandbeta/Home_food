@@ -156,7 +156,7 @@ export default function Home() {
                     </div>
                     <div
                       className="relative w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
-                      style={{ background: 'linear-gradient(145deg, var(--color-cream), var(--color-cream-dark))' }}
+                      style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))' }}
                     >
                       <span>{getCategoryEmoji(dish?.category)}</span>
                       {getDishImage(dish) && (
@@ -202,7 +202,7 @@ export default function Home() {
                   <div className="flex items-center gap-3 min-w-0">
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
-                      style={{ background: 'linear-gradient(135deg, var(--color-cream), var(--color-cream-dark))' }}
+                      style={{ background: 'linear-gradient(135deg, var(--color-ink-900), var(--color-ink-850))' }}
                     >
                       📦
                     </div>

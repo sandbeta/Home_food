@@ -67,7 +67,7 @@ function RecommendCard({ dishes, onAdd, spawnParticle }) {
       </div>
       <div className="relative flex items-center gap-3">
         <div className="relative w-16 h-16 rounded-[var(--radius-tile)] flex items-center justify-center shrink-0 overflow-hidden"
-          style={{ background: 'linear-gradient(145deg, var(--color-cream) 0%, var(--color-cream-dark) 60%, rgba(200,104,63,0.08) 100%)' }}>
+          style={{ background: 'linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-850) 60%, rgba(200,104,63,0.08) 100%)' }}>
           <span className="text-3xl">{CATEGORY_CONFIG[randomDish.category]?.emoji || '🍽️'}</span>
           {randomDish.image_url && (
             <img src={randomDish.image_url} alt={randomDish.name} loading="lazy"

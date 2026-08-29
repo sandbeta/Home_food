@@ -38,7 +38,7 @@ export const LOCAL_FALLBACKS = [
 
 // 暖骨白→浅陶渐变占位（终极回退，无图时也不开天窗）
 export const INK_PLACEHOLDER =
-  'linear-gradient(135deg, var(--color-cream) 0%, var(--color-cream-dark) 100%)'
+  'linear-gradient(135deg, var(--color-ink-900) 0%, var(--color-ink-850) 100%)'
 
 // 给 <img onError> 用的三级回退：先本地 webp，再 ink 渐变
 export function heroFallback(e, index = 0) {

@@ -9,6 +9,7 @@ import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { useCart } from '../components/CartContext'
 import { pickOne, PROFILE_TITLES } from '../lib/sweetCopy'
+import Icon from '../components/ui/Icons'
 
 export default function Profile() {
   const [stats, setStats] = useState({ orders: 0, total: 0 })
@@ -68,7 +69,7 @@ export default function Profile() {
             className="flex items-center gap-3 cursor-pointer"
             style={{ padding: 'var(--space-card-p)' }}
           >
-            <span className="text-xl">⚙️</span>
+            <Icon name="gear" size={20} style={{ color: 'var(--color-ash)' }} />
             <span className="flex-1 text-sm font-bold text-[var(--color-bone)]">管理后台</span>
             <span className="text-[var(--color-ash)] text-lg">›</span>
           </motion.div>

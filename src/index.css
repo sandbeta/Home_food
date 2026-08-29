@@ -44,37 +44,6 @@
   --font-serif: "Playfair Display", "Noto Serif SC", serif;
   --font-sans: "Noto Sans SC", "Inter", system-ui, sans-serif;
 
-  /* —— 历史名重映射（向后兼容既有 var() 引用；不删名，只换值） —— */
-  --color-primary: #C8683F;
-  --color-primary-light: rgba(200,104,63,0.14);
-  --color-primary-dark: #9A4E2C;
-  --color-peach: #E0A07E;
-  --color-peach-light: rgba(224,160,126,0.16);
-  --color-secondary: #7FA37A;
-  --color-secondary-light: rgba(127,163,122,0.14);
-  --color-haze: #7FA37A;
-  --color-haze-light: rgba(127,163,122,0.14);
-  --color-cream: #F7F3EC;            /* → 暖骨白 */
-  --color-cream-dark: #EFE7DA;
-  --color-card: #FFFDF9;
-  --color-card-side: #EFE7DA;
-  --color-surface: #FFFDF9;
-  --color-text: #2B2620;
-  --color-text-secondary: #6B6155;
-  --color-text-tertiary: #9A9082;
-  --color-border: rgba(43,38,32,0.10);
-  --color-success: #7FA37A;
-  --color-warning: #C8683F;
-  --color-info: #7FA37A;
-  --color-love: #D98C84;
-  --color-primary-gradient: linear-gradient(135deg, #E0A07E 0%, #C8683F 100%);
-
-  /* —— 向后兼容别名（旧页引用，映射到新赤陶/鼠尾草语义） —— */
-  --color-gold: var(--color-clay);
-  --color-gold-soft: var(--color-clay-soft);
-  --color-gold-gradient: var(--color-clay-gradient);
-  --color-platinum: var(--color-sage);
-  --color-platinum-soft: var(--color-sage-soft);
 }
 
 /* ============================================================
@@ -91,6 +60,7 @@
   --radius-btn: 16px;    /* 按钮 */
   --radius-ctl: 12px;    /* 输入 / 小控件 */
   --radius-sheet: 32px;  /* 底部浮层顶部 */
+  --clay-deep: #9A4E2C;  /* 深赤陶（渐变收尾/按压态） */
 
   /* —— 字阶补充 ——
      同样不覆盖 text-xs/sm/base/lg 的默认值（会让全站字号变小），
@@ -144,7 +114,7 @@ html, body {
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.6;
-  color: var(--color-text);
+  color: var(--color-bone);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -176,7 +146,7 @@ body::before {
 
 /* ========== Typography ========== */
 button, a, select { cursor: pointer; }
-input, textarea, select { color: var(--color-text); }
+input, textarea, select { color: var(--color-bone); }
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-serif);
   letter-spacing: -0.01em;
@@ -196,7 +166,7 @@ h1, h2, h3, h4, h5, h6 {
 /* ========== 焦点可见性 (无障碍) ========== */
 button:focus-visible, a:focus-visible, input:focus-visible,
 textarea:focus-visible, select:focus-visible {
-  outline: 2px solid var(--color-gold-soft);
+  outline: 2px solid var(--color-sage-soft);
   outline-offset: 2px;
 }
 
@@ -313,9 +283,7 @@ textarea:focus-visible, select:focus-visible {
 
 /* 双人格辉光 */
 .glow-clay     { box-shadow: 0 0 0 3px rgba(200,104,63,0.18), 0 6px 20px rgba(200,104,63,0.22); }
-.glow-gold     { box-shadow: 0 0 0 3px rgba(200,104,63,0.18), 0 6px 20px rgba(200,104,63,0.22); } /* 向后兼容别名 */
 .glow-sage     { box-shadow: 0 0 0 3px rgba(127,163,122,0.18), 0 6px 20px rgba(127,163,122,0.22); }
-.glow-platinum { box-shadow: 0 0 0 3px rgba(127,163,122,0.18), 0 6px 20px rgba(127,163,122,0.22); } /* 向后兼容别名 */
 .glow-love     { box-shadow: 0 6px 20px rgba(217,140,132,0.25); }
 /* 激活态脉冲（配合 is-active 使用） */
 .avatar-me.is-active    { animation: pulse-glow-gold 2.4s ease-in-out infinite; }
@@ -424,7 +392,6 @@ textarea:focus-visible, select:focus-visible {
   0%, 100% { box-shadow: 0 0 0 0 rgba(127, 163, 122, 0.40); }
   50% { box-shadow: 0 0 22px 4px rgba(127, 163, 122, 0.30); }
 }
-/* 向后兼容别名（旧名沿用新色值） */
 @keyframes pulse-glow-gold {
   0%, 100% { box-shadow: 0 0 0 0 rgba(200, 104, 63, 0.40); }
   50% { box-shadow: 0 0 22px 4px rgba(200, 104, 63, 0.32); }

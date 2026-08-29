@@ -126,14 +126,14 @@ scripts/
 | 功能 | 详情页「男朋友的菜谱」卡（342 份懒加载菜谱） | `249a8ef` |
 | 交互修正② | 首页「换一道」原地换菜（此前误绑跳转菜单页）+ 主推位只用带实拍图的菜（无图菜 emoji 大卡太素），常点网格随轮换顺移 | 本轮 |
 | 迁移 | 项目迁至 E:\晨光厨房-交付包（本目录） | （无代码变更） |
+| 旧命名清零 | AddDishModal 全量迁移新令牌（新增 --color-clay-deep 深赤陶）；index.css 删除全部历史别名定义（cream 系 13 处用法迁至 ink-900/850）；Icons 新增 gear 并推广到后台快捷入口 + Profile（3 调用点）| 本轮 |
 | 质量体检轮 | 全工程审计后修复：灵感卡打字乱跳（改吃全量池）、死 Fredoka 字体、死端点 categories 移除、Fisher-Yates 无偏洗牌、featIdx 归零、状态 emoji 统一 🎉、Menu 列表分页（初始 30+加载更多）、mockApi 内存态缓存；新增 mockApi 冒烟测试 8 项（npm test）；README 重写 + prd.md 标注历史；preview 同步最新视觉 | 本轮 |
 
 ## 8. 已知待办 / 候选项
 
 - 测试覆盖仅 mockApi 冒烟（8 项），UI 组件无自动化测试——demo 项目可接受，引入框架时优先补 DishRow/OrderCard。
-- `Icons.jsx` 目前仅 FloatingPillNav 一个调用点；后台快捷入口/Profile 行项想换图标时直接复用它。
-- AddDishModal 仍是旧命名残留大户（--color-primary 系、Fredoka 字体），P6 旧命名门禁若重启需优先处理。
 - D3StatusRing 内圈一处 rgba(0,0,0,0.5) 暗影为有意保留（深色内盘上的暗影）。
+- ~~AddDishModal 旧命名残留~~ ✅ 已清零（见台账「旧命名清零」）；~~preview 落后~~ ✅ 已同步。
 
 ## 9. 色值审计方法（门禁脚本已实现）
 

@@ -15,7 +15,7 @@ export default function FullBleedHero({ src, variant = 'immersive', alt = '', ch
         left: '50%',
         transform: 'translateX(-50%)',
         width: 'min(var(--shell-w), 100%)',
-        background: 'var(--color-cream)',
+        background: 'var(--color-ink-900)',
       }}
     >
       <motion.img
