@@ -1,39 +1,36 @@
 # 项目交接文档 · 晨光厨房（food-ordering-miniapp）
 
-> **给新对话的 AI / 开发者**：本文档是自包含的。读完即可接手，无需翻旧会话。
-> 最后更新：2026-08-29（IA 重构全部完成）　代码 HEAD：`76280e6`　工作区：干净
-> 注：本文档自身作为 docs 提交在代码 HEAD 之后，仓库实际 HEAD 会多一笔 docs 提交，属正常。
+> **给接力的 AI / 开发者**：本文档自包含，读完即可接手。
+> **协作铁律：每一次代码/数据/文案修改，都必须同步更新本文档（进度表、文件地图、坑清单按需），随代码一起提交。** 这是项目所有者定的规矩。
+> 最后更新：2026-08-29　代码 HEAD：`92cad75`　工作区：干净
+> 注：本文档自身的 docs 提交在代码 HEAD 之后，仓库实际 HEAD 会多一笔，属正常。
 
 ---
 
-## 1. 一句话简介
+## 0. 项目身份与位置
 
-情侣点餐 H5 小程序（手机 480px 竖屏框）。已完成两轮工作：**①「晨光厨房」换肤（已完成并验收）**；**② UI 与信息架构全面重构（✅ P0–P6 全部完成，2026-08-29 验收通过）**。当前项目处于**维护态**：改代码前仍须读第 5 节架构约定与第 8 节环境坑。
+- **是什么**：情侣点餐 H5 小程序（480px 手机竖屏框）。**男朋友视角的文案，写给女朋友——昵称「懒洋洋」**，所有面向用户的标题/情话都按此人设写。
+- **位置（2026-08-29 已迁移）**：`E:\晨光厨房-交付包\extracted`（应用仓库）；交付包根目录还有 4 个历史 zip 与本文档副本 `PROJECT-HANDOFF-晨光厨房.md`（与仓库内本文档保持同步）。
+- **当前状态**：重构（P0–P6）已完成验收；之后又经多轮实测打磨（视觉层次、文案个性化、HowToCook 数据源灌库、菜谱卡）。处于**个人使用 + 持续迭代**状态。
 
-- **项目路径**：`C:/Users/87374/WorkBuddy/2026-08-15-23-13-20/food-ordering-review/food-ordering-miniapp`
-- **重构方案全文**：`docs/superpowers/plans/2026-08-29-ui-ia-redesign.md`（含逐页布局规格与验收门禁）
-- **换肤方案**：`docs/superpowers/specs/2026-08-17-sunlit-kitchen-reskin-design.md`
-- **换肤执行台账**：`.superpowers/sdd/2026-08-18-sunlit-kitchen-reskin/progress.md`
-
-## 2. 跑起来
+## 1. 跑起来
 
 ```bash
-cd <项目路径>
-npm install          # node_modules 不在压缩包里
-npm run dev          # 或: node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5173
-npm run build        # 沙箱里 dist/ 不可写，用: vite build --outDir /tmp/sk-build
-npm run lint         # oxlint；正确入口 ./node_modules/.bin/oxlint
+cd E:\晨光厨房-交付包\extracted
+npm install        # 仅首次/换机器
+npm run dev        # http://127.0.0.1:5173/
+npm run build      # 构建验证（也可 --outDir 任意临时目录）
+npm run lint       # oxlint；入口 ./node_modules/.bin/oxlint
+python scripts/p6_static_gate.py   # 色值单源/暗色残留/断头路 三项静态门禁
 ```
+- dev server 启动后**必须 HTTP 探测**确认（vite 输出有缓冲）：`GET /` 的 `<title>` 应为「晨光厨房 · 今天想吃什么」。
+- `/api/*` 直连会 502（vite 代理指向不存在的 :3000）——**正常现象**，浏览器端 mock 层在 fetch 阶段拦截，应用不受影响。
 
-- dev server 启动后**必须做 HTTP 探测**确认（vite 输出有缓冲，后台任务看不到）：
-  `urllib.request.urlopen('http://127.0.0.1:5173/')` 读 `<title>` 应为「晨光厨房 · 今天想吃什么」。
-- 预览地址：`http://127.0.0.1:5173/`
-
-## 3. 技术栈
+## 2. 技术栈
 
 React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Motion 12 + localStorage 模拟后端（`src/lib/mockApi.js`，离线可用）。
 
-## 4. 设计语言（不可改的部分）
+## 3. 设计语言（不可改的部分）
 
 **晨光厨房 Sunlit Kitchen** —— 暖骨白亮色 + 双人格温度对比：
 
@@ -43,109 +40,101 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 | `--color-bone` | `#2B2620` | 主文字 |
 | `--color-clay` / `-soft` | `#C8683F` / `#E0A07E` | 我(🐱) 赤陶暖 |
 | `--color-sage` / `-soft` | `#7FA37A` / `#A9C4A4` | TA(🐰) 鼠尾草绿冷 |
-| `--color-caramel/love/danger` | `#B5793F` / `#D98C84` / `#C2543F` | AA买单 / 喜爱 / 删除 |
+| `--color-caramel` / `love` / `danger` | `#B5793F` / `#D98C84` / `#C2543F` | 价格数字 / 喜爱 / 删除 |
 | `--color-ash` / `mist` | `#6B6155` / `#9A9082` | 次文字 / 占位 |
 
 核心语义必须保留：**双人格（我/TA）、购物车、谁买单（AA/我请/TA请）、收藏**。
 
-## 5. 必须遵守的架构约定（改代码前先读）
+**视觉层次原则（2026-08-29 实测打磨定稿）**：每屏一个深色锚点（首页主推卡、购物车合计卡 = clay 实底白字，其余浅色玻璃）；价格数字一律 caramel 衬线、clay 只留给动作/激活态；图片背景用 FullBleedHero 的多档纵向溶底叠层，不与玻璃卡硬碰；导航/快捷图标用 `ui/Icons.jsx` 细线 SVG（激活态白色），不再新增 emoji 图标。
 
-1. **页面转场绝不能带 transform**（App.jsx 用 `motion.js` 的 `pageEnter`，纯 opacity）。任何 transform 会让包裹层成为 fixed/sticky 的包含块 → PageHeader 吸顶失效、FullBleedHero 错乱。要位移用 `contentEnter` 放**内层**。
-2. **`DockLayer` 是全站唯一底部固定层**：导航药丸 + 购物车球**并排同一行**（flex 分宽），结构上不可能重叠。不要再加 `fixed bottom-*` 元素（此前 Menu 的 CTA 与球撞过）。
-3. **所有页面用 `PageHeader`**（支持 `back`/`backTo`）；后台三页一律包 `AdminShell`（强制返回，消灭断头路）。
-4. **颜色单源真值**：色值只写在 `src/index.css` + `src/theme/persona.js`（+`images.js`）。页面/组件一律 `var(--color-*)` 或 `PERSONA[...]`，**不许硬编码色值**。
-5. **设计标尺在 `@theme static`**（index.css）：圆角 `card 28 / tile 20 / btn 16 / ctl 12 / sheet 32`；阴影 `--shadow-1..5`（暖调）+ `glow-clay/sage`；布局 `--shell-w 480 / --space-page-x 16 / --bottom-inset`。**不要覆盖 Tailwind 默认的 `text-xs/sm/base/lg` 和 `rounded-lg/xl`**（会让全站字号/圆角静默位移）。
-6. **不可变文件（最小改动）**：`src/components/CartContext.jsx`、`src/lib/mockApi.js`、`src/lib/favorites.js`。
-7. 新增共享组件放 `src/components/ui/`，**每个组件须有 ≥2 处真实调用点**才建。
-8. 提交信息用中文，说明「为什么」而不只是「改了什么」。
+## 4. 架构约定（改代码前先读）
 
-## 6. 当前进度
+1. **页面转场绝不能带 transform**（App.jsx `pageEnter` 纯 opacity），否则 PageHeader 吸顶失效、FullBleedHero 错乱。位移用 `contentEnter` 放内层。
+2. **DockLayer 是全站唯一常驻底部固定层**（导航+购物车球并排同行）。购物车为空时球槽不渲染（药丸自然居中），加购时药丸以 `layout` 动画让位——不要恢复恒定占位。
+3. **所有用户侧页面用 `PageHeader`**（back/backTo/right）；后台三页一律包 `AdminShell`。后台标题保持功能命名（工具页不加情话）。
+4. **颜色单源真值**：色值只写在 `src/index.css` + `src/theme/persona.js`；页面一律 `var(--color-*)`；给运行时 var() 用的令牌放 `@theme static`（防树摇）。新玻璃浓度用 `--glass-strong`。
+5. **文案单源真值**：所有页头标题/情话池集中在 **`src/lib/sweetCopy.js`**（NICKNAME='懒洋洋' + 各页标题/副标题池），六页每次进入随机抽取。**改情话只动这个文件**；新增页面文案也放这里。
+6. **不可变文件（最小改动，改须逐处说明）**：`src/components/CartContext.jsx`、`src/lib/mockApi.js`（已因数据接线 +2 行与菜谱注入 +3 行，均有据）、`src/lib/favorites.js`。
+7. 共享组件放 `src/components/ui/`，≥2 处真实调用点才建；`Icons.jsx` 是图标基元集，单调用点也保留。
+8. 提交信息用中文，说明「为什么」；**提交前跑 lint + build + `p6_static_gate.py`**。
 
-### 已完成 ✅
+## 5. 数据层（菜品 407 道 + 菜谱 342 份）
 
-| 轮次 | 内容 | 验收 |
-|---|---|---|
-| 换肤 T1–T12 | 暗房晚宴(暗) → 晨光厨房(亮)，含向后兼容别名、旧主题名清理 | IS_PASS 7 项全绿（`6c6dc17` + `e208a8c`） |
-| 重构 P0 | 设计标尺令牌（`@theme static`，21 个）+ motion.js 收编 | `b6365f7` |
-| 重构 P1 | 页面转场去 transform；DockLayer；PageHeader；`--shell-w` 收敛魔数 | `97e8296` |
-| 重构 P2 | `src/components/ui/` 11 个组件（EmptyState/LoadingState/DishRow/OrderCard/PayerSelector/Stepper/StatCard/SectionHeader/Chip/PageContainer/AdminShell）；删死代码 D3FlipCard、TabBar | `a0d93db` |
-| 重构 P3-a | **结算并入购物车**（Cart 一页完成下单；`/checkout` → 重定向 `/cart`） | `c496b76` |
-| 重构 P3-b | **后台三页 AdminShell**（消灭 AdminDishes/AdminOrders 两处断头路） | `4c2a61f` |
-| 重构 P3-c | **收藏并入点菜页**（分段控件 全部/⭐收藏；Menu 卡片补上缺失的跳详情 onClick；删与购物车球重叠的 CTA） | `21d81b5` |
-| 核对修正 | 交接文档与代码逐条核对后：Cart 圆角笔误（--radius-md→--radius-btn）；六页 Header 转发壳迁移为直接引用 PageHeader 并删除 Header.jsx（兑现第 5 节约定 3）；四个 ui 组件 docstring 的完成时态修正 | build+lint 全绿（`31f2376`→`686a204`） |
-| 重构 P4 | 逐页重排：/favorites 重定向+删页、Profile 清空壳+StatCard、Home 收敛 3 隐喻（主推大卡+网格+竖列表）、DishDetail 补内边距+Stepper、MyOrders 接 OrderCard+状态筛选、OrderDetail+状态环 --ring-size 令牌化、全页 PageContainer | build+lint 全绿（`8c05af6`→`0d60f2b`） |
-| 重构 P5 | 质感扫尾：硬编码 px 字号清零（映射字阶）、散落圆角归 --radius-tile、价格/合计数字补 font-serif、AddDishModal 的 480 魔数换 --shell-w | 字号/圆角 grep 到 0（`ad1ca26`） |
-| 重构 P6 | 11 项门禁全过（build 0 / lint 0 / 断头路 0 / 固定层零重叠 / sticky / 字号 0 / 暗色 0 / 旧命名 0 / 色值单源 / 业务文件零改动 / reduced-motion）＋ preview-all-features.html 重写为新 IA 10 屏（浏览器截图验收） | `76280e6`＋`scripts/p6_static_gate.py` 全绿 |
+- 种子库 = `mockApi.js` 内 65 道原始菜 + `src/lib/seedMenuExtra.js`（**342 道，由 HowToCook 生成**，勿手改）。
+- 数据源：[Anduin2017/HowToCook](https://github.com/Anduin2017/HowToCook)（**公有领域/Unlicense**）。生成器 `scripts/build_htc_seed.py` 一条命令产出三件套：菜品摘要（seedMenuExtra.js）、本地压缩预览图（`public/dish-images/htc/`，153 张 560px/JPEG）、菜谱（seedRecipes.js）。
+- **菜谱数据**：`src/lib/seedRecipes.js`（352KB，键=菜品 id，含 原料清单/步骤/难度星级/卡路里/小贴士）。**懒加载**：仅详情页经 mockApi 动态 import 注入 `/api/dishes/:id` 响应，列表与首屏不背体积。
+- 详情页「男朋友的菜谱」卡：原料 pill + 编号步骤 + 💡小贴士；原 65 道老菜无菜谱数据，卡片自动隐藏。
+- 重新生成：`python scripts/build_htc_seed.py --repo <HowToCook 克隆目录> [--img-src <已抢救图片目录>]`（图片幂等缓存，已存在不联网）。
+- **国内网络坑**：raw.githubusercontent 不可达；jsDelivr 的 gh 代理最终跳 raw 也不可达；git 批量协商大包会被重置。可行路径：稀疏克隆只取 md（`--filter=blob:none --sparse`）+ 单 blob 按需取（小请求可过）+ codeload tarball 部分解压兜底。git 输出中文路径需 `-c core.quotepath=false`。
 
-### 待做 🎉（无）
-
-P4 逐页重排、P5 质感、P6 验收均已按方案完成（2026-08-29）：
-- **P4**：/favorites 重定向+删页、Profile 清空壳、Home 收敛 3 隐喻、DishDetail 修内边距+Stepper、MyOrders 接 OrderCard+状态筛选、OrderDetail 状态环 --ring-size 令牌化、全页 PageContainer（`8c05af6`–`0d60f2b`）。
-- **P5**：硬编码 px 字号/散落圆角 grep 到 0、serif 数字、480 魔数清尾（`ad1ca26`）。
-- **P6**：`python scripts/p6_static_gate.py` 色值单源/暗色/断头路全绿；`preview-all-features.html` 已是新 IA 10 屏（`76280e6`）。
-
-后续迭代仍走「方案 → 实现 → build+lint+门禁脚本 → 中文提交」的节奏即可。
-
-## 7. 关键文件地图
+## 6. 关键文件地图
 
 ```
 src/
-├── App.jsx                  路由+外壳（转场、DockLayer、--bottom-inset）
-├── index.css                @theme 色板 + @theme static 设计标尺 + 组件类(.glass/.d3-*/.section-title)
+├── App.jsx                  路由+外壳（纯 opacity 转场、DockLayer、--bottom-inset）
+├── index.css                @theme 色板 + @theme static 标尺 + 组件类(.glass/.d3-*/.section-title)
 ├── theme/
 │   ├── persona.js           PERSONA/ORDER_STATUS/PAYER + helpers（双人格真源）
-│   ├── motion.js            pageEnter(纯opacity!)/contentEnter/cardEntrance/sheetUp/tapScale/stagger
-│   └── images.js            HERO_IMAGES/三级图片回退(INK_PLACEHOLDER/heroFallback/resolveHero)
+│   ├── motion.js            pageEnter(纯opacity!)/contentEnter/cardEntrance/sheetUp/tapScale
+│   └── images.js            HERO_IMAGES/三级图片回退
+├── lib/
+│   ├── mockApi.js           模拟后端（不可变*，改动须逐处说明）
+│   ├── favorites.js         收藏 hook（不可变）
+│   ├── categoryIcons.js     品类 emoji 与菜品图
+│   ├── seedMenuExtra.js     HowToCook 灌库菜品 342 道（生成，勿手改）
+│   ├── seedRecipes.js       菜谱数据 342 份（生成，懒加载，勿手改）
+│   └── sweetCopy.js         ★ 全站个性化文案池（懒洋洋昵称 + 各页标题/情话，随机抽取）
 ├── components/
-│   ├── DockLayer.jsx        ★唯一底部固定层（导航+购物车球并排）
+│   ├── DockLayer.jsx        ★唯一常驻底部固定层（空车药丸居中，球槽随购物车挂载）
 │   ├── PageHeader.jsx       ★统一页头（back/backTo/right）
-│   ├── FloatingPillNav.jsx  4 tab 导航（无定位，DockLayer 管）
-│   ├── D3CartOrb.jsx        购物车球（无定位，DockLayer 管）
-│   ├── GlassCard.jsx / FullBleedHero.jsx / D3StatusRing.jsx / KissIcon.jsx / AddDishModal.jsx
-│   └── ui/                  ★11 个共享组件（见 P2）
-├── pages/                   10 页（Checkout、Favorites 已删，路由保留重定向）
-└── lib/                     mockApi.js(不可变*) / favorites.js(不可变) / categoryIcons.js / seedMenuExtra.js(生成)
+│   ├── FloatingPillNav.jsx  4 tab 导航（SVG 图标，激活态白）
+│   ├── D3CartOrb.jsx        购物车球（入场/退场由 DockLayer 编排）
+│   ├── GlassCard / FullBleedHero / D3StatusRing(--ring-size) / KissIcon / AddDishModal
+│   └── ui/                  共享组件：Icons(细线图标集)/DishRow/OrderCard/EmptyState/
+│                            LoadingState/PayerSelector/Stepper/StatCard/SectionHeader/
+│                            Chip/PageContainer/AdminShell
+├── pages/                   10 页：Home/Menu/DishDetail/Cart/MyOrders/OrderDetail/
+│                            Profile/Admin/AdminDishes/AdminOrders
+│                            （Checkout、Favorites 已删，路由保留重定向）
+public/dish-images/htc/     HowToCook 预览图 153 张（生成）
 scripts/
-├── p6_static_gate.py        P6 静态门禁自检（色值单源差分/暗色/断头路，方法见第 9 节）
-└── build_htc_seed.py        HowToCook 菜谱灌库生成器（见下条）
+├── p6_static_gate.py        静态门禁自检（色值单源差分/暗色/断头路）
+└── build_htc_seed.py        HowToCook 灌库生成器
 ```
 
-**菜品数据源（2026-08-29 追加）**：种子库 65 → 407 道，追加部分由
-`scripts/build_htc_seed.py` 从 [HowToCook](https://github.com/Anduin2017/HowToCook)
-（公有领域/Unlicense）自动生成到 `src/lib/seedMenuExtra.js`，153 道带本地压缩图
-（`public/dish-images/htc/`）。mockApi.js 的"不可变"约定：本次仅 +2 行接线
-（import + push），属第 6.8 项门禁允许的"必要小改"，业务逻辑零改动。
-重新生成：`python scripts/build_htc_seed.py --repo <HowToCook 克隆目录>`。
-注意国内网络：raw.githubusercontent 与 jsDelivr 的 gh 代理均不可达，
-克隆只取 md（稀疏+blob 过滤），图片用单 blob 按需取或 codeload tarball
-部分解压兜底；重新生成时若图片已存在会走缓存不再联网。
-```
+## 7. 进度台账（关键提交速查）
 
-## 8. 环境坑（务必牢记，踩过实录）
+| 轮次 | 内容 | 提交 |
+|---|---|---|
+| 换肤 T1–T12 | 暗房晚宴 → 晨光厨房 | `6c6dc17`+`e208a8c` |
+| 重构 P0–P3 | 令牌标尺/DockLayer+PageHeader/ui组件/结算并入购物车/AdminShell/收藏并入点菜 | `b6365f7`→`21d81b5` |
+| P4 逐页重排 | favorites 重定向删页/Home 收敛 3 隐喻/DishDetail 修边+Stepper/OrderCard 统一/状态环令牌化 | `8c05af6`→`0d60f2b` |
+| P5 质感 | 硬编码字号/圆角清零 + serif 数字 | `ad1ca26` |
+| P6 验收 | 11 项门禁 + preview 重写为 10 屏 | `76280e6` |
+| 视觉打磨① | 沉浸式叠层溶底 + 停靠层 --glass-strong | `8295012` |
+| 视觉打磨② | 空车药丸居中（球槽随车挂载 + layout 动画） | `1e040bc` |
+| 视觉打磨③ | 深色锚点卡（Home 主推/Cart 合计）+ 价格转 caramel + 人格徽章 + 四色快捷入口 + 字阶对比 | `5a9e6df` |
+| 视觉打磨④ | 细线 SVG 图标集 ui/Icons（激活态转白） | `8659883` |
+| 交互修正 | 删首页快捷入口（与底部导航重复） | `cc61606` |
+| 数据源 | HowToCook 灌库 65→407 道菜 + 153 本地图 + 生成器 | `90dab1d` |
+| 灌库配套 | 图片 onError 回退 emoji + 0 菜分类隐藏 | `4c4d586` |
+| 个性化① | 首页欢迎语男朋友口吻（懒洋洋） | `e569fb0` |
+| 个性化② | 各页页头文案统一男朋友口吻 | `7a4a32f` |
+| 个性化③ | 页头文案随机化（sweetCopy.js 文案池） | `bd29ddf` |
+| 功能 | 详情页「男朋友的菜谱」卡（342 份懒加载菜谱） | `249a8ef` |
+| 迁移 | 项目迁至 E:\晨光厨房-交付包（本目录） | （无代码变更） |
 
-| 坑 | 对策 |
-|---|---|
-| 🔴 **`git rm` 会清空整个目录**（删 Checkout 时把 src/pages/ 12 个文件全洗了） | 删文件用 `python -c "import os; os.remove(r'<原生Windows绝对路径>')"`，再 `git add -A src/`。**每个阶段完成立即提交检查点**。恢复：`git checkout HEAD -- <目录>` |
-| 🔴 沙箱写 `dist/` 被拦 | 构建用 `--outDir /tmp/sk-build` |
-| 🟠 Tailwind v4 会**树摇掉未被 var() 引用的主题变量** | 设计令牌必须放 `@theme static`，否则产物里缺失 |
-| 🟠 未被引用的组件**不进构建**，语法错误测不出来 | 用 dev server 逐模块转译探测：`GET /src/components/ui/X.jsx` 看是否 200 且无 "Transform failed" |
-| 🟠 grep 带 alpha 的 rgba 要写 `rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*[\),]`（写 `\)` 会漏 `rgba(230,178,90,0.35)`） | 审计色值用「白名单差分」+ 此正则 |
-| 🟠 grep 大小写敏感（`#2A1E0E` ≠ `#2a1e0e`） | 审计一律加 `-i` |
-| 🟡 `pathlib.glob("src/**/*.{jsx}")` **不展开花括号**，静默匹配为空 | 用 `rglob("*.jsx")` 或显式文件列表 |
-| 🟡 内联 `var(--radius-lg/md)` 这类**默认档**令牌，靠同名工具类（rounded-lg 等）在某处被引用才进产物 | DishRow 缩略图的 `var(--radius-lg)` 目前靠 OrderDetail 的 `rounded-lg` 类「捎带」进产物；P4/P5 动这两处时需同步处理，或把内联引用改到标尺档 |
-| 🟡 zip 打包曾漏掉被跟踪的 `dist_bak_2508/`（68 个文件），解压后 `git status` 假报 68 个删除 | 对策：`git checkout -- dist_bak_2508`（对象在 .git 里，可完整恢复）；重新打包时勿再排除被跟踪目录 |
-| 🟡 vite 后台启动输出有缓冲，TaskOutput 看不到 | `netstat -ano \| grep :5173` + HTTP 探测确认 |
-| 🟡 oxlint 入口是 `./node_modules/.bin/oxlint`（`node_modules/oxlint/bin/oxlint.js` 不存在） | 用 .bin 下的脚本 |
+## 8. 已知待办 / 候选项
 
-## 9. 色值审计方法（P6 会用到）
+- `preview-all-features.html` 又落后于最新视觉（深色锚点卡、图标化、快捷入口删除、菜谱卡均未同步）——下次大改版时一并重写。
+- `Icons.jsx` 目前仅 FloatingPillNav 一个调用点；后台快捷入口/Profile 行项想换图标时直接复用它。
+- AddDishModal 仍是旧命名残留大户（--color-primary 系、Fredoka 字体），P6 旧命名门禁若重启需优先处理。
+- D3StatusRing 内圈一处 rgba(0,0,0,0.5) 暗影为有意保留（深色内盘上的暗影）。
 
-1. 白名单种子 = 主题层文件（`index.css`、`theme/persona.js`、`theme/images.js`）的全部色值
-2. 允许项：`#2b2620`(bone 正文)、`#9a4e2c`(深赤陶)、`rgb(0,0,0)`/`rgb(43,38,32)`(阴影)、纯白系
-3. 逐文件差分，越界即残留；另跑「暗色检测」：max(R,G,B) < 0x50 且不在允许集
-4. JS 实现：先 `str(p).replace("\\","/")` 归一化路径再比对（Windows 下 glob 产物是反斜杠，曾经因此误报）
+## 9. 色值审计方法（门禁脚本已实现）
 
-## 10. 给新对话的开场白模板
+白名单种子 = `index.css` + `theme/persona.js` + `theme/images.js` 全部色值；允许项：bone 正文、深赤陶、黑/骨 rgb 阴影、纯白系。逐文件差分，越界即残留；另跑暗色检测（max(R,G,B)<0x50 且不在允许集）。见 `scripts/p6_static_gate.py`。
 
-> 请先读 `<项目路径>/PROJECT-HANDOFF.md`。重构（P0–P6）已全部完成并验收，项目处于维护态；
-> 改动前遵守第 5 节架构约定与第 8 节环境坑，每次改动跑 `npm run build`、`npm run lint` 与
-> `python scripts/p6_static_gate.py` 复验门禁，用中文提交说明「为什么」。
+## 10. 给接力的开场白模板
+
+> 请先读 `E:\晨光厨房-交付包\extracted\PROJECT-HANDOFF.md`。遵守第 4 节架构约定与第 5/9 节的坑，改动前跑 `npm run build`、`npm run lint`、`python scripts/p6_static_gate.py` 复验。**每次修改同步更新本文档（进度台账 + 文件地图 + 坑清单），随代码一起提交。** 文案改 `src/lib/sweetCopy.js`，菜品/菜谱数据用 `scripts/build_htc_seed.py` 重新生成。
