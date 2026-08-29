@@ -29,19 +29,26 @@ const chefOf = (dish) => (dish.id % 2 === 0 ? 'me' : 'partner')
  */
 export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
-  const [featured, setFeatured] = useState(null)
-  const [popular, setPopular] = useState([])
+  const [dishes, setDishes] = useState([])
+  const [featIdx, setFeatIdx] = useState(0)
   const [sweetNote] = useState(() => pickOne(HOME_NOTES))
   const navigate = useNavigate()
 
   useEffect(() => {
     fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3)))
     fetch('/api/dishes?category=全部').then(r => r.json()).then(d => {
-      const shuffled = [...d].sort(() => 0.5 - Math.random())
-      setFeatured(shuffled[0] || null)
-      setPopular(shuffled.slice(1, 7))
+      // 主推大卡优先用带实拍图的菜（无图菜在大卡上只有一枚小 emoji，观感太素）；
+      // 两组各自洗牌后拼接，保证主推位永远有图
+      const shuf = (arr) => [...arr].sort(() => 0.5 - Math.random())
+      setDishes([...shuf(d.filter(x => getDishImage(x))), ...shuf(d.filter(x => !getDishImage(x)))])
     })
   }, [])
+
+  // 「换一道」在池子里顺位轮换：主推卡换菜，常点网格跟着顺移一批
+  const featured = dishes.length ? dishes[featIdx % dishes.length] : null
+  const popular = dishes.length
+    ? Array.from({ length: 6 }, (_, k) => dishes[(featIdx + 1 + k) % dishes.length])
+    : []
 
   return (
     <div className="relative">
@@ -55,9 +62,20 @@ export default function Home() {
           <motion.div {...contentEnter(0.05)}>
             <SectionHeader
               title="今日推荐"
-              action={<button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-clay)] font-bold">换一道 →</button>}
+              action={
+                <button
+                  onClick={() => setFeatIdx(i => (i + 1) % Math.max(dishes.length, 1))}
+                  className="text-xs text-[var(--color-clay)] font-bold"
+                >
+                  换一道 →
+                </button>
+              }
             />
             <motion.div
+              key={featured.id}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate(`/dish/${featured.id}`)}
               className="overflow-hidden cursor-pointer mt-3"
@@ -71,7 +89,11 @@ export default function Home() {
                 className="relative h-44 overflow-hidden flex items-center justify-center"
                 style={{ background: 'rgba(255,253,249,0.16)' }}
               >
-                <span className="text-6xl">{getCategoryEmoji(featured.category)}</span>
+                <div
+                  className="absolute w-44 h-44 rounded-full"
+                  style={{ background: 'radial-gradient(circle, rgba(255,253,249,0.22), transparent 70%)' }}
+                />
+                <span className="text-7xl relative">{getCategoryEmoji(featured.category)}</span>
                 {getDishImage(featured) && (
                   <img
                     src={getDishImage(featured)}
