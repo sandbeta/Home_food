@@ -1,5 +1,7 @@
 const STORAGE_KEY = 'couple_order_app_state_v2'
 
+import { SEED_MENU_EXTRA } from './seedMenuExtra'
+
 const defaultCategories = ['全部', '家常菜', '硬菜', '素菜', '主食', '小吃', '水果', '饮品', '汤类', '川菜', '粤菜', '湘菜', '鲁菜', '苏菜', '浙菜', '闽菜', '徽菜', '东北菜', '西北菜', '云贵菜', '其他']
 
 const seedDishes = [
@@ -109,6 +111,10 @@ function loadState() {
   } catch {}
   return { dishes: seedDishes, orders: [], nextDishId: 66, nextOrderId: 1001 }
 }
+
+// HowToCook 开源菜谱灌库数据（公有领域/Unlicense，生成于 scripts/build_htc_seed.py），
+// 扩充日常分类供给；loadState 的 missingSeed 按名去重，老 localStorage 也会自动补齐
+seedDishes.push(...SEED_MENU_EXTRA)
 
 function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
