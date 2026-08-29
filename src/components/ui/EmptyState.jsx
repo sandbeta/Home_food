@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 
 /**
- * 统一空态 —— 取代散落在各页的手写空态变体。当前已接入：Cart / Menu /
- * AdminDishes / AdminOrders；MyOrders 待 P4 迁移（Favorites 页已删除，其功能并入 Menu）。
+ * 统一空态 —— 取代各页的手写空态变体。已接入：Cart / Menu / AdminDishes /
+ * AdminOrders / MyOrders / OrderDetail / DishDetail。
  */
 export default function EmptyState({ emoji = '🍽️', title, desc, action, className = '' }) {
   return (

@@ -1,14 +1,14 @@
 # 项目交接文档 · 晨光厨房（food-ordering-miniapp）
 
 > **给新对话的 AI / 开发者**：本文档是自包含的。读完即可接手，无需翻旧会话。
-> 最后更新：2026-08-29（核对修正轮）　代码 HEAD：`686a204`　工作区：干净
+> 最后更新：2026-08-29（P4+P5 完成轮）　代码 HEAD：`ad1ca26`　工作区：干净
 > 注：本文档自身作为 docs 提交在代码 HEAD 之后，仓库实际 HEAD 会多一笔 docs 提交，属正常。
 
 ---
 
 ## 1. 一句话简介
 
-情侣点餐 H5 小程序（手机 480px 竖屏框）。已完成两轮工作：**①「晨光厨房」换肤（已完成并验收）**；**② UI 与信息架构全面重构（进行中，P0–P3 已完成，P4–P6 待做）**。
+情侣点餐 H5 小程序（手机 480px 竖屏框）。已完成两轮工作：**①「晨光厨房」换肤（已完成并验收）**；**② UI 与信息架构全面重构（进行中，P0–P5 已完成，P6 待做）**。
 
 - **项目路径**：`C:/Users/87374/WorkBuddy/2026-08-15-23-13-20/food-ordering-review/food-ordering-miniapp`
 - **重构方案全文**：`docs/superpowers/plans/2026-08-29-ui-ia-redesign.md`（含逐页布局规格与验收门禁）
@@ -73,23 +73,17 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 | 重构 P3-b | **后台三页 AdminShell**（消灭 AdminDishes/AdminOrders 两处断头路） | `4c2a61f` |
 | 重构 P3-c | **收藏并入点菜页**（分段控件 全部/⭐收藏；Menu 卡片补上缺失的跳详情 onClick；删与购物车球重叠的 CTA） | `21d81b5` |
 | 核对修正 | 交接文档与代码逐条核对后：Cart 圆角笔误（--radius-md→--radius-btn）；六页 Header 转发壳迁移为直接引用 PageHeader 并删除 Header.jsx（兑现第 5 节约定 3）；四个 ui 组件 docstring 的完成时态修正 | build+lint 全绿（`31f2376`→`686a204`） |
+| 重构 P4 | 逐页重排：/favorites 重定向+删页、Profile 清空壳+StatCard、Home 收敛 3 隐喻（主推大卡+网格+竖列表）、DishDetail 补内边距+Stepper、MyOrders 接 OrderCard+状态筛选、OrderDetail+状态环 --ring-size 令牌化、全页 PageContainer | build+lint 全绿（`8c05af6`→`0d60f2b`） |
+| 重构 P5 | 质感扫尾：硬编码 px 字号清零（映射字阶）、散落圆角归 --radius-tile、价格/合计数字补 font-serif、AddDishModal 的 480 魔数换 --shell-w | 字号/圆角 grep 到 0（`ad1ca26`） |
 
-### 待做 🔴（P4–P6，按序）
+### 待做 🔴（仅剩 P6）
 
-**P4 逐页重排**（规格见方案文档第六节）：
-- [ ] `/favorites` 改重定向到 `/menu?fav=1`，**删除 Favorites.jsx**（Menu 已吸收其功能）
-- [ ] Profile：移除「我的收藏」入口（已并入点菜页）、删除 `path:'#'` 的「设置/关于」空壳项
-- [ ] Home：4 种列表隐喻（横轨×2+网格+列表）收敛为 3 种、约 1.5 屏（Hero→快捷→今日推荐大卡→常点的网格→最近订单 3 条）
-- [ ] DishDetail：修 GlassCard 零内边距；用 ui/Stepper
-- [ ] Orders / OrderDetail：用 ui/OrderCard、状态环尺寸令牌化（现硬编码 140×140）
-- [ ] 每页容器换 PageContainer
+**P4 逐页重排 ✅（2026-08-29 完成，提交 `8c05af6`–`0d60f2b`）**
 
-**P5 质感**：
-- [ ] 19 处硬编码 px 字号 → 字阶（P0 时点审计为 43，P2/P3 重构后现存 19：10px×5、11px×4、15px×3、13px×2、9px×2、17/20/22px 各 1；用 `text-xs/sm/base/lg/xl/2xl/3xl` + `text-display`，终验 grep 到 0）
-- [ ] 卡片圆角统一到 `--radius-card/--radius-tile`（现散落 24/22/26px）；阴影统一到 `--shadow-*`
-- [ ] serif 用于页面大标题与价格/统计数字（PageHeader 已是，页面内标题与数字待改）
+**P5 质感 ✅（2026-08-29 完成，提交 `ad1ca26`；现存字号/圆角硬编码已 grep 到 0）**
 
 **P6 验收（11 项门禁）**：build 0 / lint 0 error / 断头路 0 / 固定层零重叠 / sticky 生效 / 硬编码字号 0 / 暗色残留 0 / 旧命名 0 / 色值单源 / 业务文件改动最小 / reduced-motion 生效；最后**同步 `preview-all-features.html` 到新 IA（10 页）** 并提交。
+- 前 10 项静态门禁已可用 `python scripts/p6_static_gate.py` + build/lint 复验（2026-08-29 实测全绿）；**唯一剩余大项是把 `preview-all-features.html` 从旧 IA（含 #checkout/#favorites，11 屏）重写成新 IA 10 屏**。
 
 ## 7. 关键文件地图
 
@@ -108,8 +102,10 @@ src/
 │   ├── D3CartOrb.jsx        购物车球（无定位，DockLayer 管）
 │   ├── GlassCard.jsx / FullBleedHero.jsx / D3StatusRing.jsx / KissIcon.jsx / AddDishModal.jsx
 │   └── ui/                  ★11 个共享组件（见 P2）
-├── pages/                   11 页（Checkout 已删）
+├── pages/                   10 页（Checkout、Favorites 已删，路由保留重定向）
 └── lib/                     mockApi.js(不可变) / favorites.js(不可变) / categoryIcons.js
+scripts/
+└── p6_static_gate.py        P6 静态门禁自检（色值单源差分/暗色/断头路，方法见第 9 节）
 ```
 
 ## 8. 环境坑（务必牢记，踩过实录）
@@ -137,4 +133,7 @@ src/
 
 ## 10. 给新对话的开场白模板
 
-> 请先读 `<项目路径>/PROJECT-HANDOFF.md`，然后继续执行其中的「P4 逐页重排」，从 `/favorites` 重定向和 Profile 清理开始。遵守第 5 节的架构约定与第 8 节的环境坑，每个阶段完成立即 build+lint+提交。
+> 请先读 `<项目路径>/PROJECT-HANDOFF.md`，然后继续执行其中的「P6 验收」：先跑
+> `python scripts/p6_static_gate.py` + build + lint 复验前 10 项门禁，再把
+> `preview-all-features.html` 重写为新 IA 的 10 屏并提交。遵守第 5 节的架构约定
+> 与第 8 节的环境坑。

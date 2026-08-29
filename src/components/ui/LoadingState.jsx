@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 
 /**
- * 统一加载态 —— 目标是取代 MyOrders / AdminDishes / AdminOrders 三份相同的手写实现。
- * 当前已接入：AdminDishes / AdminOrders；MyOrders 待 P4 迁移（勿据本注释误判已完成）。
+ * 统一加载态 —— 取代各页手写的相同实现。已接入：AdminDishes / AdminOrders /
+ * MyOrders / OrderDetail / DishDetail。
  */
 export default function LoadingState({ emoji = '📋', text = '加载中...' }) {
   return (
