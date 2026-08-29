@@ -10,9 +10,14 @@ import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
 
-const MOTIVATIONS = [
-  '吃饱了才有力气减肥~', '今天也要好好吃饭呀', '唯有美食与爱不可辜负',
-  '吃好喝好，长生不老', '人生苦短，再来一碗', '肚子饱了，心情就好了',
+// 顶部欢迎语：男朋友口吻，写给女朋友（昵称：懒洋洋）
+const GIRLFRIEND_NICKNAME = '懒洋洋'
+const SWEET_NOTES = [
+  '今天想让男朋友投喂点什么呀？',
+  '你负责点菜，做饭和洗碗都归我',
+  '小懒虫，想吃啥直接点，都给你安排',
+  '奶茶炸鸡火锅烤肉，你说了算',
+  '和你一起吃的每一顿都好吃',
 ]
 
 function getGreeting() {
@@ -35,7 +40,7 @@ export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
   const [featured, setFeatured] = useState(null)
   const [popular, setPopular] = useState([])
-  const [motivation] = useState(() => MOTIVATIONS[Math.floor(Math.random() * MOTIVATIONS.length)])
+  const [sweetNote] = useState(() => SWEET_NOTES[Math.floor(Math.random() * SWEET_NOTES.length)])
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -51,7 +56,7 @@ export default function Home() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.home} variant="immersive" alt="今日美食" />
 
-      <PageHeader title={`${getGreeting()}，今天吃什么？`} subtitle={motivation} />
+      <PageHeader title={`${getGreeting()}，${GIRLFRIEND_NICKNAME}`} subtitle={sweetNote} />
 
       <PageContainer>
         {/* 今日主推 —— 全页深色锚点：clay 实底 + 白字大号 serif 价格 */}
