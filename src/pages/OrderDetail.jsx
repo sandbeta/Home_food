@@ -98,7 +98,7 @@ export default function OrderDetail() {
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0">
                     <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-                    <span className="text-sm font-bold text-[var(--color-clay-soft)]">{(item.price * item.quantity).toFixed(0)}</span>
+                    <span className="text-sm font-bold text-[var(--color-caramel)]">{(item.price * item.quantity).toFixed(0)}</span>
                   </div>
                 </motion.div>
               ))}
@@ -108,13 +108,13 @@ export default function OrderDetail() {
                 style={{ background: 'linear-gradient(90deg, transparent, var(--color-glass-border) 20%, var(--color-glass-border) 80%, transparent)' }} />
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-[var(--color-clay-soft)]">合计</span>
+                  <span className="text-sm font-bold text-[var(--color-bone)]">合计</span>
                   {order.payer && <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                     style={{ background: payer.border, color: payer.label === 'AA' ? 'var(--color-ash)' : (order.payer === 'me' ? 'var(--color-clay-soft)' : 'var(--color-sage-soft)') }}>{payer.label}</span>}
                 </div>
                 <div className="flex items-center gap-1">
                   <KissIcon className="w-4 h-4 text-[var(--color-love)]" />
-                  <span className="font-serif text-xl font-bold text-[var(--color-clay-soft)] tabular-nums">{order.total_price}</span>
+                  <span className="font-serif text-2xl font-bold text-[var(--color-caramel)] tabular-nums">{order.total_price}</span>
                 </div>
               </div>
             </div>

@@ -74,7 +74,7 @@ function RecommendCard({ dishes, onAdd, spawnParticle }) {
           <p className="text-xs text-[var(--color-ash)] mt-0.5 line-clamp-1">{randomDish.description || '好吃的~'}</p>
           <div className="flex items-center gap-1 mt-1.5">
             <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-            <span className="font-serif text-base font-extrabold text-[var(--color-clay)]">{randomDish.price}</span>
+            <span className="font-serif text-base font-extrabold text-[var(--color-caramel)]">{randomDish.price}</span>
           </div>
         </div>
         <motion.button whileTap={{ scale: 0.92 }} whileHover={{ scale: 1.04 }} onClick={(e) => {

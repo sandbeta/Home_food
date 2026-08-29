@@ -88,7 +88,7 @@ export default function DishRow({
           <div className="flex items-center justify-between mt-2.5 gap-2">
             <div className="flex items-center gap-1 shrink-0">
               <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-              <span className="font-serif text-lg font-extrabold text-[var(--color-clay)] leading-tight tabular-nums">
+              <span className="font-serif text-lg font-extrabold text-[var(--color-caramel)] leading-tight tabular-nums">
                 {dish.price}
               </span>
             </div>

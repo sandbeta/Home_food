@@ -12,6 +12,7 @@ import Stepper from '../components/ui/Stepper'
 import EmptyState from '../components/ui/EmptyState'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
+import { cardEntrance } from '../theme/motion'
 
 function CartRow({ item, onUpdate, onRemove }) {
   return (
@@ -26,7 +27,7 @@ function CartRow({ item, onUpdate, onRemove }) {
         <h3 className="font-semibold text-sm text-[var(--color-bone)] truncate">{item.name}</h3>
         <div className="flex items-center gap-1 mt-0.5">
           <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-          <span className="font-serif text-sm font-bold text-[var(--color-clay)] tabular-nums">{item.price}</span>
+          <span className="font-serif text-sm font-bold text-[var(--color-caramel)] tabular-nums">{item.price}</span>
         </div>
       </div>
 
@@ -226,18 +227,27 @@ export default function Cart() {
             <PayerSelector value={payer} onChange={setPayer} />
           </GlassCard>
 
-          {/* 合计 + 提交 */}
-          <GlassCard style={{ padding: 'var(--space-card-p)' }}>
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-[var(--color-ash)] font-semibold">合计</span>
+          {/* 合计 + 提交 —— 本页的深色锚点卡：clay 实底 + 白字大数字 + 反白按钮 */}
+          <motion.div
+            {...cardEntrance(0.2)}
+            className="overflow-hidden"
+            style={{
+              borderRadius: 'var(--radius-card)',
+              background: 'var(--color-clay-gradient)',
+              boxShadow: 'var(--shadow-4)',
+              padding: 'var(--space-card-p)',
+            }}
+          >
+            <div className="flex justify-between items-center">
+              <span className="text-[#FFFDF9]/85 font-semibold">合计</span>
               <div className="flex items-center gap-1.5">
-                <KissIcon className="w-5 h-5 text-[var(--color-love)]" />
+                <KissIcon className="w-5 h-5 text-[#FFFDF9]" />
                 <motion.span
                   key={totalPrice}
                   initial={{ scale: 1.3, y: -4 }}
                   animate={{ scale: 1, y: 0 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                  className="font-serif text-display font-bold text-[var(--color-clay)] tabular-nums"
+                  className="font-serif text-display font-bold text-[#FFFDF9] tabular-nums"
                 >
                   {totalPrice}
                 </motion.span>
@@ -245,14 +255,11 @@ export default function Cart() {
             </div>
 
             <div
-              className="flex items-center gap-1.5 mb-3.5 py-1.5 px-2.5 rounded-xl self-start"
-              style={{
-                background:
-                  'linear-gradient(135deg, color-mix(in srgb, var(--color-clay) 8%, transparent), color-mix(in srgb, var(--color-sage) 5%, transparent))',
-              }}
+              className="flex items-center gap-1.5 mb-3.5 mt-2 py-1.5 px-2.5 rounded-xl self-start"
+              style={{ background: 'rgba(43,38,32,0.14)' }}
             >
               <span className="text-xs">⏱️</span>
-              <span className="text-xs text-[var(--color-ash)]">预估等待约 20-30 分钟</span>
+              <span className="text-xs text-[#FFFDF9]/85">预估等待约 20-30 分钟</span>
             </div>
 
             <motion.button
@@ -260,12 +267,17 @@ export default function Cart() {
               whileHover={{ scale: 1.01 }}
               onClick={handleSubmit}
               disabled={submitting}
-              className="d3-btn d3-btn-primary w-full disabled:opacity-50 py-3.5 font-bold text-base animate-pulse-glow-clay"
-              style={{ borderRadius: 'var(--radius-btn)' }}
+              className="w-full disabled:opacity-50 py-3.5 font-bold text-base"
+              style={{
+                borderRadius: 'var(--radius-btn)',
+                background: '#FFFDF9',
+                color: 'var(--color-clay)',
+                boxShadow: 'var(--shadow-2)',
+              }}
             >
               {submitting ? '提交中...' : '下单啦~'}
             </motion.button>
-          </GlassCard>
+          </motion.div>
         </PageContainer>
       )}
     </div>

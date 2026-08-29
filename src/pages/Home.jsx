@@ -10,11 +10,12 @@ import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
 
+// 快捷入口四色 tint：让双人格的冷暖（clay/sage）与喜爱(love)、焦糖(caramel)在首屏就出场
 const QUICK_ACTIONS = [
-  { label: '菜单', emoji: '🍜', path: '/menu' },
-  { label: '收藏', emoji: '⭐', path: '/menu?fav=1' },
-  { label: '订单', emoji: '📋', path: '/orders' },
-  { label: '我的', emoji: '👤', path: '/profile' },
+  { label: '菜单', emoji: '🍜', path: '/menu', tint: 'color-mix(in srgb, var(--color-clay) 12%, transparent)' },
+  { label: '收藏', emoji: '⭐', path: '/menu?fav=1', tint: 'color-mix(in srgb, var(--color-love) 16%, transparent)' },
+  { label: '订单', emoji: '📋', path: '/orders', tint: 'color-mix(in srgb, var(--color-caramel) 12%, transparent)' },
+  { label: '我的', emoji: '👤', path: '/profile', tint: 'color-mix(in srgb, var(--color-sage) 16%, transparent)' },
 ]
 
 const MOTIVATIONS = [
@@ -30,9 +31,12 @@ function getGreeting() {
   return '晚上好'
 }
 
+// 常点人 mock：按菜品 id 稳定分配 🐱/🐰，让双人格出现在首页网格里
+const chefOf = (dish) => (dish.id % 2 === 0 ? 'me' : 'partner')
+
 /**
- * 首页 —— 按重构方案收敛为「主推大卡 + 2 列网格 + 竖列表」3 种列表隐喻，约 1.5 屏。
- * （此前的 3D 轮播 Banner、八大菜系横轨、为你推荐横轨均已移除：隐喻过多且推流重复）
+ * 首页 —— 列表隐喻收敛为「主推大卡 + 2 列网格 + 竖列表」3 种，约 1.5 屏。
+ * 主推卡是全页唯一的深色锚点（clay 实底），其余模块保持浅色玻璃，拉开轻重层次。
  */
 export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
@@ -57,7 +61,7 @@ export default function Home() {
       <PageHeader title={`${getGreeting()}，今天吃什么？`} subtitle={motivation} />
 
       <PageContainer>
-        {/* 快捷入口 */}
+        {/* 快捷入口：四色 tint 区分 */}
         <motion.div className="grid grid-cols-4 gap-3" {...contentEnter()}>
           {QUICK_ACTIONS.map((action) => (
             <motion.button
@@ -69,16 +73,16 @@ export default function Home() {
             >
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl glass"
-                style={{ boxShadow: 'var(--shadow-3)' }}
+                style={{ background: action.tint, boxShadow: 'var(--shadow-2)' }}
               >
                 {action.emoji}
               </div>
-              <span className="text-xs font-bold text-[var(--color-ash)]">{action.label}</span>
+              <span className="text-xs font-bold text-[var(--color-bone)]">{action.label}</span>
             </motion.button>
           ))}
         </motion.div>
 
-        {/* 今日推荐主推大卡 */}
+        {/* 今日主推 —— 全页深色锚点：clay 实底 + 白字大号 serif 价格 */}
         {featured && (
           <motion.div {...contentEnter(0.05)}>
             <SectionHeader
@@ -88,37 +92,38 @@ export default function Home() {
             <motion.div
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate(`/dish/${featured.id}`)}
-              className="d3-card-face overflow-hidden cursor-pointer mt-3"
+              className="overflow-hidden cursor-pointer mt-3"
+              style={{
+                borderRadius: 'var(--radius-card)',
+                background: 'var(--color-clay-gradient)',
+                boxShadow: 'var(--shadow-4)',
+              }}
             >
-              <div className="relative h-48">
+              <div className="h-44 overflow-hidden">
                 {getDishImage(featured) ? (
                   <img src={getDishImage(featured)} alt={featured.name} className="w-full h-full object-cover" />
                 ) : (
                   <div
                     className="w-full h-full flex items-center justify-center text-6xl"
-                    style={{ background: 'linear-gradient(145deg, var(--color-cream), var(--color-cream-dark))' }}
+                    style={{ background: 'rgba(255,253,249,0.16)' }}
                   >
                     {getCategoryEmoji(featured.category)}
                   </div>
                 )}
-                {/* 底部说明层：暖墨渐变压底保证可读 */}
-                <div
-                  className="absolute inset-x-0 bottom-0 px-4 pb-3 pt-10"
-                  style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(43,38,32,0.55) 100%)' }}
-                >
+              </div>
+              <div className="flex items-end justify-between gap-3 px-4 pb-3.5 pt-3">
+                <div className="min-w-0">
                   <span
                     className="inline-block text-xs font-extrabold px-2.5 py-1 rounded-full"
-                    style={{ background: 'var(--color-clay)', color: '#FFFDF9' }}
+                    style={{ background: 'rgba(255,253,249,0.22)', color: '#FFFDF9' }}
                   >
                     今日主推
                   </span>
-                  <div className="flex items-end justify-between gap-3 mt-1.5">
-                    <p className="text-lg font-bold text-[#FFFDF9] truncate">{featured.name}</p>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <KissIcon className="w-4 h-4 text-[#FFFDF9]" />
-                      <span className="font-serif text-lg font-extrabold text-[#FFFDF9] tabular-nums">{featured.price}</span>
-                    </div>
-                  </div>
+                  <p className="font-serif text-xl font-bold text-[#FFFDF9] truncate mt-1.5">{featured.name}</p>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <KissIcon className="w-4 h-4 text-[#FFFDF9]" />
+                  <span className="font-serif text-2xl font-extrabold text-[#FFFDF9] tabular-nums">{featured.price}</span>
                 </div>
               </div>
             </motion.div>
@@ -133,31 +138,40 @@ export default function Home() {
               action={<button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-clay)] font-bold">全部 →</button>}
             />
             <div className="grid grid-cols-2 gap-3 mt-3">
-              {popular.map((dish) => (
-                <motion.div
-                  key={dish.id}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate(`/dish/${dish.id}`)}
-                  className="d3-card-face cursor-pointer flex items-center gap-3"
-                  style={{ padding: 'var(--space-card-p)' }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
-                    style={{ background: 'linear-gradient(145deg, var(--color-cream), var(--color-cream-dark))' }}
+              {popular.map((dish) => {
+                const chef = chefOf(dish)
+                return (
+                  <motion.div
+                    key={dish.id}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => navigate(`/dish/${dish.id}`)}
+                    className="d3-card-face cursor-pointer flex items-center gap-3 relative"
+                    style={{ padding: 'var(--space-card-p)' }}
                   >
-                    {getDishImage(dish)
-                      ? <img src={getDishImage(dish)} className="w-full h-full object-cover" alt={dish.name} />
-                      : <span>{getCategoryEmoji(dish?.category)}</span>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-[var(--color-bone)] truncate">{dish.name}</p>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-                      <span className="text-xs font-bold text-[var(--color-clay)]">{dish.price}</span>
+                    <div
+                      className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] border-2 border-[var(--color-ink-900)] ${chef === 'me' ? 'avatar-me' : 'avatar-partner'}`}
+                      title={chef === 'me' ? '我常点' : 'TA 常点'}
+                    >
+                      {chef === 'me' ? '🐱' : '🐰'}
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
+                      style={{ background: 'linear-gradient(145deg, var(--color-cream), var(--color-cream-dark))' }}
+                    >
+                      {getDishImage(dish)
+                        ? <img src={getDishImage(dish)} className="w-full h-full object-cover" alt={dish.name} />
+                        : <span>{getCategoryEmoji(dish?.category)}</span>}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-[var(--color-bone)] truncate">{dish.name}</p>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
+                        <span className="font-serif text-sm font-bold text-[var(--color-caramel)] tabular-nums">{dish.price}</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )
+              })}
             </div>
           </motion.div>
         )}
@@ -194,7 +208,7 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
                     <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-                    <span className="text-sm font-bold text-[var(--color-clay)]">{order.total_price}</span>
+                    <span className="font-serif text-sm font-bold text-[var(--color-caramel)] tabular-nums">{order.total_price}</span>
                   </div>
                 </motion.div>
               ))}

@@ -4,7 +4,7 @@
 export default function SectionHeader({ title, action, className = '' }) {
   return (
     <div className={`flex items-center justify-between gap-3 ${className}`}>
-      <h2 className="font-serif text-xl font-semibold text-[var(--color-bone)] truncate">
+      <h2 className="font-serif text-2xl font-semibold text-[var(--color-bone)] truncate">
         {title}
       </h2>
       {action && <div className="shrink-0">{action}</div>}
