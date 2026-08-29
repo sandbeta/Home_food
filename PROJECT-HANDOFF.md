@@ -104,9 +104,21 @@ src/
 │   ├── GlassCard.jsx / FullBleedHero.jsx / D3StatusRing.jsx / KissIcon.jsx / AddDishModal.jsx
 │   └── ui/                  ★11 个共享组件（见 P2）
 ├── pages/                   10 页（Checkout、Favorites 已删，路由保留重定向）
-└── lib/                     mockApi.js(不可变) / favorites.js(不可变) / categoryIcons.js
+└── lib/                     mockApi.js(不可变*) / favorites.js(不可变) / categoryIcons.js / seedMenuExtra.js(生成)
 scripts/
-└── p6_static_gate.py        P6 静态门禁自检（色值单源差分/暗色/断头路，方法见第 9 节）
+├── p6_static_gate.py        P6 静态门禁自检（色值单源差分/暗色/断头路，方法见第 9 节）
+└── build_htc_seed.py        HowToCook 菜谱灌库生成器（见下条）
+```
+
+**菜品数据源（2026-08-29 追加）**：种子库 65 → 407 道，追加部分由
+`scripts/build_htc_seed.py` 从 [HowToCook](https://github.com/Anduin2017/HowToCook)
+（公有领域/Unlicense）自动生成到 `src/lib/seedMenuExtra.js`，153 道带本地压缩图
+（`public/dish-images/htc/`）。mockApi.js 的"不可变"约定：本次仅 +2 行接线
+（import + push），属第 6.8 项门禁允许的"必要小改"，业务逻辑零改动。
+重新生成：`python scripts/build_htc_seed.py --repo <HowToCook 克隆目录>`。
+注意国内网络：raw.githubusercontent 与 jsDelivr 的 gh 代理均不可达，
+克隆只取 md（稀疏+blob 过滤），图片用单 blob 按需取或 codeload tarball
+部分解压兜底；重新生成时若图片已存在会走缓存不再联网。
 ```
 
 ## 8. 环境坑（务必牢记，踩过实录）
