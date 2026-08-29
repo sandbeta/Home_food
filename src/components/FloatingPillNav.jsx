@@ -10,7 +10,8 @@ const tabs = [
 
 /**
  * 底部玻璃药丸导航 —— 只渲染药丸本体，不做定位、不处理安全区。
- * 定位与安全区由 DockLayer 统一管理。
+ * 定位与安全区由 DockLayer 统一管理；layout 让首次加购/清空购物车时
+ * 药丸宽度变化走平滑补间，而不是瞬间跳版。
  * 药丸宽度自适应（flex-1），与购物车球同行排布，任何屏宽下都不可能重叠。
  */
 export default function FloatingPillNav() {
@@ -26,7 +27,8 @@ export default function FloatingPillNav() {
   }
 
   return (
-    <nav
+    <motion.nav
+      layout
       className="flex-1 glass rounded-full px-2.5 py-2 flex items-center justify-around gap-1"
       style={{
         minHeight: 'var(--dock-h)',
@@ -65,6 +67,6 @@ export default function FloatingPillNav() {
           </Link>
         )
       })}
-    </nav>
+    </motion.nav>
   )
 }
