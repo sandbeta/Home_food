@@ -166,7 +166,7 @@ export default function Menu() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.menu} variant="immersive" alt="菜单" />
 
-      <PageHeader title="今天吃什么？" subtitle="一起选点好吃的吧~" />
+      <PageHeader title="懒洋洋今天想吃什么？" subtitle="随便点，买单和洗碗都归男朋友" />
 
       <PageContainer>
         <WhoSelector whoAmI={whoAmI} setWhoAmI={setWhoAmI} />

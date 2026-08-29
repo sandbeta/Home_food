@@ -130,7 +130,7 @@ export default function Cart() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.orders} variant="functional" alt="购物车" />
 
-      <PageHeader title="已选的菜" subtitle={totalCount > 0 ? `共 ${totalCount} 件` : ''} back />
+      <PageHeader title="想吃的都在这啦" subtitle={totalCount > 0 ? `共 ${totalCount} 件，买单我来` : ''} back />
 
       {items.length === 0 ? (
         <EmptyState

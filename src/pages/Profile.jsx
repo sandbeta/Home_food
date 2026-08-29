@@ -25,7 +25,7 @@ export default function Profile() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.profile} variant="immersive" alt="我的" />
 
-      <PageHeader title="我的" />
+      <PageHeader title="我的懒洋洋" />
 
       <PageContainer>
         {/* 身份卡 - 点头像切换 🐱/🐰 */}

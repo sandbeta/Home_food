@@ -57,7 +57,7 @@ export default function OrderDetail() {
       <FullBleedHero src={HERO_IMAGES.order} variant="immersive" alt="订单详情" />
 
       <PageHeader
-        title="订单详情"
+        title="这单吃了啥"
         back
         right={<Link to="/orders" className="text-xs text-[var(--color-clay)] font-semibold bg-[var(--color-clay)]/10 px-3 py-1.5 rounded-full">全部订单</Link>}
       />

@@ -36,7 +36,7 @@ export default function MyOrders() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.orders} variant="immersive" alt="我们的订单" />
 
-      <PageHeader title="我们的订单" subtitle={orders.length > 0 ? `一共 ${orders.length} 笔` : ''} />
+      <PageHeader title="我们的干饭记录" subtitle={orders.length > 0 ? `一共 ${orders.length} 笔，每顿都有我陪` : ''} />
 
       <PageContainer>
         {/* 状态筛选 */}
