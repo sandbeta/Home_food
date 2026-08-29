@@ -65,9 +65,14 @@ function RecommendCard({ dishes, onAdd, spawnParticle }) {
         <span className="text-xs text-[var(--color-ash)]">不知道吃啥就选它</span>
       </div>
       <div className="relative flex items-center gap-3">
-        <div className="w-16 h-16 rounded-[var(--radius-tile)] flex items-center justify-center shrink-0 overflow-hidden"
+        <div className="relative w-16 h-16 rounded-[var(--radius-tile)] flex items-center justify-center shrink-0 overflow-hidden"
           style={{ background: 'linear-gradient(145deg, var(--color-cream) 0%, var(--color-cream-dark) 60%, rgba(200,104,63,0.08) 100%)' }}>
-          {randomDish.image_url ? <img src={randomDish.image_url} className="w-full h-full object-cover" alt={randomDish.name} /> : <span className="text-3xl">{CATEGORY_CONFIG[randomDish.category]?.emoji || '🍽️'}</span>}
+          <span className="text-3xl">{CATEGORY_CONFIG[randomDish.category]?.emoji || '🍽️'}</span>
+          {randomDish.image_url && (
+            <img src={randomDish.image_url} alt={randomDish.name} loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.style.display = 'none' }} />
+          )}
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="font-bold text-lg text-[var(--color-bone)] truncate">{randomDish.name}</h3>
@@ -135,6 +140,17 @@ export default function Menu() {
   useEffect(() => {
     if (searchParams.get('fav')) setScope('fav')
   }, [searchParams])
+
+  // 0 菜的分类不展示（如「其他」被清空时），避免点了空手而归
+  const [catCounts, setCatCounts] = useState(null)
+  useEffect(() => {
+    fetch('/api/dishes/all').then(r => r.json()).then(all => {
+      const m = {}
+      all.forEach(d => { if (Number(d.available) !== 0) m[d.category] = (m[d.category] || 0) + 1 })
+      setCatCounts(m)
+    }).catch(() => {})
+  }, [])
+  const visibleCats = (items) => (catCounts ? items.filter(cat => cat === '全部' || (catCounts[cat] || 0) > 0) : items)
 
   const spawnParticle = (x, y) => {
     const id = Date.now() + Math.random()
@@ -218,7 +234,7 @@ export default function Menu() {
         {/* 分类标签 - 可折叠分组网格布局 */}
         <div className="mb-3">
           <div className="flex flex-wrap gap-2 items-center">
-            {CATEGORY_GROUPS[0].items.map(cat => {
+            {visibleCats(CATEGORY_GROUPS[0].items).map(cat => {
               const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG['其他']
               const active = activeCategory === cat
               return (
@@ -271,7 +287,7 @@ export default function Menu() {
                     <div key={group.label}>
                       <div className="text-xs font-extrabold px-0.5 pb-1 text-[var(--color-clay)]">{group.label}</div>
                       <div className="flex flex-wrap gap-2">
-                        {group.items.map(cat => {
+                        {visibleCats(group.items).map(cat => {
                           const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG['其他']
                           const active = activeCategory === cat
                           return (

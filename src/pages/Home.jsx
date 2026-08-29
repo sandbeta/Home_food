@@ -71,16 +71,18 @@ export default function Home() {
                 boxShadow: 'var(--shadow-4)',
               }}
             >
-              <div className="h-44 overflow-hidden">
-                {getDishImage(featured) ? (
-                  <img src={getDishImage(featured)} alt={featured.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div
-                    className="w-full h-full flex items-center justify-center text-6xl"
-                    style={{ background: 'rgba(255,253,249,0.16)' }}
-                  >
-                    {getCategoryEmoji(featured.category)}
-                  </div>
+              <div
+                className="relative h-44 overflow-hidden flex items-center justify-center"
+                style={{ background: 'rgba(255,253,249,0.16)' }}
+              >
+                <span className="text-6xl">{getCategoryEmoji(featured.category)}</span>
+                {getDishImage(featured) && (
+                  <img
+                    src={getDishImage(featured)}
+                    alt={featured.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.style.display = 'none' }}
+                  />
                 )}
               </div>
               <div className="flex items-end justify-between gap-3 px-4 pb-3.5 pt-3">
@@ -127,12 +129,19 @@ export default function Home() {
                       {chef === 'me' ? '🐱' : '🐰'}
                     </div>
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
+                      className="relative w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
                       style={{ background: 'linear-gradient(145deg, var(--color-cream), var(--color-cream-dark))' }}
                     >
-                      {getDishImage(dish)
-                        ? <img src={getDishImage(dish)} className="w-full h-full object-cover" alt={dish.name} />
-                        : <span>{getCategoryEmoji(dish?.category)}</span>}
+                      <span>{getCategoryEmoji(dish?.category)}</span>
+                      {getDishImage(dish) && (
+                        <img
+                          src={getDishImage(dish)}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          alt={dish.name}
+                          loading="lazy"
+                          onError={(e) => { e.currentTarget.style.display = 'none' }}
+                        />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-[var(--color-bone)] truncate">{dish.name}</p>

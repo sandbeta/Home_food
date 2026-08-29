@@ -53,19 +53,24 @@ export default function DishRow({
         className="d3-card-face p-3.5 flex items-center gap-3"
         style={{ padding: 'var(--space-card-p)' }}
       >
-        {/* 缩略图：有图用图，无图用品类 emoji 占位 */}
+        {/* 缩略图：emoji 垫底，图片盖在上面；远程图挂了就露出 emoji（灌库菜多为外链图） */}
         <div
-          className="w-[70px] h-[70px] shrink-0 overflow-hidden flex items-center justify-center"
+          className="relative w-[70px] h-[70px] shrink-0 overflow-hidden flex items-center justify-center"
           style={{
             borderRadius: 'var(--radius-lg)',
             background:
               'linear-gradient(145deg, var(--color-cream) 0%, var(--color-cream-dark) 50%, rgba(200,104,63,0.06) 100%)',
           }}
         >
-          {image ? (
-            <img src={image} alt={dish.name} className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-3xl drop-shadow-sm">{emoji}</span>
+          <span className="text-3xl drop-shadow-sm">{emoji}</span>
+          {image && (
+            <img
+              src={image}
+              alt={dish.name}
+              loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.style.display = 'none' }}
+            />
           )}
         </div>
 
