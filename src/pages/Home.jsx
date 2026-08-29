@@ -38,9 +38,17 @@ export default function Home() {
     fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3)))
     fetch('/api/dishes?category=全部').then(r => r.json()).then(d => {
       // 主推大卡优先用带实拍图的菜（无图菜在大卡上只有一枚小 emoji，观感太素）；
-      // 两组各自洗牌后拼接，保证主推位永远有图
-      const shuf = (arr) => [...arr].sort(() => 0.5 - Math.random())
+      // 两组各自洗牌后拼接，保证主推位永远有图。Fisher-Yates 无偏洗牌。
+      const shuf = (arr) => {
+        const a = [...arr]
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          ;[a[i], a[j]] = [a[j], a[i]]
+        }
+        return a
+      }
       setDishes([...shuf(d.filter(x => getDishImage(x))), ...shuf(d.filter(x => !getDishImage(x)))])
+      setFeatIdx(0) // 新数据到来时轮换指针归零
     })
   }, [])
 

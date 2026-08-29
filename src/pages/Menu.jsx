@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../components/CartContext'
@@ -109,7 +109,6 @@ export default function Menu() {
   const [loading, setLoading] = useState(true)
   const [searchFocused, setSearchFocused] = useState(false)
   const [showAllCategories, setShowAllCategories] = useState(false)
-  const searchRef = useRef(null)
   const [particles, setParticles] = useState([])
   const { addItem, whoAmI, setWhoAmI } = useCart()
   const { favorites, has, toggle } = useFavorites()
@@ -141,6 +140,14 @@ export default function Menu() {
   useEffect(() => {
     if (searchParams.get('fav')) setScope('fav')
   }, [searchParams])
+
+  // 长列表分页渲染：初始 30 条 + 加载更多，避免 400+ 行一次性进 DOM（筛选条件变化时重置）
+  const [visibleCount, setVisibleCount] = useState(30)
+  useEffect(() => { setVisibleCount(30) }, [activeCategory, scope, keyword])
+  const visibleDishes = useMemo(
+    () => filteredDishes.slice(0, visibleCount),
+    [filteredDishes, visibleCount],
+  )
 
   // 0 菜的分类不展示（如「其他」被清空时），避免点了空手而归
   const [catCounts, setCatCounts] = useState(null)
@@ -207,8 +214,7 @@ export default function Menu() {
         </div>
 
         {/* 搜索框 */}
-        <div className={`d3-card-face flex items-center gap-2 px-3 py-2.5 mb-4 bg-[var(--color-ink-800)]/80 transition-all duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}
-          ref={searchRef}>
+        <div className={`d3-card-face flex items-center gap-2 px-3 py-2.5 mb-4 bg-[var(--color-ink-800)]/80 transition-all duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}>
           <motion.svg className={`w-4 h-4 text-[var(--color-ash)] transition-colors duration-300 ${searchFocused ? 'text-[var(--color-clay)]' : ''}`}
             viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
             animate={searchFocused ? { rotate: 90 } : { rotate: 0 }}
@@ -232,7 +238,7 @@ export default function Menu() {
           </AnimatePresence>
         </div>
 
-        {!loading && <RecommendCard dishes={filteredDishes.length ? filteredDishes : dishes} onAdd={addItem} spawnParticle={spawnParticle} />}
+        {!loading && <RecommendCard dishes={dishes} onAdd={addItem} spawnParticle={spawnParticle} />}
 
         {/* 分类标签 - 可折叠分组网格布局 */}
         <div className="mb-3">
@@ -359,7 +365,7 @@ export default function Menu() {
           </motion.div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-card-p)' }}>
-            {filteredDishes.map(dish => (
+            {visibleDishes.map(dish => (
               <DishRow
                 key={`${dish.id}-${dish.name}`}
                 dish={dish}
@@ -377,6 +383,17 @@ export default function Menu() {
               />
             ))}
           </div>
+        )}
+
+        {visibleDishes.length < filteredDishes.length && (
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setVisibleCount(c => c + 30)}
+            className="d3-btn-sm py-2.5 text-sm font-bold text-[var(--color-clay)] border border-[var(--color-clay)]/30 self-center px-6"
+            style={{ borderRadius: 'var(--radius-btn)' }}
+          >
+            加载更多（还有 {filteredDishes.length - visibleDishes.length} 道）
+          </motion.button>
         )}
       </PageContainer>
 

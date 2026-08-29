@@ -46,7 +46,7 @@ export default function AddDishModal({ dish, onClose, onSave }) {
                 style={{ background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-primary))' }}>
                 <span className="text-sm">{dish ? '✏️' : '➕'}</span>
               </div>
-              <h2 className="text-lg font-bold text-[var(--color-text)]" style={{ fontFamily: 'Fredoka, sans-serif' }}>{dish ? '改改这道菜' : '加一道新菜'}</h2>
+              <h2 className="text-lg font-bold text-[var(--color-text)]">{dish ? '改改这道菜' : '加一道新菜'}</h2>
             </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-ash)] hover:scale-105 active:scale-95 transition-transform border border-[var(--color-glass-border)] bg-[var(--color-glass)]">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>

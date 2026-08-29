@@ -11,7 +11,7 @@ const STATUS_FILTERS = [
   { value: '', label: '全部', emoji: '✨' },
   { value: 'pending', label: '等着呢', emoji: '⏳' },
   { value: 'preparing', label: '在做了', emoji: '👨‍🍳' },
-  { value: 'completed', label: '做好啦', emoji: '✅' },
+  { value: 'completed', label: '做好啦', emoji: '🎉' },
 ]
 
 const PAYER_LABEL = { aa: 'AA', me: '我请', partner: 'TA请' }
