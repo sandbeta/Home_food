@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node scripts/test_mockApi.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.42.2",

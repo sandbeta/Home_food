@@ -224,18 +224,15 @@
         <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 30% 20%,var(--photo-warm),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
-          <div class="title-s">中午好，今天吃什么？</div>
-          <div class="sub-s">吃好喝好，长生不老</div><div class="underline"></div>
-          <div class="qgrid">
-            <span class="qi"><i>🍜</i>菜单</span><span class="qi"><i>⭐</i>收藏</span><span class="qi"><i>📋</i>订单</span><span class="qi"><i>👤</i>我的</span>
-          </div>
+          <div class="title-s">下午好，懒洋洋</div>
+          <div class="sub-s">你负责点菜，做饭和洗碗都归我</div><div class="underline"></div>
           <div class="sect"><h4>今日推荐</h4><a>换一道 →</a></div>
           <div class="glass feat">
             <div class="img"></div>
-            <div class="cap"><span class="tagme">今日主推</span>
-              <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:5px">
-                <span class="nm">番茄牛腩煲</span><span class="price serif" style="color:#FFFDF9">28</span>
-              </div>
+            <div style="padding:9px 14px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,var(--clay-soft),var(--clay))">
+              <div><span class="tagme" style="background:rgba(255,253,249,.22)">今日主推</span>
+                <div class="nm" style="font-family:var(--serif);font-size:17px;margin-top:4px">酸菜白肉锅</div></div>
+              <span class="price serif" style="color:#FFFDF9;font-size:22px">40</span>
             </div>
           </div>
           <div class="sect"><h4>常点的</h4><a>全部 →</a></div>
@@ -250,7 +247,7 @@
         </div></div>
         <div class="dock"><div class="pill-nav"><i class="act">🏠</i><i>🍜</i><i>📋</i><i>👤</i></div><div class="orb">🛒<b>3</b></div></div>
       </div></div>
-      <ul><li>列表隐喻收敛为 3 种，约 1.5 屏</li><li>今日主推大卡（底部暖墨渐变压字）</li><li>常点的 2 列网格 + 最近订单竖列表</li><li>收藏入口直达 /menu?fav=1</li></ul>
+      <ul><li>列表隐喻收敛为 3 种，约 1.5 屏</li><li>主推位只用带实拍图的菜，「换一道」原地轮换</li><li>常点的 2 列网格 + 最近订单竖列表</li><li>收藏入口直达 /menu?fav=1（无独立快捷入口，与底部导航去重）</li></ul>
     </div>
 
     <!-- 2 MENU -->
@@ -260,7 +257,7 @@
         <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 70% 20%,var(--photo-herb),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
-          <div class="title-s">今天吃什么？</div><div class="sub-s">一起选点好吃的吧~</div><div class="underline"></div>
+          <div class="title-s">懒洋洋今天想吃什么？</div><div class="sub-s">随便点，买单和洗碗都归男朋友</div><div class="underline"></div>
           <div class="glass seg"><span class="on">🍜 全部菜品</span><span>⭐ 我的收藏</span></div>
           <div class="glass search">🔍 搜搜想吃的菜...</div>
           <div class="glass card"><div class="split-h"><span class="badge">今日灵感</span><span class="muted" style="font-size:10.5px">不知道吃啥就选它</span></div>
@@ -301,10 +298,20 @@
               <span class="chip" style="background:linear-gradient(135deg,var(--clay-soft),var(--clay));color:#FFFDF9;border:none">＋</span></div>
           </div>
           <div class="glass card"><button class="btn-clay" style="margin-top:0">🐱 加入购物车</button></div>
+          <div class="glass card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="nm" style="font-family:var(--serif);font-size:15px">男朋友的菜谱</div>
+              <span style="display:flex;gap:4px"><span class="badge">★★★★</span><span class="badge" style="background:var(--glass);border:1px solid var(--glass-border);color:var(--ash)">🔥 571 大卡</span></span>
+            </div>
+            <div class="ds" style="margin-top:8px">🧺 需要准备：小龙虾 / 香叶 / 八角 / 桂皮 / 青花椒 / 郫县豆瓣 / 啤酒</div>
+            <div class="split-h" style="margin-top:8px"><span style="width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--clay-soft),var(--clay));color:#FFFDF9;font-size:9px;display:inline-flex;align-items:center;justify-content:center;flex:none">1</span><span class="ds" style="margin:0">小龙虾刷洗干净去虾线，葱切 2cm 段、姜蒜切末</span></div>
+            <div class="split-h" style="margin-top:5px"><span style="width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--clay-soft),var(--clay));color:#FFFDF9;font-size:9px;display:inline-flex;align-items:center;justify-content:center;flex:none">2</span><span class="ds" style="margin:0">烧油，油微热下香叶、八角、桂皮、青花椒、子弹头辣椒</span></div>
+            <div class="kbd">共 7 步 · 💡 饭店应该都是油炸一遍，家庭做法用油比炒菜多一些即可</div>
+          </div>
         </div></div>
         <div class="dock"><div class="pill-nav"><i>🏠</i><i class="act">🍜</i><i>📋</i><i>👤</i></div><div class="orb" style="opacity:.35">🛒</div></div>
       </div></div>
-      <ul><li>PageHeader(back + ⭐收藏在右上)</li><li>信息卡补齐内边距（不再贴圆角边）</li><li>数量统一 ui/Stepper（36px 档）</li><li>按当前人格渐变加购</li></ul>
+      <ul><li>PageHeader(back + ⭐收藏在右上)</li><li>信息卡 + 数量卡 + 加购卡</li><li>男朋友的菜谱卡：原料 pill + 编号步骤 + 卡路里（懒加载）</li></ul>
     </div>
 
     <!-- 4 CART -->
@@ -314,7 +321,7 @@
         <div class="hero" style="height:120px;filter:blur(8px) brightness(1.02)"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-neu),var(--photo-base))"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad" style="padding-top:30px">
-          <div class="title-s">已选的菜</div><div class="sub-s">共 4 件</div><div class="underline"></div>
+          <div class="title-s">想吃的都在这啦</div><div class="sub-s">共 4 件，买单我来</div><div class="underline"></div>
           <div class="glass card" style="border-color:rgba(200,104,63,.4)">
             <div class="split-h"><span class="av me">🐱</span><b>我点的</b><span class="price serif" style="margin-left:auto">70</span></div>
             <div class="ds" style="margin-top:6px;display:flex;justify-content:space-between">酸菜鱼 ×1 <span>− 1 ＋</span></div>
@@ -344,7 +351,7 @@
         <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-neu),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
-          <div class="title-s">我们的订单</div><div class="sub-s">一共 3 笔</div><div class="underline"></div>
+          <div class="title-s">我们的干饭记录</div><div class="sub-s">一共 3 笔，每顿都有我陪</div><div class="underline"></div>
           <div class="row"><span class="chip on">✨ 全部</span><span class="chip">⏳ 等着呢</span><span class="chip">👨‍🍳 在做了</span><span class="chip">🎉 做好啦</span></div>
           <div class="glass ocard"><div class="bar" style="background:linear-gradient(90deg,rgba(224,160,126,.55),rgba(224,160,126,.13))"></div>
             <div class="inner"><div class="lbar" style="background:#E0A07E"></div>
@@ -370,7 +377,7 @@
 
     <!-- 6 ORDER DETAIL -->
     <div class="cell" id="order">
-      <h3>🔎 订单详情 <span class="tag">/orders/:id</span></h3>
+      <h3>🔎 这单吃了啥 <span class="tag">/orders/:id</span></h3>
       <div class="phone"><div class="screen">
         <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 40% 30%,var(--photo-neu),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
@@ -404,7 +411,7 @@
         <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-warm),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
-          <div class="title-s">我的</div><div class="underline"></div>
+          <div class="title-s">我的懒洋洋</div><div class="underline"></div>
           <div class="glass card" style="text-align:center">
             <div style="width:64px;height:64px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:30px" class="av me">🐱</div>
             <div class="nm" style="margin-top:8px;font-family:var(--serif)">美食家（我）</div>
@@ -515,13 +522,14 @@
       <div class="ck"><div class="ic">🧭</div><div><b>断头路 0</b><span>PageHeader(back/backTo) 全覆盖；后台三页 AdminShell 强制返回。</span></div></div>
       <div class="ck"><div class="ic">📏</div><div><b>设计标尺</b><span>@theme static 圆角/阴影/字阶/间距/动效令牌；硬编码 px 字号与散落圆角 grep 到 0。</span></div></div>
       <div class="ck"><div class="ic">🔥</div><div><b>订单状态</b><span>D3 状态环（--ring-size 令牌）+ ui/OrderCard 用户端/后台双端复用。</span></div></div>
+      <div class="ck"><div class="ic">📖</div><div><b>男朋友的菜谱</b><span>342 份制作菜谱（原料/步骤/卡路里/小贴士）随详情页懒加载，来自 HowToCook 公有领域数据。</span></div></div>
       <div class="ck"><div class="ic">🧊</div><div><b>玻璃卡 + 降级</b><span>backdrop-filter 不支持时回退实色；prefers-reduced-motion 关闭动效。</span></div></div>
     </div>
   </section>
 
   <footer>
     晨光厨房 · IA 重构预览（10 页） &nbsp;|&nbsp; 真机运行于 <code style="color:var(--clay)">npm run dev</code>（http://localhost:5173）<br>
-    本页为静态功能预览；想看真实大图与交互动效，请打开 dev server。
+    本页为静态功能预览（导航图标为示意简化，实机为统一细线 SVG）；想看真实大图与交互动效，请打开 dev server。
   </footer>
 </div>
 
