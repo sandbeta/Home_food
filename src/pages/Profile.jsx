@@ -8,9 +8,11 @@ import StatCard from '../components/ui/StatCard'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { useCart } from '../components/CartContext'
+import { pickOne, PROFILE_TITLES } from '../lib/sweetCopy'
 
 export default function Profile() {
   const [stats, setStats] = useState({ orders: 0, total: 0 })
+  const [pageTitle] = useState(() => pickOne(PROFILE_TITLES))
   const navigate = useNavigate()
   const { whoAmI, setWhoAmI } = useCart()
   const persona = PERSONA[whoAmI]
@@ -25,7 +27,7 @@ export default function Profile() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.profile} variant="immersive" alt="我的" />
 
-      <PageHeader title="我的懒洋洋" />
+      <PageHeader title={pageTitle} />
 
       <PageContainer>
         {/* 身份卡 - 点头像切换 🐱/🐰 */}

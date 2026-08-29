@@ -11,6 +11,7 @@ import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import { HERO_IMAGES } from '../theme/images'
 import { ORDER_STATUS, PAYER } from '../theme/persona'
+import { pickOne, DETAIL_TITLES } from '../lib/sweetCopy'
 
 const STATUS_MAP = {
   pending: { ...ORDER_STATUS.pending, emoji: '⏳', desc: '交给厨房啦，等着就好~' },
@@ -23,6 +24,7 @@ export default function OrderDetail() {
   const navigate = useNavigate()
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [pageTitle] = useState(() => pickOne(DETAIL_TITLES))
 
   useEffect(() => {
     fetch(`/api/orders/${id}`).then(r => r.json())
@@ -57,7 +59,7 @@ export default function OrderDetail() {
       <FullBleedHero src={HERO_IMAGES.order} variant="immersive" alt="订单详情" />
 
       <PageHeader
-        title="这单吃了啥"
+        title={pageTitle}
         back
         right={<Link to="/orders" className="text-xs text-[var(--color-clay)] font-semibold bg-[var(--color-clay)]/10 px-3 py-1.5 rounded-full">全部订单</Link>}
       />

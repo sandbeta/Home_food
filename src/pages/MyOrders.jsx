@@ -10,6 +10,7 @@ import LoadingState from '../components/ui/LoadingState'
 import Chip from '../components/ui/Chip'
 import { HERO_IMAGES } from '../theme/images'
 import { orderStatusOf } from '../theme/persona'
+import { pickOne, ORDERS_TITLES, ORDERS_NOTES } from '../lib/sweetCopy'
 
 const STATUS_FILTERS = [
   { value: '', label: '全部', emoji: '✨' },
@@ -26,6 +27,8 @@ export default function MyOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
+  const [pageTitle] = useState(() => pickOne(ORDERS_TITLES))
+  const [pageNote] = useState(() => pickOne(ORDERS_NOTES))
   const navigate = useNavigate()
 
   useEffect(() => { fetch('/api/orders').then(r => r.json()).then(d => { setOrders(d); setLoading(false) }) }, [])
@@ -36,7 +39,7 @@ export default function MyOrders() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.orders} variant="immersive" alt="我们的订单" />
 
-      <PageHeader title="我们的干饭记录" subtitle={orders.length > 0 ? `一共 ${orders.length} 笔，每顿都有我陪` : ''} />
+      <PageHeader title={pageTitle} subtitle={orders.length > 0 ? pageNote(orders.length) : ''} />
 
       <PageContainer>
         {/* 状态筛选 */}

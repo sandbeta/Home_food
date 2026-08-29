@@ -12,6 +12,7 @@ import EmptyState from '../components/ui/EmptyState'
 import { useFavorites } from '../lib/favorites'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
+import { pickOne, MENU_TITLES, MENU_NOTES } from '../lib/sweetCopy'
 
 // 仅保留 emoji；旧版彩虹色全部移除，改用晨光玻璃 + 赤陶/鼠尾草绿强调
 const CATEGORY_CONFIG = {
@@ -143,6 +144,8 @@ export default function Menu() {
 
   // 0 菜的分类不展示（如「其他」被清空时），避免点了空手而归
   const [catCounts, setCatCounts] = useState(null)
+  const [pageTitle] = useState(() => pickOne(MENU_TITLES))
+  const [pageNote] = useState(() => pickOne(MENU_NOTES))
   useEffect(() => {
     fetch('/api/dishes/all').then(r => r.json()).then(all => {
       const m = {}
@@ -166,7 +169,7 @@ export default function Menu() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.menu} variant="immersive" alt="菜单" />
 
-      <PageHeader title="懒洋洋今天想吃什么？" subtitle="随便点，买单和洗碗都归男朋友" />
+      <PageHeader title={pageTitle} subtitle={pageNote} />
 
       <PageContainer>
         <WhoSelector whoAmI={whoAmI} setWhoAmI={setWhoAmI} />

@@ -13,6 +13,7 @@ import EmptyState from '../components/ui/EmptyState'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { cardEntrance } from '../theme/motion'
+import { pickOne, CART_TITLES, CART_NOTES } from '../lib/sweetCopy'
 
 function CartRow({ item, onUpdate, onRemove }) {
   return (
@@ -68,6 +69,8 @@ export default function Cart() {
   const [payer, setPayer] = useState('aa')
   const [submitting, setSubmitting] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
+  const [pageTitle] = useState(() => pickOne(CART_TITLES))
+  const [pageNote] = useState(() => pickOne(CART_NOTES))
   const navigate = useNavigate()
 
   const meItems = items.filter((i) => i.added_by === 'me')
@@ -130,7 +133,7 @@ export default function Cart() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.orders} variant="functional" alt="购物车" />
 
-      <PageHeader title="想吃的都在这啦" subtitle={totalCount > 0 ? `共 ${totalCount} 件，买单我来` : ''} back />
+      <PageHeader title={pageTitle} subtitle={totalCount > 0 ? pageNote(totalCount) : ''} back />
 
       {items.length === 0 ? (
         <EmptyState

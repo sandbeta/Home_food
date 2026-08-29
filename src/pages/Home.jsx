@@ -9,16 +9,7 @@ import SectionHeader from '../components/ui/SectionHeader'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
-
-// 顶部欢迎语：男朋友口吻，写给女朋友（昵称：懒洋洋）
-const GIRLFRIEND_NICKNAME = '懒洋洋'
-const SWEET_NOTES = [
-  '今天想让男朋友投喂点什么呀？',
-  '你负责点菜，做饭和洗碗都归我',
-  '小懒虫，想吃啥直接点，都给你安排',
-  '奶茶炸鸡火锅烤肉，你说了算',
-  '和你一起吃的每一顿都好吃',
-]
+import { NICKNAME, pickOne, HOME_NOTES } from '../lib/sweetCopy'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -40,7 +31,7 @@ export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
   const [featured, setFeatured] = useState(null)
   const [popular, setPopular] = useState([])
-  const [sweetNote] = useState(() => SWEET_NOTES[Math.floor(Math.random() * SWEET_NOTES.length)])
+  const [sweetNote] = useState(() => pickOne(HOME_NOTES))
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -56,7 +47,7 @@ export default function Home() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.home} variant="immersive" alt="今日美食" />
 
-      <PageHeader title={`${getGreeting()}，${GIRLFRIEND_NICKNAME}`} subtitle={sweetNote} />
+      <PageHeader title={`${getGreeting()}，${NICKNAME}`} subtitle={sweetNote} />
 
       <PageContainer>
         {/* 今日主推 —— 全页深色锚点：clay 实底 + 白字大号 serif 价格 */}
