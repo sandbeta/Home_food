@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import Header from '../components/Header'
+import PageHeader from '../components/PageHeader'
 import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
 import { HERO_IMAGES } from '../theme/images'
@@ -26,7 +26,7 @@ export default function MyOrders() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.orders} variant="immersive" alt="我们的订单" />
 
-      <Header title="我们的订单" subtitle={orders.length > 0 ? `一共 ${orders.length} 笔` : ''} />
+      <PageHeader title="我们的订单" subtitle={orders.length > 0 ? `一共 ${orders.length} 笔` : ''} />
 
       <div className="px-4">
         {loading ? (

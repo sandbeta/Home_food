@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCart } from '../components/CartContext'
-import Header from '../components/Header'
+import PageHeader from '../components/PageHeader'
 import GlassCard from '../components/GlassCard'
 import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
@@ -44,7 +44,7 @@ export default function DishDetail() {
     <div className="relative">
       <FullBleedHero src={dish.image_url || HERO_IMAGES.dish} variant="immersive" alt={dish.name} />
 
-      <Header title={dish.name}
+      <PageHeader title={dish.name}
         right={
           <div className="flex items-center gap-2">
             <motion.button

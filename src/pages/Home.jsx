@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import Header from '../components/Header'
+import PageHeader from '../components/PageHeader'
 import GlassCard from '../components/GlassCard'
 import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
@@ -72,7 +72,7 @@ export default function Home() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.home} variant="immersive" alt="今日美食" />
 
-      <Header title={`${getGreeting()}，今天吃什么？`} subtitle={motivation} />
+      <PageHeader title={`${getGreeting()}，今天吃什么？`} subtitle={motivation} />
 
       <div className="px-4 pb-6 space-y-6">
         {/* 3D 轮播 Banner */}

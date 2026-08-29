@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import Header from '../components/Header'
+import PageHeader from '../components/PageHeader'
 import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
 import { useFavorites } from '../lib/favorites'
@@ -15,7 +15,7 @@ export default function Favorites() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.favorites} variant="immersive" alt="我的收藏" />
 
-      <Header title="我的收藏" subtitle={`${favorites.length} 道喜欢的菜`} />
+      <PageHeader title="我的收藏" subtitle={`${favorites.length} 道喜欢的菜`} />
 
       <div className="px-4 pb-4">
         {favorites.length === 0 ? (

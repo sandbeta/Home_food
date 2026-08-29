@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import Header from '../components/Header'
+import PageHeader from '../components/PageHeader'
 import FullBleedHero from '../components/FullBleedHero'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
@@ -30,7 +30,7 @@ export default function Profile() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.profile} variant="immersive" alt="我的" />
 
-      <Header title="我的" />
+      <PageHeader title="我的" />
 
       <div className="px-4 pb-4 space-y-4">
         {/* 头像卡片 - 身份切换 */}

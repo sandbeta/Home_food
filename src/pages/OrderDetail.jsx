@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import Header from '../components/Header'
+import PageHeader from '../components/PageHeader'
 import GlassCard from '../components/GlassCard'
 import FullBleedHero from '../components/FullBleedHero'
 import D3StatusRing from '../components/D3StatusRing'
@@ -57,7 +57,7 @@ export default function OrderDetail() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.order} variant="immersive" alt="订单详情" />
 
-      <Header title="订单详情"
+      <PageHeader title="订单详情"
         right={<Link to="/orders" className="text-xs text-[var(--color-clay)] font-semibold bg-[var(--color-clay)]/10 px-3 py-1.5 rounded-full">全部订单</Link>} />
 
       <div className="px-4 space-y-3">
