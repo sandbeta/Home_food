@@ -2,7 +2,10 @@ import { motion } from 'framer-motion'
 
 export default function D3StatusRing({ config }) {
   return (
-    <div className="relative w-[140px] h-[140px] mx-auto" style={{ perspective: '800px' }}>
+    <div
+      className="relative mx-auto"
+      style={{ width: 'var(--ring-size)', height: 'var(--ring-size)', perspective: '800px' }}
+    >
       <div className="absolute inset-0 rounded-full" style={{
         background: `radial-gradient(circle, ${config.ring[1]}30, transparent 70%)`,
         transform: 'translateZ(-20px)'

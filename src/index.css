@@ -105,6 +105,7 @@
   --space-page-x: 16px;    /* 页面左右边距（PageHeader 也要对齐到这里） */
   --space-section: 20px;   /* 区块之间的纵向节奏 */
   --space-card-p: 16px;    /* 卡片内边距 */
+  --ring-size: 140px;      /* 订单状态环直径（OrderDetail） */
 
   /* —— 底部停靠层 ——
      唯一底部固定层：导航药丸与购物车球**并排同一行**（而非上下叠放），

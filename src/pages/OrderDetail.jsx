@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
 import GlassCard from '../components/GlassCard'
 import FullBleedHero from '../components/FullBleedHero'
 import D3StatusRing from '../components/D3StatusRing'
 import KissIcon from '../components/KissIcon'
+import PageContainer from '../components/ui/PageContainer'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
 import { HERO_IMAGES } from '../theme/images'
 import { ORDER_STATUS, PAYER } from '../theme/persona'
 
@@ -17,6 +20,7 @@ const STATUS_MAP = {
 
 export default function OrderDetail() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -26,28 +30,23 @@ export default function OrderDetail() {
       .catch(() => setLoading(false))
   }, [id])
 
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center py-32">
-      <div className="relative">
-        <motion.div className="text-5xl" animate={{ y: [0, -8, 0], rotate: [0, 5, -5, 0] }} transition={{ duration: 2, repeat: Infinity }}>🍳</motion.div>
-        <motion.div className="absolute -inset-6 rounded-full opacity-15"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.18), transparent 70%)' }} />
-      </div>
-    </div>
-  )
+  if (loading) return <LoadingState emoji="🍳" text="正在查订单..." />
 
   if (!order) return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-32 relative overflow-hidden">
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full opacity-10"
-        style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.18), transparent 70%)' }} />
-      <motion.div className="text-7xl mb-4 relative z-10" animate={{ y: [0, -6, 0] }} transition={{ duration: 2.5, repeat: Infinity }}>😵</motion.div>
-      <p className="text-[var(--color-ash)] relative z-10 font-medium">找不到这个订单了</p>
-      <Link to="/orders" className="mt-4 d3-btn d3-btn-primary text-xs font-semibold px-4 py-2 rounded-full relative z-10">
-        回到订单列表
-      </Link>
-    </motion.div>
+    <EmptyState
+      emoji="😵"
+      title="找不到这个订单了"
+      desc="它可能已被删除，或者链接不对~"
+      action={
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/orders')}
+          className="d3-btn d3-btn-primary px-5 py-2.5 text-sm font-bold"
+        >
+          回到订单列表
+        </motion.button>
+      }
+    />
   )
 
   const status = STATUS_MAP[order.status] || STATUS_MAP.pending
@@ -57,10 +56,14 @@ export default function OrderDetail() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.order} variant="immersive" alt="订单详情" />
 
-      <PageHeader title="订单详情"
-        right={<Link to="/orders" className="text-xs text-[var(--color-clay)] font-semibold bg-[var(--color-clay)]/10 px-3 py-1.5 rounded-full">全部订单</Link>} />
+      <PageHeader
+        title="订单详情"
+        back
+        right={<Link to="/orders" className="text-xs text-[var(--color-clay)] font-semibold bg-[var(--color-clay)]/10 px-3 py-1.5 rounded-full">全部订单</Link>}
+      />
 
-      <div className="px-4 space-y-3">
+      <PageContainer>
+        {/* 状态环（尺寸令牌 --ring-size，见 D3StatusRing） */}
         <GlassCard>
           <div className="p-5 text-center overflow-hidden relative">
             <div className="relative z-10">
@@ -74,6 +77,7 @@ export default function OrderDetail() {
           </div>
         </GlassCard>
 
+        {/* 菜品明细 + 谁买单 + 合计 */}
         <GlassCard delay={0.1}>
           <div className="p-4">
             <h2 className="font-bold text-sm text-[var(--color-bone)] mb-3 flex items-center gap-2">
@@ -85,14 +89,14 @@ export default function OrderDetail() {
                   transition={{ delay: 0.15 + idx * 0.04 }}
                   className="flex items-center justify-between rounded-lg px-2 py-1.5 -mx-2 hover:bg-white/5 transition-colors duration-150 relative group">
                   <div className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full group-hover:bg-[var(--color-clay)]/40 transition-colors duration-150" />
-                  <div className="flex items-center gap-2.5">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] ${item.added_by === 'me' ? 'avatar-me' : 'avatar-partner'}`}>
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] shrink-0 ${item.added_by === 'me' ? 'avatar-me' : 'avatar-partner'}`}>
                       {item.added_by === 'me' ? '🐱' : '🐰'}
                     </div>
-                    <span className="text-sm text-[var(--color-bone)] font-medium">{item.dish_name}</span>
-                    <span className="text-xs text-[var(--color-ash)]">×{item.quantity}</span>
+                    <span className="text-sm text-[var(--color-bone)] font-medium truncate">{item.dish_name}</span>
+                    <span className="text-xs text-[var(--color-ash)] shrink-0">×{item.quantity}</span>
                   </div>
-                  <div className="flex items-center gap-0.5">
+                  <div className="flex items-center gap-0.5 shrink-0">
                     <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
                     <span className="text-sm font-bold text-[var(--color-clay-soft)]">{(item.price * item.quantity).toFixed(0)}</span>
                   </div>
@@ -110,13 +114,14 @@ export default function OrderDetail() {
                 </div>
                 <div className="flex items-center gap-1">
                   <KissIcon className="w-4 h-4 text-[var(--color-love)]" />
-                  <span className="text-[20px] font-bold text-[var(--color-clay-soft)]">{order.total_price}</span>
+                  <span className="font-serif text-xl font-bold text-[var(--color-clay-soft)] tabular-nums">{order.total_price}</span>
                 </div>
               </div>
             </div>
           </div>
         </GlassCard>
 
+        {/* 备注 */}
         {order.note && (
           <GlassCard delay={0.2}>
             <div className="p-3.5 relative overflow-hidden">
@@ -130,14 +135,15 @@ export default function OrderDetail() {
           </GlassCard>
         )}
 
+        {/* 时间戳 */}
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-          className="text-center text-xs text-[var(--color-ash)] py-3 flex items-center justify-center gap-1.5">
+          className="text-center text-xs text-[var(--color-ash)] pb-2 flex items-center justify-center gap-1.5">
           <svg className="w-3 h-3 opacity-40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
           </svg>
           {new Date(order.created_at).toLocaleString('zh-CN')}
         </motion.p>
-      </div>
+      </PageContainer>
     </div>
   )
 }
