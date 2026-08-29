@@ -1,71 +1,98 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../components/CartContext'
-import { useFavorites } from '../lib/favorites'
-import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
-import { pickOne, MENU_TITLES, MENU_NOTES } from '../lib/sweetCopy'
-import Icon from '../components/ui/Icons'
+import PageHeader from '../components/PageHeader'
+import GlassCard from '../components/GlassCard'
+import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
+import DishRow from '../components/ui/DishRow'
+import PageContainer from '../components/ui/PageContainer'
+import EmptyState from '../components/ui/EmptyState'
+import { useFavorites } from '../lib/favorites'
+import { HERO_IMAGES } from '../theme/images'
+import { PERSONA } from '../theme/persona'
+import { pickOne, MENU_TITLES, MENU_NOTES } from '../lib/sweetCopy'
 
-/*
- * 点菜页 · WeUI 设计语言试点
- * 搜索框/白卡分组/发丝线/按压变色；逻辑与晨光版一致：
- * 收藏并入（?fav=1 热同步）、给谁点、今日灵感（吃全量池，搜索不扰动）、
- * 0 菜分类隐藏、长列表分页（初始 30 + 加载更多）。
- */
+// 仅保留 emoji；旧版彩虹色全部移除，改用晨光玻璃 + 赤陶/鼠尾草绿强调
+const CATEGORY_CONFIG = {
+  '全部': { emoji: '✨' }, '家常菜': { emoji: '🍳' }, '硬菜': { emoji: '🥩' }, '素菜': { emoji: '🥬' },
+  '主食': { emoji: '🍚' }, '小吃': { emoji: '🍢' }, '水果': { emoji: '🍎' }, '饮品': { emoji: '🧋' },
+  '汤类': { emoji: '🍲' }, '川菜': { emoji: '🌶️' }, '粤菜': { emoji: '🥢' }, '湘菜': { emoji: '🔥' },
+  '鲁菜': { emoji: '🍤' }, '苏菜': { emoji: '🪷' }, '浙菜': { emoji: '🐟' }, '闽菜': { emoji: '🦐' },
+  '徽菜': { emoji: '🍲' }, '东北菜': { emoji: '🥟' }, '西北菜': { emoji: '🍖' }, '云贵菜': { emoji: '🍄' },
+  '其他': { emoji: '🍽️' },
+}
 
-const hideImg = (e) => { e.currentTarget.style.display = 'none' }
-
-function RecommendCard({ dish, onAdd, onReload }) {
-  if (!dish) return null
+function WhoSelector({ whoAmI, setWhoAmI }) {
   return (
-    <div className="weui-group">
-      <div className="weui-cell" style={{ display: 'block' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span className="weui-14 weui-t2">今日灵感</span>
-          <button className="weui-link" onClick={onReload}
-            style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', fontSize: 14 }}>
-            换一个
-          </button>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10 }}>
-          <div
-            style={{
-              width: 48, height: 48, borderRadius: 4, overflow: 'hidden', flex: 'none', position: 'relative',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-weui-press)',
-            }}
-          >
-            <span style={{ fontSize: 24 }}>{getCategoryEmoji(dish.category)}</span>
-            {getDishImage(dish) && (
-              <img src={getDishImage(dish)} alt={dish.name} loading="lazy"
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                onError={hideImg} />
-            )}
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="weui-17 weui-medium weui-t1">{dish.name}</div>
-            <div className="weui-14 weui-t2" style={{ marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {dish.description || '好吃的~'}
-            </div>
-            <div className="weui-14 weui-medium weui-t1" style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ display: 'inline-flex', color: 'var(--color-weui-text2)' }}>
-                <KissIcon className="w-3 h-3" />
-              </span>
-              {dish.price}
-            </div>
-          </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); onAdd(dish) }}
-            style={{
-              flex: 'none', padding: '5px 12px', borderRadius: 8, fontSize: 14, cursor: 'pointer',
-              border: '1px solid var(--color-weui-green)', background: 'none', color: 'var(--color-weui-green)',
-            }}
-          >
-            加一份
-          </button>
-        </div>
-      </div>
+    <div className="d3-card-face p-1.5 flex items-center gap-1.5 mb-4">
+      <span className="pl-2 pr-1 text-xs text-[var(--color-ash)] font-bold">给谁点</span>
+      {[{ value: 'me', label: '自己', icon: '🐱' }, { value: 'partner', label: 'TA', icon: '🐰' }].map(opt => {
+        const active = whoAmI === opt.value
+        return (
+          <motion.button key={opt.value} whileTap={{ scale: 0.95 }} onClick={() => setWhoAmI(opt.value)}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-2xl text-sm font-bold transition-all duration-300 ease-out ${active ? (opt.value === 'me' ? 'avatar-me glow-clay' : 'avatar-partner glow-sage') : 'text-[var(--color-ash)] hover:bg-white/5'}`}
+            animate={active ? { scale: 1.02 } : { scale: 1 }}>
+            <motion.span className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center text-xs"
+              animate={active ? { rotate: [0, -8, 8, 0] } : { rotate: 0 }}
+              transition={{ duration: 0.5 }}>{opt.icon}</motion.span>
+            {opt.label}
+          </motion.button>
+        )
+      })}
     </div>
+  )
+}
+
+function RecommendCard({ dishes, onAdd, spawnParticle }) {
+  const randomDish = useMemo(() => {
+    if (dishes.length === 0) return null
+    return dishes[Math.floor(Math.random() * dishes.length)]
+  }, [dishes])
+
+  if (!randomDish) return null
+
+  return (
+    <GlassCard className="p-4 mb-4 overflow-hidden relative">
+      <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full animate-float-gentle"
+        style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.14), transparent 70%)' }} />
+      <div className="absolute -left-6 -bottom-6 w-20 h-20 rounded-full animate-float"
+        style={{ background: 'radial-gradient(circle, rgba(127,163,122,0.10), transparent 70%)', animationDelay: '1s' }} />
+
+      <div className="relative flex items-center justify-between mb-3">
+        <span className="badge-soft text-xs font-extrabold px-2.5 py-1 rounded-full"
+          style={{ background: 'rgba(200,104,63,0.14)', color: 'var(--color-clay)' }}>今日灵感</span>
+        <span className="text-xs text-[var(--color-ash)]">不知道吃啥就选它</span>
+      </div>
+      <div className="relative flex items-center gap-3">
+        <div className="relative w-16 h-16 rounded-[var(--radius-tile)] flex items-center justify-center shrink-0 overflow-hidden"
+          style={{ background: 'linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-850) 60%, rgba(200,104,63,0.08) 100%)' }}>
+          <span className="text-3xl">{CATEGORY_CONFIG[randomDish.category]?.emoji || '🍽️'}</span>
+          {randomDish.image_url && (
+            <img src={randomDish.image_url} alt={randomDish.name} loading="lazy"
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.style.display = 'none' }} />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-bold text-lg text-[var(--color-bone)] truncate">{randomDish.name}</h3>
+          <p className="text-xs text-[var(--color-ash)] mt-0.5 line-clamp-1">{randomDish.description || '好吃的~'}</p>
+          <div className="flex items-center gap-1 mt-1.5">
+            <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
+            <span className="font-serif text-base font-extrabold text-[var(--color-caramel)]">{randomDish.price}</span>
+          </div>
+        </div>
+        <motion.button whileTap={{ scale: 0.92 }} whileHover={{ scale: 1.04 }} onClick={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect()
+          spawnParticle(rect.left + rect.width / 2, rect.top)
+          onAdd(randomDish)
+        }}
+          className="d3-btn d3-btn-primary px-3.5 py-2 rounded-2xl text-xs font-bold">
+          加一份
+        </motion.button>
+      </div>
+    </GlassCard>
   )
 }
 
@@ -80,13 +107,16 @@ export default function Menu() {
   const [activeCategory, setActiveCategory] = useState('全部')
   const [keyword, setKeyword] = useState('')
   const [loading, setLoading] = useState(true)
+  const [searchFocused, setSearchFocused] = useState(false)
   const [showAllCategories, setShowAllCategories] = useState(false)
+  const [particles, setParticles] = useState([])
   const { addItem, whoAmI, setWhoAmI } = useCart()
   const { favorites, has, toggle } = useFavorites()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
-  // 收藏已并入本页：'all'=全部菜品，'fav'=我的收藏；?fav=1 直达（热同步）
+  // 收藏已并入本页：'all'=全部菜品，'fav'=我的收藏
+  // 支持 ?fav=1 直达收藏（/favorites 旧路由重定向到这里）
   const [scope, setScope] = useState(() => (searchParams.get('fav') ? 'fav' : 'all'))
   const isFavScope = scope === 'fav'
 
@@ -98,6 +128,7 @@ export default function Menu() {
       .catch(() => setLoading(false))
   }, [activeCategory])
 
+  // 收藏页签的数据源是本地收藏夹，全部页签是服务端返回；关键词对两者都生效
   const filteredDishes = useMemo(() => {
     const q = keyword.trim().toLowerCase()
     const base = isFavScope ? favorites : dishes
@@ -105,7 +136,12 @@ export default function Menu() {
     return base.filter(d => `${d.name} ${d.category} ${d.description || ''}`.toLowerCase().includes(q))
   }, [isFavScope, favorites, dishes, keyword])
 
-  // 长列表分页：初始 30 条 + 加载更多（筛选条件变化时重置）
+  // /favorites 旧链接会重定向到 /menu?fav=1；若此时已停在 /menu（组件未重挂载），这里热同步页签
+  useEffect(() => {
+    if (searchParams.get('fav')) setScope('fav')
+  }, [searchParams])
+
+  // 长列表分页渲染：初始 30 条 + 加载更多，避免 400+ 行一次性进 DOM（筛选条件变化时重置）
   const [visibleCount, setVisibleCount] = useState(30)
   useEffect(() => { setVisibleCount(30) }, [activeCategory, scope, keyword])
   const visibleDishes = useMemo(
@@ -113,11 +149,7 @@ export default function Menu() {
     [filteredDishes, visibleCount],
   )
 
-  // 今日灵感吃全量池，搜索/筛选不扰动；「换一个」顺位轮换
-  const [inspIdx, setInsIdx] = useState(0)
-  const inspiration = dishes.length ? dishes[inspIdx % dishes.length] : null
-
-  // 0 菜的分类不展示
+  // 0 菜的分类不展示（如「其他」被清空时），避免点了空手而归
   const [catCounts, setCatCounts] = useState(null)
   const [pageTitle] = useState(() => pickOne(MENU_TITLES))
   const [pageNote] = useState(() => pickOne(MENU_NOTES))
@@ -130,203 +162,261 @@ export default function Menu() {
   }, [])
   const visibleCats = (items) => (catCounts ? items.filter(cat => cat === '全部' || (catCounts[cat] || 0) > 0) : items)
 
-  const pill = (active) => ({
-    padding: '5px 12px', borderRadius: 8, fontSize: 14, cursor: 'pointer',
-    border: active ? 'none' : '0.5px solid var(--color-weui-line)',
-    background: active ? 'rgba(7, 193, 96, 0.08)' : 'var(--color-weui-card)',
-    color: active ? 'var(--color-weui-green)' : 'var(--color-weui-text2)',
-    fontWeight: active ? 500 : 400,
-  })
+  const spawnParticle = (x, y) => {
+    const id = Date.now() + Math.random()
+    setParticles(prev => [...prev, { id, x, y }])
+    setTimeout(() => {
+      setParticles(prev => prev.filter(p => p.id !== id))
+    }, 950)
+  }
+
+  const partner = PERSONA[whoAmI]
 
   return (
-    <div className="weui-theme">
-      <header className="weui-nav"><span className="weui-nav-title">点菜</span></header>
+    <div className="relative">
+      <FullBleedHero src={HERO_IMAGES.menu} variant="immersive" alt="菜单" />
 
-      <div style={{ padding: '12px 16px 0' }}>
-        <div className="weui-17 weui-medium weui-t1">{pageTitle}</div>
-        <div className="weui-14 weui-t2" style={{ marginTop: 2 }}>{pageNote}</div>
-      </div>
+      <PageHeader title={pageTitle} subtitle={pageNote} />
 
-      <div style={{ padding: '12px 16px 76px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {/* 搜索框 */}
-        <div className="weui-search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
-          </svg>
-          <input value={keyword} onChange={e => setKeyword(e.target.value)} placeholder="搜搜想吃的菜..." />
-          {keyword && (
-            <button onClick={() => setKeyword('')}
-              style={{ border: 'none', background: 'none', color: 'var(--color-weui-text3)', fontSize: 14, cursor: 'pointer', padding: 0 }}>
-              ✕
-            </button>
-          )}
+      <PageContainer>
+        <WhoSelector whoAmI={whoAmI} setWhoAmI={setWhoAmI} />
+
+        {/* 分段控件：收藏并入点菜页（收藏的下一步动作永远是加购，不该埋两级深） */}
+        <div className="d3-card-face p-1.5 flex items-center gap-1.5">
+          {[
+            { value: 'all', label: '全部菜品', emoji: '🍜' },
+            { value: 'fav', label: '我的收藏', emoji: '⭐' },
+          ].map((opt) => {
+            const active = scope === opt.value
+            return (
+              <motion.button
+                key={opt.value}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setScope(opt.value)}
+                aria-pressed={active}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-all duration-300"
+                style={{
+                  borderRadius: 'var(--radius-ctl)',
+                  ...(active
+                    ? {
+                        background: 'var(--color-clay-gradient)',
+                        color: '#FFFDF9',
+                        boxShadow: '0 4px 12px rgba(200,104,63,0.26)',
+                      }
+                    : { color: 'var(--color-ash)' }),
+                }}
+              >
+                <span>{opt.emoji}</span>
+                {opt.label}
+              </motion.button>
+            )
+          })}
         </div>
 
-        {/* 全部菜品 / 我的收藏：文本页签，选中绿 + 绿色下划线 */}
-        <div className="weui-group">
-          <div style={{ display: 'flex' }}>
-            {[{ value: 'all', label: '全部菜品' }, { value: 'fav', label: '⭐ 我的收藏' }].map((o) => {
-              const active = scope === o.value
+        {/* 搜索框 */}
+        <div className={`d3-card-face flex items-center gap-2 px-3 py-2.5 mb-4 bg-[var(--color-ink-800)]/80 transition-all duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}>
+          <motion.svg className={`w-4 h-4 text-[var(--color-ash)] transition-colors duration-300 ${searchFocused ? 'text-[var(--color-clay)]' : ''}`}
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
+            animate={searchFocused ? { rotate: 90 } : { rotate: 0 }}
+            transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}>
+            <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+          </motion.svg>
+          <input value={keyword} onChange={e => setKeyword(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
+            placeholder="搜搜想吃的菜..."
+            className="d3-input bg-transparent flex-1 text-sm placeholder:text-[var(--color-mist)] outline-none" />
+          <AnimatePresence>
+            {keyword && (
+              <motion.button onClick={() => setKeyword('')}
+                initial={{ opacity: 0, scale: 0.8, width: 0 }}
+                animate={{ opacity: 1, scale: 1, width: 'auto' }}
+                exit={{ opacity: 0, scale: 0.8, width: 0 }}
+                transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
+                className="text-xs text-[var(--color-clay)] font-bold px-1 whitespace-nowrap overflow-hidden">清空</motion.button>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {!loading && <RecommendCard dishes={dishes} onAdd={addItem} spawnParticle={spawnParticle} />}
+
+        {/* 分类标签 - 可折叠分组网格布局 */}
+        <div className="mb-3">
+          <div className="flex flex-wrap gap-2 items-center">
+            {visibleCats(CATEGORY_GROUPS[0].items).map(cat => {
+              const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG['其他']
+              const active = activeCategory === cat
               return (
-                <button key={o.value} onClick={() => setScope(o.value)}
-                  style={{
-                    flex: 1, padding: '10px 0 8px', fontSize: 14, fontWeight: 500, cursor: 'pointer',
-                    border: 'none', background: 'none',
-                    color: active ? 'var(--color-weui-green)' : 'var(--color-weui-text2)',
-                    borderBottom: active ? '2px solid var(--color-weui-green)' : '0.5px solid var(--color-weui-line)',
-                  }}>
-                  {o.label}
-                </button>
+                <motion.button key={cat}
+                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ y: -1 }}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${active ? 'd3-btn d3-btn-primary text-[#FFFDF9]' : 'd3-btn-sm text-[var(--color-ash)] hover:text-[var(--color-bone)]'}`}>
+                  <span className="text-xs">{cfg.emoji}</span>{cat}
+                </motion.button>
               )
             })}
-          </div>
-        </div>
-
-        {/* 给谁点 */}
-        <div className="weui-group">
-          <div className="weui-cell">
-            <span className="weui-17 weui-t1" style={{ flex: 1 }}>给谁点</span>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {[{ value: 'me', label: '自己 🐱' }, { value: 'partner', label: 'TA 🐰' }].map(o => {
-                const active = whoAmI === o.value
-                return (
-                  <button key={o.value} onClick={() => setWhoAmI(o.value)}
-                    style={{
-                      fontSize: 14, fontWeight: 500, padding: '4px 12px', borderRadius: 8, cursor: 'pointer', border: 'none',
-                      color: active ? 'var(--color-weui-green)' : 'var(--color-weui-text2)',
-                      background: active ? 'rgba(7, 193, 96, 0.08)' : 'transparent',
-                    }}>
-                    {o.label}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* 今日灵感（吃全量池，搜索不扰动） */}
-        <RecommendCard dish={inspiration} onAdd={addItem} onReload={() => setInsIdx(i => i + 1)} />
-
-        {/* 分类标签 */}
-        <div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
-            {visibleCats(CATEGORY_GROUPS[0].items).map(cat => (
-              <button key={cat} style={pill(activeCategory === cat)} onClick={() => setActiveCategory(cat)}>
-                {cat}
-              </button>
-            ))}
             {!showAllCategories && (
-              <button style={pill(false)} onClick={() => setShowAllCategories(true)}>更多菜系</button>
+              <motion.button
+                key="toggle-btn"
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowAllCategories(true)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border border-[var(--color-clay)]/30 text-[var(--color-clay)] hover:bg-[var(--color-clay)]/5 transition-all duration-300">
+                更多菜系
+                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 4.5L6 7.5L9 4.5" />
+                </svg>
+              </motion.button>
             )}
           </div>
-          {showAllCategories && (
-            <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ textAlign: 'right' }}>
-                <button className="weui-link" onClick={() => setShowAllCategories(false)}
-                  style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer' }}>收起</button>
-              </div>
-              {CATEGORY_GROUPS.slice(1).map(group => (
-                <div key={group.label}>
-                  <div className="weui-14 weui-t3" style={{ padding: '0 4px 4px' }}>{group.label}</div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {visibleCats(group.items).map(cat => (
-                      <button key={cat} style={pill(activeCategory === cat)} onClick={() => setActiveCategory(cat)}>
-                        {cat}
-                      </button>
-                    ))}
+
+          <AnimatePresence>
+            {showAllCategories && (
+              <motion.div
+                key="expanded-categories"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="pt-2 space-y-1.5">
+                  <div className="flex justify-end">
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setShowAllCategories(false)}
+                      className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold text-[var(--color-ash)] hover:text-[var(--color-clay)] transition-colors duration-200">
+                      收起
+                      <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 7.5L6 4.5L9 7.5" />
+                      </svg>
+                    </motion.button>
                   </div>
+                  {CATEGORY_GROUPS.slice(1).map(group => (
+                    <div key={group.label}>
+                      <div className="text-xs font-extrabold px-0.5 pb-1 text-[var(--color-clay)]">{group.label}</div>
+                      <div className="flex flex-wrap gap-2">
+                        {visibleCats(group.items).map(cat => {
+                          const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG['其他']
+                          const active = activeCategory === cat
+                          return (
+                            <motion.button key={cat}
+                              whileTap={{ scale: 0.95 }}
+                              whileHover={{ y: -1 }}
+                              onClick={() => setActiveCategory(cat)}
+                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${active ? 'd3-btn d3-btn-primary text-[#FFFDF9]' : 'd3-btn-sm text-[var(--color-ash)] hover:text-[var(--color-bone)]'}`}>
+                              <span className="text-xs">{cfg.emoji}</span>{cat}
+                            </motion.button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* 菜品列表 */}
         {loading ? (
-          <div className="weui-group" style={{ padding: 16 }}>
-            <span className="weui-14 weui-t2">加载中...</span>
+          <div className="space-y-3.5">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="d3-card p-3.5 flex items-center gap-3 overflow-hidden">
+                <div className="w-[70px] h-[70px] rounded-[var(--radius-tile)] animate-shimmer-fade shrink-0" />
+                <div className="flex-1 space-y-2.5">
+                  <div className="h-[16px] w-[55%] animate-shimmer-fade rounded-full" style={{ animationDelay: `${i * 0.15}s` }} />
+                  <div className="h-[12px] w-[35%] animate-shimmer-fade rounded-full" style={{ animationDelay: `${i * 0.15 + 0.1}s` }} />
+                  <div className="h-[12px] w-[25%] animate-shimmer-fade rounded-full" style={{ animationDelay: `${i * 0.15 + 0.2}s` }} />
+                </div>
+              </div>
+            ))}
           </div>
         ) : isFavScope && favorites.length === 0 ? (
-          <div className="weui-group" style={{ padding: '40px 0', textAlign: 'center' }}>
-            <Icon name="star" size={40} style={{ color: 'var(--color-weui-text3)' }} />
-            <p className="weui-17 weui-medium weui-t1" style={{ marginTop: 8 }}>还没有收藏的菜</p>
-            <p className="weui-14 weui-t2" style={{ marginTop: 4 }}>看到想吃的点亮星星，下次直接从这里找</p>
-            <button className="weui-link" onClick={() => setScope('all')}
-              style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', marginTop: 12 }}>
-              去逛逛
-            </button>
-          </div>
+          <EmptyState
+            emoji="⭐"
+            title="还没有收藏的菜"
+            desc="看到想吃的点个⭐，下次直接从这里找"
+            action={
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setScope('all')}
+                className="d3-btn d3-btn-primary px-6 py-2.5 text-sm font-bold"
+                style={{ borderRadius: 'var(--radius-btn)' }}
+              >
+                去逛逛
+              </motion.button>
+            }
+          />
         ) : filteredDishes.length === 0 ? (
-          <div className="weui-group" style={{ padding: '40px 0', textAlign: 'center' }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-weui-text3)" strokeWidth="1.5" strokeLinecap="round" style={{ margin: '0 auto' }}>
-              <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
-            </svg>
-            <p className="weui-17 weui-medium weui-t1" style={{ marginTop: 8 }}>没搜到这口</p>
-            <p className="weui-14 weui-t2" style={{ marginTop: 4 }}>换个关键词试试~</p>
-          </div>
-        ) : (
-          <>
-            <div className="weui-group">
-              {visibleDishes.map(dish => (
-                <div key={`${dish.id}-${dish.name}`} className="weui-cell" onClick={() => navigate(`/dish/${dish.id}`)}>
-                  <div
-                    style={{
-                      width: 40, height: 40, borderRadius: 4, overflow: 'hidden', flex: 'none', position: 'relative',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-weui-press)',
-                    }}
-                  >
-                    <span style={{ fontSize: 20 }}>{getCategoryEmoji(dish.category)}</span>
-                    {getDishImage(dish) && (
-                      <img src={getDishImage(dish)} alt={dish.name} loading="lazy"
-                        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={hideImg} />
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span className="weui-17 weui-t1" style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dish.name}</span>
-                      <button
-                        aria-label={has(dish.id) ? '取消收藏' : '收藏'}
-                        onClick={(e) => { e.stopPropagation(); toggle(dish) }}
-                        style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', color: has(dish.id) ? 'var(--color-weui-green)' : 'var(--color-weui-text3)' }}>
-                        <Icon name="star" size={18} />
-                      </button>
-                    </div>
-                    <div className="weui-14 weui-t2" style={{ marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {dish.description || dish.category}
-                    </div>
-                    <div className="weui-17 weui-medium weui-t1" style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 3 }}>
-                      <span style={{ display: 'inline-flex', color: 'var(--color-weui-text2)' }}>
-                        <KissIcon className="w-3 h-3" />
-                      </span>
-                      {dish.price}
-                    </div>
-                  </div>
-                  <button
-                    aria-label={`添加${dish.name}`}
-                    onClick={(e) => { e.stopPropagation(); addItem(dish) }}
-                    style={{
-                      flex: 'none', alignSelf: 'center', width: 32, height: 32, borderRadius: 8, cursor: 'pointer',
-                      border: '1px solid var(--color-weui-green)', background: 'none',
-                      color: 'var(--color-weui-green)', fontSize: 18, lineHeight: 1,
-                    }}
-                  >
-                    ＋
-                  </button>
-                </div>
-              ))}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="d3-card flex flex-col items-center justify-center py-16 px-4">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+              <div className="w-32 h-32 rounded-full animate-pulse-soft"
+                style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.08), transparent 70%)' }} />
             </div>
-            {visibleDishes.length < filteredDishes.length && (
-              <div style={{ textAlign: 'center', padding: '4px 0' }}>
-                <button className="weui-link" style={{ border: 'none', background: 'none', cursor: 'pointer' }}
-                  onClick={() => setVisibleCount(c => c + 30)}>
-                  加载更多（还有 {filteredDishes.length - visibleDishes.length} 道）
-                </button>
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-5 animate-float"
+                style={{ background: 'linear-gradient(135deg, rgba(200,104,63,0.12), rgba(127,163,122,0.08))' }}>
+                <span className="text-5xl">🔍</span>
               </div>
-            )}
-          </>
+            </div>
+            <p className="text-[var(--color-bone)] font-bold text-base">没搜到这口</p>
+            <p className="text-[var(--color-ash)] text-sm mt-1.5 text-center max-w-[200px] leading-relaxed">换个关键词试试~<br />也许换个名字就能找到啦</p>
+          </motion.div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-card-p)' }}>
+            {visibleDishes.map(dish => (
+              <DishRow
+                key={`${dish.id}-${dish.name}`}
+                dish={dish}
+                showFav
+                favorited={has(dish.id)}
+                onToggleFav={toggle}
+                onClick={() => navigate(`/dish/${dish.id}`)}
+                addLabel={`添加${dish.name}`}
+                accent={partner.gradient}
+                onAdd={(d, e) => {
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  spawnParticle(rect.left + rect.width / 2, rect.top)
+                  addItem(d)
+                }}
+              />
+            ))}
+          </div>
         )}
-      </div>
+
+        {visibleDishes.length < filteredDishes.length && (
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={() => setVisibleCount(c => c + 30)}
+            className="d3-btn-sm py-2.5 text-sm font-bold text-[var(--color-clay)] border border-[var(--color-clay)]/30 self-center px-6"
+            style={{ borderRadius: 'var(--radius-btn)' }}
+          >
+            加载更多（还有 {filteredDishes.length - visibleDishes.length} 道）
+          </motion.button>
+        )}
+      </PageContainer>
+
+      {/* +1 飘升粒子 */}
+      <AnimatePresence>
+        {particles.map(p => (
+          <motion.div
+            key={p.id}
+            initial={{ opacity: 1, y: 0, scale: 0.8 }}
+            animate={{ opacity: 0, y: -60, scale: 1.4 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed z-[100] pointer-events-none"
+            style={{ left: p.x, top: p.y }}
+          >
+            <div className="flex items-center gap-0.5 bg-gradient-to-r from-[var(--color-clay-soft)] to-[var(--color-clay)] text-[#FFFDF9] text-xs font-extrabold px-2 py-1 rounded-full shadow-lg">
+              <span>+1</span>
+              <KissIcon className="w-3 h-3" />
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
     </div>
   )
 }
