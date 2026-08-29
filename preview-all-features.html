@@ -9,18 +9,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    /* 晨光厨房 Sunlit Kitchen — 亮色暖调（ink=亮底 / bone=深字，语义已反转） */
+    /* 晨光厨房 Sunlit Kitchen —— 与 src/index.css 的 @theme 同源 */
     --ink-900:#F7F3EC; --ink-850:#FBF8F2; --ink-800:#EFE7DA;
     --bone:#2B2620; --ash:#6B6155; --mist:#9A9082;
-    --gold:#C8683F; --gold-soft:#E0A07E;
-    --platinum:#7FA37A; --platinum-soft:#A9C4A4;
-    --sage:#7FA37A; --love:#D98C84; --danger:#C2543F;
+    --clay:#C8683F; --clay-soft:#E0A07E;
+    --sage:#7FA37A; --sage-soft:#A9C4A4;
+    --caramel:#B5793F; --love:#D98C84; --danger:#C2543F;
     --glass:rgba(255,253,249,0.62); --glass-border:rgba(43,38,32,0.10);
-    /* 装饰：英雄图占位（暖棕/草绿/玫瑰/中性）· 图标块 · 机身边框 */
-    --photo-warm:#B5793F; --photo-herb:#7FA37A; --photo-rose:#D98C84; --photo-neu:#9A9082;
+    /* 装饰：英雄图占位（赤陶/草绿/玫瑰/中性）· 图标块 · 机身边框 */
+    --photo-warm:#C8683F; --photo-herb:#7FA37A; --photo-rose:#D98C84; --photo-neu:#9A9082;
     --photo-base:#E4DACC; --tile-a:#EFE7DA; --tile-b:#E4DACC;
     --frame-a:#EFE7DA; --frame-b:#DCD3C3;
-    --radius-card:28px; --radius-btn:16px;
+    --radius-card:28px; --radius-tile:20px; --radius-btn:16px;
     --serif:'Playfair Display','Noto Serif SC',serif;
     --sans:'Noto Sans SC','Inter',system-ui,sans-serif;
   }
@@ -41,20 +41,20 @@
     border-bottom:1px solid var(--glass-border)}
   .top-inner{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
   .brand{font-family:var(--serif);font-size:22px;letter-spacing:.5px}
-  .brand b{background:linear-gradient(90deg,var(--gold-soft),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand b{background:linear-gradient(90deg,var(--clay-soft),var(--clay));-webkit-background-clip:text;background-clip:text;color:transparent}
   .anchors{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
   .anchors a{font-size:12.5px;color:var(--ash);text-decoration:none;padding:6px 11px;border:1px solid var(--glass-border);border-radius:999px;transition:.2s}
-  .anchors a:hover{color:var(--gold-soft);border-color:var(--gold);background:rgba(200,104,63,.08)}
+  .anchors a:hover{color:var(--clay);border-color:var(--clay);background:rgba(200,104,63,.08)}
 
   /* ---------- intro ---------- */
   .intro{padding:38px 0 10px;text-align:center}
   .intro h1{font-family:var(--serif);font-size:34px;line-height:1.2}
-  .intro p{color:var(--ash);margin-top:12px;font-size:14px;max-width:720px;margin-inline:auto;line-height:1.7}
+  .intro p{color:var(--ash);margin-top:12px;font-size:14px;max-width:760px;margin-inline:auto;line-height:1.7}
   .legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:22px}
   .legend .it{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--bone)}
   .dot{width:14px;height:14px;border-radius:50%}
-  .dot.me{background:linear-gradient(135deg,var(--gold-soft),var(--gold));box-shadow:0 0 12px rgba(200,104,63,.6)}
-  .dot.ta{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));box-shadow:0 0 12px rgba(127,163,122,.5)}
+  .dot.me{background:linear-gradient(135deg,var(--clay-soft),var(--clay));box-shadow:0 0 12px rgba(200,104,63,.6)}
+  .dot.ta{background:linear-gradient(135deg,var(--sage-soft),var(--sage));box-shadow:0 0 12px rgba(127,163,122,.5)}
 
   /* ---------- grid of phones ---------- */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:34px;margin-top:40px}
@@ -62,7 +62,7 @@
   .cell h3{font-family:var(--serif);font-size:19px;display:flex;align-items:center;gap:8px}
   .cell .tag{font-size:11px;color:var(--mist);border:1px solid var(--glass-border);padding:2px 8px;border-radius:999px}
   .cell ul{list-style:none;font-size:12.5px;color:var(--ash);line-height:1.9;text-align:left;max-width:300px}
-  .cell ul li::before{content:"·";color:var(--gold);margin-right:7px}
+  .cell ul li::before{content:"·";color:var(--clay);margin-right:7px}
 
   /* ---------- phone frame ---------- */
   .phone{width:330px;height:680px;border-radius:46px;position:relative;flex:none;
@@ -76,62 +76,101 @@
   .hero .img{position:absolute;inset:0;filter:saturate(1.1)}
   .hero .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(247,243,236,.12),rgba(247,243,236,.86))}
   .notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:90px;height:18px;background:var(--bone);border-radius:999px;z-index:5;opacity:.6}
-  .scroll{position:absolute;left:0;right:0;top:0;bottom:0;overflow:hidden;padding:0 16px 78px}
+  .scroll{position:absolute;left:0;right:0;top:0;bottom:0;overflow:hidden;padding:0 16px 92px}
   .pad{padding-top:42px}
-  .glass{background:var(--glass);border:1px solid var(--glass-border);border-radius:18px;backdrop-filter:blur(10px)}
+  .glass{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-card);backdrop-filter:blur(10px)}
   .title-s{font-family:var(--serif);font-size:22px;line-height:1.2;color:var(--bone)}
   .sub-s{font-size:11.5px;color:var(--ash);margin-top:5px}
-  .underline{width:46px;height:3px;border-radius:3px;margin-top:10px;background:linear-gradient(90deg,var(--gold-soft),var(--gold))}
-  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-  .chip{font-size:11.5px;padding:7px 12px;border-radius:999px;border:1px solid var(--glass-border);color:var(--bone);background:var(--glass)}
-  .chip.on{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--bone);border:none;font-weight:700}
-  .chip.ta.on{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:var(--bone)}
+  .underline{width:46px;height:3px;border-radius:3px;margin-top:10px;background:linear-gradient(90deg,var(--clay-soft),var(--clay))}
+  .sect{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+  .sect h4{font-family:var(--serif);font-size:15px;color:var(--bone)}
+  .sect a{font-size:11px;color:var(--clay);font-weight:700;text-decoration:none}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .qgrid .qi{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10.5px;color:var(--ash);font-weight:700}
+  .qgrid .qi i{width:46px;height:46px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:20px;font-style:normal;
+    background:var(--glass);border:1px solid var(--glass-border)}
+  .chip{font-size:11.5px;padding:7px 12px;border-radius:999px;border:1px solid var(--glass-border);color:var(--ash);background:var(--glass)}
+  .chip.on{background:linear-gradient(135deg,var(--clay-soft),var(--clay));color:#FFFDF9;border:none;font-weight:700}
+  .seg{display:flex;gap:6px;padding:6px;margin-top:14px}
+  .seg span{flex:1;text-align:center;font-size:12.5px;font-weight:700;padding:8px 0;border-radius:12px;color:var(--ash)}
+  .seg span.on{background:linear-gradient(135deg,var(--clay-soft),var(--clay));color:#FFFDF9;box-shadow:0 4px 12px rgba(200,104,63,.26)}
+  .search{display:flex;align-items:center;gap:8px;padding:9px 12px;margin-top:10px;border-radius:var(--radius-btn);font-size:12px;color:var(--mist)}
   .card{padding:14px;margin-top:12px}
   .card .nm{font-size:14px;font-weight:700;color:var(--bone)}
   .card .ds{font-size:11px;color:var(--ash);margin-top:4px;line-height:1.5}
-  .price{color:var(--gold);font-weight:700;font-size:14px}
-  .add{margin-left:auto;width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--bone);font-weight:800;font-size:16px;border:none}
-  .kpis{display:flex;gap:10px;margin-top:14px}
+  .price{color:var(--clay);font-weight:700;font-size:14px}
+  .price.serif{font-family:var(--serif)}
+  .badge{font-size:10px;font-weight:700;color:var(--clay);background:rgba(200,104,63,.14);border:1px solid rgba(200,104,63,.28);border-radius:999px;padding:3px 9px}
+  .thumb{width:46px;height:46px;border-radius:var(--radius-tile);background:linear-gradient(135deg,var(--tile-a),var(--tile-b));flex:none}
+  .add{margin-left:auto;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;
+    background:linear-gradient(135deg,var(--clay-soft),var(--clay));color:#FFFDF9;font-weight:800;font-size:15px;border:none}
+  .fav{color:var(--love);font-size:17px;flex:none}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .grid2 .gcard{display:flex;align-items:center;gap:8px;padding:10px}
+  .feat{position:relative;height:150px;margin-top:10px;overflow:hidden}
+  .feat .img{position:absolute;inset:0;background:radial-gradient(120% 110% at 35% 20%,var(--photo-warm),var(--photo-base));filter:saturate(1.1)}
+  .feat .cap{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 10px;
+    background:linear-gradient(180deg,transparent,rgba(43,38,32,.55));color:#FFFDF9}
+  .feat .cap .nm{color:#FFFDF9}
+  .feat .tagme{display:inline-block;font-size:10px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--clay);color:#FFFDF9}
+  .kpis{display:flex;gap:10px;margin-top:12px}
   .kpi{flex:1;text-align:center;padding:12px 6px}
-  .kpi b{font-family:var(--serif);font-size:20px;color:var(--gold);display:block}
+  .kpi b{font-family:var(--serif);font-size:20px;color:var(--clay);display:block}
   .kpi span{font-size:10.5px;color:var(--ash)}
-  .stat{display:flex;justify-content:space-between;padding:11px 14px;margin-top:8px;font-size:12.5px;color:var(--bone)}
-  .av{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:15px;border:2px solid transparent}
-  .av.me{background:linear-gradient(135deg,var(--gold-soft),var(--gold));box-shadow:0 0 10px rgba(200,104,63,.5)}
-  .av.ta{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));box-shadow:0 0 10px rgba(127,163,122,.4)}
-  .pill-nav{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:8;
-    display:flex;gap:6px;padding:8px 10px;border-radius:999px;
+  .stat{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;margin-top:10px;font-size:12.5px;color:var(--bone)}
+  .av{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;border:2px solid transparent;flex:none}
+  .av.me{background:linear-gradient(135deg,var(--clay-soft),var(--clay));box-shadow:0 0 10px rgba(200,104,63,.5)}
+  .av.ta{background:linear-gradient(135deg,var(--sage-soft),var(--sage));box-shadow:0 0 10px rgba(127,163,122,.4)}
+  .av.sm{width:20px;height:20px;font-size:10px}
+  /* DockLayer：导航药丸 + 购物车球并排同一行（全站唯一底部固定层） */
+  .dock{position:absolute;left:12px;right:12px;bottom:12px;z-index:8;display:flex;align-items:center;gap:8px}
+  .pill-nav{flex:1;display:flex;gap:6px;padding:8px 10px;border-radius:999px;
     background:rgba(255,253,249,.78);backdrop-filter:blur(14px);border:1px solid var(--glass-border)}
-  .pill-nav i{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ash)}
-  .pill-nav i.act{background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--bone);box-shadow:0 0 14px rgba(200,104,63,.55)}
-  .orb{position:absolute;right:16px;bottom:74px;z-index:8;width:54px;height:54px;border-radius:50%;
-    background:linear-gradient(135deg,var(--gold-soft),var(--gold));box-shadow:0 8px 22px rgba(200,104,63,.45),inset 0 2px 4px rgba(255,255,255,.4);
-    display:flex;align-items:center;justify-content:center;color:var(--bone);font-size:22px}
-  .orb b{position:absolute;top:-4px;right:-4px;background:var(--love);color:var(--bone);font-size:10px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-  .ring{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;
-    border:3px solid;margin:8px auto}
-  .ring.pend{border-color:var(--platinum);box-shadow:0 0 14px rgba(127,163,122,.4)}
-  .ring.prep{border-color:var(--gold);box-shadow:0 0 14px rgba(200,104,63,.5)}
-  .ring.done{border-color:var(--sage);box-shadow:0 0 14px rgba(127,163,122,.45)}
-  .status-chip{font-size:10.5px;padding:3px 9px;border-radius:999px;font-weight:700}
-  .sc-pend{background:rgba(127,163,122,.16);color:var(--platinum)}
-  .sc-prep{background:rgba(200,104,63,.16);color:var(--gold)}
+  .pill-nav i{flex:1;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--mist)}
+  .pill-nav i.act{background:linear-gradient(135deg,var(--clay-soft),var(--clay));color:#FFFDF9;box-shadow:0 0 14px rgba(200,104,63,.55)}
+  .orb{width:52px;height:52px;border-radius:50%;flex:none;position:relative;
+    background:linear-gradient(135deg,var(--clay-soft),var(--clay));box-shadow:0 8px 22px rgba(200,104,63,.45),inset 0 2px 4px rgba(255,255,255,.4);
+    display:flex;align-items:center;justify-content:center;color:#FFFDF9;font-size:21px}
+  .orb b{position:absolute;top:-4px;right:-4px;background:var(--love);color:#FFFDF9;font-size:10px;min-width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .back{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:var(--bone);font-size:15px}
+  /* D3 状态环（--ring-size） */
+  .ring{width:104px;height:104px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;
+    border:3px dashed rgba(43,38,32,.15);margin:6px auto;position:relative}
+  .ring::before{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px solid var(--ring-c);opacity:.45;
+    border-top-color:transparent;border-right-color:transparent;transform:rotate(35deg)}
+  .ring::after{content:"";position:absolute;inset:6px;border-radius:50%;background:linear-gradient(135deg,var(--ring-c),transparent);opacity:.25}
+  .ring span{position:relative;z-index:1}
+  .ring.pend{--ring-c:#9A9082}
+  .ring.prep{--ring-c:#C8683F}
+  .ring.done{--ring-c:#7FA37A}
+  .status-chip{font-size:10.5px;padding:3px 9px;border-radius:999px;font-weight:700;flex:none}
+  .sc-pend{background:rgba(154,144,130,.16);color:var(--ash)}
+  .sc-prep{background:rgba(200,104,63,.14);color:var(--clay)}
   .sc-done{background:rgba(127,163,122,.16);color:var(--sage)}
+  /* OrderCard：顶部状态条 + 左侧色条 */
+  .ocard{margin-top:12px;overflow:hidden;padding:0}
+  .ocard .bar{height:4px}
+  .ocard .inner{display:flex}
+  .ocard .lbar{width:4px;flex:none}
+  .ocard .body{flex:1;padding:12px;min-width:0}
+  .ocard .meta{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .ocard .items{font-size:12.5px;color:var(--bone);font-weight:500;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ocard .foot{display:flex;align-items:center;justify-content:space-between;margin-top:9px;padding-top:9px;border-top:1px solid var(--glass-border)}
   .payer{display:flex;gap:6px;margin-top:10px}
-  .payer span{flex:1;text-align:center;font-size:11px;padding:8px 0;border-radius:10px;border:1px solid var(--glass-border);color:var(--ash)}
-  .payer span.aa.on{border-color:var(--platinum);color:var(--platinum);box-shadow:0 0 10px rgba(127,163,122,.3)}
-  .payer span.me.on{border-color:var(--gold);color:var(--gold);box-shadow:0 0 10px rgba(200,104,63,.3)}
-  .payer span.ta.on{border-color:var(--platinum);color:var(--platinum);box-shadow:0 0 10px rgba(127,163,122,.3)}
-  .btn-gold{width:100%;margin-top:10px;padding:11px;border:none;border-radius:12px;
-    background:linear-gradient(135deg,var(--gold-soft),var(--gold));color:var(--bone);font-weight:800;font-size:13px}
-  .btn-sage{background:linear-gradient(135deg,var(--platinum-soft),var(--sage))}
-  .btn-plat{background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:var(--bone)}
-  .btn-love{background:linear-gradient(135deg,#f3bcb7,var(--love));color:var(--bone)}
-  .split-h{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--bone)}
-  .console-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-  .cbox{padding:14px;text-align:center}
-  .cbox b{font-family:var(--serif);font-size:22px;color:var(--gold);display:block}
+  .payer span{flex:1;text-align:center;font-size:11px;padding:8px 0;border-radius:12px;border:1px solid var(--glass-border);color:var(--ash)}
+  .payer span.aa.on{border-color:var(--caramel);color:var(--caramel);box-shadow:0 0 10px rgba(181,121,63,.3)}
+  .payer span.me.on{border-color:var(--clay);color:var(--clay);box-shadow:0 0 10px rgba(200,104,63,.3)}
+  .payer span.ta.on{border-color:var(--sage);color:var(--sage);box-shadow:0 0 10px rgba(127,163,122,.3)}
+  .btn-clay{width:100%;margin-top:10px;padding:11px;border:none;border-radius:var(--radius-btn);
+    background:linear-gradient(135deg,var(--clay-soft),var(--clay));color:#FFFDF9;font-weight:800;font-size:13px}
+  .btn-sage{background:linear-gradient(135deg,var(--sage-soft),var(--sage));color:var(--bone)}
+  .btn-caramel{background:var(--caramel);color:#FFFDF9}
+  .btn-love{background:linear-gradient(135deg,#f3bcb7,var(--danger));color:#FFFDF9}
+  .split-h{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:12px;color:var(--bone)}
+  .console-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+  .cbox{padding:14px 6px;text-align:center}
+  .cbox b{font-family:var(--serif);font-size:22px;color:var(--clay);display:block}
   .cbox span{font-size:10.5px;color:var(--ash)}
   .muted{color:var(--mist)}
   .kbd{font-size:10.5px;color:var(--mist);margin-top:6px}
@@ -156,23 +195,23 @@
   <div class="top-inner">
     <div class="brand">🌤️ <b>晨光厨房</b> · 全功能预览</div>
     <nav class="anchors">
-      <a href="#home">首页</a><a href="#menu">菜单</a><a href="#dish">详情</a>
-      <a href="#fav">收藏</a><a href="#orders">订单</a><a href="#order">订单详情</a>
-      <a href="#profile">我的</a><a href="#cart">购物车</a><a href="#checkout">结算</a>
-      <a href="#admin">后台</a><a href="#adishes">菜品管理</a><a href="#aorders">订单管理</a>
+      <a href="#home">首页</a><a href="#menu">点菜</a><a href="#dish">详情</a>
+      <a href="#cart">购物车</a><a href="#orders">订单</a><a href="#order">订单详情</a>
+      <a href="#profile">我的</a><a href="#admin">后台</a><a href="#adishes">菜品管理</a><a href="#aorders">厨房看板</a>
     </nav>
   </div>
 </header>
 
 <div class="wrap">
   <section class="intro">
-    <h1>沉浸式重排 · 全 12 页一屏看尽</h1>
-    <p>这是「温暖情侣 2.0」小程序重做后的视觉预览。晨光骨白底 + 全屏美食大图 + 浅色磨砂卡，双人格用<strong style="color:var(--gold)">温度对比</strong>表达——我=赤陶暖，TA=鼠尾草绿冷。下方每个手机框都是一页真实布局的静态还原（真机跑起来大图是 Unsplash，这里用渐变占位，离线也能看）。</p>
+    <h1>信息架构重排 · 全 10 页一屏看尽</h1>
+    <p>这是「晨光厨房」IA 重构完成后的视觉预览：12 页收敛为 <strong style="color:var(--clay)">10 页</strong>——结算并入购物车、收藏并入点菜页（旧路由 /checkout、/favorites 保留重定向）。晨光骨白底 + 全屏美食大图 + 浅色磨砂卡，双人格用<strong style="color:var(--clay)">温度对比</strong>表达——我=赤陶暖，TA=鼠尾草绿冷。每个手机框都是一页真实布局的静态还原（真机跑起来大图是 Unsplash，这里用渐变占位，离线也能看）。</p>
     <div class="legend">
-      <div class="it"><span class="dot me"></span>我 / 🐱 / 暖金 #E6B25A</div>
-      <div class="it"><span class="dot ta"></span>TA / 🐰 / 冷铂 #C2C7D2</div>
-      <div class="it" style="color:var(--sage)">● 完成 / 上架</div>
-      <div class="it" style="color:var(--love)">● 喜爱 / 删除</div>
+      <div class="it"><span class="dot me"></span>我 / 🐱 / 赤陶 #C8683F</div>
+      <div class="it"><span class="dot ta"></span>TA / 🐰 / 鼠尾草 #7FA37A</div>
+      <div class="it" style="color:var(--caramel)">● AA / 焦糖</div>
+      <div class="it" style="color:var(--love)">● 喜爱</div>
+      <div class="it" style="color:var(--danger)">● 删除强调</div>
     </div>
   </section>
 
@@ -185,45 +224,63 @@
         <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 30% 20%,var(--photo-warm),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
-          <div class="title-s">今天想吃什么？</div>
-          <div class="sub-s">为你们俩挑一顿</div><div class="underline"></div>
-          <div class="row">
-            <span class="chip on">🔍 搜索</span><span class="chip">🎲 随机</span><span class="chip">🍜 面食</span><span class="chip">🍰 甜点</span>
+          <div class="title-s">中午好，今天吃什么？</div>
+          <div class="sub-s">吃好喝好，长生不老</div><div class="underline"></div>
+          <div class="qgrid">
+            <span class="qi"><i>🍜</i>菜单</span><span class="qi"><i>⭐</i>收藏</span><span class="qi"><i>📋</i>订单</span><span class="qi"><i>👤</i>我的</span>
           </div>
-          <div class="glass card"><div class="nm">今日推荐</div><div class="ds">慢炖牛肋配迷迭香，适合两个人分着吃。</div><div class="row"><span class="chip">查看 →</span></div></div>
-          <div class="glass card"><div class="split-h"><span class="av me">🐱</span> 我常点 &nbsp; <span class="av ta">🐰</span> TA 常点</div></div>
+          <div class="sect"><h4>今日推荐</h4><a>换一道 →</a></div>
+          <div class="glass feat">
+            <div class="img"></div>
+            <div class="cap"><span class="tagme">今日主推</span>
+              <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:5px">
+                <span class="nm">番茄牛腩煲</span><span class="price serif" style="color:#FFFDF9">28</span>
+              </div>
+            </div>
+          </div>
+          <div class="sect"><h4>常点的</h4><a>全部 →</a></div>
+          <div class="grid2">
+            <div class="glass gcard"><div class="thumb"></div><div><div class="nm">宫保鸡丁</div><div class="price serif">26</div></div></div>
+            <div class="glass gcard"><div class="thumb"></div><div><div class="nm">虾饺皇</div><div class="price serif">24</div></div></div>
+            <div class="glass gcard"><div class="thumb"></div><div><div class="nm">东坡肉</div><div class="price serif">36</div></div></div>
+            <div class="glass gcard"><div class="thumb"></div><div><div class="nm">过桥米线</div><div class="price serif">26</div></div></div>
+          </div>
+          <div class="sect"><h4>最近订单</h4><a>全部</a></div>
+          <div class="glass stat"><span>📦 #1002 · 麻婆豆腐×1…</span><span class="price serif">18</span></div>
         </div></div>
-        <div class="orb">🛒<b>3</b></div>
-        <div class="pill-nav"><i class="act">🏠</i><i>🍽️</i><i>📦</i><i>👤</i></div>
+        <div class="dock"><div class="pill-nav"><i class="act">🏠</i><i>🍜</i><i>📋</i><i>👤</i></div><div class="orb">🛒<b>3</b></div></div>
       </div></div>
-      <ul><li>全屏美食大图 hero</li><li>快捷入口 + 品类 chips</li><li>今日推荐玻璃卡</li><li>双人格常点对照</li></ul>
+      <ul><li>列表隐喻收敛为 3 种，约 1.5 屏</li><li>今日主推大卡（底部暖墨渐变压字）</li><li>常点的 2 列网格 + 最近订单竖列表</li><li>收藏入口直达 /menu?fav=1</li></ul>
     </div>
 
     <!-- 2 MENU -->
     <div class="cell" id="menu">
-      <h3>🍽️ 菜单 <span class="tag">/menu</span></h3>
+      <h3>🍜 点菜 <span class="tag">/menu（含收藏）</span></h3>
       <div class="phone"><div class="screen">
         <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 70% 20%,var(--photo-herb),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
-          <div class="title-s">菜单</div><div class="underline"></div>
-          <div class="row"><span class="av me">🐱</span><span class="chip on">我点</span><span class="av ta">🐰</span><span class="chip ta">TA点</span></div>
-          <div class="row"><span class="chip on">🍜</span><span class="chip">🍚</span><span class="chip">🥗</span><span class="chip">🍰</span><span class="chip">🥤</span></div>
-          <div class="glass card" style="display:flex;align-items:center;gap:10px">
-            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))"></div>
-            <div style="flex:1"><div class="nm">黑松露意面</div><div class="ds">¥<span class="price">68</span></div></div>
-            <button class="add">＋</button>
+          <div class="title-s">今天吃什么？</div><div class="sub-s">一起选点好吃的吧~</div><div class="underline"></div>
+          <div class="glass seg"><span class="on">🍜 全部菜品</span><span>⭐ 我的收藏</span></div>
+          <div class="glass search">🔍 搜搜想吃的菜...</div>
+          <div class="glass card"><div class="split-h"><span class="badge">今日灵感</span><span class="muted" style="font-size:10.5px">不知道吃啥就选它</span></div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
+              <div class="thumb"></div>
+              <div style="flex:1"><div class="nm">酸菜鱼</div><div class="ds">酸辣开胃，鱼片嫩滑</div><div class="price serif">42</div></div>
+              <button class="add">＋</button>
+            </div>
           </div>
-          <div class="glass card" style="display:flex;align-items:center;gap:10px">
-            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))"></div>
-            <div style="flex:1"><div class="nm">椰香芒果布丁</div><div class="ds">¥<span class="price">32</span></div></div>
+          <div class="row"><span class="chip on">✨ 全部</span><span class="chip">🍳 家常菜</span><span class="chip">🥩 硬菜</span><span class="chip">🌶️ 川菜</span><span class="chip">🦐 粤菜</span></div>
+          <div class="glass card" style="display:flex;align-items:center;gap:10px;position:relative">
+            <span class="fav" style="position:absolute;top:8px;right:10px">⭐</span>
+            <div class="thumb"></div>
+            <div style="flex:1"><div class="nm">宫保鸡丁 <span class="badge">川菜</span></div><div class="ds">甜辣荔枝味，花生脆香</div><div class="price serif">26</div></div>
             <button class="add">＋</button>
           </div>
         </div></div>
-        <div class="orb">🛒<b>3</b></div>
-        <div class="pill-nav"><i>🏠</i><i class="act">🍽️</i><i>📦</i><i>👤</i></div>
+        <div class="dock"><div class="pill-nav"><i>🏠</i><i class="act">🍜</i><i>📋</i><i>👤</i></div><div class="orb">🛒<b>3</b></div></div>
       </div></div>
-      <ul><li>谁在点（🐱我 / 🐰TA）切换</li><li>品类 emoji 标签</li><li>推荐卡 + 加购金按钮</li></ul>
+      <ul><li>收藏并入点菜：分段控件 全部 / ⭐收藏</li><li>?fav=1 直达收藏页签（/favorites 重定向）</li><li>给谁点（🐱/🐰）决定加购归属</li><li>菜品行统一 ui/DishRow，+1 飘升粒子</li></ul>
     </div>
 
     <!-- 3 DISH DETAIL -->
@@ -233,82 +290,111 @@
         <div class="hero" style="height:230px"><div class="img" style="background:radial-gradient(120% 90% at 40% 30%,var(--photo-warm),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad" style="padding-top:18px">
-          <div class="glass card"><div class="nm">黑松露意面</div><div class="ds" style="margin-top:6px">手工宽面，黑松露酱底，现磨帕玛森。两人份刚好。</div>
-            <div style="display:flex;align-items:center;margin-top:10px"><span class="price" style="font-size:18px">¥68</span>
-            <div style="margin-left:auto;display:flex;align-items:center;gap:10px"><span class="chip">−</span><b>1</b><span class="chip">＋</span></div></div>
-            <button class="btn-gold">🐱 加入购物车</button>
+          <div class="glass card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+              <div class="nm" style="font-family:var(--serif);font-size:16px">酸菜鱼</div><span class="badge">川菜</span></div>
+            <div class="ds" style="margin-top:6px">酸辣开胃，鱼片嫩滑，汤都想喝完。</div>
+            <div style="display:flex;align-items:center;margin-top:10px"><span class="price serif" style="font-size:20px">42</span></div>
           </div>
+          <div class="glass card" style="display:flex;align-items:center;justify-content:space-between">
+            <b style="font-size:12.5px">数量</b>
+            <div style="display:flex;align-items:center;gap:10px"><span class="chip">−</span><b>1</b>
+              <span class="chip" style="background:linear-gradient(135deg,var(--clay-soft),var(--clay));color:#FFFDF9;border:none">＋</span></div>
+          </div>
+          <div class="glass card"><button class="btn-clay" style="margin-top:0">🐱 加入购物车</button></div>
         </div></div>
-        <div class="pill-nav"><i>🏠</i><i>🍽️</i><i>📦</i><i>👤</i></div>
+        <div class="dock"><div class="pill-nav"><i>🏠</i><i class="act">🍜</i><i>📋</i><i>👤</i></div><div class="orb" style="opacity:.35">🛒</div></div>
       </div></div>
-      <ul><li>大图 hero + 信息玻璃卡</li><li>数量步进器</li><li>按当前人格加入购物车</li></ul>
+      <ul><li>PageHeader(back + ⭐收藏在右上)</li><li>信息卡补齐内边距（不再贴圆角边）</li><li>数量统一 ui/Stepper（36px 档）</li><li>按当前人格渐变加购</li></ul>
     </div>
 
-    <!-- 4 FAVORITES -->
-    <div class="cell" id="fav">
-      <h3>❤️ 收藏 <span class="tag">/favorites</span></h3>
+    <!-- 4 CART -->
+    <div class="cell" id="cart">
+      <h3>🛒 购物车（含结算） <span class="tag">/cart</span></h3>
       <div class="phone"><div class="screen">
-        <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 60% 30%,var(--photo-rose),var(--photo-base))"></div><div class="scrim"></div></div>
+        <div class="hero" style="height:120px;filter:blur(8px) brightness(1.02)"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-neu),var(--photo-base))"></div></div>
         <div class="notch"></div>
-        <div class="scroll"><div class="pad">
-          <div class="title-s">我们的收藏</div><div class="underline"></div>
-          <div class="glass card" style="display:flex;align-items:center;gap:10px">
-            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))"></div>
-            <div style="flex:1"><div class="nm">慢炖牛肋</div><div class="ds">¥<span class="price">98</span></div></div>
-            <span style="color:var(--love);font-size:18px">♥</span>
+        <div class="scroll"><div class="pad" style="padding-top:30px">
+          <div class="title-s">已选的菜</div><div class="sub-s">共 4 件</div><div class="underline"></div>
+          <div class="glass card" style="border-color:rgba(200,104,63,.4)">
+            <div class="split-h"><span class="av me">🐱</span><b>我点的</b><span class="price serif" style="margin-left:auto">70</span></div>
+            <div class="ds" style="margin-top:6px;display:flex;justify-content:space-between">酸菜鱼 ×1 <span>− 1 ＋</span></div>
+            <div class="ds" style="margin-top:4px;display:flex;justify-content:space-between">麻婆豆腐 ×1 <span>− 1 ＋</span></div>
           </div>
-          <div class="glass card" style="display:flex;align-items:center;gap:10px">
-            <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--tile-a),var(--tile-b))"></div>
-            <div style="flex:1"><div class="nm">抹茶千层</div><div class="ds">¥<span class="price">42</span></div></div>
-            <span style="color:var(--love);font-size:18px">♥</span>
+          <div class="glass card" style="border-color:rgba(127,163,122,.4)">
+            <div class="split-h"><span class="av ta">🐰</span><b>TA 点的</b><span class="price serif" style="margin-left:auto">84</span></div>
+            <div class="ds" style="margin-top:6px;display:flex;justify-content:space-between">东坡肉 ×1 <span>− 1 ＋</span></div>
+            <div class="ds" style="margin-top:4px;display:flex;justify-content:space-between">龙井虾仁 ×1 <span>− 1 ＋</span></div>
           </div>
+          <div class="glass card"><div class="ds">💬 想说点啥</div><div class="search" style="margin-top:6px">少盐、不要香菜...</div></div>
+          <div class="glass card"><div class="ds" style="margin-bottom:4px">谁来买单？</div>
+            <div class="payer"><span class="aa on">✌️ AA<br><small>各付各的</small></span><span class="me">🙋 我请</span><span class="ta">💝 TA请</span></div></div>
+          <div class="glass card"><div style="display:flex;justify-content:space-between;align-items:center">
+              <span class="muted" style="font-size:12px">合计</span><span class="price serif" style="font-size:22px">154</span></div>
+            <button class="btn-clay">下单啦~</button></div>
         </div></div>
-        <div class="pill-nav"><i>🏠</i><i>🍽️</i><i>📦</i><i>👤</i></div>
+        <div class="dock"><div class="pill-nav"><i>🏠</i><i>🍜</i><i>📋</i><i>👤</i></div><div class="orb" style="opacity:.35">🛒</div></div>
       </div></div>
-      <ul><li>收藏网格</li><li>喜爱心形（love 色）</li><li>价格暖金显示</li></ul>
+      <ul><li>原 /checkout 已并入：一页完成下单</li><li>我/TA 双栏拆分 + 各自小计 + Stepper</li><li>备注 + ui/PayerSelector（AA/我请/TA请）</li><li>提交成功 → 庆祝遮罩 → /orders/:id</li></ul>
     </div>
 
-    <!-- 5 MY ORDERS -->
+    <!-- 5 ORDERS -->
     <div class="cell" id="orders">
-      <h3>📦 我的订单 <span class="tag">/orders</span></h3>
+      <h3>📦 订单 <span class="tag">/orders</span></h3>
       <div class="phone"><div class="screen">
         <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-neu),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
-          <div class="title-s">订单</div><div class="underline"></div>
-          <div class="glass card" style="display:flex;align-items:center;gap:10px">
-            <span class="av me">🐱</span><span class="av ta">🐰</span>
-            <div style="flex:1"><div class="nm">#1024</div><div class="ds">黑松露意面 ×1</div></div>
-            <span class="status-chip sc-prep">🔥 制作中</span>
-          </div>
-          <div class="glass card" style="display:flex;align-items:center;gap:10px">
-            <span class="av me">🐱</span><span class="av ta">🐰</span>
-            <div style="flex:1"><div class="nm">#1021</div><div class="ds">抹茶千层 ×2</div></div>
-            <span class="status-chip sc-done">✓ 已完成</span>
-          </div>
+          <div class="title-s">我们的订单</div><div class="sub-s">一共 3 笔</div><div class="underline"></div>
+          <div class="row"><span class="chip on">✨ 全部</span><span class="chip">⏳ 等着呢</span><span class="chip">👨‍🍳 在做了</span><span class="chip">🎉 做好啦</span></div>
+          <div class="glass ocard"><div class="bar" style="background:linear-gradient(90deg,rgba(224,160,126,.55),rgba(224,160,126,.13))"></div>
+            <div class="inner"><div class="lbar" style="background:#E0A07E"></div>
+            <div class="body">
+              <div class="meta"><span class="muted" style="font-size:10.5px">🕐 8/29 12:04</span><span class="status-chip sc-prep">在做了</span></div>
+              <div class="items">酸菜鱼×1、麻婆豆腐×1</div>
+              <div class="foot"><span class="price serif">70</span>
+                <span style="display:flex;gap:2px"><span class="av sm me">🐱</span><span class="av sm ta">🐰</span></span></div>
+            </div></div></div>
+          <div class="glass ocard"><div class="bar" style="background:linear-gradient(90deg,rgba(169,196,164,.55),rgba(169,196,164,.13))"></div>
+            <div class="inner"><div class="lbar" style="background:#A9C4A4"></div>
+            <div class="body">
+              <div class="meta"><span class="muted" style="font-size:10.5px">🕐 8/28 19:32</span><span class="status-chip sc-done">做好啦</span></div>
+              <div class="items">东坡肉×1、龙井虾仁×1</div>
+              <div class="foot"><span class="price serif">84</span>
+                <span style="display:flex;gap:2px"><span class="av sm me">🐱</span><span class="av sm ta">🐰</span></span></div>
+            </div></div></div>
         </div></div>
-        <div class="pill-nav"><i>🏠</i><i>🍽️</i><i class="act">📦</i><i>👤</i></div>
+        <div class="dock"><div class="pill-nav"><i>🏠</i><i>🍜</i><i class="act">📋</i><i>👤</i></div><div class="orb" style="opacity:.35">🛒</div></div>
       </div></div>
-      <ul><li>订单列表</li><li>状态 chip（铂/金/鼠尾草）</li><li>双人头像标识</li></ul>
+      <ul><li>状态筛选（ui/Chip，与后台同源）</li><li>订单卡统一 ui/OrderCard（user 变体）</li><li>顶/侧双状态条 + 双人头像 + 整卡可跳</li></ul>
     </div>
 
     <!-- 6 ORDER DETAIL -->
     <div class="cell" id="order">
-      <h3>🔎 订单详情 <span class="tag">/order/:id</span></h3>
+      <h3>🔎 订单详情 <span class="tag">/orders/:id</span></h3>
       <div class="phone"><div class="screen">
         <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 40% 30%,var(--photo-neu),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
-          <div class="ring prep">🔥</div>
-          <div class="glass card"><div class="nm">#1024 · 制作中</div>
-            <div class="ds" style="margin-top:6px">黑松露意面 ×1 · 椰香芒果布丁 ×1</div>
-            <div class="split-h"><span class="av me">🐱</span> 我请 &nbsp; <span class="muted" style="font-size:11px">（谁买单）</span></div>
-            <div style="margin-top:8px;border-top:1px solid var(--glass-border);padding-top:8px;display:flex;justify-content:space-between"><span class="muted" style="font-size:11px">合计</span><span class="price">¥100</span></div>
+          <div class="glass card" style="text-align:center">
+            <div class="ring prep"><span>👨‍🍳</span></div>
+            <span class="status-chip sc-prep">在做了</span>
+            <div class="ds" style="margin-top:6px">正在努力做呢，快好了~</div>
           </div>
+          <div class="glass card"><div class="nm">📝 都选了啥</div>
+            <div class="split-h" style="margin-top:8px"><span class="av sm me">🐱</span> 酸菜鱼 ×1<span class="price serif" style="margin-left:auto">42</span></div>
+            <div class="split-h" style="margin-top:6px"><span class="av sm ta">🐰</span> 龙井虾仁 ×1<span class="price serif" style="margin-left:auto">48</span></div>
+            <div style="margin-top:10px;border-top:1px solid var(--glass-border);padding-top:9px;display:flex;justify-content:space-between;align-items:center">
+              <span class="muted" style="font-size:11.5px">合计 <span class="badge">TA请</span></span>
+              <span class="price serif" style="font-size:19px">90</span></div>
+          </div>
+          <div class="glass card" style="border-left:3px solid;border-image:linear-gradient(180deg,var(--clay-soft),var(--sage)) 1">
+            <div class="ds">💬 备注 · 多放蒜，微辣</div>
+          </div>
+          <div class="kbd" style="text-align:center">🕐 2026/8/29 12:04:33</div>
         </div></div>
-        <div class="pill-nav"><i>🏠</i><i>🍽️</i><i class="act">📦</i><i>👤</i></div>
+        <div class="dock"><div class="pill-nav"><i>🏠</i><i>🍜</i><i class="act">📋</i><i>👤</i></div><div class="orb" style="opacity:.35">🛒</div></div>
       </div></div>
-      <ul><li>D3 状态环（ORDER_STATUS 色）</li><li>明细 + 谁买单</li><li>合计暖金</li></ul>
+      <ul><li>D3 状态环尺寸令牌化（--ring-size）</li><li>明细按人标注 + 谁买单 chip</li><li>备注卡 + 时间戳</li></ul>
     </div>
 
     <!-- 7 PROFILE -->
@@ -318,143 +404,123 @@
         <div class="hero"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-warm),var(--photo-base))"></div><div class="scrim"></div></div>
         <div class="notch"></div>
         <div class="scroll"><div class="pad">
+          <div class="title-s">我的</div><div class="underline"></div>
           <div class="glass card" style="text-align:center">
             <div style="width:64px;height:64px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:30px" class="av me">🐱</div>
-            <div class="nm" style="margin-top:8px">我是 🐱（点此切换 🐰）</div>
-            <div class="ds">当前人格决定加购归属</div>
+            <div class="nm" style="margin-top:8px;font-family:var(--serif)">美食家（我）</div>
+            <div class="ds">点头像切换 🐱/🐰 身份</div>
           </div>
           <div class="kpis">
-            <div class="glass kpi"><b>12</b><span>收藏</span></div>
-            <div class="glass kpi"><b>8</b><span>订单</span></div>
-            <div class="glass kpi"><b>¥640</b><span>累计</span></div>
+            <div class="glass kpi"><b>12</b><span>订单总数</span></div>
+            <div class="glass kpi"><b>1,584</b><span>累计消费</span></div>
           </div>
-          <div class="glass stat"><span>地址管理</span><span class="muted">›</span></div>
-          <div class="glass stat"><span>关于双人模式</span><span class="muted">›</span></div>
+          <div class="glass stat"><span>⚙️ 管理后台</span><span class="muted">›</span></div>
         </div></div>
-        <div class="pill-nav"><i>🏠</i><i>🍽️</i><i>📦</i><i class="act">👤</i></div>
+        <div class="dock"><div class="pill-nav"><i>🏠</i><i>🍜</i><i>📋</i><i class="act">👤</i></div><div class="orb" style="opacity:.35">🛒</div></div>
       </div></div>
-      <ul><li>🐱/🐰 人格切换</li><li>统计 KPI（暖金）</li><li>设置入口</li></ul>
+      <ul><li>身份卡：点头像切换 🐱/🐰</li><li>ui/StatCard ×2（订单总数 / 累计消费）</li><li>收藏入口与 设置/关于 空壳项已删除，仅留管理后台</li></ul>
     </div>
 
-    <!-- 8 CART -->
-    <div class="cell" id="cart">
-      <h3>🛒 购物车 <span class="tag">/cart</span></h3>
-      <div class="phone"><div class="screen">
-        <div class="hero" style="height:120px;filter:blur(8px) brightness(1.02)"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-neu),var(--photo-base))"></div></div>
-        <div class="notch"></div>
-        <div class="scroll"><div class="pad" style="padding-top:30px">
-          <div class="title-s">购物车</div><div class="underline"></div>
-          <div class="glass card" style="border-color:rgba(200,104,63,.3)">
-            <div class="split-h"><span class="av me">🐱</span><b>我的</b><span class="price" style="margin-left:auto">¥100</span></div>
-            <div class="ds" style="margin-top:6px">黑松露意面 ×1</div>
-          </div>
-          <div class="glass card" style="border-color:rgba(127,163,122,.3)">
-            <div class="split-h"><span class="av ta">🐰</span><b>TA的</b><span class="price" style="margin-left:auto">¥64</span></div>
-            <div class="ds" style="margin-top:6px">抹茶千层 ×2</div>
-          </div>
-          <div class="payer"><span class="aa on">AA</span><span class="me">我请</span><span class="ta">TA请</span></div>
-        </div></div>
-        <div class="pill-nav"><i>🏠</i><i>🍽️</i><i>📦</i><i>👤</i></div>
-      </div></div>
-      <ul><li>按人拆分（我/TA 双栏）</li><li>各自小计</li><li>谁买单：AA/我请/TA请</li></ul>
-    </div>
-
-    <!-- 9 CHECKOUT -->
-    <div class="cell" id="checkout">
-      <h3>💳 结算 <span class="tag">/checkout</span></h3>
-      <div class="phone"><div class="screen">
-        <div class="hero" style="height:120px;filter:blur(8px) brightness(1.02)"><div class="img" style="background:radial-gradient(120% 90% at 50% 30%,var(--photo-neu),var(--photo-base))"></div></div>
-        <div class="notch"></div>
-        <div class="scroll"><div class="pad" style="padding-top:30px">
-          <div class="title-s">确认订单</div><div class="underline"></div>
-          <div class="glass card"><div class="nm">黑松露意面 ×1</div><div class="ds">椰香芒果布丁 ×1</div></div>
-          <div class="glass card"><div class="split-h"><b>谁买单</b></div>
-            <div class="payer"><span class="aa on">AA</span><span class="me">我请</span><span class="ta">TA请</span></div></div>
-          <div class="glass card" style="display:flex;justify-content:space-between"><span class="muted" style="font-size:12px">合计</span><span class="price" style="font-size:18px">¥164</span></div>
-          <button class="btn-gold">🐱 提交订单</button>
-        </div></div>
-        <div class="pill-nav"><i>🏠</i><i>🍽️</i><i>📦</i><i>👤</i></div>
-      </div></div>
-      <ul><li>明细 / 备注 / 谁买单</li><li>合计暖金</li><li>提交后庆祝遮罩</li></ul>
-    </div>
-
-    <!-- 10 ADMIN -->
+    <!-- 8 ADMIN -->
     <div class="cell" id="admin">
-      <h3>🛠️ 后台控制台 <span class="tag">/admin</span></h3>
+      <h3>🛠️ 管理后台 <span class="tag">/admin</span></h3>
       <div class="phone"><div class="screen">
         <div class="scroll" style="padding-top:42px"><div class="pad">
-          <div class="title-s">管理后台</div><div class="sub-s">晨光玻璃控制台</div><div class="underline"></div>
+          <div class="title-s">管理后台</div><div class="sub-s">← 返回在页头（AdminShell）</div><div class="underline"></div>
           <div class="console-grid">
-            <div class="glass cbox"><b>24</b><span>在售菜品</span></div>
-            <div class="glass cbox"><b>8</b><span>今日订单</span></div>
-            <div class="glass cbox"><b>3</b><span>制作中</span></div>
-            <div class="glass cbox"><b>¥1.2k</b><span>营业额</span></div>
+            <div class="glass cbox"><b>65</b><span>菜品</span></div>
+            <div class="glass cbox"><b>8</b><span>订单</span></div>
+            <div class="glass cbox"><b>3</b><span>今日</span></div>
           </div>
-          <div class="glass stat"><span>🍽️ 菜品管理</span><span class="muted">›</span></div>
-          <div class="glass stat"><span>📦 订单管理</span><span class="muted">›</span></div>
+          <div class="sect"><h4>快捷入口</h4></div>
+          <div class="grid2">
+            <div class="glass gcard" style="border-left:3px solid var(--clay)"><span style="font-size:22px">🍽️</span><b style="font-size:12.5px">菜品管理</b></div>
+            <div class="glass gcard" style="border-left:3px solid var(--sage)"><span style="font-size:22px">👨‍🍳</span><b style="font-size:12.5px">厨房看板</b></div>
+          </div>
+          <div class="glass stat" style="justify-content:center;color:var(--ash)">← 返回用户端</div>
         </div></div>
-        <div class="kbd" style="position:absolute;bottom:14px;width:100%;text-align:center">（后台视图自动隐藏底部悬浮导航）</div>
+        <div class="kbd" style="position:absolute;bottom:14px;width:100%;text-align:center">（/admin 路由下 DockLayer 自动隐藏）</div>
       </div></div>
-      <ul><li>暗色玻璃数据卡</li><li>可读性优先</li><li>入口：菜品 / 订单管理</li></ul>
+      <ul><li>三页后台统一 AdminShell（渐变头部 + 强制返回）</li><li>ui/StatCard ×3（菜品/订单/今日）</li><li>显式「返回用户端」出口</li></ul>
     </div>
 
-    <!-- 11 ADMIN DISHES -->
+    <!-- 9 ADMIN DISHES -->
     <div class="cell" id="adishes">
       <h3>🍽️ 菜品管理 <span class="tag">/admin/dishes</span></h3>
       <div class="phone"><div class="screen">
         <div class="scroll" style="padding-top:42px"><div class="pad">
-          <div class="title-s">菜品管理</div><div class="underline"></div>
-          <div class="glass card"><div class="nm">黑松露意面</div><div class="ds">¥68 · 在售</div>
-            <div class="row"><span class="chip on" style="background:linear-gradient(135deg,var(--platinum-soft),var(--sage));color:var(--bone);border:none">上架</span>
-            <span class="chip" style="background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:var(--bone);border:none">编辑</span>
-            <span class="chip" style="background:linear-gradient(135deg,#f3bcb7,var(--love));color:var(--bone);border:none">删除</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div><div class="title-s">菜品管理</div><div class="sub-s">共 65 道菜</div></div>
+            <span class="chip on" style="border-radius:12px">+ 添加</span>
           </div>
-          <div class="glass card"><div class="nm">抹茶千层</div><div class="ds">¥42 · 在售</div>
-            <div class="row"><span class="chip on" style="background:linear-gradient(135deg,var(--platinum-soft),var(--sage));color:var(--bone);border:none">上架</span>
-            <span class="chip" style="background:linear-gradient(135deg,var(--platinum-soft),var(--platinum));color:var(--bone);border:none">编辑</span>
-            <span class="chip" style="background:linear-gradient(135deg,#f3bcb7,var(--love));color:var(--bone);border:none">删除</span></div>
+          <div class="underline"></div>
+          <div class="glass card"><div class="split-h" style="margin-top:0"><div class="thumb"></div>
+              <div><div class="nm">酸菜鱼 <span class="badge">川菜</span></div><div class="price serif">42</div></div></div>
+            <div class="row"><span class="chip on" style="background:linear-gradient(135deg,var(--sage-soft),var(--sage));color:var(--bone);border:none">✓ 上架</span>
+            <span class="chip" style="background:var(--caramel);color:#FFFDF9;border:none">编辑</span>
+            <span class="chip" style="background:linear-gradient(135deg,var(--love),var(--danger));color:#FFFDF9;border:none">删除</span></div>
           </div>
-          <button class="btn-gold">＋ 新增菜品</button>
+          <div class="glass card" style="opacity:.5"><div class="split-h" style="margin-top:0"><div class="thumb"></div>
+              <div><div class="nm">口味虾 <span class="badge">湘菜</span></div><div class="price serif">48</div></div></div>
+            <div class="row"><span class="chip">已下架</span>
+            <span class="chip" style="background:var(--caramel);color:#FFFDF9;border:none">编辑</span>
+            <span class="chip" style="background:linear-gradient(135deg,var(--love),var(--danger));color:#FFFDF9;border:none">删除</span></div>
+          </div>
         </div></div>
       </div></div>
-      <ul><li>玻璃表格卡</li><li>上架=鼠尾草 / 编辑=铂 / 删除=爱</li><li>新增走玻璃上滑弹窗</li></ul>
+      <ul><li>菜品行统一 ui/DishRow（manage 变体）</li><li>上架/下架 + 编辑 + 删除，冷暖语义分色</li><li>新增/编辑走底部玻璃弹窗（AddDishModal）</li></ul>
     </div>
 
-    <!-- 12 ADMIN ORDERS -->
+    <!-- 10 ADMIN ORDERS -->
     <div class="cell" id="aorders">
-      <h3>📋 订单管理 <span class="tag">/admin/orders</span></h3>
+      <h3>👨‍🍳 厨房看板 <span class="tag">/admin/orders</span></h3>
       <div class="phone"><div class="screen">
         <div class="scroll" style="padding-top:42px"><div class="pad">
-          <div class="title-s">订单管理</div><div class="underline"></div>
-          <div class="glass card"><div class="split-h"><span class="av me">🐱</span><span class="av ta">🐰</span><b>#1024</b><span class="status-chip sc-pend" style="margin-left:auto">待处理</span></div>
-            <button class="btn-plat" style="width:100%;margin-top:10px;padding:9px;border:none;border-radius:10px">🔥 开始做</button></div>
-          <div class="glass card"><div class="split-h"><span class="av me">🐱</span><span class="av ta">🐰</span><b>#1021</b><span class="status-chip sc-prep" style="margin-left:auto">制作中</span></div>
-            <button class="btn-gold" style="width:100%;margin-top:10px;padding:9px;border:none;border-radius:10px">✓ 完成</button></div>
+          <div class="title-s">厨房看板</div><div class="sub-s">3 笔订单</div><div class="underline"></div>
+          <div class="row"><span class="chip on">✨ 全部</span><span class="chip">⏳ 等着呢</span><span class="chip">👨‍🍳 在做了</span><span class="chip">🎉 做好啦</span></div>
+          <div class="glass ocard"><div class="bar" style="background:linear-gradient(90deg,rgba(154,144,130,.55),rgba(154,144,130,.13))"></div>
+            <div class="inner"><div class="lbar" style="background:#9A9082"></div>
+            <div class="body">
+              <div class="meta"><span class="muted" style="font-size:10.5px">#1003</span>
+                <span style="display:flex;gap:6px;align-items:center"><span class="badge">我请</span><span class="status-chip sc-pend">等着呢</span></span></div>
+              <div class="items">酸菜鱼×1、麻婆豆腐×1</div>
+              <div class="foot"><span class="price serif">70</span>
+                <button class="btn-clay" style="width:auto;margin-top:0;padding:7px 12px;font-size:11px;border-radius:12px">🔥 开始做</button></div>
+            </div></div></div>
+          <div class="glass ocard"><div class="bar" style="background:linear-gradient(90deg,rgba(224,160,126,.55),rgba(224,160,126,.13))"></div>
+            <div class="inner"><div class="lbar" style="background:#E0A07E"></div>
+            <div class="body">
+              <div class="meta"><span class="muted" style="font-size:10.5px">#1002</span>
+                <span style="display:flex;gap:6px;align-items:center"><span class="badge">AA</span><span class="status-chip sc-prep">在做了</span></span></div>
+              <div class="items">龙井虾仁×1</div>
+              <div class="foot"><span class="price serif">48</span>
+                <button class="btn-sage" style="width:auto;margin-top:0;padding:7px 12px;font-size:11px;border-radius:12px;border:none;font-weight:800;color:var(--bone)">✅ 做好了</button></div>
+            </div></div></div>
         </div></div>
       </div></div>
-      <ul><li>玻璃订单行</li><li>状态按钮走 ORDER_STATUS</li><li>改单逻辑不变</li></ul>
+      <ul><li>订单卡复用 ui/OrderCard（admin 变体）</li><li>显示订单号 + 买单方 + 备注</li><li>状态推进：开始做=赤陶 / 做好了=鼠尾草</li></ul>
     </div>
 
   </div>
 
   <!-- CHECKLIST -->
   <section class="check">
-    <h2>核心功能 · 全部保留</h2>
-    <p class="c">本次只换视觉语言，业务逻辑一刀未动（CartContext / mockApi / favorites 三个文件未改）。</p>
+    <h2>核心语义 · 全部保留</h2>
+    <p class="c">IA 重构不改业务内核：CartContext / mockApi / favorites 三个文件零改动；色值仍单源在 index.css + persona.js。</p>
     <div class="checks">
-      <div class="ck"><div class="ic">🐱🐰</div><div><b>双人格系统</b><span>whoAmI 切换；加购归属按当前人格；购物车按人拆分。</span></div></div>
-      <div class="ck"><div class="ic">💸</div><div><b>谁买单</b><span>AA / 我请 / TA请 三种，颜色取自 persona.js。</span></div></div>
-      <div class="ck"><div class="ic">❤️</div><div><b>收藏</b><span>爱心填充 love 色；价格暖金显示。</span></div></div>
-      <div class="ck"><div class="ic">🛒</div><div><b>购物车球</b><span>金色 D3 悬浮球，带数量角标。</span></div></div>
-      <div class="ck"><div class="ic">🔥</div><div><b>订单状态环</b><span>D3 状态环颜色由 ORDER_STATUS 驱动（待处理/制作中/已完成）。</span></div></div>
+      <div class="ck"><div class="ic">🐱🐰</div><div><b>双人格系统</b><span>whoAmI 切换；加购归属按当前人格；购物车按人拆分小计。</span></div></div>
+      <div class="ck"><div class="ic">💸</div><div><b>谁买单</b><span>AA / 我请 / TA请 三种（ui/PayerSelector），颜色取自 persona.js。</span></div></div>
+      <div class="ck"><div class="ic">⭐</div><div><b>收藏并入点菜</b><span>Menu 分段控件直达；/favorites → /menu?fav=1 重定向；lib/favorites 未改。</span></div></div>
+      <div class="ck"><div class="ic">🛒</div><div><b>结算并入购物车</b><span>Cart 一页完成下单（原 /checkout 重定向 /cart）；购物车球与导航并排停靠，零重叠。</span></div></div>
+      <div class="ck"><div class="ic">🧭</div><div><b>断头路 0</b><span>PageHeader(back/backTo) 全覆盖；后台三页 AdminShell 强制返回。</span></div></div>
+      <div class="ck"><div class="ic">📏</div><div><b>设计标尺</b><span>@theme static 圆角/阴影/字阶/间距/动效令牌；硬编码 px 字号与散落圆角 grep 到 0。</span></div></div>
+      <div class="ck"><div class="ic">🔥</div><div><b>订单状态</b><span>D3 状态环（--ring-size 令牌）+ ui/OrderCard 用户端/后台双端复用。</span></div></div>
       <div class="ck"><div class="ic">🧊</div><div><b>玻璃卡 + 降级</b><span>backdrop-filter 不支持时回退实色；prefers-reduced-motion 关闭动效。</span></div></div>
-      <div class="ck"><div class="ic">📱</div><div><b>悬浮药丸导航</b><span>底部玻璃药丸，仅图标 + 激活金光；后台页自动隐藏。</span></div></div>
-      <div class="ck"><div class="ic">🛠️</div><div><b>管理后台</b><span>暗色玻璃控制台 + 菜品/订单管理，可读性优先。</span></div></div>
     </div>
   </section>
 
   <footer>
-    晨光厨房 · 沉浸式重排预览 &nbsp;|&nbsp; 真机运行于 <code style="color:var(--gold-soft)">npm run dev</code>（http://localhost:5173）<br>
+    晨光厨房 · IA 重构预览（10 页） &nbsp;|&nbsp; 真机运行于 <code style="color:var(--clay)">npm run dev</code>（http://localhost:5173）<br>
     本页为静态功能预览；想看真实大图与交互动效，请打开 dev server。
   </footer>
 </div>
