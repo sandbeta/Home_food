@@ -9,15 +9,6 @@ import SectionHeader from '../components/ui/SectionHeader'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
-import Icon from '../components/ui/Icons'
-
-// 快捷入口四色 tint：让双人格的冷暖（clay/sage）与喜爱(love)、焦糖(caramel)在首屏就出场
-const QUICK_ACTIONS = [
-  { label: '菜单', icon: 'menu', color: 'var(--color-clay)', path: '/menu', tint: 'color-mix(in srgb, var(--color-clay) 12%, transparent)' },
-  { label: '收藏', icon: 'star', color: 'var(--color-love)', path: '/menu?fav=1', tint: 'color-mix(in srgb, var(--color-love) 16%, transparent)' },
-  { label: '订单', icon: 'orders', color: 'var(--color-caramel)', path: '/orders', tint: 'color-mix(in srgb, var(--color-caramel) 12%, transparent)' },
-  { label: '我的', icon: 'user', color: 'var(--color-sage)', path: '/profile', tint: 'color-mix(in srgb, var(--color-sage) 16%, transparent)' },
-]
 
 const MOTIVATIONS = [
   '吃饱了才有力气减肥~', '今天也要好好吃饭呀', '唯有美食与爱不可辜负',
@@ -36,8 +27,9 @@ function getGreeting() {
 const chefOf = (dish) => (dish.id % 2 === 0 ? 'me' : 'partner')
 
 /**
- * 首页 —— 列表隐喻收敛为「主推大卡 + 2 列网格 + 竖列表」3 种，约 1.5 屏。
- * 主推卡是全页唯一的深色锚点（clay 实底），其余模块保持浅色玻璃，拉开轻重层次。
+ * 首页 —— 「主推大卡 + 2 列网格 + 竖列表」，约 1 屏出头。
+ * 不设快捷入口：与底部导航功能重复（用户实测反馈后移除），
+ * 收藏走点菜页分段控件，订单/我的走底部导航。
  */
 export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
@@ -62,27 +54,6 @@ export default function Home() {
       <PageHeader title={`${getGreeting()}，今天吃什么？`} subtitle={motivation} />
 
       <PageContainer>
-        {/* 快捷入口：四色 tint 区分 */}
-        <motion.div className="grid grid-cols-4 gap-3" {...contentEnter()}>
-          {QUICK_ACTIONS.map((action) => (
-            <motion.button
-              key={action.label}
-              whileTap={{ scale: 0.92, y: 2 }}
-              whileHover={{ y: -4, transition: { type: 'spring', stiffness: 400 } }}
-              onClick={() => navigate(action.path)}
-              className="flex flex-col items-center gap-1.5 py-2"
-            >
-              <div
-                className="w-14 h-14 rounded-2xl flex items-center justify-center glass"
-                style={{ background: action.tint, boxShadow: 'var(--shadow-2)' }}
-              >
-                <Icon name={action.icon} size={24} style={{ color: action.color }} />
-              </div>
-              <span className="text-xs font-bold text-[var(--color-bone)]">{action.label}</span>
-            </motion.button>
-          ))}
-        </motion.div>
-
         {/* 今日主推 —— 全页深色锚点：clay 实底 + 白字大号 serif 价格 */}
         {featured && (
           <motion.div {...contentEnter(0.05)}>
