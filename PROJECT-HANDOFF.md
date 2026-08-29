@@ -1,14 +1,14 @@
 # 项目交接文档 · 晨光厨房（food-ordering-miniapp）
 
 > **给新对话的 AI / 开发者**：本文档是自包含的。读完即可接手，无需翻旧会话。
-> 最后更新：2026-08-29（P4+P5 完成轮）　代码 HEAD：`ad1ca26`　工作区：干净
+> 最后更新：2026-08-29（IA 重构全部完成）　代码 HEAD：`76280e6`　工作区：干净
 > 注：本文档自身作为 docs 提交在代码 HEAD 之后，仓库实际 HEAD 会多一笔 docs 提交，属正常。
 
 ---
 
 ## 1. 一句话简介
 
-情侣点餐 H5 小程序（手机 480px 竖屏框）。已完成两轮工作：**①「晨光厨房」换肤（已完成并验收）**；**② UI 与信息架构全面重构（进行中，P0–P5 已完成，P6 待做）**。
+情侣点餐 H5 小程序（手机 480px 竖屏框）。已完成两轮工作：**①「晨光厨房」换肤（已完成并验收）**；**② UI 与信息架构全面重构（✅ P0–P6 全部完成，2026-08-29 验收通过）**。当前项目处于**维护态**：改代码前仍须读第 5 节架构约定与第 8 节环境坑。
 
 - **项目路径**：`C:/Users/87374/WorkBuddy/2026-08-15-23-13-20/food-ordering-review/food-ordering-miniapp`
 - **重构方案全文**：`docs/superpowers/plans/2026-08-29-ui-ia-redesign.md`（含逐页布局规格与验收门禁）
@@ -75,15 +75,16 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 | 核对修正 | 交接文档与代码逐条核对后：Cart 圆角笔误（--radius-md→--radius-btn）；六页 Header 转发壳迁移为直接引用 PageHeader 并删除 Header.jsx（兑现第 5 节约定 3）；四个 ui 组件 docstring 的完成时态修正 | build+lint 全绿（`31f2376`→`686a204`） |
 | 重构 P4 | 逐页重排：/favorites 重定向+删页、Profile 清空壳+StatCard、Home 收敛 3 隐喻（主推大卡+网格+竖列表）、DishDetail 补内边距+Stepper、MyOrders 接 OrderCard+状态筛选、OrderDetail+状态环 --ring-size 令牌化、全页 PageContainer | build+lint 全绿（`8c05af6`→`0d60f2b`） |
 | 重构 P5 | 质感扫尾：硬编码 px 字号清零（映射字阶）、散落圆角归 --radius-tile、价格/合计数字补 font-serif、AddDishModal 的 480 魔数换 --shell-w | 字号/圆角 grep 到 0（`ad1ca26`） |
+| 重构 P6 | 11 项门禁全过（build 0 / lint 0 / 断头路 0 / 固定层零重叠 / sticky / 字号 0 / 暗色 0 / 旧命名 0 / 色值单源 / 业务文件零改动 / reduced-motion）＋ preview-all-features.html 重写为新 IA 10 屏（浏览器截图验收） | `76280e6`＋`scripts/p6_static_gate.py` 全绿 |
 
-### 待做 🔴（仅剩 P6）
+### 待做 🎉（无）
 
-**P4 逐页重排 ✅（2026-08-29 完成，提交 `8c05af6`–`0d60f2b`）**
+P4 逐页重排、P5 质感、P6 验收均已按方案完成（2026-08-29）：
+- **P4**：/favorites 重定向+删页、Profile 清空壳、Home 收敛 3 隐喻、DishDetail 修内边距+Stepper、MyOrders 接 OrderCard+状态筛选、OrderDetail 状态环 --ring-size 令牌化、全页 PageContainer（`8c05af6`–`0d60f2b`）。
+- **P5**：硬编码 px 字号/散落圆角 grep 到 0、serif 数字、480 魔数清尾（`ad1ca26`）。
+- **P6**：`python scripts/p6_static_gate.py` 色值单源/暗色/断头路全绿；`preview-all-features.html` 已是新 IA 10 屏（`76280e6`）。
 
-**P5 质感 ✅（2026-08-29 完成，提交 `ad1ca26`；现存字号/圆角硬编码已 grep 到 0）**
-
-**P6 验收（11 项门禁）**：build 0 / lint 0 error / 断头路 0 / 固定层零重叠 / sticky 生效 / 硬编码字号 0 / 暗色残留 0 / 旧命名 0 / 色值单源 / 业务文件改动最小 / reduced-motion 生效；最后**同步 `preview-all-features.html` 到新 IA（10 页）** 并提交。
-- 前 10 项静态门禁已可用 `python scripts/p6_static_gate.py` + build/lint 复验（2026-08-29 实测全绿）；**唯一剩余大项是把 `preview-all-features.html` 从旧 IA（含 #checkout/#favorites，11 屏）重写成新 IA 10 屏**。
+后续迭代仍走「方案 → 实现 → build+lint+门禁脚本 → 中文提交」的节奏即可。
 
 ## 7. 关键文件地图
 
@@ -133,7 +134,6 @@ scripts/
 
 ## 10. 给新对话的开场白模板
 
-> 请先读 `<项目路径>/PROJECT-HANDOFF.md`，然后继续执行其中的「P6 验收」：先跑
-> `python scripts/p6_static_gate.py` + build + lint 复验前 10 项门禁，再把
-> `preview-all-features.html` 重写为新 IA 的 10 屏并提交。遵守第 5 节的架构约定
-> 与第 8 节的环境坑。
+> 请先读 `<项目路径>/PROJECT-HANDOFF.md`。重构（P0–P6）已全部完成并验收，项目处于维护态；
+> 改动前遵守第 5 节架构约定与第 8 节环境坑，每次改动跑 `npm run build`、`npm run lint` 与
+> `python scripts/p6_static_gate.py` 复验门禁，用中文提交说明「为什么」。
