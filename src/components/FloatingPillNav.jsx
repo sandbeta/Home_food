@@ -57,7 +57,7 @@ export default function FloatingPillNav() {
               />
             )}
             <span
-              className="relative text-[22px] transition-transform"
+              className="relative text-2xl transition-transform"
               style={{ color: active ? 'var(--color-clay)' : 'var(--color-ash)' }}
             >
               {tab.emoji}

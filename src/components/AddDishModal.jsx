@@ -34,7 +34,8 @@ export default function AddDishModal({ dish, onClose, onSave }) {
         style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,38,32,0.35)' }} />
       <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-        className="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto z-50">
+        className="fixed bottom-0 left-0 right-0 mx-auto z-50"
+        style={{ maxWidth: 'var(--shell-w)' }}>
         <div className="d3-card-face rounded-t-3xl max-h-[85vh] overflow-hidden">
           <div className="flex justify-center pt-3 pb-1">
             <div className="w-12 h-1.5 rounded-full" style={{ background: 'linear-gradient(90deg, var(--color-primary-light), var(--color-primary), var(--color-primary-light))' }} />
@@ -55,7 +56,7 @@ export default function AddDishModal({ dish, onClose, onSave }) {
             <div className="space-y-4">
               {FIELDS.map(f => (
                 <div key={f.key}>
-                  <label className="text-[13px] text-[var(--color-text-secondary)] block mb-1.5 font-semibold flex items-center gap-1.5">
+                  <label className="text-sm text-[var(--color-text-secondary)] block mb-1.5 font-semibold flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-primary)' }} />
                     {f.label}
                   </label>
@@ -69,7 +70,7 @@ export default function AddDishModal({ dish, onClose, onSave }) {
               ))}
 
               <div>
-                <label className="text-[13px] text-[var(--color-text-secondary)] block mb-1.5 font-semibold flex items-center gap-1.5">
+                <label className="text-sm text-[var(--color-text-secondary)] block mb-1.5 font-semibold flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-secondary)' }} />
                   分类
                 </label>

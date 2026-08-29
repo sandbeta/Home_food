@@ -33,7 +33,7 @@ function WhoSelector({ whoAmI, setWhoAmI }) {
           <motion.button key={opt.value} whileTap={{ scale: 0.95 }} onClick={() => setWhoAmI(opt.value)}
             className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-2xl text-sm font-bold transition-all duration-300 ease-out ${active ? (opt.value === 'me' ? 'avatar-me glow-clay' : 'avatar-partner glow-sage') : 'text-[var(--color-ash)] hover:bg-white/5'}`}
             animate={active ? { scale: 1.02 } : { scale: 1 }}>
-            <motion.span className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center text-[10px]"
+            <motion.span className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center text-xs"
               animate={active ? { rotate: [0, -8, 8, 0] } : { rotate: 0 }}
               transition={{ duration: 0.5 }}>{opt.icon}</motion.span>
             {opt.label}
@@ -65,16 +65,16 @@ function RecommendCard({ dishes, onAdd, spawnParticle }) {
         <span className="text-xs text-[var(--color-ash)]">不知道吃啥就选它</span>
       </div>
       <div className="relative flex items-center gap-3">
-        <div className="w-16 h-16 rounded-[22px] flex items-center justify-center shrink-0 overflow-hidden"
+        <div className="w-16 h-16 rounded-[var(--radius-tile)] flex items-center justify-center shrink-0 overflow-hidden"
           style={{ background: 'linear-gradient(145deg, var(--color-cream) 0%, var(--color-cream-dark) 60%, rgba(200,104,63,0.08) 100%)' }}>
           {randomDish.image_url ? <img src={randomDish.image_url} className="w-full h-full object-cover" alt={randomDish.name} /> : <span className="text-3xl">{CATEGORY_CONFIG[randomDish.category]?.emoji || '🍽️'}</span>}
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-[17px] text-[var(--color-bone)] truncate">{randomDish.name}</h3>
+          <h3 className="font-bold text-lg text-[var(--color-bone)] truncate">{randomDish.name}</h3>
           <p className="text-xs text-[var(--color-ash)] mt-0.5 line-clamp-1">{randomDish.description || '好吃的~'}</p>
           <div className="flex items-center gap-1 mt-1.5">
             <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-            <span className="text-[15px] font-extrabold text-[var(--color-clay)]">{randomDish.price}</span>
+            <span className="font-serif text-base font-extrabold text-[var(--color-clay)]">{randomDish.price}</span>
           </div>
         </div>
         <motion.button whileTap={{ scale: 0.92 }} whileHover={{ scale: 1.04 }} onClick={(e) => {
@@ -260,7 +260,7 @@ export default function Menu() {
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setShowAllCategories(false)}
-                      className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold text-[var(--color-ash)] hover:text-[var(--color-clay)] transition-colors duration-200">
+                      className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold text-[var(--color-ash)] hover:text-[var(--color-clay)] transition-colors duration-200">
                       收起
                       <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 7.5L6 4.5L9 7.5" />
@@ -269,7 +269,7 @@ export default function Menu() {
                   </div>
                   {CATEGORY_GROUPS.slice(1).map(group => (
                     <div key={group.label}>
-                      <div className="text-[10px] font-extrabold px-0.5 pb-1 text-[var(--color-clay)]">{group.label}</div>
+                      <div className="text-xs font-extrabold px-0.5 pb-1 text-[var(--color-clay)]">{group.label}</div>
                       <div className="flex flex-wrap gap-2">
                         {group.items.map(cat => {
                           const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG['其他']
@@ -297,7 +297,7 @@ export default function Menu() {
           <div className="space-y-3.5">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="d3-card p-3.5 flex items-center gap-3 overflow-hidden">
-                <div className="w-[70px] h-[70px] rounded-[24px] animate-shimmer-fade shrink-0" />
+                <div className="w-[70px] h-[70px] rounded-[var(--radius-tile)] animate-shimmer-fade shrink-0" />
                 <div className="flex-1 space-y-2.5">
                   <div className="h-[16px] w-[55%] animate-shimmer-fade rounded-full" style={{ animationDelay: `${i * 0.15}s` }} />
                   <div className="h-[12px] w-[35%] animate-shimmer-fade rounded-full" style={{ animationDelay: `${i * 0.15 + 0.1}s` }} />

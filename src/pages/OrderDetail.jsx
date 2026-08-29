@@ -90,7 +90,7 @@ export default function OrderDetail() {
                   className="flex items-center justify-between rounded-lg px-2 py-1.5 -mx-2 hover:bg-white/5 transition-colors duration-150 relative group">
                   <div className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full group-hover:bg-[var(--color-clay)]/40 transition-colors duration-150" />
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] shrink-0 ${item.added_by === 'me' ? 'avatar-me' : 'avatar-partner'}`}>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 ${item.added_by === 'me' ? 'avatar-me' : 'avatar-partner'}`}>
                       {item.added_by === 'me' ? '🐱' : '🐰'}
                     </div>
                     <span className="text-sm text-[var(--color-bone)] font-medium truncate">{item.dish_name}</span>

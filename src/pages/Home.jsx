@@ -116,7 +116,7 @@ export default function Home() {
                     <p className="text-lg font-bold text-[#FFFDF9] truncate">{featured.name}</p>
                     <div className="flex items-center gap-1 shrink-0">
                       <KissIcon className="w-4 h-4 text-[#FFFDF9]" />
-                      <span className="text-lg font-extrabold text-[#FFFDF9] tabular-nums">{featured.price}</span>
+                      <span className="font-serif text-lg font-extrabold text-[#FFFDF9] tabular-nums">{featured.price}</span>
                     </div>
                   </div>
                 </div>

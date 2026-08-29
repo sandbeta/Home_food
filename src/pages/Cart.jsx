@@ -26,7 +26,7 @@ function CartRow({ item, onUpdate, onRemove }) {
         <h3 className="font-semibold text-sm text-[var(--color-bone)] truncate">{item.name}</h3>
         <div className="flex items-center gap-1 mt-0.5">
           <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-          <span className="text-sm font-bold text-[var(--color-clay)] tabular-nums">{item.price}</span>
+          <span className="font-serif text-sm font-bold text-[var(--color-clay)] tabular-nums">{item.price}</span>
         </div>
       </div>
 

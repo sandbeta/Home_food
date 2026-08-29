@@ -89,7 +89,7 @@ export default function OrderCard({
           <div className="flex items-center justify-between gap-2 mt-2.5 pt-2.5 border-t border-[var(--color-glass-border)]">
             <div className="flex items-center gap-1.5 min-w-0">
               <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)] shrink-0" />
-              <span className="text-base font-bold text-[var(--color-clay)] tabular-nums">
+              <span className="font-serif text-base font-bold text-[var(--color-clay)] tabular-nums">
                 {order.total_price}
               </span>
               {isAdmin && (
@@ -108,7 +108,7 @@ export default function OrderCard({
                     {(order.items || []).slice(0, 3).map((it, idx) => (
                       <div
                         key={idx}
-                        className={`w-6 h-6 rounded-full border-2 border-[var(--color-ink-900)] flex items-center justify-center text-[9px] ${
+                        className={`w-6 h-6 rounded-full border-2 border-[var(--color-ink-900)] flex items-center justify-center text-xs ${
                           it.added_by === 'me' ? 'avatar-me' : 'avatar-partner'
                         }`}
                       >
