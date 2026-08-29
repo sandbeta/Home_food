@@ -1,8 +1,6 @@
 const STORAGE_KEY = 'couple_order_app_state_v2'
 
-import { SEED_MENU_EXTRA } from './seedMenuExtra'
-
-const defaultCategories = ['全部', '家常菜', '硬菜', '素菜', '主食', '小吃', '水果', '饮品', '汤类', '川菜', '粤菜', '湘菜', '鲁菜', '苏菜', '浙菜', '闽菜', '徽菜', '东北菜', '西北菜', '云贵菜', '其他']
+import { SEED_MENU_EXTRA } from './seedMenuExtra.js'
 
 const seedDishes = [
   { id: 1, name: '番茄牛腩煲', price: 28, category: '硬菜', description: '酸甜浓郁，拌饭一绝', available: 1, image_url: '/dish-images/dish-1.webp' },
@@ -94,11 +92,17 @@ const seedDishes = [
   { id: 65, name: '折耳根炒腊肉', price: 32, category: '云贵菜', description: '独特香气，越吃越上头', available: 1, image_url: '/dish-images/dish-65.webp' },
 ]
 
+// 内存态缓存：407 道菜 + 订单的 JSON 每请求都解析一遍太浪费，
+// 首次 loadState 解析后驻留内存，写入时同步落盘（单标签页 demo 场景足够）
+let stateCache = null
+
 function loadState() {
+  if (stateCache) return stateCache
+  let state
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
-      const state = JSON.parse(saved)
+      state = JSON.parse(saved)
       const existingNames = new Set((state.dishes || []).map(d => d.name))
       const missingSeed = seedDishes.filter(d => !existingNames.has(d.name))
       if (missingSeed.length) {
@@ -106,10 +110,14 @@ function loadState() {
         state.nextDishId = Math.max(Number(state.nextDishId || 1), ...state.dishes.map(d => Number(d.id || 0))) + 1
         saveState(state)
       }
-      return state
+    } else {
+      state = { dishes: seedDishes, orders: [], nextDishId: 66, nextOrderId: 1001 }
     }
-  } catch {}
-  return { dishes: seedDishes, orders: [], nextDishId: 66, nextOrderId: 1001 }
+  } catch {
+    state = { dishes: seedDishes, orders: [], nextDishId: 66, nextOrderId: 1001 }
+  }
+  stateCache = state
+  return state
 }
 
 // HowToCook 开源菜谱灌库数据（公有领域/Unlicense，生成于 scripts/build_htc_seed.py），
@@ -117,6 +125,7 @@ function loadState() {
 seedDishes.push(...SEED_MENU_EXTRA)
 
 function saveState(state) {
+  stateCache = state
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
 }
 
@@ -158,11 +167,6 @@ export function installMockApi() {
     const method = (init.method || 'GET').toUpperCase()
     const { pathname, searchParams } = parsed
 
-    if (pathname === '/api/dishes/categories' && method === 'GET') {
-      const cats = Array.from(new Set([...defaultCategories, ...state.dishes.map(d => d.category).filter(Boolean)]))
-      return json(cats)
-    }
-
     if (pathname === '/api/dishes/all' && method === 'GET') {
       return json([...state.dishes].sort((a, b) => b.id - a.id))
     }
@@ -189,7 +193,7 @@ export function installMockApi() {
       const dish = state.dishes.find(d => d.id === id)
       if (!dish) return json({ message: 'Not found' }, 404)
       // 菜谱（HowToCook 灌库菜才有）按需动态加载：体积较大，不进列表与首屏
-      const recipes = await import('./seedRecipes').then(m => m.default).catch(() => ({}))
+      const recipes = await import('./seedRecipes.js').then(m => m.default).catch(() => ({}))
       return json({ ...dish, recipe: recipes[id] || null })
     }
     if (dishMatch && method === 'PUT') {
