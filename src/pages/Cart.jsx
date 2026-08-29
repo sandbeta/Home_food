@@ -214,7 +214,7 @@ export default function Cart() {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="d3-input w-full px-3.5 py-2.5 text-sm resize-none text-[var(--color-bone)] placeholder:text-[var(--color-mist)]/70 font-medium"
-              style={{ borderRadius: 'var(--radius-md)' }}
+              style={{ borderRadius: 'var(--radius-btn)' }}
               rows={2}
               placeholder="少盐、不要香菜、多放蒜..."
             />
@@ -261,7 +261,7 @@ export default function Cart() {
               onClick={handleSubmit}
               disabled={submitting}
               className="d3-btn d3-btn-primary w-full disabled:opacity-50 py-3.5 font-bold text-base animate-pulse-glow-clay"
-              style={{ borderRadius: 'var(--radius-md)' }}
+              style={{ borderRadius: 'var(--radius-btn)' }}
             >
               {submitting ? '提交中...' : '下单啦~'}
             </motion.button>
