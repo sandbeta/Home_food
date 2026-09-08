@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
 import GlassCard from '../components/GlassCard'
 import FullBleedHero from '../components/FullBleedHero'
-import D3StatusRing from '../components/D3StatusRing'
+import StoveStage from '../components/StoveStage'
 import KissIcon from '../components/KissIcon'
 import PageContainer from '../components/ui/PageContainer'
 import EmptyState from '../components/ui/EmptyState'
@@ -65,11 +65,11 @@ export default function OrderDetail() {
       />
 
       <PageContainer>
-        {/* 状态环（尺寸令牌 --ring-size，见 D3StatusRing） */}
+        {/* 灶台舞台：熄火 / 点火焖煮 / 起锅，三态各有戏 */}
         <GlassCard>
           <div className="p-5 text-center overflow-hidden relative">
             <div className="relative z-10">
-              <D3StatusRing config={{ ring: status.ring }} />
+              <StoveStage statusKey={order.status} createdAt={order.created_at} />
               <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
                 className="inline-block px-4 py-1 rounded-full text-sm font-bold"
                 style={{ background: status.chipBg, color: status.chipColor }}>{status.text}</motion.span>
@@ -100,7 +100,7 @@ export default function OrderDetail() {
                   </div>
                   <div className="flex items-center gap-0.5 shrink-0">
                     <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-                    <span className="text-sm font-bold text-[var(--color-caramel)]">{(item.price * item.quantity).toFixed(0)}</span>
+                    <span className="text-sm font-bold text-[var(--color-caramel)]"><span className="text-[0.75em] mr-px">¥</span>{(item.price * item.quantity).toFixed(0)}</span>
                   </div>
                 </motion.div>
               ))}
@@ -116,7 +116,7 @@ export default function OrderDetail() {
                 </div>
                 <div className="flex items-center gap-1">
                   <KissIcon className="w-4 h-4 text-[var(--color-love)]" />
-                  <span className="font-serif text-2xl font-bold text-[var(--color-caramel)] tabular-nums">{order.total_price}</span>
+                  <span className="font-serif text-2xl font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{order.total_price}</span>
                 </div>
               </div>
             </div>

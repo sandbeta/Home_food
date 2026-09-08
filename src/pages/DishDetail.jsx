@@ -12,6 +12,7 @@ import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import { useFavorites } from '../lib/favorites'
 import { HERO_IMAGES } from '../theme/images'
+import { getDishImage } from '../lib/categoryIcons'
 import { PERSONA } from '../theme/persona'
 
 export default function DishDetail() {
@@ -62,7 +63,7 @@ export default function DishDetail() {
 
   return (
     <div className="relative">
-      <FullBleedHero src={dish.image_url || HERO_IMAGES.dish} variant="immersive" alt={dish.name} />
+      <FullBleedHero src={getDishImage(dish) || HERO_IMAGES.dish} variant="immersive" alt={dish.name} />
 
       <PageHeader
         title={dish.name}
@@ -92,7 +93,7 @@ export default function DishDetail() {
             <p className="text-sm text-[var(--color-ash)] leading-relaxed">{dish.description || '一道美味的菜品~'}</p>
             <div className="flex items-center gap-1.5 mt-3">
               <KissIcon className="w-5 h-5 text-[var(--color-love)]" />
-              <span className="font-serif text-2xl font-bold text-[var(--color-clay)] tabular-nums">{dish.price}</span>
+              <span className="font-serif text-2xl font-bold text-[var(--color-clay)] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{dish.price}</span>
             </div>
           </div>
         </GlassCard>

@@ -3,16 +3,17 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../components/CartContext'
 import PageHeader from '../components/PageHeader'
-import GlassCard from '../components/GlassCard'
 import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
 import DishRow from '../components/ui/DishRow'
 import PageContainer from '../components/ui/PageContainer'
 import EmptyState from '../components/ui/EmptyState'
+import LuckyDishCard from '../components/ui/LuckyDishCard'
 import { useFavorites } from '../lib/favorites'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { pickOne, MENU_TITLES, MENU_NOTES } from '../lib/sweetCopy'
+import { tap, vibrate } from '../lib/sfx'
 
 // 仅保留 emoji；旧版彩虹色全部移除，改用晨光玻璃 + 赤陶/鼠尾草绿强调
 const CATEGORY_CONFIG = {
@@ -45,56 +46,6 @@ function WhoSelector({ whoAmI, setWhoAmI }) {
   )
 }
 
-function RecommendCard({ dishes, onAdd, spawnParticle }) {
-  const randomDish = useMemo(() => {
-    if (dishes.length === 0) return null
-    return dishes[Math.floor(Math.random() * dishes.length)]
-  }, [dishes])
-
-  if (!randomDish) return null
-
-  return (
-    <GlassCard className="p-4 mb-4 overflow-hidden relative">
-      <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full animate-float-gentle"
-        style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.14), transparent 70%)' }} />
-      <div className="absolute -left-6 -bottom-6 w-20 h-20 rounded-full animate-float"
-        style={{ background: 'radial-gradient(circle, rgba(127,163,122,0.10), transparent 70%)', animationDelay: '1s' }} />
-
-      <div className="relative flex items-center justify-between mb-3">
-        <span className="badge-soft text-xs font-extrabold px-2.5 py-1 rounded-full"
-          style={{ background: 'rgba(200,104,63,0.14)', color: 'var(--color-clay)' }}>今日灵感</span>
-        <span className="text-xs text-[var(--color-ash)]">不知道吃啥就选它</span>
-      </div>
-      <div className="relative flex items-center gap-3">
-        <div className="relative w-16 h-16 rounded-[var(--radius-tile)] flex items-center justify-center shrink-0 overflow-hidden"
-          style={{ background: 'linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-850) 60%, rgba(200,104,63,0.08) 100%)' }}>
-          <span className="text-3xl">{CATEGORY_CONFIG[randomDish.category]?.emoji || '🍽️'}</span>
-          {randomDish.image_url && (
-            <img src={randomDish.image_url} alt={randomDish.name} loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.style.display = 'none' }} />
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-lg text-[var(--color-bone)] truncate">{randomDish.name}</h3>
-          <p className="text-xs text-[var(--color-ash)] mt-0.5 line-clamp-1">{randomDish.description || '好吃的~'}</p>
-          <div className="flex items-center gap-1 mt-1.5">
-            <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-            <span className="font-serif text-base font-extrabold text-[var(--color-caramel)]">{randomDish.price}</span>
-          </div>
-        </div>
-        <motion.button whileTap={{ scale: 0.92 }} whileHover={{ scale: 1.04 }} onClick={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect()
-          spawnParticle(rect.left + rect.width / 2, rect.top)
-          onAdd(randomDish)
-        }}
-          className="d3-btn d3-btn-primary px-3.5 py-2 rounded-2xl text-xs font-bold">
-          加一份
-        </motion.button>
-      </div>
-    </GlassCard>
-  )
-}
 
 const CATEGORY_GROUPS = [
   { label: '家常', items: ['全部', '家常菜', '硬菜', '素菜', '主食', '小吃', '水果', '饮品', '汤类'] },
@@ -163,6 +114,8 @@ export default function Menu() {
   const visibleCats = (items) => (catCounts ? items.filter(cat => cat === '全部' || (catCounts[cat] || 0) > 0) : items)
 
   const spawnParticle = (x, y) => {
+    tap()
+    vibrate(8)
     const id = Date.now() + Math.random()
     setParticles(prev => [...prev, { id, x, y }])
     setTimeout(() => {
@@ -238,7 +191,7 @@ export default function Menu() {
           </AnimatePresence>
         </div>
 
-        {!loading && <RecommendCard dishes={dishes} onAdd={addItem} spawnParticle={spawnParticle} />}
+        {!loading && <LuckyDishCard dishes={dishes} onAdd={addItem} spawnParticle={spawnParticle} />}
 
         {/* 分类标签 - 可折叠分组网格布局 */}
         <div className="mb-3">

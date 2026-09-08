@@ -89,7 +89,7 @@ export default function OrderCard({
             <div className="flex items-center gap-1.5 min-w-0">
               <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)] shrink-0" />
               <span className="font-serif text-base font-bold text-[var(--color-caramel)] tabular-nums">
-                {order.total_price}
+                <span className="text-[0.75em] mr-px">¥</span>{order.total_price}
               </span>
               {isAdmin && (
                 <span className="text-xs text-[var(--color-ash)] truncate">

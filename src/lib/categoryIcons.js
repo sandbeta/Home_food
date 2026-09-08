@@ -1,4 +1,6 @@
 // Category icon mapping - emojis for category badges
+import { assetUrl } from './assetUrl'
+
 export const CATEGORY_ICONS = {
   '家常菜': '🍳',
   '硬菜': '🥩',
@@ -29,8 +31,9 @@ export function getCategoryEmoji(category) {
 
 // Get the display image for a dish card
 // If dish has image_url, use it; otherwise return null (fallback to emoji)
+// 路径经 assetUrl 转换：GitHub Pages 等子路径部署下绝对路径会 404
 export function getDishImage(dish) {
   if (!dish) return null
-  if (dish.image_url) return dish.image_url
+  if (dish.image_url) return assetUrl(dish.image_url)
   return null
 }

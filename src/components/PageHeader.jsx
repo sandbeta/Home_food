@@ -23,7 +23,7 @@ export default function PageHeader({ title, subtitle, back = false, backTo, righ
       className="sticky top-0 z-40"
       style={{
         background:
-          'linear-gradient(180deg, rgba(247,243,236,0.82) 0%, rgba(247,243,236,0) 100%)',
+          'linear-gradient(180deg, var(--scrim-top) 0%, rgba(0,0,0,0) 100%)',
         backdropFilter: 'blur(14px)',
         WebkitBackdropFilter: 'blur(14px)',
       }}

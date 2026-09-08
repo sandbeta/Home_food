@@ -28,7 +28,7 @@ function CartRow({ item, onUpdate, onRemove }) {
         <h3 className="font-semibold text-sm text-[var(--color-bone)] truncate">{item.name}</h3>
         <div className="flex items-center gap-1 mt-0.5">
           <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-          <span className="font-serif text-sm font-bold text-[var(--color-caramel)] tabular-nums">{item.price}</span>
+          <span className="font-serif text-sm font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{item.price}</span>
         </div>
       </div>
 
@@ -159,7 +159,7 @@ export default function Cart() {
               <div className="flex items-center gap-2 mb-3">
                 <div className="avatar-me w-7 h-7 rounded-full flex items-center justify-center text-xs">🐱</div>
                 <span className="font-bold text-[var(--color-bone)]">我点的</span>
-                <span className="ml-auto text-sm font-bold text-[var(--color-clay)] tabular-nums">{meTotal}</span>
+                <span className="ml-auto text-sm font-bold text-[var(--color-clay)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{meTotal}</span>
               </div>
               <div>
                 <AnimatePresence>
@@ -182,7 +182,7 @@ export default function Cart() {
               <div className="flex items-center gap-2 mb-3">
                 <div className="avatar-partner w-7 h-7 rounded-full flex items-center justify-center text-xs">🐰</div>
                 <span className="font-bold text-[var(--color-bone)]">TA 点的</span>
-                <span className="ml-auto text-sm font-bold text-[var(--color-sage)] tabular-nums">{partnerTotal}</span>
+                <span className="ml-auto text-sm font-bold text-[var(--color-sage)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{partnerTotal}</span>
               </div>
               <div>
                 <AnimatePresence>
@@ -252,7 +252,7 @@ export default function Cart() {
                   transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                   className="font-serif text-display font-bold text-[#FFFDF9] tabular-nums"
                 >
-                  {totalPrice}
+                  <span className="text-[0.6em] mr-1 opacity-90">¥</span>{totalPrice}
                 </motion.span>
               </div>
             </div>

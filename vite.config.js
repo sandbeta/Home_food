@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
+  // 相对基址：GitHub Pages 部署在 /{仓库名}/ 子路径下也能正确加载资源，
+  // 本地开发与自建域名根路径同样适用（无需知道仓库名）
+  base: './',
   plugins: [react(), tailwindcss()],
   server: {
     host: true,
