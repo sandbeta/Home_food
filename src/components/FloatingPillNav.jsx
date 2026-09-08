@@ -5,6 +5,7 @@ import Icon from './ui/Icons'
 const tabs = [
   { path: '/home', label: '首页', icon: 'home' },
   { path: '/menu', label: '吃什么', icon: 'menu' },
+  { path: '/hot', label: '热门', icon: 'flame' },
   { path: '/orders', label: '订单', icon: 'orders' },
   { path: '/profile', label: '我的', icon: 'user' },
 ]
@@ -22,6 +23,7 @@ export default function FloatingPillNav() {
   const isActive = (tab) => {
     if (tab.path === '/home') return path === '/home'
     if (tab.path === '/menu') return path === '/menu'
+    if (tab.path === '/hot') return path === '/hot'
     if (tab.path === '/orders') return path === '/orders' || path.startsWith('/orders/')
     if (tab.path === '/profile') return path === '/profile'
     return false

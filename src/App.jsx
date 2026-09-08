@@ -13,6 +13,7 @@ const Cart = lazy(() => import('./pages/Cart'))
 const OrderDetail = lazy(() => import('./pages/OrderDetail'))
 const MyOrders = lazy(() => import('./pages/MyOrders'))
 const Profile = lazy(() => import('./pages/Profile'))
+const HotDishes = lazy(() => import('./pages/HotDishes'))
 const Admin = lazy(() => import('./pages/Admin'))
 const AdminDishes = lazy(() => import('./pages/AdminDishes'))
 const AdminOrders = lazy(() => import('./pages/AdminOrders'))
@@ -81,6 +82,7 @@ function App() {
                   {/* 收藏已并入点菜页（/menu 分段控件）：旧路由保留重定向，避免外链失效 */}
                   <Route path="/favorites" element={<Navigate to="/menu?fav=1" replace />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/hot" element={<HotDishes />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/admin/dishes" element={<AdminDishes />} />
                   <Route path="/admin/orders" element={<AdminOrders />} />
