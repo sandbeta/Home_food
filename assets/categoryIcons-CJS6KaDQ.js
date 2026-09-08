@@ -1,0 +1,1 @@
+import{t as e}from"./assetUrl-CxUlBX2l.js";var t={家常菜:`🍳`,硬菜:`🥩`,素菜:`🥬`,主食:`🍚`,小吃:`🥟`,水果:`🍎`,饮品:`🥤`,汤类:`🍲`,川菜:`🌶️`,粤菜:`🦐`,湘菜:`🌶️`,鲁菜:`🍖`,苏菜:`🦀`,浙菜:`🐟`,闽菜:`🍜`,徽菜:`🍄`,东北菜:`🥟`,西北菜:`🍜`,云贵菜:`🍲`,其他:`🍽️`};function n(e){return t[e]||`🍽️`}function r(t){return t&&t.image_url?e(t.image_url):null}export{r as n,n as t};

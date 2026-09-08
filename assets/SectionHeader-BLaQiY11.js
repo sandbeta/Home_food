@@ -1,0 +1,1 @@
+import{i as e}from"./framer-motion-BVlT9LUN.js";var t=e();function n({title:e,action:n,className:r=``}){return(0,t.jsxs)(`div`,{className:`flex items-center justify-between gap-3 ${r}`,children:[(0,t.jsx)(`h2`,{className:`font-serif text-2xl font-semibold text-[var(--color-bone)] truncate`,children:e}),n&&(0,t.jsx)(`div`,{className:`shrink-0`,children:n})]})}export{n as t};

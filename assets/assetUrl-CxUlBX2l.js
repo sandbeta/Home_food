@@ -1,0 +1,1 @@
+var e=`./`;function t(t){return!t||/^(https?:|data:|blob:)/i.test(t)||!t.startsWith(`/`)?t:e.endsWith(`/`)?e+t.slice(1):e+t}export{t};

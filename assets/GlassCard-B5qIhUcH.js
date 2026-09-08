@@ -1,0 +1,1 @@
+import{i as e,n as t}from"./framer-motion-BVlT9LUN.js";import{r as n}from"./index-Bepn9ZHY.js";var r=e();function i({as:e=`div`,className:i=``,delay:a=0,glow:o,children:s,style:c,...l}){return(0,r.jsx)(t.div,{...n(a),className:`glass rounded-[var(--radius-card)] ${i}`,style:{...c,...o?{boxShadow:o}:{boxShadow:`0 8px 24px rgba(43,38,32,0.08)`}},...l,children:s})}export{i as t};
