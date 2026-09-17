@@ -174,10 +174,26 @@ const REAL_IMAGE_OVERRIDES = {
   61: '/dish-images/real/61.webp',
   62: '/dish-images/real/62.webp',
   63: '/dish-images/real/63.webp',
+  516: '/dish-images/htc/516.jpg',
+  555: '/dish-images/htc/555.jpg',
+  573: '/dish-images/htc/573.jpg',
+  576: '/dish-images/htc/576.jpg',
+  584: '/dish-images/htc/584.jpg',
+  585: '/dish-images/htc/585.jpg',
+  588: '/dish-images/htc/588.jpg',
+  633: '/dish-images/htc/633.jpg',
+  648: '/dish-images/htc/648.jpg',
+  669: '/dish-images/htc/669.jpg',
+  678: '/dish-images/htc/678.jpg',
+  732: '/dish-images/htc/732.jpg',
+  760: '/dish-images/htc/760.jpg',
+  782: '/dish-images/htc/782.jpg',
+  783: '/dish-images/htc/783.jpg',
   900: '/dish-images/real/900.webp',
   901: '/dish-images/real/901.webp',
   902: '/dish-images/real/902.webp',
   903: '/dish-images/real/903.webp',
+  905: '/dish-images/htc/905.jpg',
   906: '/dish-images/real/906.webp',
   907: '/dish-images/real/907.webp',
   908: '/dish-images/real/908.webp',
@@ -196,6 +212,7 @@ const REAL_IMAGE_OVERRIDES = {
 seedDishes.forEach((d) => { const u = REAL_IMAGE_OVERRIDES[d.id]; if (u) d.image_url = u })
 // AI 图清退：仍指向原 dish-*.webp 且未被真实图覆盖的菜，清空 image_url 走 emoji 占位
 seedDishes.forEach((d) => { if (/^\/dish-images\/dish-\d+\.webp$/.test(d.image_url) && !(d.id in REAL_IMAGE_OVERRIDES)) d.image_url = '' })
+
 
 
 function saveState(state) {
