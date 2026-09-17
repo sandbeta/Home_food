@@ -1,21 +1,19 @@
 // ============================================================
-// 深夜食堂开屏弹窗 —— 夜宵模式开启的当下，自动端出一份宵夜菜单。
-// 每个"夜宵时段"（21:00—04:59，凌晨归前一晚）只自动弹一次，
-// 时段戳复用 useTheme.slotStamp，与主题系统同一套跨午夜语义。
-// 浮层骨架与 AddDishModal 同款：遮罩 + sheetUp 底部卡。
+// 深夜食堂开屏弹窗 —— 进入夜宵模式即端出一份宵夜菜单。
+// 触发语义（2026-09-18 所有者反馈"只在初次弹"后改版）：每次进入夜宵都弹
+// （light→night 切换 / 夜宵态刷新）；旧版按时段戳去重导致同晚再开关不弹，已废弃。
+// 浮层骨架与 AddDishModal 同款：遮罩 + 底部卡。
 // ============================================================
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from './CartContext'
-import { useTheme, slotStamp } from '../theme/useTheme'
+import { useTheme } from '../theme/useTheme'
 import { nightPick } from '../lib/nightRules'
 import { getCategoryEmoji } from '../lib/categoryIcons'
 import { pickOne, NIGHT_SNACK_NOTES } from '../lib/sweetCopy'
 import { usePrefersReducedMotion } from '../theme/motion'
-
-const SHOWN_KEY = 'couple_order_nightsnack_shown'
 
 /** Fisher-Yates 无偏洗牌取前 n 道 */
 const shuffleTake = (arr, n) => {
@@ -36,12 +34,10 @@ export default function NightSnackSheet() {
   const [open, setOpen] = useState(false)
   const [note] = useState(() => pickOne(NIGHT_SNACK_NOTES))
 
-  // 夜宵亮起 && 本时段还没弹过 → 拉数据展示。先占坑再弹，
-  // 路由切换/重渲染/刷新都不重复打扰，明晚时段戳变化后自然恢复。
+  // 每次「进入夜宵」都弹：light→night 切换、夜宵态下刷新/首挂载。
+  // 组件常驻 App 外壳不随路由重挂载，关一次后切页不会重弹。
   useEffect(() => {
     if (!isNight) return
-    if (localStorage.getItem(SHOWN_KEY) === slotStamp()) return
-    localStorage.setItem(SHOWN_KEY, slotStamp())
     fetch('/api/dishes/all').then(r => r.json()).then(all => {
       const pool = nightPick(all)
       if (pool.length) { setDishes(shuffleTake(pool, 6)); setOpen(true) }

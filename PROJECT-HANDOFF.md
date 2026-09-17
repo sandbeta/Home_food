@@ -96,12 +96,12 @@ src/
 │   ├── PageHeader.jsx       ★统一页头（back/backTo/right）
 │   ├── FloatingPillNav.jsx  4 tab 导航（SVG 图标，激活态白）
 │   ├── D3CartOrb.jsx        购物车球（入场/退场由 DockLayer 编排）
-│   ├── NightSnackSheet.jsx  ★夜宵开屏弹窗（夜宵开启时每时段自动弹一次，六宫格一键加购）
+│   ├── NightSnackSheet.jsx  ★夜宵开屏弹窗（进入夜宵即弹六宫格宵夜，一键加购；App 外壳常驻）
 │   ├── GlassCard / FullBleedHero / D3StatusRing(--ring-size) / KissIcon / AddDishModal
 │   └── ui/                  共享组件：Icons(细线图标集)/DishRow/OrderCard/EmptyState/
 │                            LoadingState/PayerSelector/Stepper/StatCard/SectionHeader/
 │                            Chip/PageContainer/AdminShell/ThemeToggle(页头夜宵快捷钮)
-├── pages/                   10 页：Home/Menu/DishDetail/Cart/MyOrders/OrderDetail/
+├── pages/                   11 页：Home/NightHome(夜宵专属首页)/Menu/DishDetail/Cart/MyOrders/OrderDetail/
 │                            Profile/Admin/AdminDishes/AdminOrders
 │                            （Checkout、Favorites 已删，路由保留重定向）
 public/dish-images/htc/     HowToCook 预览图 153 张（生成）
@@ -147,7 +147,8 @@ scripts/
 | 夜宵开关可发现性+自动跟时 | 所有者两点反馈：①夜宵下开关位置不明显 → 新增 `ui/ThemeToggle.jsx`（玻璃钮，夜宵自动反相可见）注入四个 tab 页 PageHeader right 槽常驻；个人页开关关闭态轨道 rgba(43,38,32,.16) 绑到 bone 反相令牌（晨光渲染值不变，夜宵不再隐形）②要求随时间自动开启 → useTheme 重写：手动值带"生效时段戳"（凌晨归前一晚），跨过 05:00/21:00 边界自动回归时间规则；60s 轮询 + visibilitychange 回前台重算兜底（H5 后台 interval 不可靠）。副标题改「深夜 21 点后自动开，也可手动切」。时段逻辑一次性验证 9 项全过；?theme= 调试钩子保留且其生效期间暂停轮询接管（预览手动切换不被重置） | 本轮 |
 | 夜宵场景落地 | 所有者反馈"夜宵模式点亮了，但菜品里没多少能当夜宵的"。双层修复（选定「两者都做」）：**数据层**——新增 `lib/seedNightExtra.js` 25 道经典宵夜（烧烤炸串/夜面炒饭/饺包馄饨/卤味辣锅/糖水暖饮，id 900-924 避开灌库段，emoji 占位同无图灌库菜机制），mockApi 接线（不可变文件三处改动：+1 行 import、+2 行 push、1 处注释 407→432），冒烟断言 407→432；**规则层**——新增 `lib/nightRules.js`（isNightSnack 关键词只匹配菜名+排除名单兜住可乐鸡翅/啤酒鸭类误伤；nightPick 命中<6 回退全池防夜宵空窗）。全库命中 70/432=16.2%（一次性脚本人工复核：新增 25 道全命中，存量粥/粉/串/糖水/卤味系命中合理）。接线：Home 夜宵模式下主推/网格/换一道整池收敛夜宵系（保序过滤，白天零变化）；Menu 分类 chips 首位旁增「🌙夜宵」伪分类（前端过滤，visibleCats 豁免空分类隐藏）。build/lint/test/静态门禁全过 | `4f2de14` |
 | 夜宵开屏弹窗 | 所有者要求"夜宵模式开启时自动弹出夜宵菜品"。新增 `components/NightSnackSheet.jsx`（App.jsx 挂载，admin 路由不挂）：夜宵亮起当下自动端出六宫格宵夜 sheet（nightPick 池洗牌取 6，emoji+菜名+caramel 价+一键 + 加购走 useCart.addItem，「看全店」跳 /menu?cat=夜宵）。**每时段只弹一次**：localStorage 存 slotStamp 时段戳（useTheme 导出 slotStamp，凌晨归前一晚），先占坑再弹防重渲染重复打扰；跨到新夜宵时段自动恢复。Menu 增 ?cat= 热同步（与 ?fav=1 同款模式）。弹窗骨架与 AddDishModal 同款（遮罩+sheetUp 底部卡，reduced-motion 降级纯 opacity），文案进 NIGHT_SNACK_NOTES 池。build/lint/test/门禁全过 | `9a65127` |
-| DishRow 收藏钮对齐 | 所有者截图反馈点菜页爱心与加购钮"歪歪扭扭"：心钮原 `right-2`(8px) 贴卡角，加购钮在内容区（右缘距卡边 --space-card-p=18px），且两钮半径不同（16 vs 20px）→ 圆心横向差 14px。改 `right-[calc(var(--space-card-p)_+_4px)]`：右缘 22px，圆心 38px 与加购钮圆心(18+20)同垂线，纵向上下呼应成一条轴。仅 DishRow 一处，Home 网格/后台 manage 变体不受影响（showFav 只在 Menu 开启） | 本轮 |
+| DishRow 收藏钮对齐 | 所有者截图反馈点菜页爱心与加购钮"歪歪扭扭"：心钮原 `right-2`(8px) 贴卡角，加购钮在内容区（右缘距卡边 --space-card-p=18px），且两钮半径不同（16 vs 20px）→ 圆心横向差 14px。改 `right-[calc(var(--space-card-p)_+_4px)]`：右缘 22px，圆心 38px 与加购钮圆心(18+20)同垂线，纵向上下呼应成一条轴。仅 DishRow 一处，Home 网格/后台 manage 变体不受影响（showFav 只在 Menu 开启） | `01c920f` |
+| 夜宵改版（弹窗修复+专属首页） | 所有者两反馈：①**弹窗只在初次有效**——根因=上轮 SHOWN_KEY 按 slotStamp 做了"每时段只弹一次"持久化去重，同晚关过/刷新过就再也不弹。改为组件常驻 App 外壳 + isNight 转变即弹（light→night 切换、夜宵态刷新都触发；关一次后切页不重弹），废弃 localStorage 去重 ②**夜宵要另一套界面**——新增 `pages/NightHome.jsx`：深夜主推大卡（手动"换一道"，不做自动轮换陪吃更安静）+「这些点得多」双列网格每格一键加购 + 全店夜宵入口；App.jsx 路由层 `/home` 按 isNight 分发（懒加载分包），Home.jsx 撤销上轮的 nightPick 派生恢复纯白天版。文案池 NIGHT_HOME_TITLES/NOTES 进 sweetCopy。四大语义与底导不动。build/lint/test/门禁全过 | 本轮 |
 
 ## 8. 已知待办 / 候选项
 

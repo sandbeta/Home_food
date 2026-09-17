@@ -4,10 +4,12 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { CartProvider } from './components/CartContext'
 import DockLayer from './components/DockLayer'
 import NightSnackSheet from './components/NightSnackSheet'
+import { useTheme } from './theme/useTheme'
 import { pageEnter } from './theme/motion'
 
 // 路由懒加载 — 按需加载页面，减小初始 bundle 体积
 const Home = lazy(() => import('./pages/Home'))
+const NightHome = lazy(() => import('./pages/NightHome'))
 const Menu = lazy(() => import('./pages/Menu'))
 const DishDetail = lazy(() => import('./pages/DishDetail'))
 const Cart = lazy(() => import('./pages/Cart'))
@@ -30,6 +32,7 @@ function PageLoader() {
 
 function App() {
   const location = useLocation()
+  const { isNight } = useTheme()
   const isAdmin = location.pathname.startsWith('/admin')
 
   return (
@@ -72,7 +75,8 @@ function App() {
               <Suspense fallback={<PageLoader />}>
                 <Routes location={location}>
                   <Route path="/" element={<Navigate to="/home" replace />} />
-                  <Route path="/home" element={<Home />} />
+                  {/* 首页按主题分发：夜宵模式=深夜食堂专属界面，白天=原首页 */}
+                  <Route path="/home" element={isNight ? <NightHome /> : <Home />} />
                   <Route path="/menu" element={<Menu />} />
                   <Route path="/dish/:id" element={<DishDetail />} />
                   <Route path="/cart" element={<Cart />} />
