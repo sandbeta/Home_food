@@ -556,22 +556,22 @@ textarea:focus-visible, select:focus-visible {
    让"温度对比"在夜里依然是同一对情侣的颜色。 */
 [data-theme="night"] {
   /* 表面：暖木炭黑（保留棕相，不用死黑） */
-  --color-ink-900: #16130F;
-  --color-ink-850: #1F1A15;
-  --color-ink-800: #2A241D;
+  --color-ink-900: #232019;
+  --color-ink-850: #2C2720;
+  --color-ink-800: #383128;
   /* 文字反相 */
   --color-bone: #F2EDE3;
   --color-ash: #A89E8F;
   --color-mist: #6E665C;
   /* 玻璃：白雾 → 微弱高光 + 浅发丝边 */
-  --color-glass: rgba(242, 237, 227, 0.05);
-  --color-glass-border: rgba(242, 237, 227, 0.14);
+  --color-glass: rgba(242, 237, 227, 0.08);
+  --color-glass-border: rgba(242, 237, 227, 0.16);
   /* 遮罩与背景反相 */
-  --scrim-top: rgba(22, 19, 15, 0.85);
-  --glass-strong: rgba(31, 26, 21, 0.88); /* 停靠药丸：夜宵改为暗玻璃 */
-  --hero-wash-functional: rgba(22, 19, 15, 0.72);
-  --hero-wash-immersive: linear-gradient(180deg, rgba(22,19,15,0.42) 0%, rgba(22,19,15,0.72) 22%, rgba(22,19,15,0.92) 46%, rgba(22,19,15,0.97) 100%);
-  --body-bg: radial-gradient(120% 80% at 50% 0%, #221D17 0%, var(--color-ink-900) 55%, #0F0D0A 100%);
+  --scrim-top: rgba(35, 32, 25, 0.85);
+  --glass-strong: rgba(44, 39, 32, 0.90); /* 停靠药丸：夜宵改为暗玻璃 */
+  --hero-wash-functional: rgba(35, 32, 25, 0.72);
+  --hero-wash-immersive: linear-gradient(180deg, rgba(35,32,25,0.42) 0%, rgba(35,32,25,0.72) 22%, rgba(35,32,25,0.92) 46%, rgba(35,32,25,0.97) 100%);
+  --body-bg: radial-gradient(120% 80% at 50% 0%, #332C23 0%, var(--color-ink-900) 55%, #1B1812 100%);
   --vignette: radial-gradient(130% 100% at 50% 40%, transparent 60%, rgba(0, 0, 0, 0.34) 100%);
   /* 阴影：深底上改用纯黑系才可见 */
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
@@ -579,21 +579,21 @@ textarea:focus-visible, select:focus-visible {
   --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.40);
   --shadow-4: 0 16px 44px rgba(0, 0, 0, 0.48);
   --shadow-5: 0 30px 70px rgba(0, 0, 0, 0.55);
-  /* 大图反相：压暗 22% + 去饱和，让文字与玻璃卡始终赢过底图 */
-  --hero-filter-immersive: brightness(0.78) saturate(0.82);
-  --hero-filter-functional: blur(14px) brightness(0.5);
+  /* 大图反相：压暗 12% + 轻去饱和（2026-09-17 夜宵提亮轮，从 22% 放宽），让文字与玻璃卡赢过底图但画面不闷 */
+  --hero-filter-immersive: brightness(0.88) saturate(0.88);
+  --hero-filter-functional: blur(14px) brightness(0.62);
 }
 
 /* 玻璃底不支持 backdrop-blur 时的实底回退也要跟着反相 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-theme="night"] .glass,
-  [data-theme="night"] .d3-card-face { background: rgba(31, 26, 21, 0.94) !important; }
+  [data-theme="night"] .d3-card-face { background: rgba(44, 39, 32, 0.94) !important; }
 }
 
 /* 输入框 / 软分组块：亮底是"压暗 4%"，暗底改为"提亮 5%" */
 [data-theme="night"] .d3-input,
 [data-theme="night"] .soft-block {
-  background: rgba(242, 237, 227, 0.06);
+  background: rgba(242, 237, 227, 0.09);
 }
 
 /* 卡片阴影在暗底上的强度单独校准（d3-card-face 是硬编码 rgba，需覆盖） */
