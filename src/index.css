@@ -72,6 +72,32 @@
   --radius-sheet: 24px;  /* 底部浮层顶部 */
   --clay-deep: #9A4E2C;  /* 深赤陶（渐变收尾/按压态） */
 
+  /* —— Open Color 法双人格色阶 ——
+     推导：open-color v1.9.1 全 13 色族 130 值转 CIE LCh(D65)，逐档取均值成标准曲线，
+     以现主色为锚点做「明度加法平移 + 彩度比值缩放 + 色相均值漂移」，越出色域者裁剪彩度。
+     clay-70 与 sage-60 即现主色（逐字节相同），故本轮写入不改变任何现有观感。
+     语义：00-10 浅底 / 20-30 hover 与激活底 / 70 按压态 / 80-90 深底文字与标题 */
+  --clay-00: #FFF3EE;
+  --clay-10: #FFE5DC;
+  --clay-20: #FFD0BE;
+  --clay-30: #FFB497;
+  --clay-40: #F89D78;
+  --clay-50: #EC8A60;
+  --clay-60: #DC794E;
+  --clay-70: #C8683F;
+  --clay-80: #B55B35;
+  --clay-90: #9F4F2D;
+  --sage-00: #F9FDF7;
+  --sage-10: #EBF3E7;
+  --sage-20: #D5E5D1;
+  --sage-30: #BBD3B5;
+  --sage-40: #A4C39E;
+  --sage-50: #90B38B;
+  --sage-60: #7FA37A;
+  --sage-70: #6E916A;
+  --sage-80: #62835D;
+  --sage-90: #557251;
+
   /* —— 遮罩 / 背景（夜宵模式反相点：亮暗两档只换这几个令牌） —— */
   --scrim-top: rgba(250, 247, 242, 0.86);          /* PageHeader 吸顶渐隐 */
   --hero-wash-functional: rgba(250, 247, 242, 0.72); /* functional Hero 压暗罩 */
