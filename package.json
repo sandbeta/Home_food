@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "node scripts/test_mockApi.mjs",
     "export:seeds": "node scripts/export-seeds.mjs",
-    "family": "node server/index.mjs"
+    "pack:exe": "node scripts/pack-exe.mjs",
+    "family": "node server/index.cjs"
   },
   "dependencies": {
     "framer-motion": "^12.42.2",

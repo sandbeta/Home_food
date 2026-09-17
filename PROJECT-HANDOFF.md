@@ -106,14 +106,17 @@ src/
 │                            Profile/Admin/AdminDishes/AdminOrders
 │                            （Checkout、Favorites 已删，路由保留重定向）
 public/dish-images/         菜品预览图：htc/ 169 张（生成 153 + 真实化轮补 16）、real/ 35 张（Wikimedia CC）、dish-*.webp 仅存 11 张（均已被 HowToCook 实拍覆盖，其余 AI 图已删）
-server/                    家庭本地服务端（零依赖 Node，npm run family，见 §10）
-├── index.mjs              /api 一比一复刻 mockApi + 托管 dist + state.json 原子持久化
+server/                    家庭本地服务端（零依赖 Node，双击 exe 或 npm run family，见 §10）
+├── index.cjs              运行入口（CJS，兼 Node SEA exe 入口）：/api 一比一复刻 mockApi + 托管 dist + state.json 原子持久化 + fatal 防闪退
+├── sea-config.json        SEA 打包配置（main=index.cjs）
+├── 晨光厨房服务端.exe      pack:exe 产物（gitignore，88MB = node.exe 内嵌代码，dist/data 在旁）
 └── data/                  seed-dishes.json(432)/seed-recipes.json(342) 出厂种子；state.json 运行时数据(gitignore)
 scripts/
 ├── p6_static_gate.py        静态门禁自检（色值单源差分/暗色/断头路）
 ├── build_htc_seed.py        HowToCook 灌库生成器
 ├── test_mockApi.mjs         mockApi 冒烟测试（npm test）
-└── export-seeds.mjs         导出菜品/菜谱种子 JSON → server/data（家庭服务端首启数据）
+├── export-seeds.mjs         导出菜品/菜谱种子 JSON → server/data（家庭服务端首启数据）
+└── pack-exe.mjs             一键打 SEA exe（blob→复制 node.exe→postject 注入→清中间物）
 ```
 
 ## 7. 进度台账（关键提交速查）
@@ -155,7 +158,8 @@ scripts/
 | DishRow 收藏钮对齐 | 所有者截图反馈点菜页爱心与加购钮"歪歪扭扭"：心钮原 `right-2`(8px) 贴卡角，加购钮在内容区（右缘距卡边 --space-card-p=18px），且两钮半径不同（16 vs 20px）→ 圆心横向差 14px。改 `right-[calc(var(--space-card-p)_+_4px)]`：右缘 22px，圆心 38px 与加购钮圆心(18+20)同垂线，纵向上下呼应成一条轴。仅 DishRow 一处，Home 网格/后台 manage 变体不受影响（showFav 只在 Menu 开启） | `01c920f` |
 | 夜宵改版（弹窗修复+专属首页） | 所有者两反馈：①**弹窗只在初次有效**——根因=上轮 SHOWN_KEY 按 slotStamp 做了"每时段只弹一次"持久化去重，同晚关过/刷新过就再也不弹。改为组件常驻 App 外壳 + isNight 转变即弹（light→night 切换、夜宵态刷新都触发；关一次后切页不重弹），废弃 localStorage 去重 ②**夜宵要另一套界面**——新增 `pages/NightHome.jsx`：深夜主推大卡（手动"换一道"，不做自动轮换陪吃更安静）+「这些点得多」双列网格每格一键加购 + 全店夜宵入口；App.jsx 路由层 `/home` 按 isNight 分发（懒加载分包），Home.jsx 撤销上轮的 nightPick 派生恢复纯白天版。文案池 NIGHT_HOME_TITLES/NOTES 进 sweetCopy。四大语义与底导不动。build/lint/test/门禁全过 | `51c8f36` |
 | 菜品图真实化 | 所有者要求预览图全部真实照片、禁 AI 生成（实测确认原 65 张 dish-*.webp 带"AI生成"水印）。三批抓取：HowToCook 仓库实拍 27（GitHub blob API，jsDelivr/tarball 国内均不可用）、Wikimedia Commons CC 照片 35（代理开启后可达；三批共 115 搜，**联系表逐张目检剔除 33 张错配**——菜单/街景/古画/人物像混入率高，宁缺毋滥）、其余留 emoji。mockApi 注入 REAL_IMAGE_OVERRIDES 78 条+覆盖应用/AI 清退两条 forEach；19 张无真实图可配的 AI 图删文件。全库真实图 231/432，dish-*.webp 仅剩 11 张且均为 HowToCook 实拍覆盖。四件套全过 | `842cd6a`+`89c37b3` |
-| 家庭局域网服务端 | 所有者要家庭使用+数据本地存储（选定"各手机共享同一后端"场景）。新增 `server/index.mjs`：零依赖 Node HTTP，接口一比一复刻 mockApi（降序/available 过滤/服务端重算总价/recipe 注入/missingSeed 按名补齐），数据原子写 `server/data/state.json`（tmp+rename，gitignore），同时托管 dist/ 静态（SPA 兜底+防目录穿越），绑 0.0.0.0:8787 并打印局域网地址。`main.jsx` 按端口 8787 判定模式：家庭=真实 fetch、其余=动态装载 mock（种子包不进关键路径）；vite proxy 3000→8787；`scripts/export-seeds.mjs` 导出 432 菜+342 菜谱种子 JSON。E2E 15 项+重启持久化全过。文档新增 §10 部署手册（三步启动/种子重导/备份=拷 state.json/边界声明）。顺带清账：删除 35 张数据层早已清退但磁盘残留的孤儿 AI 图，兑现"零 AI 残留" | 本轮 |
+| 家庭局域网服务端 | 所有者要家庭使用+数据本地存储（选定"各手机共享同一后端"场景）。新增 `server/index.mjs`：零依赖 Node HTTP，接口一比一复刻 mockApi（降序/available 过滤/服务端重算总价/recipe 注入/missingSeed 按名补齐），数据原子写 `server/data/state.json`（tmp+rename，gitignore），同时托管 dist/ 静态（SPA 兜底+防目录穿越），绑 0.0.0.0:8787 并打印局域网地址。`main.jsx` 按端口 8787 判定模式：家庭=真实 fetch、其余=动态装载 mock（种子包不进关键路径）；vite proxy 3000→8787；`scripts/export-seeds.mjs` 导出 432 菜+342 菜谱种子 JSON。E2E 15 项+重启持久化全过。文档新增 §10 部署手册（三步启动/种子重导/备份=拷 state.json/边界声明）。顺带清账：删除 35 张数据层早已清退但磁盘残留的孤儿 AI 图，兑现"零 AI 残留" | `827f6ca` |
+| 双击启动 exe | 所有者要"点一下就能启动服务端"。服务端 mjs→**CJS**（`server/index.cjs`，SEA 硬性要求；行为回归 10 项全过后删旧 mjs）；SEA 路径解析：exe 认 server/ 内（推荐）与项目根两种摆位，种子缺失报友好错误。`scripts/pack-exe.mjs`+`npm run pack:exe` 一键打包：`--experimental-sea-config` 出 blob → 复制本机 node.exe（v24，88MB）→ npx postject 注入（签名破坏警告属预期）→ 清中间物；exe/dist/state 全部 gitignore。双击体验硬化：`fatal()` 统一所有致命错误（端口占用/种子缺失/初始化失败）——打印原因+等回车关窗（readSync，stdin 不可用时 Atomics.wait 挂起防闪退），顶部 uncaughtException 兜底；修掉两处 `holdOpen()+process.exit` 并存导致"保持窗口"形同虚设的 bug（libuv 句柄未净时强退还会触发断言崩溃，回归脚本实测复现过）。产物实测：exe 直跑 432 菜接口+页面 200+E2E 十项全过、数据落 exe 旁 server/data。文档 §10/§6/台账同步，部署手册改推双击 exe | 本轮 |
 
 ## 8. 已知待办 / 候选项
 
@@ -178,9 +182,10 @@ cd E:\晨光厨房-交付包\extracted
 npm run build          # 产出 dist/（服务端直接托管）
 npm run family         # 启动，控制台打印局域网地址
 ```
-手机连同一 WiFi 打开打印的地址即可。防火墙弹窗时允许专用网络。开机自启可选：任务计划程序登录时运行 `node server/index.mjs`（工作目录设为 extracted）。
+**双击 exe（推荐日常用法）**：`server\晨光厨房服务端.exe`（Node SEA 单文件，内嵌服务端代码，无需命令行）。`npm run pack:exe` 可随时重打（需 Node ≥20.12；注入破坏 Node 官方签名，Defender 弹窗时选"允许"）。exe 认两种摆位：放 server/ 目录内（推荐）或项目根；它只管代码，dist/ 与 data/ 在旁——分发时整个 extracted 文件夹一起拷。
+手机连同一 WiFi 打开打印的地址即可。防火墙弹窗时允许专用网络。开机自启可选：任务计划程序登录时运行该 exe。
 
-**数据**：首启自动从 `server/data/seed-dishes.json`+`seed-recipes.json` 建 state.json；种子更新（灌库/新菜）后跑 `npm run export:seeds` 重导，重启服务按名补齐。`state.json` 已 gitignore（运行数据不入库）。备份=拷走 state.json 一个文件。
+**数据**：首启自动从 `server/data/seed-dishes.json`+`seed-recipes.json` 建 state.json；种子更新（灌库/新菜）后跑 `npm run export:seeds` 重导，重启服务按名补齐。`state.json` 已 gitignore（运行数据不入库）。备份=拷走 state.json 一个文件。**双击防闪退**：所有致命错误（端口占用/种子缺失/初始化失败）走 `fatal()`——打印原因、等回车再关窗，双击场景绝不一闪而过。
 
 **E2E 已验**（15 项+重启持久化）：菜品/分类/详情菜谱/下单总价/状态推进/加改删下架/静态托管/404 语义/重启不丢数据。
 
