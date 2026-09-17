@@ -37,10 +37,10 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 
 | 令牌 | 值 | 语义 |
 |---|---|---|
-| `--color-ink-900` | `#FAF7F2` | 页面底（暖纸白，2026-09-17 换装后） |
+| `--color-ink-900` | `#FDFBF7` | 页面底（暖纸白，2026-09-17 提亮后） |
 | `--color-bone` | `#2B2620` | 主文字 |
-| `--color-clay` / `-soft` | `#C8683F` / `#E0A07E` | 我(🐱) 赤陶暖 |
-| `--color-sage` / `-soft` | `#7FA37A` / `#A9C4A4` | TA(🐰) 鼠尾草绿冷 |
+| `--color-clay` / `-soft` | `#EC8A60` / `#F99E78` | 我(🐱) 蜜橘暖（2026-09-17 提亮 = clay-50/40） |
+| `--color-sage` / `-soft` | `#A4C39E` / `#BBD3B5` | TA(🐰) 薄荷绿冷（2026-09-17 提亮 = sage-40/30） |
 | `--color-caramel` / `love` / `danger` | `#B5793F` / `#D98C84` / `#C2543F` | 价格数字 / 喜爱 / 删除 |
 | `--color-ash` / `mist` | `#6B6155` / `#9A9082` | 次文字 / 占位 |
 
@@ -135,6 +135,7 @@ scripts/
 | 编辑杂志换装 | 全站视觉换装「编辑杂志质感」（所有者选定）：纸面卡/收圆角/深专色渐变/松间距/大衬线/眉题页头/编号主推卡；StoveStage、HotDishes 两处硬编码色收编令牌；DishDetail 价格补对齐 caramel 原则。build/lint/test/静态门禁全过 | 本轮 |
 | Vercel 动效工程 | 参考 emilkowalski/skills（Vercel/Linear 设计工程师）的动画规范整改全站动效：① scale(0) 起跳全改 ≥0.9 淡入（DockLayer 购物车球、D3StatusRing、Cart 庆祝），去 180° 翻转/旋转 ② UI 动画压进 300ms 档（cardEntrance 500→340ms，状态环内盘 600→400ms 去 [0.34,1.56] 过冲曲线）③ 高频按压收敛到 0.92–0.97（Stepper/DishRow/收藏星/移除等多处），Stepper 数字弹跳去旋转、弹簧 stiffness 320/damping 26 去"跳跳床"④ 移除按钮 hover 90° 旋转、购物车球 hover 上浮等高频表演元素；Menu 清空按钮回弹曲线改标准 ease-out。顺带：PAYER 补 fill 字段（单源），OrderDetail 买单徽章改实底高对比（AA 底 #96612E 白字 ≥5:1）、备注分隔线与 +1 粒子收专色。装饰性低频动画（StoveStage 蒸汽/✨）按规范豁免保留。全部门禁通过 | 本轮 |
 | 双人格色阶 | 参考 yeun/open-color（MIT）补齐 clay/sage 各 10 档色阶，写入 index.css 的 @theme static（--clay-00..90 / --sage-00..90）。推导法：open-color 全 13 色族 130 值 → CIE LCh(D65) → 逐档均值曲线 → 以现主色为锚点做明度加法平移 + 彩度比值缩放 + 色相均值漂移，越出色域裁剪彩度。锚定档 clay-70=#C8683F、sage-60=#7FA37A 与现值逐字节相同，本轮纯基础设施、页面观感零变化，无组件被迫改用。待办：hover/active/disabled 与夜宵模式择机绑定色阶档（当前仍是临时 rgba 拼） | 本轮 |
+| 提亮方案一 | 所有者反馈"太暗沉"，主色沿色阶上提：clay #C8683F→#EC8A60(clay-50)、sage #7FA37A→#A4C39E(sage-40)，soft 各提一档；ink 三档底与 body-bg/scrim/hero-wash 同步提白；渐变改为 新主色→原锚点 的同族双档（观感更透但白字对比降至 2.5:1，深端 clay-70+ 兜底按压/夜宵）；全站 26 文件旧人格色 rgba 与旧 hex 字面量统一迁移，HotDishes 榜单色收编令牌；夜宵模式人格色不反相原则不变。build/lint/test/静态门禁全过 | 本轮 |
 
 ## 8. 已知待办 / 候选项
 

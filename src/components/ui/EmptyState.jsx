@@ -14,11 +14,11 @@ export default function EmptyState({ emoji = '🍽️', title, desc, action, cla
       {/* 晨光光斑：赤陶 + 鼠尾草双色，呼应双人格 */}
       <div
         className="absolute top-8 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full opacity-15 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.18), transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(236,138,96,0.18), transparent 70%)' }}
       />
       <div
         className="absolute bottom-12 left-1/4 w-24 h-24 rounded-full opacity-10 pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(127,163,122,0.16), transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(164,195,158,0.16), transparent 70%)' }}
       />
 
       <motion.div

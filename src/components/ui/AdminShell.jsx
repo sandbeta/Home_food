@@ -24,7 +24,7 @@ export default function AdminShell({
         className="absolute top-0 left-0 right-0 h-56 pointer-events-none"
         style={{
           background:
-            'linear-gradient(180deg, rgba(200,104,63,0.10) 0%, rgba(127,163,122,0.06) 45%, transparent 100%)',
+            'linear-gradient(180deg, rgba(236,138,96,0.10) 0%, rgba(164,195,158,0.06) 45%, transparent 100%)',
         }}
       />
 

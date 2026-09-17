@@ -21,7 +21,7 @@ export default function D3CartOrb() {
         height: 'var(--dock-orb)',
         background: PERSONA.me.gradient,
         boxShadow:
-          '0 6px 20px rgba(200,104,63,0.40), 0 12px 32px rgba(43,38,32,0.22), inset 0 2px 4px rgba(255,255,255,0.45), inset 0 -2px 4px rgba(154,78,44,0.30)',
+          '0 6px 20px rgba(236,138,96,0.40), 0 12px 32px rgba(43,38,32,0.22), inset 0 2px 4px rgba(255,255,255,0.45), inset 0 -2px 4px rgba(159, 79, 45,0.30)',
       }}
       whileHover={{ scale: 1.04 }}
       whileTap={{ scale: 0.94 }}

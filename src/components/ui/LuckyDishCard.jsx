@@ -91,13 +91,13 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
     <GlassCard className="p-4 mb-4 overflow-hidden relative">
       {/* 氛围光斑：赤陶 + 鼠尾草双色，呼应双人格 */}
       <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full animate-float-gentle"
-        style={{ background: 'radial-gradient(circle, rgba(200,104,63,0.14), transparent 70%)' }} />
+        style={{ background: 'radial-gradient(circle, rgba(236,138,96,0.14), transparent 70%)' }} />
       <div className="absolute -left-6 -bottom-6 w-20 h-20 rounded-full animate-float"
-        style={{ background: 'radial-gradient(circle, rgba(127,163,122,0.10), transparent 70%)', animationDelay: '1s' }} />
+        style={{ background: 'radial-gradient(circle, rgba(164,195,158,0.10), transparent 70%)', animationDelay: '1s' }} />
 
       <div className="relative flex items-center justify-between mb-3">
         <span className="badge-soft text-xs font-extrabold px-2.5 py-1 rounded-full"
-          style={{ background: 'rgba(200,104,63,0.14)', color: 'var(--color-clay)' }}>
+          style={{ background: 'rgba(236,138,96,0.14)', color: 'var(--color-clay)' }}>
           手气签 · 今日灵感
         </span>
         <div className="flex items-center gap-2">
@@ -132,7 +132,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
           animate={{ scale: drawing ? [1, 1.04, 1] : 1 }}
           transition={drawing ? { duration: 0.42, repeat: Infinity, ease: 'easeInOut' } : { type: 'spring', stiffness: 280, damping: 15 }}
           className="relative w-16 h-16 rounded-[var(--radius-tile)] flex items-center justify-center shrink-0 overflow-hidden"
-          style={{ background: 'linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-850) 60%, rgba(200,104,63,0.08) 100%)' }}
+          style={{ background: 'linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-850) 60%, rgba(236,138,96,0.08) 100%)' }}
         >
           <span className="text-3xl">{emoji}</span>
           {dishImg && (

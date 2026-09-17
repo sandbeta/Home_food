@@ -18,9 +18,9 @@
    ============================================================ */
 @theme {
   /* —— 表面 / 底（晨光暖骨白） —— */
-  --color-ink-900: #FAF7F2;   /* 主底 暖纸白 */
-  --color-ink-850: #F3EDE3;   /* 区块底 浅陶 */
-  --color-ink-800: #E4DACC;   /* 次级底 */
+  --color-ink-900: #FDFBF7;   /* 主底 暖纸白（提亮） */
+  --color-ink-850: #F6F0E7;   /* 区块底 浅陶（提亮） */
+  --color-ink-800: #EBE0D0;   /* 次级底（提亮） */
 
   /* —— 文字 —— */
   --color-bone: #2B2620;      /* 主文字 墨 */
@@ -28,10 +28,10 @@
   --color-mist: #9A9082;      /* 三级 / 占位 */
 
   /* —— 双人格强调（温度对比） —— */
-  --color-clay: #C8683F;      /* 我(me) 赤陶(暖) */
-  --color-clay-soft: #E0A07E; /* 赤陶高光 */
-  --color-sage: #7FA37A;      /* TA(partner) 鼠尾草绿(冷) */
-  --color-sage-soft: #A9C4A4; /* 鼠尾草高光 */
+  --color-clay: #EC8A60;      /* 我(me) 蜜橘(暖·提亮=clay-50) */
+  --color-clay-soft: #F99E78; /* 蜜橘高光(clay-40) */
+  --color-sage: #A4C39E;      /* TA(partner) 薄荷绿(冷·提亮=sage-40) */
+  --color-sage-soft: #BBD3B5; /* 薄荷高光(sage-30) */
 
   /* —— 状态 —— */
   --color-caramel: #B5793F;   /* 中性暖强调 焦糖 */
@@ -42,8 +42,8 @@
   --color-glass: #FFFDFA;
   --color-glass-border: rgba(43,38,32,0.08);
   /* —— 品牌渐变 —— */
-  --color-clay-gradient: linear-gradient(180deg, #C8683F 0%, #A55630 100%);
-  --color-sage-gradient: linear-gradient(180deg, #7FA37A 0%, #678A62 100%);
+  --color-clay-gradient: linear-gradient(180deg, #EC8A60 0%, #B55B35 100%);
+  --color-sage-gradient: linear-gradient(180deg, #A4C39E 0%, #6E9269 100%);
 
   /* 圆角语义（见下方 @theme static 中的完整标尺） */
   --radius-card: 20px;
@@ -70,39 +70,39 @@
   --radius-btn: 14px;    /* 按钮 */
   --radius-ctl: 12px;    /* 输入 / 小控件 */
   --radius-sheet: 24px;  /* 底部浮层顶部 */
-  --clay-deep: #9A4E2C;  /* 深赤陶（渐变收尾/按压态） */
+  --clay-deep: #9F4F2D;  /* 深赤陶（渐变收尾/按压态·提亮后=clay-90） */
 
   /* —— Open Color 法双人格色阶 ——
      推导：open-color v1.9.1 全 13 色族 130 值转 CIE LCh(D65)，逐档取均值成标准曲线，
      以现主色为锚点做「明度加法平移 + 彩度比值缩放 + 色相均值漂移」，越出色域者裁剪彩度。
      clay-70 与 sage-60 即现主色（逐字节相同），故本轮写入不改变任何现有观感。
      语义：00-10 浅底 / 20-30 hover 与激活底 / 70 按压态 / 80-90 深底文字与标题 */
-  --clay-00: #FFF3EE;
+  --clay-00: #FFF3EF;
   --clay-10: #FFE5DC;
   --clay-20: #FFD0BE;
-  --clay-30: #FFB497;
-  --clay-40: #F89D78;
+  --clay-30: #FFB597;
+  --clay-40: #F99E78;
   --clay-50: #EC8A60;
-  --clay-60: #DC794E;
+  --clay-60: #DD794E;
   --clay-70: #C8683F;
   --clay-80: #B55B35;
   --clay-90: #9F4F2D;
-  --sage-00: #F9FDF7;
-  --sage-10: #EBF3E7;
-  --sage-20: #D5E5D1;
+  --sage-00: #F9FDF8;
+  --sage-10: #EBF4E8;
+  --sage-20: #D5E6D1;
   --sage-30: #BBD3B5;
   --sage-40: #A4C39E;
-  --sage-50: #90B38B;
+  --sage-50: #90B38A;
   --sage-60: #7FA37A;
-  --sage-70: #6E916A;
+  --sage-70: #6E9269;
   --sage-80: #62835D;
-  --sage-90: #557251;
+  --sage-90: #557351;
 
   /* —— 遮罩 / 背景（夜宵模式反相点：亮暗两档只换这几个令牌） —— */
-  --scrim-top: rgba(250, 247, 242, 0.86);          /* PageHeader 吸顶渐隐 */
-  --hero-wash-functional: rgba(250, 247, 242, 0.72); /* functional Hero 压暗罩 */
-  --hero-wash-immersive: linear-gradient(180deg, rgba(250,247,242,0) 0%, rgba(250,247,242,0.12) 38%, rgba(250,247,242,0.62) 66%, rgba(250,247,242,0.94) 86%, #FAF7F2 100%);
-  --body-bg: #F6F0E6;
+  --scrim-top: rgba(253, 251, 247, 0.86);          /* PageHeader 吸顶渐隐 */
+  --hero-wash-functional: rgba(253, 251, 247, 0.72); /* functional Hero 压暗罩 */
+  --hero-wash-immersive: linear-gradient(180deg, rgba(253,251,247,0) 0%, rgba(253,251,247,0.12) 38%, rgba(253,251,247,0.62) 66%, rgba(253,251,247,0.94) 86%, #FDFBF7 100%);
+  --body-bg: #FAF4EA;
   --vignette: none;
   /* Hero 图片滤镜（夜宵反相点：暗底上大图必须收亮度去饱和，否则抢文字） */
   --hero-filter-immersive: brightness(1.04) saturate(1.05);
@@ -141,8 +141,8 @@
   --shadow-4: 0 16px 44px rgba(43, 38, 32, 0.12);
   --shadow-5: 0 30px 70px rgba(43, 38, 32, 0.16);
   /* 双人格辉光 */
-  --shadow-glow-clay: 0 0 0 3px rgba(200, 104, 63, 0.18), 0 6px 20px rgba(200, 104, 63, 0.22);
-  --shadow-glow-sage: 0 0 0 3px rgba(127, 163, 122, 0.18), 0 6px 20px rgba(127, 163, 122, 0.22);
+  --shadow-glow-clay: 0 0 0 3px rgba(236,138,96, 0.18), 0 6px 20px rgba(236,138,96, 0.22);
+  --shadow-glow-sage: 0 0 0 3px rgba(164,195,158, 0.18), 0 6px 20px rgba(164,195,158, 0.22);
 
   /* —— 动效 —— */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -230,14 +230,14 @@ textarea:focus-visible, select:focus-visible {
 }
 .glass-elevated { box-shadow: 0 4px 16px rgba(43, 38, 32, 0.07); }
 .glass-me {
-  border: 1px solid rgba(200, 104, 63, 0.40);
-  background: linear-gradient(180deg, rgba(200,104,63,0.10) 0%, rgba(255,253,249,0.04) 100%);
-  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px rgba(200,104,63,0.10);
+  border: 1px solid rgba(236,138,96, 0.40);
+  background: linear-gradient(180deg, rgba(236,138,96,0.10) 0%, rgba(255,253,249,0.04) 100%);
+  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px rgba(236,138,96,0.10);
 }
 .glass-partner {
-  border: 1px solid rgba(127, 163, 122, 0.40);
-  background: linear-gradient(180deg, rgba(127,163,122,0.10) 0%, rgba(255,253,249,0.04) 100%);
-  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px rgba(127,163,122,0.10);
+  border: 1px solid rgba(164,195,158, 0.40);
+  background: linear-gradient(180deg, rgba(164,195,158,0.10) 0%, rgba(255,253,249,0.04) 100%);
+  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px rgba(164,195,158,0.10);
 }
 
 /* ========== Card ========== */
@@ -271,7 +271,7 @@ textarea:focus-visible, select:focus-visible {
 }
 .d3-btn-primary:hover {
   filter: brightness(1.04);
-  box-shadow: 0 2px 6px rgba(154, 78, 44, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 6px rgba(159, 79, 45, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .d3-btn-primary:active { transform: scale(0.98); filter: brightness(0.97); }
 
@@ -296,8 +296,8 @@ textarea:focus-visible, select:focus-visible {
 .d3-input::placeholder { color: var(--color-mist); }
 .d3-input:focus {
   outline: none;
-  border-color: rgba(200, 104, 63, 0.55);
-  box-shadow: 0 0 0 4px rgba(200, 104, 63, 0.14);
+  border-color: rgba(236,138,96, 0.55);
+  box-shadow: 0 0 0 4px rgba(236,138,96, 0.14);
 }
 
 /* ========== Badge ========== */
@@ -309,27 +309,27 @@ textarea:focus-visible, select:focus-visible {
   font-size: 0.6875rem;
   font-weight: 700;
   border-radius: 999px;
-  background: rgba(200, 104, 63, 0.08);
+  background: rgba(236,138,96, 0.08);
   color: var(--color-clay);
-  border: 1px solid rgba(200, 104, 63, 0.16);
+  border: 1px solid rgba(236,138,96, 0.16);
 }
 
 /* ========== Avatar & Backgrounds ========== */
 .avatar-me {
-  background: linear-gradient(180deg, #C8683F 0%, #A55630 100%);
+  background: linear-gradient(180deg, #EC8A60 0%, #C8683F 100%);
   color: #FFFDF9;
 }
 .avatar-partner {
-  background: linear-gradient(180deg, #7FA37A 0%, #678A62 100%);
+  background: linear-gradient(180deg, #A4C39E 0%, #7FA37A 100%);
   color: #1A2417;
 }
 /* 旧 bg-warm / bg-cool 在新语言里退为亮色，避免旧页开天窗 */
-.bg-warm { background: linear-gradient(135deg, #F0E4D8 0%, #E4DACC 100%); }
-.bg-cool { background: linear-gradient(135deg, #E3ECE0 0%, #D5E0D2 100%); }
+.bg-warm { background: linear-gradient(135deg, #F5EADB 0%, #EBE0D0 100%); }
+.bg-cool { background: linear-gradient(135deg, #E9F3E6 0%, #DCEAD7 100%); }
 
 /* 双人格辉光 */
-.glow-clay     { box-shadow: 0 0 0 3px rgba(200,104,63,0.18), 0 6px 20px rgba(200,104,63,0.22); }
-.glow-sage     { box-shadow: 0 0 0 3px rgba(127,163,122,0.18), 0 6px 20px rgba(127,163,122,0.22); }
+.glow-clay     { box-shadow: 0 0 0 3px rgba(236,138,96,0.18), 0 6px 20px rgba(236,138,96,0.22); }
+.glow-sage     { box-shadow: 0 0 0 3px rgba(164,195,158,0.18), 0 6px 20px rgba(164,195,158,0.22); }
 .glow-love     { box-shadow: 0 6px 20px rgba(217,140,132,0.25); }
 /* 激活态脉冲（配合 is-active 使用） */
 .avatar-me.is-active    { animation: pulse-glow-gold 2.4s ease-in-out infinite; }
@@ -431,20 +431,20 @@ textarea:focus-visible, select:focus-visible {
 .animate-float-gentle { animation: float-gentle 6s ease-in-out infinite; }
 
 @keyframes pulse-glow-clay {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 104, 63, 0.40); }
-  50% { box-shadow: 0 0 22px 4px rgba(200, 104, 63, 0.32); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(236,138,96, 0.40); }
+  50% { box-shadow: 0 0 22px 4px rgba(236,138,96, 0.32); }
 }
 @keyframes pulse-glow-sage {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(127, 163, 122, 0.40); }
-  50% { box-shadow: 0 0 22px 4px rgba(127, 163, 122, 0.30); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(164,195,158, 0.40); }
+  50% { box-shadow: 0 0 22px 4px rgba(164,195,158, 0.30); }
 }
 @keyframes pulse-glow-gold {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 104, 63, 0.40); }
-  50% { box-shadow: 0 0 22px 4px rgba(200, 104, 63, 0.32); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(236,138,96, 0.40); }
+  50% { box-shadow: 0 0 22px 4px rgba(236,138,96, 0.32); }
 }
 @keyframes pulse-glow-platinum {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(127, 163, 122, 0.40); }
-  50% { box-shadow: 0 0 22px 4px rgba(127, 163, 122, 0.30); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(164,195,158, 0.40); }
+  50% { box-shadow: 0 0 22px 4px rgba(164,195,158, 0.30); }
 }
 .animate-pulse-glow-clay { animation: pulse-glow-clay 2.4s ease-in-out infinite; }
 .animate-pulse-glow-sage { animation: pulse-glow-sage 2.4s ease-in-out infinite; }
@@ -467,7 +467,7 @@ textarea:focus-visible, select:focus-visible {
   height: 64px;
   margin-left: -65px;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(232, 150, 79, 0.40), rgba(200, 104, 63, 0.12) 60%, transparent 75%);
+  background: radial-gradient(closest-side, rgba(232, 150, 79, 0.40), rgba(236,138,96, 0.12) 60%, transparent 75%);
   filter: blur(6px);
   animation: stove-breathe 2.2s ease-in-out infinite;
   pointer-events: none;

@@ -56,7 +56,7 @@ export default function FloatingPillNav() {
                 className="absolute inset-0 rounded-full"
                 style={{
                   background: 'var(--color-clay-gradient)',
-                  boxShadow: '0 6px 18px rgba(200,104,63,0.28)',
+                  boxShadow: '0 6px 18px rgba(236,138,96,0.28)',
                 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 28 }}
               />

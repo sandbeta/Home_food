@@ -14,7 +14,7 @@ import { HOT_TRENDS, matchTrendDish } from '../lib/hotRecipes'
 import { tap, vibrate } from '../lib/sfx'
 
 // 排名色：前三金/银铜，其余安静
-const RANK_COLORS = ['#C8683F', 'var(--color-mist)', '#B5793F']
+const RANK_COLORS = ['var(--color-clay)', 'var(--color-mist)', 'var(--color-caramel)']
 
 export default function HotDishes() {
   const [dishes, setDishes] = useState([])
@@ -147,7 +147,7 @@ export default function HotDishes() {
                     <div className="flex items-center gap-1.5">
                       <p className="text-sm font-bold text-[var(--color-bone)] truncate">{t.name}</p>
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full shrink-0 font-bold"
-                        style={{ background: 'rgba(200,104,63,0.10)', color: 'var(--color-clay)' }}>
+                        style={{ background: 'rgba(236,138,96,0.10)', color: 'var(--color-clay)' }}>
                         {t.tag}
                       </span>
                     </div>
@@ -171,7 +171,7 @@ export default function HotDishes() {
                         className="w-8 h-8 rounded-full flex items-center justify-center"
                         style={{
                           background: 'var(--color-clay-gradient)',
-                          boxShadow: '0 4px 10px rgba(200,104,63,0.28), inset 0 1px 0 rgba(255,255,255,0.3)',
+                          boxShadow: '0 4px 10px rgba(236,138,96,0.28), inset 0 1px 0 rgba(255,255,255,0.3)',
                         }}
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFDF9" strokeWidth="2.8" strokeLinecap="round">

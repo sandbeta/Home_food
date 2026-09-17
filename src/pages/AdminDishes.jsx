@@ -97,7 +97,7 @@ export default function AdminDishes() {
                           ? {
                               background: 'linear-gradient(135deg, var(--color-sage-soft), var(--color-sage))',
                               color: 'var(--color-bone)',
-                              boxShadow: '0 2px 8px rgba(127,163,122,0.25)',
+                              boxShadow: '0 2px 8px rgba(164,195,158,0.25)',
                             }
                           : {
                               background: 'var(--color-glass)',

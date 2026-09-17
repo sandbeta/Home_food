@@ -97,7 +97,7 @@ export default function AddDishModal({ dish, onClose, onSave }) {
                 style={{ borderColor: 'var(--color-glass-border)', color: 'var(--color-ash)', background: 'transparent' }}>算了</motion.button>
               <motion.button type="submit" whileTap={{ scale: 0.97 }}
                 className="d3-btn d3-btn-primary flex-1 py-3 rounded-2xl text-white font-bold text-sm transition-shadow duration-200"
-                style={{ background: 'linear-gradient(135deg, var(--color-clay), var(--color-clay-deep))', boxShadow: '0 4px 15px rgba(200,104,63,0.35)' }}>好啦</motion.button>
+                style={{ background: 'linear-gradient(135deg, var(--color-clay), var(--color-clay-deep))', boxShadow: '0 4px 15px rgba(236,138,96,0.35)' }}>好啦</motion.button>
             </div>
           </form>
         </div>
