@@ -74,6 +74,9 @@ export function toggleTheme() {
 
 /** 重算并广播（跨时段的分钟级轮询与前台恢复都走这里） */
 function tick() {
+  // 调试/预览钩子强制主题期间，暂停时间接管（预览里手动切换不应被轮询重置）
+  const url = readThemeParam()
+  if (url === 'night' || url === 'light') return
   const next = resolveTheme()
   if (next !== current) {
     current = next
