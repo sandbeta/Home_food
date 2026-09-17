@@ -39,7 +39,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 |---|---|---|
 | `--color-ink-900` | `#FDFBF7` | 页面底（暖纸白，2026-09-17 提亮后） |
 | `--color-bone` | `#2B2620` | 主文字 |
-| `--color-clay` / `-soft` | `#EC8A60` / `#F99E78` | 我(🐱) 蜜橘暖（2026-09-17 提亮 = clay-50/40） |
+| `--color-clay` / `-soft` | `var(--clay-60)`=`#DD794E` / `#F99E78` | 我(🐱) 蜜橘暖（2026-09-17 提亮后回退 clay-60 折中档；soft 仍 clay-40） |
 | `--color-sage` / `-soft` | `#A4C39E` / `#BBD3B5` | TA(🐰) 薄荷绿冷（2026-09-17 提亮 = sage-40/30） |
 | `--color-caramel` / `love` / `danger` | `#B5793F` / `#D98C84` / `#C2543F` | 价格数字 / 喜爱 / 删除 |
 | `--color-ash` / `mist` | `#6B6155` / `#9A9082` | 次文字 / 占位 |

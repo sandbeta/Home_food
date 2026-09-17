@@ -14,7 +14,7 @@
 /* ============================================================
    晨光厨房 · Sunlit Kitchen 设计系统
    暖调亮色晨光底 + 轻量玻璃质感 + 双人格温度对比
-   我(me)=暖赤陶 #C8683F / TA(partner)=冷鼠尾草绿 #7FA37A
+   我(me)=蜜橘 #DD794E(clay-60) / TA(partner)=冷鼠尾草绿 #A4C39E(sage-40)
    ============================================================ */
 @theme {
   /* —— 表面 / 底（晨光暖骨白） —— */
@@ -28,7 +28,7 @@
   --color-mist: #9A9082;      /* 三级 / 占位 */
 
   /* —— 双人格强调（温度对比） —— */
-  --color-clay: #EC8A60;      /* 我(me) 蜜橘(暖·提亮=clay-50) */
+  --color-clay: var(--clay-60); /* 我(me) 蜜橘(clay-60 折中档,白字对比达标) */
   --color-clay-soft: #F99E78; /* 蜜橘高光(clay-40) */
   --color-sage: #A4C39E;      /* TA(partner) 薄荷绿(冷·提亮=sage-40) */
   --color-sage-soft: #BBD3B5; /* 薄荷高光(sage-30) */
@@ -42,8 +42,8 @@
   --color-glass: #FFFDFA;
   --color-glass-border: rgba(43,38,32,0.08);
   /* —— 品牌渐变 —— */
-  --color-clay-gradient: linear-gradient(180deg, #EC8A60 0%, #B55B35 100%);
-  --color-sage-gradient: linear-gradient(180deg, #A4C39E 0%, #6E9269 100%);
+  --color-clay-gradient: linear-gradient(180deg, var(--clay-60) 0%, var(--clay-80) 100%);
+  --color-sage-gradient: linear-gradient(180deg, var(--sage-40) 0%, var(--sage-70) 100%);
 
   /* 圆角语义（见下方 @theme static 中的完整标尺） */
   --radius-card: 20px;
