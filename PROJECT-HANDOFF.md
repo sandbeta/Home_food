@@ -57,7 +57,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 3. **所有用户侧页面用 `PageHeader`**（back/backTo/right）；后台三页一律包 `AdminShell`。后台标题保持功能命名（工具页不加情话）。
 4. **颜色单源真值**：色值只写在 `src/index.css` + `src/theme/persona.js`；页面一律 `var(--color-*)`；给运行时 var() 用的令牌放 `@theme static`（防树摇）。新玻璃浓度用 `--glass-strong`。
 5. **文案单源真值**：所有页头标题/情话池集中在 **`src/lib/sweetCopy.js`**（NICKNAME='懒洋洋' + 各页标题/副标题池），六页每次进入随机抽取。**改情话只动这个文件**；新增页面文案也放这里。
-6. **不可变文件（最小改动，改须逐处说明）**：`src/components/CartContext.jsx`、`src/lib/mockApi.js`（已因数据接线 +2 行与菜谱注入 +3 行、夜宵种子接线 +3 行 import/push 与 1 处注释更新，均有据）、`src/lib/favorites.js`。
+6. **不可变文件（最小改动，改须逐处说明）**：`src/components/CartContext.jsx`、`src/lib/mockApi.js`（已因数据接线 +2 行与菜谱注入 +3 行、夜宵种子接线 +3 行 import/push 与 1 处注释更新、真实图覆盖表集中注入一段（表+两条 forEach，见 §5），均有据）、`src/lib/favorites.js`。
 7. 共享组件放 `src/components/ui/`，≥2 处真实调用点才建；`Icons.jsx` 是图标基元集，单调用点也保留。
 8. 提交信息用中文，说明「为什么」；**提交前跑 lint + build + `p6_static_gate.py`**。
 9. **四件套别用 `2>&1 | Select-Object` 吞退出码**：构建失败时管道可能仍返回成功假象，判定必须看 `built in` 成功行或 `$LASTEXITCODE`（本轮 ui/ThemeToggle 曾把 `../theme` 写成少一层，就是靠 build 报错抓到的）。`src/components/ui/` 下引主题模块一律 `../../theme/`。
@@ -65,11 +65,12 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 ## 5. 数据层（菜品 432 道 + 菜谱 342 份）
 
 - 种子库 = `mockApi.js` 内 65 道原始菜 + `src/lib/seedMenuExtra.js`（**342 道，由 HowToCook 生成**，勿手改）+ `src/lib/seedNightExtra.js`（**25 道夜宵手写种子**，id 900-924，emoji 占位无图）。
+- **真实图覆盖表（2026-09-18 图片真实化）**：所有者要求预览图用真实照片、不用 AI 生成。`mockApi.js` 内新增 `REAL_IMAGE_OVERRIDES`（62 条 id→路径，集中一段、生成文件不动）+ 两条 forEach（覆盖应用 / AI 图清退）。图片来源 = HowToCook 仓库实拍 27 张（GitHub blob API 拉取：11 张直接覆盖原 `dish-{id}.webp` 路径不变、16 张入 `htc/`）+ Wikimedia Commons CC 照片 35 张（`public/dish-images/real/{id}.webp`，560px webp）。原 65 道 AI 图：35 道换真实图、19 道删文件清退留 emoji、11 道即上列覆盖。全库带真实图 215/432，其余 emoji 占位。⚠️ Wikimedia 搜索错配率高（菜单/街景/古画/人物像混入），所有新图经联系表逐张目检后才保留，宁缺毋滥。
 - 数据源：[Anduin2017/HowToCook](https://github.com/Anduin2017/HowToCook)（**公有领域/Unlicense**）。生成器 `scripts/build_htc_seed.py` 一条命令产出三件套：菜品摘要（seedMenuExtra.js）、本地压缩预览图（`public/dish-images/htc/`，153 张 560px/JPEG）、菜谱（seedRecipes.js）。
 - **菜谱数据**：`src/lib/seedRecipes.js`（352KB，键=菜品 id，含 原料清单/步骤/难度星级/卡路里/小贴士）。**懒加载**：仅详情页经 mockApi 动态 import 注入 `/api/dishes/:id` 响应，列表与首屏不背体积。
 - 详情页「男朋友的菜谱」卡：原料 pill + 编号步骤 + 💡小贴士；原 65 道老菜无菜谱数据，卡片自动隐藏。
 - 重新生成：`python scripts/build_htc_seed.py --repo <HowToCook 克隆目录> [--img-src <已抢救图片目录>]`（图片幂等缓存，已存在不联网）。
-- **国内网络坑**：raw.githubusercontent 不可达；jsDelivr 的 gh 代理最终跳 raw 也不可达；git 批量协商大包会被重置。可行路径：稀疏克隆只取 md（`--filter=blob:none --sparse`）+ 单 blob 按需取（小请求可过）+ codeload tarball 部分解压兜底。git 输出中文路径需 `-c core.quotepath=false`。
+- **国内网络坑**：raw.githubusercontent 不可达；jsDelivr 的 gh 代理最终跳 raw 也不可达（2026-09-18 实测连 cdn.jsdelivr.net 也会被强制断连）；git 批量协商大包会被重置；codeload tarball 能连但国内速度 ~20KB/s 且长连接易被超时截断（12MB 断在半路）。**可行路径（2026-09-18 再验证）**：GitHub `git/trees?recursive=1` API 拿全树 + 单 blob API（base64）按需取图，小请求稳定快；Wikimedia Commons API 需系统代理开启才可达（直连 SSL 握手超时）。git 输出中文路径需 `-c core.quotepath=false`。
 
 ## 6. 关键文件地图
 

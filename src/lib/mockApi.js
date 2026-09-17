@@ -126,6 +126,77 @@ function loadState() {
 seedDishes.push(...SEED_MENU_EXTRA)
 // 夜宵手写种子 25 道（src/lib/seedNightExtra.js，id 900-924，所有者反馈深夜场景缺供给）
 seedDishes.push(...SEED_NIGHT_EXTRA)
+// —— 真实菜品照片覆盖表（2026-09-18 图片真实化：HowToCook 实拍 + Wikimedia Commons CC 照片）——
+const REAL_IMAGE_OVERRIDES = {
+  3: '/dish-images/real/3.webp',
+  4: '/dish-images/real/4.webp',
+  5: '/dish-images/dish-5.webp',
+  7: '/dish-images/real/7.webp',
+  8: '/dish-images/real/8.webp',
+  9: '/dish-images/real/9.webp',
+  10: '/dish-images/real/10.webp',
+  11: '/dish-images/dish-11.webp',
+  12: '/dish-images/dish-12.webp',
+  13: '/dish-images/dish-13.webp',
+  14: '/dish-images/dish-14.webp',
+  15: '/dish-images/real/15.webp',
+  16: '/dish-images/real/16.webp',
+  18: '/dish-images/real/18.webp',
+  19: '/dish-images/real/19.webp',
+  20: '/dish-images/real/20.webp',
+  21: '/dish-images/real/21.webp',
+  22: '/dish-images/dish-22.webp',
+  24: '/dish-images/real/24.webp',
+  26: '/dish-images/real/26.webp',
+  27: '/dish-images/dish-27.webp',
+  28: '/dish-images/dish-28.webp',
+  29: '/dish-images/real/29.webp',
+  31: '/dish-images/real/31.webp',
+  32: '/dish-images/real/32.webp',
+  33: '/dish-images/real/33.webp',
+  36: '/dish-images/real/36.webp',
+  37: '/dish-images/real/37.webp',
+  38: '/dish-images/real/38.webp',
+  40: '/dish-images/real/40.webp',
+  41: '/dish-images/real/41.webp',
+  42: '/dish-images/dish-42.webp',
+  44: '/dish-images/real/44.webp',
+  45: '/dish-images/dish-45.webp',
+  46: '/dish-images/real/46.webp',
+  47: '/dish-images/real/47.webp',
+  49: '/dish-images/real/49.webp',
+  50: '/dish-images/real/50.webp',
+  51: '/dish-images/real/51.webp',
+  52: '/dish-images/dish-52.webp',
+  56: '/dish-images/real/56.webp',
+  59: '/dish-images/real/59.webp',
+  60: '/dish-images/real/60.webp',
+  61: '/dish-images/real/61.webp',
+  62: '/dish-images/real/62.webp',
+  63: '/dish-images/real/63.webp',
+  900: '/dish-images/real/900.webp',
+  901: '/dish-images/real/901.webp',
+  902: '/dish-images/real/902.webp',
+  903: '/dish-images/real/903.webp',
+  906: '/dish-images/real/906.webp',
+  907: '/dish-images/real/907.webp',
+  908: '/dish-images/real/908.webp',
+  911: '/dish-images/real/911.webp',
+  912: '/dish-images/real/912.webp',
+  913: '/dish-images/real/913.webp',
+  914: '/dish-images/real/914.webp',
+  915: '/dish-images/real/915.webp',
+  916: '/dish-images/real/916.webp',
+  917: '/dish-images/real/917.webp',
+  923: '/dish-images/real/923.webp',
+  924: '/dish-images/real/924.webp',
+}
+// 真实图覆盖应用：命中 id 的菜 image_url 指向真实照片（原 dish-*.webp 中已被 HowToCook
+// 实拍覆盖的 11 道路径不变；其余经此表切到 real/ 或 htc/ 新文件）
+seedDishes.forEach((d) => { const u = REAL_IMAGE_OVERRIDES[d.id]; if (u) d.image_url = u })
+// AI 图清退：仍指向原 dish-*.webp 且未被真实图覆盖的菜，清空 image_url 走 emoji 占位
+seedDishes.forEach((d) => { if (/^\/dish-images\/dish-\d+\.webp$/.test(d.image_url) && !(d.id in REAL_IMAGE_OVERRIDES)) d.image_url = '' })
+
 
 function saveState(state) {
   stateCache = state
