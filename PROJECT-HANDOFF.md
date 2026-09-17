@@ -96,6 +96,7 @@ src/
 │   ├── PageHeader.jsx       ★统一页头（back/backTo/right）
 │   ├── FloatingPillNav.jsx  4 tab 导航（SVG 图标，激活态白）
 │   ├── D3CartOrb.jsx        购物车球（入场/退场由 DockLayer 编排）
+│   ├── NightSnackSheet.jsx  ★夜宵开屏弹窗（夜宵开启时每时段自动弹一次，六宫格一键加购）
 │   ├── GlassCard / FullBleedHero / D3StatusRing(--ring-size) / KissIcon / AddDishModal
 │   └── ui/                  共享组件：Icons(细线图标集)/DishRow/OrderCard/EmptyState/
 │                            LoadingState/PayerSelector/Stepper/StatCard/SectionHeader/
@@ -144,7 +145,8 @@ scripts/
 | 色阶绑定收敛 | 全站 clay/sage/caramel 系硬编码 rgba/hex 统一绑到 `--clay-N0/--sage-N0` + `color-mix()`：SEED 层（index.css 组件类/辉光令牌/别名共 20 处、persona.js 16 处、motion.js 默认参 1 处）+ 页面/组件层 36 处清零，渲染值逐处等价（Tailwind 4/Lightning CSS 会输出 color-mix+hex8 双份，旧浏览器走回退，兼容稳）。**有意不绑**：① ink 系 rgba(43,38,32,x)（--color-bone 夜宵反相，绑了会改暗底观感）② persona ORDER_STATUS.ring 数组（D3StatusRing 有 `${ring[1]}30` 后缀拼接与 motion 描边插值，framer 不解析 var）③ PAYER.fill（保白字 ≥5:1 深锚）。绑定惯例：hover→20/30、按压→70、深文字→80/90、alpha 底按旧 rgba 的档位等价映射（clay-50/sage-40 系） | 本轮 |
 | 夜宵提亮 | 所有者反馈夜宵模式（21:00–5:00 自动开启）"背景太深"：night 块整体抬亮——ink 三档 #16130F/#1F1A15/#2A241D → #232019/#2C2720/#383128（保棕相），body-bg radial 两端 #332C23→#1B1812，玻璃雾 0.05→0.08、发丝边 0.14→0.16，scrim/hero-wash/glass-strong 同步，Hero 压暗 22%→12%（brightness 0.78→0.88、functional 0.5→0.62）。人格色反相原则不变，亮色模式零影响。build/lint/test/静态门禁全过 | `de2c13b` |
 | 夜宵开关可发现性+自动跟时 | 所有者两点反馈：①夜宵下开关位置不明显 → 新增 `ui/ThemeToggle.jsx`（玻璃钮，夜宵自动反相可见）注入四个 tab 页 PageHeader right 槽常驻；个人页开关关闭态轨道 rgba(43,38,32,.16) 绑到 bone 反相令牌（晨光渲染值不变，夜宵不再隐形）②要求随时间自动开启 → useTheme 重写：手动值带"生效时段戳"（凌晨归前一晚），跨过 05:00/21:00 边界自动回归时间规则；60s 轮询 + visibilitychange 回前台重算兜底（H5 后台 interval 不可靠）。副标题改「深夜 21 点后自动开，也可手动切」。时段逻辑一次性验证 9 项全过；?theme= 调试钩子保留且其生效期间暂停轮询接管（预览手动切换不被重置） | 本轮 |
-| 夜宵场景落地 | 所有者反馈"夜宵模式点亮了，但菜品里没多少能当夜宵的"。双层修复（选定「两者都做」）：**数据层**——新增 `lib/seedNightExtra.js` 25 道经典宵夜（烧烤炸串/夜面炒饭/饺包馄饨/卤味辣锅/糖水暖饮，id 900-924 避开灌库段，emoji 占位同无图灌库菜机制），mockApi 接线（不可变文件三处改动：+1 行 import、+2 行 push、1 处注释 407→432），冒烟断言 407→432；**规则层**——新增 `lib/nightRules.js`（isNightSnack 关键词只匹配菜名+排除名单兜住可乐鸡翅/啤酒鸭类误伤；nightPick 命中<6 回退全池防夜宵空窗）。全库命中 70/432=16.2%（一次性脚本人工复核：新增 25 道全命中，存量粥/粉/串/糖水/卤味系命中合理）。接线：Home 夜宵模式下主推/网格/换一道整池收敛夜宵系（保序过滤，白天零变化）；Menu 分类 chips 首位旁增「🌙夜宵」伪分类（前端过滤，visibleCats 豁免空分类隐藏）。build/lint/test/静态门禁全过 | 本轮 |
+| 夜宵场景落地 | 所有者反馈"夜宵模式点亮了，但菜品里没多少能当夜宵的"。双层修复（选定「两者都做」）：**数据层**——新增 `lib/seedNightExtra.js` 25 道经典宵夜（烧烤炸串/夜面炒饭/饺包馄饨/卤味辣锅/糖水暖饮，id 900-924 避开灌库段，emoji 占位同无图灌库菜机制），mockApi 接线（不可变文件三处改动：+1 行 import、+2 行 push、1 处注释 407→432），冒烟断言 407→432；**规则层**——新增 `lib/nightRules.js`（isNightSnack 关键词只匹配菜名+排除名单兜住可乐鸡翅/啤酒鸭类误伤；nightPick 命中<6 回退全池防夜宵空窗）。全库命中 70/432=16.2%（一次性脚本人工复核：新增 25 道全命中，存量粥/粉/串/糖水/卤味系命中合理）。接线：Home 夜宵模式下主推/网格/换一道整池收敛夜宵系（保序过滤，白天零变化）；Menu 分类 chips 首位旁增「🌙夜宵」伪分类（前端过滤，visibleCats 豁免空分类隐藏）。build/lint/test/静态门禁全过 | `4f2de14` |
+| 夜宵开屏弹窗 | 所有者要求"夜宵模式开启时自动弹出夜宵菜品"。新增 `components/NightSnackSheet.jsx`（App.jsx 挂载，admin 路由不挂）：夜宵亮起当下自动端出六宫格宵夜 sheet（nightPick 池洗牌取 6，emoji+菜名+caramel 价+一键 + 加购走 useCart.addItem，「看全店」跳 /menu?cat=夜宵）。**每时段只弹一次**：localStorage 存 slotStamp 时段戳（useTheme 导出 slotStamp，凌晨归前一晚），先占坑再弹防重渲染重复打扰；跨到新夜宵时段自动恢复。Menu 增 ?cat= 热同步（与 ?fav=1 同款模式）。弹窗骨架与 AddDishModal 同款（遮罩+sheetUp 底部卡，reduced-motion 降级纯 opacity），文案进 NIGHT_SNACK_NOTES 池。build/lint/test/门禁全过 | 本轮 |
 
 ## 8. 已知待办 / 候选项
 

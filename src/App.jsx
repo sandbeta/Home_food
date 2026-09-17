@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CartProvider } from './components/CartContext'
 import DockLayer from './components/DockLayer'
+import NightSnackSheet from './components/NightSnackSheet'
 import { pageEnter } from './theme/motion'
 
 // 路由懒加载 — 按需加载页面，减小初始 bundle 体积
@@ -93,6 +94,7 @@ function App() {
         </main>
 
         {!isAdmin && <DockLayer />}
+        {!isAdmin && <NightSnackSheet />}
       </div>
     </CartProvider>
   )

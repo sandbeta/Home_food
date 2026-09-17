@@ -35,7 +35,7 @@ export function slotTheme(d = new Date()) {
  * 与"手动值写入时的戳"相等 = 还在用户当初心选的时段内，手动优先；
  * 不等 = 已跨时段，手动覆盖过期，回归自动。
  */
-function slotStamp(d = new Date()) {
+export function slotStamp(d = new Date()) {
   const anchor = new Date(d)
   if (anchor.getHours() < 5) anchor.setDate(anchor.getDate() - 1)
   return `${anchor.getFullYear()}-${anchor.getMonth() + 1}-${anchor.getDate()}-${slotTheme(d)}`

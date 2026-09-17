@@ -93,6 +93,7 @@ export default function Menu() {
   // /favorites 旧链接会重定向到 /menu?fav=1；若此时已停在 /menu（组件未重挂载），这里热同步页签
   useEffect(() => {
     if (searchParams.get('fav')) setScope('fav')
+    if (searchParams.get('cat') === '夜宵') setActiveCategory('夜宵') // 夜宵弹窗「看全店」预选
   }, [searchParams])
 
   // 长列表分页渲染：初始 30 条 + 加载更多，避免 400+ 行一次性进 DOM（筛选条件变化时重置）
