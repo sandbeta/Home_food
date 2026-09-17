@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'couple_order_app_state_v2'
 
 import { SEED_MENU_EXTRA } from './seedMenuExtra.js'
+import { SEED_NIGHT_EXTRA } from './seedNightExtra.js'
 
 const seedDishes = [
   { id: 1, name: '番茄牛腩煲', price: 28, category: '硬菜', description: '酸甜浓郁，拌饭一绝', available: 1, image_url: '/dish-images/dish-1.webp' },
@@ -92,7 +93,7 @@ const seedDishes = [
   { id: 65, name: '折耳根炒腊肉', price: 32, category: '云贵菜', description: '独特香气，越吃越上头', available: 1, image_url: '/dish-images/dish-65.webp' },
 ]
 
-// 内存态缓存：407 道菜 + 订单的 JSON 每请求都解析一遍太浪费，
+// 内存态缓存：432 道菜 + 订单的 JSON 每请求都解析一遍太浪费，
 // 首次 loadState 解析后驻留内存，写入时同步落盘（单标签页 demo 场景足够）
 let stateCache = null
 
@@ -123,6 +124,8 @@ function loadState() {
 // HowToCook 开源菜谱灌库数据（公有领域/Unlicense，生成于 scripts/build_htc_seed.py），
 // 扩充日常分类供给；loadState 的 missingSeed 按名去重，老 localStorage 也会自动补齐
 seedDishes.push(...SEED_MENU_EXTRA)
+// 夜宵手写种子 25 道（src/lib/seedNightExtra.js，id 900-924，所有者反馈深夜场景缺供给）
+seedDishes.push(...SEED_NIGHT_EXTRA)
 
 function saveState(state) {
   stateCache = state

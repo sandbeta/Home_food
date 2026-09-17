@@ -23,9 +23,9 @@ const req = async (path, init) => {
   return { status: res.status, body: await res.json() }
 }
 
-// 1) 种子灌库：65 原始 + 342 HowToCook = 407
+// 1) 种子灌库：65 原始 + 342 HowToCook + 25 夜宵 = 432
 const all = await req('/api/dishes/all')
-assert(all.status === 200 && all.body.length === 407, `全量菜品 407 道（实际 ${all.body.length}）`)
+assert(all.status === 200 && all.body.length === 432, `全量菜品 432 道（实际 ${all.body.length}）`)
 assert(new Set(all.body.map(d => d.id)).size === all.body.length, '菜品 id 无重复')
 
 // 2) 分类过滤 + 下架菜不出现

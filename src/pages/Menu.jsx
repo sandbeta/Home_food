@@ -11,6 +11,7 @@ import PageContainer from '../components/ui/PageContainer'
 import EmptyState from '../components/ui/EmptyState'
 import LuckyDishCard from '../components/ui/LuckyDishCard'
 import { useFavorites } from '../lib/favorites'
+import { isNightSnack } from '../lib/nightRules'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { pickOne, MENU_TITLES, MENU_NOTES } from '../lib/sweetCopy'
@@ -18,7 +19,7 @@ import { tap, vibrate } from '../lib/sfx'
 
 // 仅保留 emoji；旧版彩虹色全部移除，改用晨光玻璃 + 赤陶/鼠尾草绿强调
 const CATEGORY_CONFIG = {
-  '全部': { emoji: '✨' }, '家常菜': { emoji: '🍳' }, '硬菜': { emoji: '🥩' }, '素菜': { emoji: '🥬' },
+  '全部': { emoji: '✨' }, '夜宵': { emoji: '🌙' }, '家常菜': { emoji: '🍳' }, '硬菜': { emoji: '🥩' }, '素菜': { emoji: '🥬' },
   '主食': { emoji: '🍚' }, '小吃': { emoji: '🍢' }, '水果': { emoji: '🍎' }, '饮品': { emoji: '🧋' },
   '汤类': { emoji: '🍲' }, '川菜': { emoji: '🌶️' }, '粤菜': { emoji: '🥢' }, '湘菜': { emoji: '🔥' },
   '鲁菜': { emoji: '🍤' }, '苏菜': { emoji: '🪷' }, '浙菜': { emoji: '🐟' }, '闽菜': { emoji: '🦐' },
@@ -49,7 +50,7 @@ function WhoSelector({ whoAmI, setWhoAmI }) {
 
 
 const CATEGORY_GROUPS = [
-  { label: '家常', items: ['全部', '家常菜', '硬菜', '素菜', '主食', '小吃', '水果', '饮品', '汤类'] },
+  { label: '家常', items: ['全部', '夜宵', '家常菜', '硬菜', '素菜', '主食', '小吃', '水果', '饮品', '汤类'] },
   { label: '八大菜系', items: ['川菜', '粤菜', '湘菜', '鲁菜', '苏菜', '浙菜', '闽菜', '徽菜'] },
   { label: '地方风味', items: ['东北菜', '西北菜', '云贵菜', '其他'] },
 ]
@@ -74,9 +75,10 @@ export default function Menu() {
 
   useEffect(() => {
     setLoading(true)
-    fetch(`/api/dishes?category=${encodeURIComponent(activeCategory)}`)
+    const night = activeCategory === '夜宵' // 前端规则伪分类（nightRules），后端无此 category
+    fetch(night ? '/api/dishes/all' : `/api/dishes?category=${encodeURIComponent(activeCategory)}`)
       .then(r => r.json())
-      .then(data => { setDishes(data); setLoading(false) })
+      .then(data => { setDishes(night ? data.filter(isNightSnack) : data); setLoading(false) })
       .catch(() => setLoading(false))
   }, [activeCategory])
 
@@ -112,7 +114,7 @@ export default function Menu() {
       setCatCounts(m)
     }).catch(() => {})
   }, [])
-  const visibleCats = (items) => (catCounts ? items.filter(cat => cat === '全部' || (catCounts[cat] || 0) > 0) : items)
+  const visibleCats = (items) => (catCounts ? items.filter(cat => cat === '全部' || cat === '夜宵' || (catCounts[cat] || 0) > 0) : items)
 
   const spawnParticle = (x, y) => {
     tap()

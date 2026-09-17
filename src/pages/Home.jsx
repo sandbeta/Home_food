@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
@@ -10,6 +10,8 @@ import Icon from '../components/ui/Icons'
 import ThemeToggle from '../components/ui/ThemeToggle'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter, EASE, usePrefersReducedMotion } from '../theme/motion'
+import { useTheme } from '../theme/useTheme'
+import { nightPick } from '../lib/nightRules'
 import { HERO_IMAGES } from '../theme/images'
 import { NICKNAME, pickOne, HOME_NOTES } from '../lib/sweetCopy'
 
@@ -38,7 +40,10 @@ const ROTATE_MS = 5000
  */
 export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
-  const [dishes, setDishes] = useState([])
+  const [allDishes, setAllDishes] = useState([])
+  const { isNight } = useTheme()
+  // 夜宵模式：主推/网格/换一道整池收敛到深夜食堂系（nightPick 保序过滤，命中过少自动回退全池不空窗）
+  const dishes = useMemo(() => (isNight ? nightPick(allDishes) : allDishes), [isNight, allDishes])
   const [rotIdx, setRotIdx] = useState(0)
   const [gridOffset, setGridOffset] = useState(0)
   // 交互后重建定时器：避免用户刚点完「换一道」，1 秒后又被自动轮换顶掉
@@ -62,7 +67,7 @@ export default function Home() {
         }
         return a
       }
-      setDishes([...shuf(d.filter(x => getDishImage(x))), ...shuf(d.filter(x => !getDishImage(x)))])
+      setAllDishes([...shuf(d.filter(x => getDishImage(x))), ...shuf(d.filter(x => !getDishImage(x)))])
       setRotIdx(0) // 新数据到来时轮换指针归零
       setGridOffset(0)
     })
