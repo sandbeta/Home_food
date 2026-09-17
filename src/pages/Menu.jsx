@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../components/CartContext'
 import PageHeader from '../components/PageHeader'
+import ThemeToggle from '../components/ui/ThemeToggle'
 import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
 import DishRow from '../components/ui/DishRow'
@@ -129,7 +130,7 @@ export default function Menu() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.menu} variant="immersive" alt="菜单" />
 
-      <PageHeader title={pageTitle} subtitle={pageNote} />
+      <PageHeader title={pageTitle} subtitle={pageNote} right={<ThemeToggle />} />
 
       <PageContainer>
         <WhoSelector whoAmI={whoAmI} setWhoAmI={setWhoAmI} />

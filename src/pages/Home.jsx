@@ -7,6 +7,7 @@ import KissIcon from '../components/KissIcon'
 import PageContainer from '../components/ui/PageContainer'
 import SectionHeader from '../components/ui/SectionHeader'
 import Icon from '../components/ui/Icons'
+import ThemeToggle from '../components/ui/ThemeToggle'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter, EASE, usePrefersReducedMotion } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
@@ -106,7 +107,7 @@ export default function Home() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.home} variant="immersive" alt="今日美食" />
 
-      <PageHeader title={`${getGreeting()}，${NICKNAME}`} subtitle={sweetNote} />
+      <PageHeader title={`${getGreeting()}，${NICKNAME}`} subtitle={sweetNote} right={<ThemeToggle />} />
 
       <PageContainer>
         {/* 今日主推 —— 全页深色锚点：clay 实底 + 白字大号 serif 价格 */}

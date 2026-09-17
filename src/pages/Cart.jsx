@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../components/CartContext'
 import PageHeader from '../components/PageHeader'
+import ThemeToggle from '../components/ui/ThemeToggle'
 import GlassCard from '../components/GlassCard'
 import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
@@ -133,7 +134,7 @@ export default function Cart() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.orders} variant="functional" alt="购物车" />
 
-      <PageHeader title={pageTitle} subtitle={totalCount > 0 ? pageNote(totalCount) : ''} back />
+      <PageHeader title={pageTitle} subtitle={totalCount > 0 ? pageNote(totalCount) : ''} back right={<ThemeToggle />} />
 
       {items.length === 0 ? (
         <EmptyState

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
+import ThemeToggle from '../components/ui/ThemeToggle'
 import FullBleedHero from '../components/FullBleedHero'
 import PageContainer from '../components/ui/PageContainer'
 import StatCard from '../components/ui/StatCard'
@@ -30,7 +31,7 @@ export default function Profile() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.profile} variant="immersive" alt="我的" />
 
-      <PageHeader title={pageTitle} />
+      <PageHeader title={pageTitle} right={<ThemeToggle />} />
 
       <PageContainer>
         {/* 身份卡 - 点头像切换 🐱/🐰 */}
@@ -86,7 +87,7 @@ export default function Profile() {
             <span className="text-base w-5 text-center" aria-hidden>{isNight ? '🌙' : '☀️'}</span>
             <div className="flex-1 min-w-0">
               <span className="block text-sm font-bold text-[var(--color-bone)]">夜宵模式</span>
-              <span className="block text-xs text-[var(--color-ash)] mt-0.5">灯调暗，灶火更暖</span>
+              <span className="block text-xs text-[var(--color-ash)] mt-0.5">深夜 21 点后自动开，也可手动切</span>
             </div>
             <motion.button
               onClick={toggleThemeMode}
@@ -96,7 +97,7 @@ export default function Profile() {
               aria-label="切换夜宵模式"
               className="relative w-12 h-7 rounded-full shrink-0 transition-colors duration-300"
               style={{
-                background: isNight ? 'var(--color-clay)' : 'rgba(43,38,32,0.16)',
+                background: isNight ? 'var(--color-clay)' : 'color-mix(in srgb, var(--color-bone) 16%, transparent)',
                 boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.12)',
               }}
             >
