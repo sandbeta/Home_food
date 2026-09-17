@@ -59,7 +59,7 @@ export default function DishRow({
           style={{
             borderRadius: 'var(--radius-lg)',
             background:
-              'linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-850) 50%, rgba(236,138,96,0.06) 100%)',
+              'linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-850) 50%, color-mix(in srgb, var(--clay-50) 6%, transparent) 100%)',
           }}
         >
           <span className="text-3xl drop-shadow-sm">{emoji}</span>

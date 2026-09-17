@@ -16,7 +16,7 @@ export default function Chip({ active = false, onClick, children, className = ''
               background: 'var(--color-clay-gradient)',
               color: '#FFFDF9',
               border: '1px solid transparent',
-              boxShadow: '0 4px 12px rgba(236,138,96,0.26)',
+              boxShadow: '0 4px 12px color-mix(in srgb, var(--clay-50) 26%, transparent)',
             }
           : {
               background: 'var(--color-glass)',

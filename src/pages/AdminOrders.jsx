@@ -20,12 +20,12 @@ const PAYER_LABEL = { aa: 'AA', me: '我请', partner: 'TA请' }
 const STATUS_ACTIONS = {
   pending: {
     next: 'preparing', text: '开始做', emoji: '🔥',
-    gradient: PERSONA.me.gradient, color: '#FFFDF9', glow: 'rgba(236,138,96,0.3)',
+    gradient: PERSONA.me.gradient, color: '#FFFDF9', glow: 'color-mix(in srgb, var(--clay-50) 30%, transparent)',
   },
   preparing: {
     next: 'completed', text: '做好了', emoji: '✅',
     gradient: 'linear-gradient(135deg, var(--color-sage-soft), var(--color-sage))',
-    color: 'var(--color-bone)', glow: 'rgba(164,195,158,0.3)',
+    color: 'var(--color-bone)', glow: 'color-mix(in srgb, var(--sage-40) 30%, transparent)',
   },
 }
 

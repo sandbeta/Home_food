@@ -97,7 +97,7 @@ export default function AdminDishes() {
                           ? {
                               background: 'linear-gradient(135deg, var(--color-sage-soft), var(--color-sage))',
                               color: 'var(--color-bone)',
-                              boxShadow: '0 2px 8px rgba(164,195,158,0.25)',
+                              boxShadow: '0 2px 8px color-mix(in srgb, var(--sage-40) 25%, transparent)',
                             }
                           : {
                               background: 'var(--color-glass)',
@@ -116,7 +116,7 @@ export default function AdminDishes() {
                       style={{
                         borderRadius: 'var(--radius-ctl)',
                         background: 'var(--color-caramel)',
-                        boxShadow: '0 2px 8px rgba(181,121,63,0.2)',
+                        boxShadow: '0 2px 8px color-mix(in srgb, var(--color-caramel) 20%, transparent)',
                       }}
                     >
                       编辑

@@ -52,9 +52,9 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
         className="absolute inset-0 rounded-full"
         style={{
           background: completed
-            ? 'radial-gradient(circle, rgba(164,195,158,0.22), transparent 70%)'
+            ? 'radial-gradient(circle, color-mix(in srgb, var(--sage-40) 22%, transparent), transparent 70%)'
             : preparing
-              ? 'radial-gradient(circle, rgba(236,138,96,0.20), transparent 70%)'
+              ? 'radial-gradient(circle, color-mix(in srgb, var(--clay-50) 20%, transparent), transparent 70%)'
               : 'radial-gradient(circle, rgba(154,144,130,0.16), transparent 70%)',
         }}
       />
@@ -176,7 +176,7 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
             >
               <div
                 className="h-[5px] rounded-full overflow-hidden"
-                style={{ background: 'rgba(236,138,96,0.14)' }}
+                style={{ background: 'color-mix(in srgb, var(--clay-50) 14%, transparent)' }}
               >
                 <div
                   className="h-full rounded-full"

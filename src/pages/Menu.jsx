@@ -154,7 +154,7 @@ export default function Menu() {
                     ? {
                         background: 'var(--color-clay-gradient)',
                         color: '#FFFDF9',
-                        boxShadow: '0 4px 12px rgba(236,138,96,0.26)',
+                        boxShadow: '0 4px 12px color-mix(in srgb, var(--clay-50) 26%, transparent)',
                       }
                     : { color: 'var(--color-ash)' }),
                 }}
@@ -305,11 +305,11 @@ export default function Menu() {
             className="d3-card flex flex-col items-center justify-center py-16 px-4">
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
               <div className="w-32 h-32 rounded-full animate-pulse-soft"
-                style={{ background: 'radial-gradient(circle, rgba(236,138,96,0.08), transparent 70%)' }} />
+                style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--clay-50) 8%, transparent), transparent 70%)' }} />
             </div>
             <div className="relative">
               <div className="w-20 h-20 rounded-full flex items-center justify-center mb-5 animate-float"
-                style={{ background: 'linear-gradient(135deg, rgba(236,138,96,0.12), rgba(164,195,158,0.08))' }}>
+                style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--clay-50) 12%, transparent), color-mix(in srgb, var(--sage-40) 8%, transparent))' }}>
                 <span className="text-5xl">🔍</span>
               </div>
             </div>

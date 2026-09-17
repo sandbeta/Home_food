@@ -42,14 +42,14 @@ function App() {
           className="fixed top-[-120px] w-80 h-80 rounded-full blur-[90px] pointer-events-none"
           style={{
             left: 'calc(50% - var(--shell-w) / 2 - 20px)',
-            background: 'radial-gradient(circle, rgba(236,138,96,0.10) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, color-mix(in srgb, var(--clay-50) 10%, transparent) 0%, transparent 70%)',
           }}
         />
         <div
           className="fixed top-1/3 w-64 h-64 rounded-full blur-[90px] pointer-events-none"
           style={{
             right: 'calc(50% - var(--shell-w) / 2 - 20px)',
-            background: 'radial-gradient(circle, rgba(164,195,158,0.10) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, color-mix(in srgb, var(--sage-40) 10%, transparent) 0%, transparent 70%)',
           }}
         />
 

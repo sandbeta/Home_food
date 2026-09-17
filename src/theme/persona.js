@@ -2,33 +2,33 @@
 export const PERSONA = {
   me: {
     key: 'me', label: '我', emoji: '🐱',
-    color: '#EC8A60', colorSoft: '#F99E78',
-    gradient: 'linear-gradient(180deg, #EC8A60 0%, #B55B35 100%)',
-    glassBorder: 'rgba(236,138,96,0.45)',
-    glow: '0 0 0 3px rgba(236,138,96,0.18), 0 6px 20px rgba(236,138,96,0.22)',
-    chipBg: 'rgba(236,138,96,0.14)', chipColor: '#C8683F',
+    color: 'var(--clay-50)', colorSoft: 'var(--clay-40)',
+    gradient: 'linear-gradient(180deg, var(--clay-50) 0%, var(--clay-80) 100%)',
+    glassBorder: 'color-mix(in srgb, var(--clay-50) 45%, transparent)',
+    glow: '0 0 0 3px color-mix(in srgb, var(--clay-50) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--clay-50) 22%, transparent)',
+    chipBg: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', chipColor: 'var(--clay-70)',
   },
   partner: {
     key: 'partner', label: 'TA', emoji: '🐰',
-    color: '#A4C39E', colorSoft: '#BBD3B5',
-    gradient: 'linear-gradient(180deg, #A4C39E 0%, #6E9269 100%)',
-    glassBorder: 'rgba(164,195,158,0.45)',
-    glow: '0 0 0 3px rgba(164,195,158,0.18), 0 6px 20px rgba(164,195,158,0.22)',
-    chipBg: 'rgba(164,195,158,0.14)', chipColor: '#7FA37A',
+    color: 'var(--sage-40)', colorSoft: 'var(--sage-30)',
+    gradient: 'linear-gradient(180deg, var(--sage-40) 0%, var(--sage-70) 100%)',
+    glassBorder: 'color-mix(in srgb, var(--sage-40) 45%, transparent)',
+    glow: '0 0 0 3px color-mix(in srgb, var(--sage-40) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--sage-40) 22%, transparent)',
+    chipBg: 'color-mix(in srgb, var(--sage-40) 14%, transparent)', chipColor: 'var(--sage-60)',
   },
 }
 export const ORDER_STATUS = {
   pending:   { text: '等着呢', emoji: '⏳', ring: ['#9A9082', '#9A9082'],
                chipBg: 'rgba(154,144,130,0.16)', chipColor: '#6B6155' },
   preparing: { text: '在做了', emoji: '👨‍🍳', ring: ['#EC8A60', '#F99E78'],
-               chipBg: 'rgba(236,138,96,0.14)', chipColor: '#C8683F' },
+               chipBg: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', chipColor: 'var(--clay-70)' },
   completed: { text: '做好啦', emoji: '🎉', ring: ['#A4C39E', '#BBD3B5'],
-               chipBg: 'rgba(164,195,158,0.16)', chipColor: '#7FA37A' },
+               chipBg: 'color-mix(in srgb, var(--sage-40) 16%, transparent)', chipColor: 'var(--sage-60)' },
 }
 export const PAYER = {
-  aa:       { label: 'AA',   emoji: '✌️', border: 'rgba(181,121,63,0.5)',  glow: '0 0 0 2px rgba(181,121,63,0.12)', fill: '#96612E' },
-  me:       { label: '我请', emoji: '🙋', border: 'rgba(236,138,96,0.6)',  glow: '0 0 0 3px rgba(236,138,96,0.20)', fill: '#C8683F' },
-  partner:  { label: 'TA请', emoji: '💝', border: 'rgba(164,195,158,0.6)', glow: '0 0 0 3px rgba(164,195,158,0.20)', fill: '#7FA37A' },
+  aa:       { label: 'AA',   emoji: '✌️', border: 'color-mix(in srgb, var(--color-caramel) 50%, transparent)',  glow: '0 0 0 2px color-mix(in srgb, var(--color-caramel) 12%, transparent)', fill: '#96612E' },
+  me:       { label: '我请', emoji: '🙋', border: 'color-mix(in srgb, var(--clay-50) 60%, transparent)',  glow: '0 0 0 3px color-mix(in srgb, var(--clay-50) 20%, transparent)', fill: '#C8683F' },
+  partner:  { label: 'TA请', emoji: '💝', border: 'color-mix(in srgb, var(--sage-40) 60%, transparent)', glow: '0 0 0 3px color-mix(in srgb, var(--sage-40) 20%, transparent)', fill: '#7FA37A' },
 }
 export const personaOf = (k) => PERSONA[k] || PERSONA.me
 export const orderStatusOf = (k) => ORDER_STATUS[k] || ORDER_STATUS.pending

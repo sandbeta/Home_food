@@ -19,7 +19,7 @@ export default function LoadingState({ emoji = '📋', text = '加载中...' }) 
           className="absolute -inset-4 rounded-full opacity-20"
           animate={{ scale: [1, 1.15, 1], opacity: [0.1, 0.25, 0.1] }}
           transition={{ duration: 2, repeat: Infinity }}
-          style={{ background: 'radial-gradient(circle, rgba(236,138,96,0.20), transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--clay-50) 20%, transparent), transparent 70%)' }}
         />
       </div>
 

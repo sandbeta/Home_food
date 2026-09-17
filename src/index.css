@@ -29,9 +29,9 @@
 
   /* —— 双人格强调（温度对比） —— */
   --color-clay: var(--clay-60); /* 我(me) 蜜橘(clay-60 折中档,白字对比达标) */
-  --color-clay-soft: #F99E78; /* 蜜橘高光(clay-40) */
-  --color-sage: #A4C39E;      /* TA(partner) 薄荷绿(冷·提亮=sage-40) */
-  --color-sage-soft: #BBD3B5; /* 薄荷高光(sage-30) */
+  --color-clay-soft: var(--clay-40); /* 蜜橘高光(clay-40) */
+  --color-sage: var(--sage-40);      /* TA(partner) 薄荷绿(冷·提亮=sage-40) */
+  --color-sage-soft: var(--sage-30); /* 薄荷高光(sage-30) */
 
   /* —— 状态 —— */
   --color-caramel: #B5793F;   /* 中性暖强调 焦糖 */
@@ -141,8 +141,8 @@
   --shadow-4: 0 16px 44px rgba(43, 38, 32, 0.12);
   --shadow-5: 0 30px 70px rgba(43, 38, 32, 0.16);
   /* 双人格辉光 */
-  --shadow-glow-clay: 0 0 0 3px rgba(236,138,96, 0.18), 0 6px 20px rgba(236,138,96, 0.22);
-  --shadow-glow-sage: 0 0 0 3px rgba(164,195,158, 0.18), 0 6px 20px rgba(164,195,158, 0.22);
+  --shadow-glow-clay: 0 0 0 3px color-mix(in srgb, var(--clay-50) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--clay-50) 22%, transparent);
+  --shadow-glow-sage: 0 0 0 3px color-mix(in srgb, var(--sage-40) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--sage-40) 22%, transparent);
 
   /* —— 动效 —— */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -230,14 +230,14 @@ textarea:focus-visible, select:focus-visible {
 }
 .glass-elevated { box-shadow: 0 4px 16px rgba(43, 38, 32, 0.07); }
 .glass-me {
-  border: 1px solid rgba(236,138,96, 0.40);
-  background: linear-gradient(180deg, rgba(236,138,96,0.10) 0%, rgba(255,253,249,0.04) 100%);
-  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px rgba(236,138,96,0.10);
+  border: 1px solid color-mix(in srgb, var(--clay-50) 40%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--clay-50) 10%, transparent) 0%, rgba(255,253,249,0.04) 100%);
+  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--clay-50) 10%, transparent);
 }
 .glass-partner {
-  border: 1px solid rgba(164,195,158, 0.40);
-  background: linear-gradient(180deg, rgba(164,195,158,0.10) 0%, rgba(255,253,249,0.04) 100%);
-  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px rgba(164,195,158,0.10);
+  border: 1px solid color-mix(in srgb, var(--sage-40) 40%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sage-40) 10%, transparent) 0%, rgba(255,253,249,0.04) 100%);
+  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--sage-40) 10%, transparent);
 }
 
 /* ========== Card ========== */
@@ -271,7 +271,7 @@ textarea:focus-visible, select:focus-visible {
 }
 .d3-btn-primary:hover {
   filter: brightness(1.04);
-  box-shadow: 0 2px 6px rgba(159, 79, 45, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--clay-90) 22%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .d3-btn-primary:active { transform: scale(0.98); filter: brightness(0.97); }
 
@@ -296,8 +296,8 @@ textarea:focus-visible, select:focus-visible {
 .d3-input::placeholder { color: var(--color-mist); }
 .d3-input:focus {
   outline: none;
-  border-color: rgba(236,138,96, 0.55);
-  box-shadow: 0 0 0 4px rgba(236,138,96, 0.14);
+  border-color: color-mix(in srgb, var(--clay-50) 55%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--clay-50) 14%, transparent);
 }
 
 /* ========== Badge ========== */
@@ -309,18 +309,18 @@ textarea:focus-visible, select:focus-visible {
   font-size: 0.6875rem;
   font-weight: 700;
   border-radius: 999px;
-  background: rgba(236,138,96, 0.08);
+  background: color-mix(in srgb, var(--clay-50) 8%, transparent);
   color: var(--color-clay);
-  border: 1px solid rgba(236,138,96, 0.16);
+  border: 1px solid color-mix(in srgb, var(--clay-50) 16%, transparent);
 }
 
 /* ========== Avatar & Backgrounds ========== */
 .avatar-me {
-  background: linear-gradient(180deg, #EC8A60 0%, #C8683F 100%);
+  background: linear-gradient(180deg, var(--clay-50) 0%, var(--clay-70) 100%);
   color: #FFFDF9;
 }
 .avatar-partner {
-  background: linear-gradient(180deg, #A4C39E 0%, #7FA37A 100%);
+  background: linear-gradient(180deg, var(--sage-40) 0%, var(--sage-60) 100%);
   color: #1A2417;
 }
 /* 旧 bg-warm / bg-cool 在新语言里退为亮色，避免旧页开天窗 */
@@ -328,8 +328,8 @@ textarea:focus-visible, select:focus-visible {
 .bg-cool { background: linear-gradient(135deg, #E9F3E6 0%, #DCEAD7 100%); }
 
 /* 双人格辉光 */
-.glow-clay     { box-shadow: 0 0 0 3px rgba(236,138,96,0.18), 0 6px 20px rgba(236,138,96,0.22); }
-.glow-sage     { box-shadow: 0 0 0 3px rgba(164,195,158,0.18), 0 6px 20px rgba(164,195,158,0.22); }
+.glow-clay     { box-shadow: 0 0 0 3px color-mix(in srgb, var(--clay-50) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--clay-50) 22%, transparent); }
+.glow-sage     { box-shadow: 0 0 0 3px color-mix(in srgb, var(--sage-40) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--sage-40) 22%, transparent); }
 .glow-love     { box-shadow: 0 6px 20px rgba(217,140,132,0.25); }
 /* 激活态脉冲（配合 is-active 使用） */
 .avatar-me.is-active    { animation: pulse-glow-gold 2.4s ease-in-out infinite; }
@@ -431,20 +431,20 @@ textarea:focus-visible, select:focus-visible {
 .animate-float-gentle { animation: float-gentle 6s ease-in-out infinite; }
 
 @keyframes pulse-glow-clay {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(236,138,96, 0.40); }
-  50% { box-shadow: 0 0 22px 4px rgba(236,138,96, 0.32); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--clay-50) 40%, transparent); }
+  50% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--clay-50) 32%, transparent); }
 }
 @keyframes pulse-glow-sage {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(164,195,158, 0.40); }
-  50% { box-shadow: 0 0 22px 4px rgba(164,195,158, 0.30); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sage-40) 40%, transparent); }
+  50% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--sage-40) 30%, transparent); }
 }
 @keyframes pulse-glow-gold {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(236,138,96, 0.40); }
-  50% { box-shadow: 0 0 22px 4px rgba(236,138,96, 0.32); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--clay-50) 40%, transparent); }
+  50% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--clay-50) 32%, transparent); }
 }
 @keyframes pulse-glow-platinum {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(164,195,158, 0.40); }
-  50% { box-shadow: 0 0 22px 4px rgba(164,195,158, 0.30); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sage-40) 40%, transparent); }
+  50% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--sage-40) 30%, transparent); }
 }
 .animate-pulse-glow-clay { animation: pulse-glow-clay 2.4s ease-in-out infinite; }
 .animate-pulse-glow-sage { animation: pulse-glow-sage 2.4s ease-in-out infinite; }
@@ -467,7 +467,7 @@ textarea:focus-visible, select:focus-visible {
   height: 64px;
   margin-left: -65px;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(232, 150, 79, 0.40), rgba(236,138,96, 0.12) 60%, transparent 75%);
+  background: radial-gradient(closest-side, rgba(232, 150, 79, 0.40), color-mix(in srgb, var(--clay-50) 12%, transparent) 60%, transparent 75%);
   filter: blur(6px);
   animation: stove-breathe 2.2s ease-in-out infinite;
   pointer-events: none;
@@ -486,7 +486,7 @@ textarea:focus-visible, select:focus-visible {
   width: 28px;
   height: 8px;
   border-radius: 50%;
-  background: radial-gradient(closest-side, #F5B87E, #C8683F 70%, transparent);
+  background: radial-gradient(closest-side, #F5B87E, var(--clay-70) 70%, transparent);
   animation: live-mouth 1.4s ease-in-out infinite;
 }
 @keyframes live-mouth {
@@ -522,7 +522,7 @@ textarea:focus-visible, select:focus-visible {
   display: block;
   width: 7px;
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  background: linear-gradient(180deg, #F5D9A8 0%, #E8964F 45%, #C8683F 100%);
+  background: linear-gradient(180deg, #F5D9A8 0%, #E8964F 45%, var(--clay-70) 100%);
   transform-origin: bottom center;
   animation: flame-flicker 0.7s ease-in-out infinite;
   filter: blur(0.3px);

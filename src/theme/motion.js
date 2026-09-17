@@ -47,7 +47,7 @@ export const sheetUp = {
 export const tapScale = { scale: 0.97 }
 
 /** 辉光脉冲（双人格激活态）—— 默认赤陶 */
-export const glowPulse = (color = 'rgba(236,138,96,0.22)') => ({
+export const glowPulse = (color = 'color-mix(in srgb, var(--clay-50) 22%, transparent)') => ({
   animate: { boxShadow: [`0 0 0 0 ${color}`, `0 0 18px 3px ${color}`, `0 0 0 0 ${color}`] },
   transition: { duration: 2.4, repeat: Infinity, ease: 'easeInOut' },
 })

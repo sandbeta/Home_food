@@ -44,7 +44,7 @@ export default function Stepper({ value, onChange, min = 1, size = 32, className
           width: size,
           height: size,
           background: 'var(--color-clay)',
-          boxShadow: '0 2px 8px rgba(236,138,96,0.28)',
+          boxShadow: '0 2px 8px color-mix(in srgb, var(--clay-50) 28%, transparent)',
         }}
       >
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
