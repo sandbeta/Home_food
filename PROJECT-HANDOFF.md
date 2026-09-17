@@ -25,11 +25,11 @@ npm test           # mockApi 冒烟测试（scripts/test_mockApi.mjs）
 python scripts/p6_static_gate.py   # 色值单源/暗色残留/断头路 三项静态门禁
 ```
 - dev server 启动后**必须 HTTP 探测**确认（vite 输出有缓冲）：`GET /` 的 `<title>` 应为「晨光厨房 · 今天想吃什么」。
-- `/api/*` 直连会 502（vite 代理指向不存在的 :3000）——**正常现象**，浏览器端 mock 层在 fetch 阶段拦截，应用不受影响。
+- `/api/*` 直连会 502（vite 代理指向 :8787，dev 时家庭服务端通常未启动）——**正常现象**，浏览器端 mock 层在 fetch 阶段拦截，应用不受影响。家庭局域网共享部署见 §10。
 
 ## 2. 技术栈
 
-React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Motion 12 + localStorage 模拟后端（`src/lib/mockApi.js`，离线可用）。
+React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Motion 12 + localStorage 模拟后端（`src/lib/mockApi.js`，离线可用）；可选**家庭本地服务端** `server/index.mjs`（零依赖 Node + JSON 文件持久化，数据不出家门，见 §10）。
 
 ## 3. 设计语言（不可改的部分）
 
@@ -105,11 +105,15 @@ src/
 ├── pages/                   11 页：Home/NightHome(夜宵专属首页)/Menu/DishDetail/Cart/MyOrders/OrderDetail/
 │                            Profile/Admin/AdminDishes/AdminOrders
 │                            （Checkout、Favorites 已删，路由保留重定向）
-public/dish-images/htc/     HowToCook 预览图 153 张（生成）
+public/dish-images/         菜品预览图：htc/ 169 张（生成 153 + 真实化轮补 16）、real/ 35 张（Wikimedia CC）、dish-*.webp 仅存 11 张（均已被 HowToCook 实拍覆盖，其余 AI 图已删）
+server/                    家庭本地服务端（零依赖 Node，npm run family，见 §10）
+├── index.mjs              /api 一比一复刻 mockApi + 托管 dist + state.json 原子持久化
+└── data/                  seed-dishes.json(432)/seed-recipes.json(342) 出厂种子；state.json 运行时数据(gitignore)
 scripts/
 ├── p6_static_gate.py        静态门禁自检（色值单源差分/暗色/断头路）
 ├── build_htc_seed.py        HowToCook 灌库生成器
-└── test_mockApi.mjs         mockApi 冒烟测试（npm test）
+├── test_mockApi.mjs         mockApi 冒烟测试（npm test）
+└── export-seeds.mjs         导出菜品/菜谱种子 JSON → server/data（家庭服务端首启数据）
 ```
 
 ## 7. 进度台账（关键提交速查）
@@ -151,6 +155,7 @@ scripts/
 | DishRow 收藏钮对齐 | 所有者截图反馈点菜页爱心与加购钮"歪歪扭扭"：心钮原 `right-2`(8px) 贴卡角，加购钮在内容区（右缘距卡边 --space-card-p=18px），且两钮半径不同（16 vs 20px）→ 圆心横向差 14px。改 `right-[calc(var(--space-card-p)_+_4px)]`：右缘 22px，圆心 38px 与加购钮圆心(18+20)同垂线，纵向上下呼应成一条轴。仅 DishRow 一处，Home 网格/后台 manage 变体不受影响（showFav 只在 Menu 开启） | `01c920f` |
 | 夜宵改版（弹窗修复+专属首页） | 所有者两反馈：①**弹窗只在初次有效**——根因=上轮 SHOWN_KEY 按 slotStamp 做了"每时段只弹一次"持久化去重，同晚关过/刷新过就再也不弹。改为组件常驻 App 外壳 + isNight 转变即弹（light→night 切换、夜宵态刷新都触发；关一次后切页不重弹），废弃 localStorage 去重 ②**夜宵要另一套界面**——新增 `pages/NightHome.jsx`：深夜主推大卡（手动"换一道"，不做自动轮换陪吃更安静）+「这些点得多」双列网格每格一键加购 + 全店夜宵入口；App.jsx 路由层 `/home` 按 isNight 分发（懒加载分包），Home.jsx 撤销上轮的 nightPick 派生恢复纯白天版。文案池 NIGHT_HOME_TITLES/NOTES 进 sweetCopy。四大语义与底导不动。build/lint/test/门禁全过 | `51c8f36` |
 | 菜品图真实化 | 所有者要求预览图全部真实照片、禁 AI 生成（实测确认原 65 张 dish-*.webp 带"AI生成"水印）。三批抓取：HowToCook 仓库实拍 27（GitHub blob API，jsDelivr/tarball 国内均不可用）、Wikimedia Commons CC 照片 35（代理开启后可达；三批共 115 搜，**联系表逐张目检剔除 33 张错配**——菜单/街景/古画/人物像混入率高，宁缺毋滥）、其余留 emoji。mockApi 注入 REAL_IMAGE_OVERRIDES 78 条+覆盖应用/AI 清退两条 forEach；19 张无真实图可配的 AI 图删文件。全库真实图 231/432，dish-*.webp 仅剩 11 张且均为 HowToCook 实拍覆盖。四件套全过 | `842cd6a`+`89c37b3` |
+| 家庭局域网服务端 | 所有者要家庭使用+数据本地存储（选定"各手机共享同一后端"场景）。新增 `server/index.mjs`：零依赖 Node HTTP，接口一比一复刻 mockApi（降序/available 过滤/服务端重算总价/recipe 注入/missingSeed 按名补齐），数据原子写 `server/data/state.json`（tmp+rename，gitignore），同时托管 dist/ 静态（SPA 兜底+防目录穿越），绑 0.0.0.0:8787 并打印局域网地址。`main.jsx` 按端口 8787 判定模式：家庭=真实 fetch、其余=动态装载 mock（种子包不进关键路径）；vite proxy 3000→8787；`scripts/export-seeds.mjs` 导出 432 菜+342 菜谱种子 JSON。E2E 15 项+重启持久化全过。文档新增 §10 部署手册（三步启动/种子重导/备份=拷 state.json/边界声明）。顺带清账：删除 35 张数据层早已清退但磁盘残留的孤儿 AI 图，兑现"零 AI 残留" | 本轮 |
 
 ## 8. 已知待办 / 候选项
 
@@ -163,6 +168,24 @@ scripts/
 
 白名单种子 = `index.css` + `theme/persona.js` + `theme/images.js` 全部色值；允许项：bone 正文、深赤陶、黑/骨 rgb 阴影、纯白系。逐文件差分，越界即残留；另跑暗色检测（max(R,G,B)<0x50 且不在允许集）。见 `scripts/p6_static_gate.py`。2026-09-17 色阶绑定收敛后，页面/组件层人格色统一为 `var(--clay-N0)` + `color-mix()` 写法（不含 hex 字面量，天然不过门禁差分）；SEED 层内残留的少量 hex（ring 数组/PAYER.fill/色阶真值本身）属白名单豁免，勿再"顺手"迁移。
 
-## 10. 给接力的开场白模板
+## 10. 家庭局域网部署（数据不出家门，2026-09-18）
+
+**架构**：家里常开电脑跑 `server/index.mjs`（零依赖 Node，需 ≥18），数据持久化 `server/data/state.json`（原子写：tmp+rename）；全家手机浏览器访问 `http://<家电脑IP>:8787` 共享同一份菜品/订单。前端模式判定在 `main.jsx`：端口 8787 → 真实 fetch；其余（vite dev / Pages / file://）→ 动态装载浏览器 mock（mock 的 400KB 种子不进家庭模式关键包）。**服务端接口一比一复刻 mockApi**（含 id 降序、available 过滤、服务端重算总价、recipe 注入），改前端接口语义时两边都要动。
+
+**部署三步（在家电脑上）**：
+```bash
+cd E:\晨光厨房-交付包\extracted
+npm run build          # 产出 dist/（服务端直接托管）
+npm run family         # 启动，控制台打印局域网地址
+```
+手机连同一 WiFi 打开打印的地址即可。防火墙弹窗时允许专用网络。开机自启可选：任务计划程序登录时运行 `node server/index.mjs`（工作目录设为 extracted）。
+
+**数据**：首启自动从 `server/data/seed-dishes.json`+`seed-recipes.json` 建 state.json；种子更新（灌库/新菜）后跑 `npm run export:seeds` 重导，重启服务按名补齐。`state.json` 已 gitignore（运行数据不入库）。备份=拷走 state.json 一个文件。
+
+**E2E 已验**（15 项+重启持久化）：菜品/分类/详情菜谱/下单总价/状态推进/加改删下架/静态托管/404 语义/重启不丢数据。
+
+**边界**：仅局域网内可用（公网暴露需另行 TLS+鉴权，本项目刻意不做）；单实例内存态+写盘，家庭并发足够；localStorage 里的旧设备数据（购物车/主题/收藏）各设备独立，不随服务端共享。
+
+## 11. 给接力的开场白模板
 
 > 请先读 `E:\晨光厨房-交付包\extracted\PROJECT-HANDOFF.md`。遵守第 4 节架构约定与第 5/9 节的坑，改动前跑 `npm run build`、`npm run lint`、`npm test`、`python scripts/p6_static_gate.py` 复验。**每次修改同步更新本文档（进度台账 + 文件地图 + 坑清单），随代码一起提交。** 文案改 `src/lib/sweetCopy.js`，菜品/菜谱数据用 `scripts/build_htc_seed.py` 重新生成。
