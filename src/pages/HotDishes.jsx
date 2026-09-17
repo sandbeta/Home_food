@@ -14,7 +14,7 @@ import { HOT_TRENDS, matchTrendDish } from '../lib/hotRecipes'
 import { tap, vibrate } from '../lib/sfx'
 
 // 排名色：前三金/银铜，其余安静
-const RANK_COLORS = ['#C8683F', '#9A8F7F', '#B5793F']
+const RANK_COLORS = ['#C8683F', 'var(--color-mist)', '#B5793F']
 
 export default function HotDishes() {
   const [dishes, setDishes] = useState([])

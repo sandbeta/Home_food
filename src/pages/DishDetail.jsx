@@ -93,7 +93,7 @@ export default function DishDetail() {
             <p className="text-sm text-[var(--color-ash)] leading-relaxed">{dish.description || '一道美味的菜品~'}</p>
             <div className="flex items-center gap-1.5 mt-3">
               <KissIcon className="w-5 h-5 text-[var(--color-love)]" />
-              <span className="font-serif text-2xl font-bold text-[var(--color-clay)] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{dish.price}</span>
+              <span className="font-serif text-2xl font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{dish.price}</span>
             </div>
           </div>
         </GlassCard>

@@ -2,24 +2,25 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 /**
- * 全站统一页头。
+ * 全站统一页头 —— 编辑杂志版式。
  *
- * 相比旧 Header 的改进：
- * 1. 支持 back —— 消灭此前 AdminDishes / AdminOrders / Checkout 三处「无返回入口」的断头路
- * 2. 内边距对齐 --space-page-x（旧 Header 是 px-5，与页面 px-4 差 4px）
- * 3. 标题用 display 字阶 + serif，副标题用 text-sm
+ * 2026-09 换装「编辑杂志质感」：
+ * 1. 装饰性彩条换成一条贯通发丝线（杂志栏目分隔），不再用发光渐变条
+ * 2. 新增 eyebrow 眉题槽：页头副标题以全大写宽字距小字呈现（杂志 kicker），
+ *    原 subtitle 槽保留向下兼容
+ * 3. 标题字阶吃 --text-display（已调大收紧），衬线大标题是版面的主角
  *
  * 注意：本组件的 sticky 依赖「页面包裹层不带 transform」，见 motion.js 的 pageEnter 说明。
  */
-export default function PageHeader({ title, subtitle, back = false, backTo, right }) {
+export default function PageHeader({ title, eyebrow, subtitle, back = false, backTo, right }) {
   const navigate = useNavigate()
   const goBack = () => (backTo ? navigate(backTo) : navigate(-1))
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.35 }}
       className="sticky top-0 z-40"
       style={{
         background:
@@ -29,7 +30,7 @@ export default function PageHeader({ title, subtitle, back = false, backTo, righ
       }}
     >
       <div
-        className="flex items-center justify-between gap-3 pt-12 pb-5"
+        className="flex items-center justify-between gap-3 pt-12 pb-4"
         style={{
           paddingLeft: 'var(--space-page-x)',
           paddingRight: 'var(--space-page-x)',
@@ -45,8 +46,6 @@ export default function PageHeader({ title, subtitle, back = false, backTo, righ
               style={{
                 background: 'var(--color-glass)',
                 border: '1px solid var(--color-glass-border)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
                 boxShadow: 'var(--shadow-1)',
               }}
             >
@@ -56,7 +55,7 @@ export default function PageHeader({ title, subtitle, back = false, backTo, righ
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="var(--color-bone)"
-                strokeWidth="2.4"
+                strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
@@ -66,27 +65,27 @@ export default function PageHeader({ title, subtitle, back = false, backTo, righ
           )}
 
           <div className="min-w-0">
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 52, opacity: 1 }}
-              transition={{ delay: 0.12, type: 'spring', stiffness: 300, damping: 24 }}
-              className="h-[3px] rounded-full mb-2 bg-gradient-to-r from-[var(--color-clay-soft)] to-[var(--color-clay)]"
-              style={{ boxShadow: '0 0 8px rgba(200,104,63,0.35), 0 0 16px rgba(200,104,63,0.12)' }}
-            />
+            {(eyebrow || subtitle) && (
+              <p
+                className="text-[10px] font-bold uppercase mb-1 truncate"
+                style={{
+                  letterSpacing: '0.18em',
+                  color: 'var(--color-mist)',
+                }}
+              >
+                {eyebrow || subtitle}
+              </p>
+            )}
             <h1 className="font-serif text-display font-bold text-[var(--color-bone)] truncate">
               {title}
             </h1>
-            {subtitle && (
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--color-clay)] shrink-0" />
-                <p className="text-sm text-[var(--color-ash)] font-semibold truncate">{subtitle}</p>
-              </div>
-            )}
           </div>
         </div>
 
         {right && <div className="shrink-0">{right}</div>}
       </div>
+      {/* 贯通发丝线：杂志栏目的分隔语言，取代旧版发光彩条 */}
+      <div style={{ borderTop: '1px solid var(--color-glass-border)', margin: '0 var(--space-page-x)' }} />
     </motion.div>
   )
 }

@@ -3,7 +3,7 @@ export const PERSONA = {
   me: {
     key: 'me', label: '我', emoji: '🐱',
     color: '#C8683F', colorSoft: '#E0A07E',
-    gradient: 'linear-gradient(135deg, #E0A07E 0%, #C8683F 100%)',
+    gradient: 'linear-gradient(180deg, #C8683F 0%, #A55630 100%)',
     glassBorder: 'rgba(200,104,63,0.45)',
     glow: '0 0 0 3px rgba(200,104,63,0.18), 0 6px 20px rgba(200,104,63,0.22)',
     chipBg: 'rgba(200,104,63,0.14)', chipColor: '#C8683F',
@@ -11,7 +11,7 @@ export const PERSONA = {
   partner: {
     key: 'partner', label: 'TA', emoji: '🐰',
     color: '#7FA37A', colorSoft: '#A9C4A4',
-    gradient: 'linear-gradient(135deg, #A9C4A4 0%, #7FA37A 100%)',
+    gradient: 'linear-gradient(180deg, #7FA37A 0%, #678A62 100%)',
     glassBorder: 'rgba(127,163,122,0.45)',
     glow: '0 0 0 3px rgba(127,163,122,0.18), 0 6px 20px rgba(127,163,122,0.22)',
     chipBg: 'rgba(127,163,122,0.14)', chipColor: '#7FA37A',

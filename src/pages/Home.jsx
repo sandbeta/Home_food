@@ -6,6 +6,7 @@ import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
 import PageContainer from '../components/ui/PageContainer'
 import SectionHeader from '../components/ui/SectionHeader'
+import Icon from '../components/ui/Icons'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter, EASE, usePrefersReducedMotion } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
@@ -161,15 +162,12 @@ export default function Home() {
                       />
                     )}
                   </div>
-                  <div className="flex items-end justify-between gap-3 px-4 pb-3.5 pt-3">
+                  <div className="flex items-end justify-between gap-3 px-5 pb-4 pt-3.5">
                     <div className="min-w-0">
-                      <span
-                        className="inline-block text-xs font-extrabold px-2.5 py-1 rounded-full"
-                        style={{ background: 'rgba(255,253,249,0.22)', color: '#FFFDF9' }}
-                      >
-                        今日主推
-                      </span>
-                      <p className="font-serif text-xl font-bold text-[#FFFDF9] truncate mt-1.5">{featured.name}</p>
+                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.2em', color: 'rgba(255,253,249,0.78)' }}>
+                        No.{String(rotIdx % rotSource.length + 1).padStart(2, '0')} · 今日主推
+                      </p>
+                      <p className="font-serif text-2xl font-bold text-[#FFFDF9] truncate mt-1">{featured.name}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <KissIcon className="w-4 h-4 text-[#FFFDF9]" />
@@ -270,10 +268,10 @@ export default function Home() {
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0"
-                      style={{ background: 'linear-gradient(135deg, var(--color-ink-900), var(--color-ink-850))' }}
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                      style={{ background: 'var(--color-ink-850)', color: 'var(--color-ash)' }}
                     >
-                      📦
+                      <Icon name="orders" size={18} strokeWidth={1.8} />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-[var(--color-bone)]">订单 #{order.id}</p>

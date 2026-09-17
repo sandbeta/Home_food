@@ -18,8 +18,8 @@
    ============================================================ */
 @theme {
   /* —— 表面 / 底（晨光暖骨白） —— */
-  --color-ink-900: #F7F3EC;   /* 主底 暖骨白 */
-  --color-ink-850: #EFE7DA;   /* 区块底 浅陶 */
+  --color-ink-900: #FAF7F2;   /* 主底 暖纸白 */
+  --color-ink-850: #F3EDE3;   /* 区块底 浅陶 */
   --color-ink-800: #E4DACC;   /* 次级底 */
 
   /* —— 文字 —— */
@@ -39,15 +39,15 @@
   --color-danger: #C2543F;    /* 危险 / 删除强调 */
 
   /* —— 玻璃 —— */
-  --color-glass: rgba(255,253,249,0.62);
-  --color-glass-border: rgba(43,38,32,0.10);
+  --color-glass: #FFFDFA;
+  --color-glass-border: rgba(43,38,32,0.08);
   /* —— 品牌渐变 —— */
-  --color-clay-gradient: linear-gradient(135deg, #E0A07E 0%, #C8683F 100%);
-  --color-sage-gradient: linear-gradient(135deg, #A9C4A4 0%, #7FA37A 100%);
+  --color-clay-gradient: linear-gradient(180deg, #C8683F 0%, #A55630 100%);
+  --color-sage-gradient: linear-gradient(180deg, #7FA37A 0%, #678A62 100%);
 
   /* 圆角语义（见下方 @theme static 中的完整标尺） */
-  --radius-card: 28px;
-  --radius-btn: 16px;
+  --radius-card: 20px;
+  --radius-btn: 14px;
   --radius-ctl: 12px;
 
   /* —— 字体 —— */
@@ -65,19 +65,19 @@
   /* —— 圆角 ——
      刻意不覆盖 Tailwind 默认的 rounded-lg/xl/2xl：那会让既有用法静默位移数 px。
      这里只补默认集里没有的档位，硬编码圆角在 P5 统一映射过来。 */
-  --radius-card: 28px;   /* 主卡片 */
-  --radius-tile: 20px;   /* 小卡 / 网格瓦片 */
-  --radius-btn: 16px;    /* 按钮 */
+  --radius-card: 20px;   /* 主卡片 */
+  --radius-tile: 16px;   /* 小卡 / 网格瓦片 */
+  --radius-btn: 14px;    /* 按钮 */
   --radius-ctl: 12px;    /* 输入 / 小控件 */
-  --radius-sheet: 32px;  /* 底部浮层顶部 */
+  --radius-sheet: 24px;  /* 底部浮层顶部 */
   --clay-deep: #9A4E2C;  /* 深赤陶（渐变收尾/按压态） */
 
   /* —— 遮罩 / 背景（夜宵模式反相点：亮暗两档只换这几个令牌） —— */
-  --scrim-top: rgba(247, 243, 236, 0.82);          /* PageHeader 吸顶渐隐 */
-  --hero-wash-functional: rgba(247, 243, 236, 0.62); /* functional Hero 压暗罩 */
-  --hero-wash-immersive: linear-gradient(180deg, rgba(247,243,236,0.30) 0%, rgba(247,243,236,0.62) 22%, rgba(247,243,236,0.90) 46%, rgba(247,243,236,0.96) 100%);
-  --body-bg: radial-gradient(120% 80% at 50% 0%, #FBF8F2 0%, var(--color-ink-900) 55%, #EDE4D6 100%);
-  --vignette: radial-gradient(130% 100% at 50% 40%, transparent 60%, rgba(43,38,32,0.06) 100%);
+  --scrim-top: rgba(250, 247, 242, 0.86);          /* PageHeader 吸顶渐隐 */
+  --hero-wash-functional: rgba(250, 247, 242, 0.72); /* functional Hero 压暗罩 */
+  --hero-wash-immersive: linear-gradient(180deg, rgba(250,247,242,0) 0%, rgba(250,247,242,0.12) 38%, rgba(250,247,242,0.62) 66%, rgba(250,247,242,0.94) 86%, #FAF7F2 100%);
+  --body-bg: #F6F0E6;
+  --vignette: none;
   /* Hero 图片滤镜（夜宵反相点：暗底上大图必须收亮度去饱和，否则抢文字） */
   --hero-filter-immersive: brightness(1.04) saturate(1.05);
   --hero-filter-functional: blur(14px) brightness(0.96);
@@ -85,15 +85,15 @@
   /* —— 字阶补充 ——
      同样不覆盖 text-xs/sm/base/lg 的默认值（会让全站字号变小），
      仅补一档 display，用于页面大标题与大数字。 */
-  --text-display: 2.125rem;
-  --text-display--line-height: 1.15;
-  --text-display--letter-spacing: -0.02em;
+  --text-display: 2.5rem;
+  --text-display--line-height: 1.06;
+  --text-display--letter-spacing: -0.035em;
 
   /* —— 布局语义间距 —— */
   --shell-w: 480px;        /* 手机框宽度，全站唯一真源（原散落 5 处硬编码） */
-  --space-page-x: 16px;    /* 页面左右边距（PageHeader 也要对齐到这里） */
-  --space-section: 20px;   /* 区块之间的纵向节奏 */
-  --space-card-p: 16px;    /* 卡片内边距 */
+  --space-page-x: 20px;    /* 页面左右边距（PageHeader 也要对齐到这里） */
+  --space-section: 26px;   /* 区块之间的纵向节奏 */
+  --space-card-p: 18px;    /* 卡片内边距 */
   --ring-size: 140px;      /* 订单状态环直径（OrderDetail） */
 
   /* —— 底部停靠层 ——
@@ -103,7 +103,7 @@
   --dock-h: 72px;    /* 停靠行总高（取药丸与球二者较大） */
   --dock-orb: 64px;  /* 购物车球直径 */
   --dock-gap: 12px;  /* 球与药丸之间的间距 */
-  --glass-strong: rgba(255,253,249,0.88); /* 停靠层药丸底色：压在任意底图上仍可读 */
+  --glass-strong: #FFFDF9; /* 停靠层药丸底色：编辑杂志实纸底 */
   --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
   --bottom-inset: calc(var(--dock-h) + var(--safe-bottom) + 16px);
   --bottom-inset-compact: calc(var(--safe-bottom) + 24px);
@@ -133,7 +133,7 @@ html, body, #root { min-height: 100%; }
 html, body {
   font-family: var(--font-sans);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.7;
   color: var(--color-bone);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -194,15 +194,15 @@ textarea:focus-visible, select:focus-visible {
 .glass {
   background: var(--color-glass);
   border: 1px solid var(--color-glass-border);
-  -webkit-backdrop-filter: blur(20px) saturate(120%);
-  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(110%);
+  backdrop-filter: blur(8px) saturate(110%);
 }
 /* 低配 / 不支持 backdrop-filter 时退为实底半透明 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass { background: rgba(255, 253, 249, 0.92); }
   .d3-card-face { background: rgba(255, 253, 249, 0.92) !important; }
 }
-.glass-elevated { box-shadow: 0 18px 50px rgba(43, 38, 32, 0.10); }
+.glass-elevated { box-shadow: 0 4px 16px rgba(43, 38, 32, 0.07); }
 .glass-me {
   border: 1px solid rgba(200, 104, 63, 0.40);
   background: linear-gradient(180deg, rgba(200,104,63,0.10) 0%, rgba(255,253,249,0.04) 100%);
@@ -222,13 +222,13 @@ textarea:focus-visible, select:focus-visible {
   border-radius: var(--radius-card);
   background: var(--color-glass);
   border: 1px solid var(--color-glass-border);
-  -webkit-backdrop-filter: blur(20px) saturate(120%);
-  backdrop-filter: blur(20px) saturate(120%);
-  box-shadow: 0 10px 34px rgba(43, 38, 32, 0.10);
+  -webkit-backdrop-filter: blur(8px) saturate(110%);
+  backdrop-filter: blur(8px) saturate(110%);
+  box-shadow: 0 2px 10px rgba(43, 38, 32, 0.05);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
 }
 .d3-card:hover .d3-card-face {
-  box-shadow: 0 16px 44px rgba(43, 38, 32, 0.14);
+  box-shadow: 0 6px 20px rgba(43, 38, 32, 0.08);
 }
 
 /* ========== Button ========== */
@@ -239,13 +239,13 @@ textarea:focus-visible, select:focus-visible {
   transition: opacity 0.15s ease, transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease;
 }
 .d3-btn-primary {
-  background: var(--color-clay-gradient);
+  background: var(--color-clay);
   color: #FFFDF9;
-  box-shadow: 0 8px 22px rgba(200, 104, 63, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .d3-btn-primary:hover {
   filter: brightness(1.04);
-  box-shadow: 0 10px 26px rgba(200, 104, 63, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 6px rgba(154, 78, 44, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .d3-btn-primary:active { transform: scale(0.98); filter: brightness(0.97); }
 
@@ -260,7 +260,7 @@ textarea:focus-visible, select:focus-visible {
 
 /* ========== Input ========== */
 .d3-input {
-  background: rgba(43, 38, 32, 0.04);
+  background: rgba(43, 38, 32, 0.03);
   border: 1px solid var(--color-glass-border);
   border-radius: var(--radius-btn);
   -webkit-backdrop-filter: blur(10px);
@@ -283,18 +283,18 @@ textarea:focus-visible, select:focus-visible {
   font-size: 0.6875rem;
   font-weight: 700;
   border-radius: 999px;
-  background: rgba(200, 104, 63, 0.14);
+  background: rgba(200, 104, 63, 0.08);
   color: var(--color-clay);
-  border: 1px solid rgba(200, 104, 63, 0.28);
+  border: 1px solid rgba(200, 104, 63, 0.16);
 }
 
 /* ========== Avatar & Backgrounds ========== */
 .avatar-me {
-  background: linear-gradient(135deg, #E0A07E 0%, #C8683F 100%);
+  background: linear-gradient(180deg, #C8683F 0%, #A55630 100%);
   color: #FFFDF9;
 }
 .avatar-partner {
-  background: linear-gradient(135deg, #A9C4A4 0%, #7FA37A 100%);
+  background: linear-gradient(180deg, #7FA37A 0%, #678A62 100%);
   color: #1A2417;
 }
 /* 旧 bg-warm / bg-cool 在新语言里退为亮色，避免旧页开天窗 */
@@ -311,19 +311,19 @@ textarea:focus-visible, select:focus-visible {
 
 /* ========== Utility Components ========== */
 .gradient-text-clay {
-  background: var(--color-clay-gradient);
+  background: var(--color-clay);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .gradient-text-gold {
-  background: var(--color-clay-gradient);
+  background: var(--color-clay);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .gradient-text {
-  background: var(--color-clay-gradient);
+  background: var(--color-clay);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -348,14 +348,14 @@ textarea:focus-visible, select:focus-visible {
   width: 30px;
   height: 3px;
   border-radius: 2px;
-  background: var(--color-clay-gradient);
+  background: var(--color-clay);
 }
 
 /* 软卡 — 轻量容器，用于分组块 */
 .soft-block {
-  background: rgba(43, 38, 32, 0.04);
+  background: rgba(43, 38, 32, 0.03);
   border: 1px solid var(--color-glass-border);
-  border-radius: 18px;
+  border-radius: 14px;
 }
 
 /* ========== Animations ========== */
