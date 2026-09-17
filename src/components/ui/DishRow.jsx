@@ -35,7 +35,7 @@ export default function DishRow({
     >
       {showFav && onToggleFav && (
         <motion.button
-          whileTap={{ scale: 0.8 }}
+          whileTap={{ scale: 0.9 }}
           onClick={(e) => { e.stopPropagation(); onToggleFav(dish) }}
           aria-label={favorited ? '取消收藏' : '收藏'}
           className="absolute top-2 right-2 z-20 w-8 h-8 rounded-full flex items-center justify-center text-base glass"
@@ -100,7 +100,7 @@ export default function DishRow({
 
             {variant === 'default' && onAdd && (
               <motion.button
-                whileTap={{ scale: 0.82 }}
+                whileTap={{ scale: 0.92 }}
                 whileHover={{ scale: 1.08 }}
                 onClick={(e) => { e.stopPropagation(); onAdd(dish, e) }}
                 aria-label={addLabel || `添加${dish.name}`}

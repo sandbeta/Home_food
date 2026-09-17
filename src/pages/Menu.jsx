@@ -182,10 +182,10 @@ export default function Menu() {
           <AnimatePresence>
             {keyword && (
               <motion.button onClick={() => setKeyword('')}
-                initial={{ opacity: 0, scale: 0.8, width: 0 }}
+                initial={{ opacity: 0, scale: 0.9, width: 0 }}
                 animate={{ opacity: 1, scale: 1, width: 'auto' }}
                 exit={{ opacity: 0, scale: 0.8, width: 0 }}
-                transition={{ duration: 0.25, ease: [0.34, 1.56, 0.64, 1] }}
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                 className="text-xs text-[var(--color-clay)] font-bold px-1 whitespace-nowrap overflow-hidden">清空</motion.button>
             )}
           </AnimatePresence>
@@ -362,7 +362,7 @@ export default function Menu() {
             className="fixed z-[100] pointer-events-none"
             style={{ left: p.x, top: p.y }}
           >
-            <div className="flex items-center gap-0.5 bg-gradient-to-r from-[var(--color-clay-soft)] to-[var(--color-clay)] text-[#FFFDF9] text-xs font-extrabold px-2 py-1 rounded-full shadow-lg">
+            <div className="flex items-center gap-0.5 text-[#FFFDF9] text-xs font-extrabold px-2 py-1 rounded-full shadow-lg" style={{ background: 'var(--color-clay)' }}>
               <span>+1</span>
               <KissIcon className="w-3 h-3" />
             </div>

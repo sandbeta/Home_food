@@ -30,9 +30,9 @@ export const contentEnter = (delay = 0) => ({
 
 /** 玻璃卡统一入场：y:24→0 + opacity */
 export const cardEntrance = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
+  initial: { opacity: 0, y: 16 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, ease: EASE, delay },
+  transition: { duration: 0.34, ease: EASE, delay },
 })
 
 /** 底部浮层（Sheet / 弹窗）从下滑入 */

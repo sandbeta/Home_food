@@ -26,9 +26,9 @@ export const ORDER_STATUS = {
                chipBg: 'rgba(127,163,122,0.16)', chipColor: '#7FA37A' },
 }
 export const PAYER = {
-  aa:       { label: 'AA',   emoji: '✌️', border: 'rgba(181,121,63,0.5)',  glow: '0 0 0 2px rgba(181,121,63,0.12)' },
-  me:       { label: '我请', emoji: '🙋', border: 'rgba(200,104,63,0.6)',  glow: '0 0 0 3px rgba(200,104,63,0.20)' },
-  partner:  { label: 'TA请', emoji: '💝', border: 'rgba(127,163,122,0.6)', glow: '0 0 0 3px rgba(127,163,122,0.20)' },
+  aa:       { label: 'AA',   emoji: '✌️', border: 'rgba(181,121,63,0.5)',  glow: '0 0 0 2px rgba(181,121,63,0.12)', fill: '#96612E' },
+  me:       { label: '我请', emoji: '🙋', border: 'rgba(200,104,63,0.6)',  glow: '0 0 0 3px rgba(200,104,63,0.20)', fill: '#C8683F' },
+  partner:  { label: 'TA请', emoji: '💝', border: 'rgba(127,163,122,0.6)', glow: '0 0 0 3px rgba(127,163,122,0.20)', fill: '#7FA37A' },
 }
 export const personaOf = (k) => PERSONA[k] || PERSONA.me
 export const orderStatusOf = (k) => ORDER_STATUS[k] || ORDER_STATUS.pending

@@ -27,12 +27,12 @@ export default function D3StatusRing({ config }) {
         }}
         initial={{ rotateX: 30, translateZ: -10 }}
         animate={{ rotateX: 0, translateZ: 10 }}
-        transition={{ delay: 0.3, duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
+        transition={{ delay: 0.3, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       >
         <motion.span className="text-5xl"
-          initial={{ scale: 0, rotateY: -180 }}
-          animate={{ scale: 1, rotateY: 0 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 12, delay: 0.4 }}
+          initial={{ scale: 0.92, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 26, delay: 0.4 }}
           style={{ transform: 'translateZ(8px)' }}>
           {config.emoji}
         </motion.span>

@@ -39,8 +39,8 @@ function CartRow({ item, onUpdate, onRemove }) {
       />
 
       <motion.button
-        whileTap={{ scale: 0.75 }}
-        whileHover={{ scale: 1.15, rotate: 90 }}
+        whileTap={{ scale: 0.94 }}
+        whileHover={{ scale: 1.08 }}
         onClick={() => onRemove(item.dish_id, item.added_by)}
         aria-label={`移除${item.name}`}
         className="text-[var(--color-mist)] active:text-[var(--color-danger)] ml-0.5 shrink-0"
@@ -110,8 +110,8 @@ export default function Cart() {
         style={{ background: 'color-mix(in srgb, var(--color-ink-900) 96%, transparent)' }}
       >
         <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
+          initial={{ scale: 0.92, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 12 }}
           className="text-8xl mb-4"
         >

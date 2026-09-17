@@ -70,7 +70,7 @@ export default function DishDetail() {
         back
         right={
           <motion.button
-            whileTap={{ scale: 0.8 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => toggle(dish)}
             aria-label={has(dish.id) ? '取消收藏' : '收藏'}
             className="w-9 h-9 rounded-full flex items-center justify-center text-lg glass"

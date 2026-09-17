@@ -11,7 +11,7 @@ export default function Stepper({ value, onChange, min = 1, size = 32, className
   return (
     <div className={`flex items-center gap-1.5 ${className}`}>
       <motion.button
-        whileTap={{ scale: 0.85 }}
+        whileTap={{ scale: 0.92 }}
         whileHover={{ scale: 1.06 }}
         onClick={dec}
         disabled={value <= min}
@@ -26,16 +26,16 @@ export default function Stepper({ value, onChange, min = 1, size = 32, className
 
       <motion.span
         key={value}
-        initial={{ scale: 1.5, rotate: -10 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 12 }}
+        initial={{ scale: 1.18 }}
+        animate={{ scale: 1 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 30 }}
         className="w-5 text-center font-bold text-base tabular-nums text-[var(--color-bone)]"
       >
         {value}
       </motion.span>
 
       <motion.button
-        whileTap={{ scale: 0.85 }}
+        whileTap={{ scale: 0.92 }}
         whileHover={{ scale: 1.06 }}
         onClick={inc}
         aria-label="增加"
@@ -43,7 +43,7 @@ export default function Stepper({ value, onChange, min = 1, size = 32, className
         style={{
           width: size,
           height: size,
-          background: 'linear-gradient(135deg, var(--color-clay-soft), var(--color-clay))',
+          background: 'var(--color-clay)',
           boxShadow: '0 2px 8px rgba(200,104,63,0.28)',
         }}
       >

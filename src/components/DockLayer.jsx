@@ -36,9 +36,9 @@ export default function DockLayer() {
           {totalCount > 0 && (
             <motion.div
               key="orb-slot"
-              initial={{ scale: 0, rotateY: -180 }}
-              animate={{ scale: 1, rotateY: 0 }}
-              exit={{ scale: 0, rotateY: 180, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
               className="shrink-0 flex items-center justify-center"
               style={{ width: 'var(--dock-orb)', height: 'var(--dock-orb)' }}

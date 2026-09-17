@@ -112,7 +112,7 @@ export default function OrderDetail() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-[var(--color-bone)]">合计</span>
                   {order.payer && <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: payer.border, color: payer.label === 'AA' ? 'var(--color-ash)' : (order.payer === 'me' ? 'var(--color-clay-soft)' : 'var(--color-sage-soft)') }}>{payer.label}</span>}
+                    style={{ background: payer.fill, color: payer.label === 'AA' ? '#FFFDF9' : (order.payer === 'me' ? '#FFFDF9' : '#1A2417') }}>{payer.label}</span>}
                 </div>
                 <div className="flex items-center gap-1">
                   <KissIcon className="w-4 h-4 text-[var(--color-love)]" />
@@ -127,7 +127,7 @@ export default function OrderDetail() {
         {order.note && (
           <GlassCard delay={0.2}>
             <div className="p-3.5 relative overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: 'linear-gradient(to bottom, var(--color-clay-soft), var(--color-sage))' }} />
+              <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: 'linear-gradient(to bottom, var(--color-clay), var(--color-sage))' }} />
               <div className="flex items-center gap-1.5 mb-1 pl-1">
                 <span className="text-sm">💬</span>
                 <span className="text-xs text-[var(--color-ash)] font-semibold">备注</span>
