@@ -2,18 +2,26 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'
 import App from './App.jsx'
+import { installAdminGate } from './lib/adminGate.js'
 import './index.css'
 import './theme/useTheme.js' // 副作用导入：启动即应用主题（localStorage / 深夜自动夜宵）
 
-// 家庭部署（2026-09-18）：页面由 server/index.mjs（默认端口 8787）端出时，数据走
+// 家庭部署（2026-09-18）：页面由 server/index.cjs 端出时，数据走
 // 本机服务端的真实 /api（存 server/data/state.json，全家设备共享同一份）；
 // 其余场景（vite dev、GitHub Pages、file:// 双击）动态装载浏览器 mock——
 // mock 及其携带的 432 道种子数据不再进家庭模式的关键包。
-// 判定端口而非全局 flag：file:// 无端口、8787 同源部署有端口，两态互不误伤。
+// 判定（2026-09-18 公网部署升级）：家庭服务端在端出 index.html 时会注入
+// window.__CHENGUANG_FAMILY__ = true 标记 —— 公网隧道（花生壳/OpenFrp 等）
+// 经域名 80/443 转发进来时同样命中，不再依赖端口；file://、GitHub Pages、
+// vite dev 拿不到该标记且无 8787 端口，两态互不误伤。保留 8787 端口判据
+// 是为兼容注入前的旧产物（如 file:// 双击 dist 预览）。
 async function bootstrap() {
-  if (window.location.port !== '8787') {
+  if (!window.__CHENGUANG_FAMILY__ && window.location.port !== '8787') {
     const { installMockApi } = await import('./lib/mockApi.js')
     installMockApi()
+  } else {
+    // 家庭模式：包装 fetch，公网写操作收到 401 时弹密码门（局域网永不触发）
+    installAdminGate()
   }
   createRoot(document.getElementById('root')).render(
     <StrictMode>

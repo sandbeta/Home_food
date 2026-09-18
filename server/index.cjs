@@ -215,12 +215,15 @@ function serveStatic(res, urlPath) {
   }
   let rel = decodeURIComponent(urlPath.split('?')[0])
   if (rel === '/' || rel === '') rel = '/index.html'
+  if (rel === '/index.html') {
+    if (fs.existsSync(path.join(DIST_DIR, 'index.html'))) return serveIndexHtml(res)
+  }
   // 防目录穿越：解析后必须仍在 DIST 内
   const abs = path.join(DIST_DIR, path.normalize(rel))
   if (!abs.startsWith(DIST_DIR) || !fs.existsSync(abs) || fs.statSync(abs).isDirectory()) {
     // hash 路由下真实路径恒为 /index.html；未知非 api 路径一律兜底
     const idx = path.join(DIST_DIR, 'index.html')
-    if (fs.existsSync(idx)) return streamFile(res, idx, 'text/html; charset=utf-8')
+    if (fs.existsSync(idx)) return serveIndexHtml(res)
     res.writeHead(404); return res.end('404')
   }
   streamFile(res, abs, MIME[path.extname(abs).toLowerCase()] || 'application/octet-stream')
@@ -230,6 +233,105 @@ function streamFile(res, abs, type) {
   fs.createReadStream(abs).pipe(res)
 }
 
+// —— 家庭模式标记注入 ——
+// 公网隧道经域名(80/443)转发进来时，前端 main.jsx 靠 window.__CHENGUANG_FAMILY__
+// 判定家庭模式（旧判据"端口==8787"在隧道下失效）。端出 index.html 时于 <head> 顶部
+// 注入该标记，零依赖、对 file:// 与 Pages 构建产物无感（它们不经这里）。
+let INDEX_HTML_CACHE = null, INDEX_HTML_MTIME = 0
+function serveIndexHtml(res) {
+  const idx = path.join(DIST_DIR, 'index.html')
+  const mt = fs.statSync(idx).mtimeMs
+  if (INDEX_HTML_CACHE === null || mt !== INDEX_HTML_MTIME) {
+    const raw = fs.readFileSync(idx, 'utf8')
+    INDEX_HTML_MTIME = mt
+    INDEX_HTML_CACHE = raw.includes('window.__CHENGUANG_FAMILY__')
+      ? raw // 已注入过（构建产物自带）则直接用
+      : raw.replace('</head>', '  <script>window.__CHENGUANG_FAMILY__=true</script>\n  </head>')
+  }
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' })
+  res.end(INDEX_HTML_CACHE)
+}
+
+// —— 公网访问识别 ——
+// 局域网直连（192.168.x.x/10.x/172.16-31.x/::1/本机）不带 XFF 头；
+// 任何经隧道/代理进来的请求一定携带 X-Forwarded-For（OpenFrp 文档：HTTP 隧道
+// frpc 会自动追加真实客户端 IP 到 XFF）。⚠️ 但 HTTPS 隧道不加 XFF，且 frpc 与
+// 服务端同机时来源恒是 127.0.0.1——单靠来源无法区分。因此提供显式开关：
+// 环境变量 FAMILY_PUBLIC_MODE=1 或 server/public-mode.txt 内容为 1 →
+// 所有请求一律视为公网（本机/局域网管理端也需过一次密码，cookie 7 天）。
+function publicMode() {
+  if (process.env.FAMILY_PUBLIC_MODE === '1') return true
+  try {
+    const f = path.join(__dirname, 'public-mode.txt')
+    return fs.existsSync(f) && fs.readFileSync(f, 'utf8').trim() === '1'
+  } catch { return false }
+}
+function clientIsPublic(req) {
+  if (publicMode()) return true
+  if (req.headers['x-forwarded-for']) return true
+  const sock = req.socket.remoteAddress || ''
+  return !(/^(127\.|::1|::ffff:127\.)/.test(sock) || /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(sock))
+}
+
+// —— Admin 密码门（2026-09-18 公网化前置安全）——
+// 局域网零打扰：内网访问行为如旧。公网访问默认拒绝（403），直到用环境变量
+// FAMILY_ADMIN_PASSWORD 设置密码后，凭同一密码换 httpOnly cookie 进入。
+function needsAdminGuard(pathname, method) {
+  // 写保护：只拦"改数据"的接口（增删改菜、上下架、推进订单状态）。
+  // 读接口与 POST /api/orders（家人公网点餐）放行——公网浏览/下单无感；
+  // 注：SPA 是 hash 路由，/admin 页面路径不会到达服务端，管理入口的写
+  // 操作全部经由下面这些 API 接口，拦接口即拦住管理行为。
+  const mutating = method !== 'GET' && method !== 'HEAD'
+  if (!mutating) return false
+  if (pathname === '/api/dishes') return true
+  if (/^\/api\/dishes\/\d+$/.test(pathname)) return true
+  if (/^\/api\/orders\/\d+\/status$/.test(pathname)) return true
+  return false
+}
+const crypto = require('node:crypto')
+const ADMIN_TOKEN = crypto.randomBytes(24).toString('hex')
+function adminPassword() {
+  // 密码来源优先级：环境变量 FAMILY_ADMIN_PASSWORD > 项目内 server/admin-password.txt
+  // （exe 双击场景没有控制台环境变量，改文件即可，重启与否都能生效——每次校验现读）
+  const envPw = process.env.FAMILY_ADMIN_PASSWORD
+  if (envPw && envPw.trim()) return envPw.trim()
+  try {
+    const f = path.join(__dirname, 'admin-password.txt')
+    if (fs.existsSync(f)) {
+      const t = fs.readFileSync(f, 'utf8').trim()
+      if (t) return t
+    }
+  } catch { /* 读不到视为未配置 */ }
+  return null
+}
+function cookieValue(req, name) {
+  const raw = req.headers.cookie || ''
+  for (const part of raw.split(';')) {
+    const i = part.indexOf('=')
+    if (i < 0) continue
+    if (part.slice(0, i).trim() === name) return decodeURIComponent(part.slice(i + 1).trim())
+  }
+  return null
+}
+function safeEqual(a, b) {
+  const ba = Buffer.from(a), bb = Buffer.from(b)
+  return ba.length === bb.length && crypto.timingSafeEqual(ba, bb)
+}
+function handleAdminLogin(req, res) {
+  const pw = adminPassword()
+  if (!pw) return sendJson(res, { message: 'admin_password_not_configured' }, 503)
+  readJsonBody(req).then((body) => {
+    if (safeEqual(String(body.password || ''), pw)) {
+      res.setHeader('Set-Cookie', `cg_admin=${ADMIN_TOKEN}; HttpOnly; Path=/; SameSite=Lax; Max-Age=604800`)
+      return sendJson(res, { ok: true })
+    }
+    return sendJson(res, { message: 'wrong_password' }, 401)
+  })
+}
+function adminAuthorized(req) {
+  return cookieValue(req, 'cg_admin') === ADMIN_TOKEN
+}
+
 try { initState() } catch (e) {
   fatal('[致命] 初始化失败：' + (e.message || String(e)))
 }
@@ -237,8 +339,18 @@ try { initState() } catch (e) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`)
   try {
-    if (url.pathname.startsWith('/api/')) await handleApi(req, res, url)
-    else serveStatic(res, url.pathname)
+    if (url.pathname === '/api/admin/login' && req.method.toUpperCase() === 'POST') {
+      return handleAdminLogin(req, res)
+    }
+    if (url.pathname.startsWith('/api/')) {
+      // 公网写操作门控：局域网直连（无 XFF、内网网卡来源）行为如旧零打扰；
+      // 隧道进来的改数据请求必须已凭密码换到 cookie。
+      if (needsAdminGuard(url.pathname, req.method.toUpperCase()) && clientIsPublic(req) && !adminAuthorized(req)) {
+        return sendJson(res, { message: 'admin_auth_required' }, 401)
+      }
+      return await handleApi(req, res, url)
+    }
+    serveStatic(res, url.pathname)
   } catch (e) {
     console.error('[error]', e)
     if (!res.headersSent) sendJson(res, { message: 'Internal error', detail: String(e.message || e) }, 500)

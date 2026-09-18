@@ -90,6 +90,7 @@ src/
 │   ├── seedMenuExtra.js     HowToCook 灌库菜品 342 道（生成，勿手改）
 │   ├── seedNightExtra.js    夜宵手写种子 25 道（id 900-924，emoji 占位）
 │   ├── nightRules.js        ★夜宵判定规则库（isNightSnack/nightPick，首页选品+点菜筛选共用）
+│   ├── adminGate.js         ★公网 Admin 密码门（包装 fetch 捕获 401→弹层输密→换 cookie 重放；见 §10.5）
 │   ├── seedRecipes.js       菜谱数据 342 份（生成，懒加载，勿手改）
 │   └── sweetCopy.js         ★ 全站个性化文案池（懒洋洋昵称 + 各页标题/情话，随机抽取）
 ├── components/
@@ -107,7 +108,9 @@ src/
 │                            （Checkout、Favorites 已删，路由保留重定向）
 public/dish-images/         菜品预览图：htc/ 169 张（生成 153 + 真实化轮补 16）、real/ 35 张（Wikimedia CC）、dish-*.webp 仅存 11 张（均已被 HowToCook 实拍覆盖，其余 AI 图已删）
 server/                    家庭本地服务端（零依赖 Node，双击 exe 或 npm run family，见 §10）
-├── index.cjs              运行入口（CJS，兼 Node SEA exe 入口）：/api 一比一复刻 mockApi + 托管 dist + state.json 原子持久化 + fatal 防闪退
+├── index.cjs              运行入口（CJS，兼 Node SEA exe 入口）：/api 一比一复刻 mockApi + 托管 dist（注入 __CHENGUANG_FAMILY__ 标记）+ 公网写门控（§10.5）+ state.json 原子持久化 + fatal 防闪退
+├── admin-password.txt     公网管理密码（本机私有，gitignore；不存在=公网管理禁用）
+├── public-mode.txt        内容为 1 时强制公网模式（HTTPS 隧道无 XFF 时必开，§10.5）
 ├── sea-config.json        SEA 打包配置（main=index.cjs）
 ├── 晨光厨房服务端.exe      pack:exe 产物（gitignore，88MB = node.exe 内嵌代码，dist/data 在旁）
 └── data/                  seed-dishes.json(432)/seed-recipes.json(342) 出厂种子；state.json 运行时数据(gitignore)
@@ -189,7 +192,19 @@ npm run family         # 启动，控制台打印局域网地址
 
 **E2E 已验**（15 项+重启持久化）：菜品/分类/详情菜谱/下单总价/状态推进/加改删下架/静态托管/404 语义/重启不丢数据。
 
-**边界**：仅局域网内可用（公网暴露需另行 TLS+鉴权，本项目刻意不做）；单实例内存态+写盘，家庭并发足够；localStorage 里的旧设备数据（购物车/主题/收藏）各设备独立，不随服务端共享。
+## 10.5 公网访问（隧道部署，2026-09-18 晚）
+
+**路线决策**：用户要求"手机浏览器直接输网址、两端不装 App 不开代理"。Tailscale/组网类被排除（手机要装客户端）；Cloudflare/Funnel 类被排除（海外入口国内直连不稳，本机 Clash 不可依赖——实测控制面超时）；**最终选定国内 frp 公益节点 OpenFrp**（console.openfrp.net，免费 2 隧道/12Mbps/初始 1GB+每日签到补流量，大陆节点需实名）。花生壳（1Mbps/1GB 月）为备胎。
+
+**代码侧已完成（本次会话）**：
+1. **家庭模式判定升级**（`main.jsx` + `server/index.cjs`）：旧判据"端口==8787"在隧道域名（80/443）下失效。现服务端端出 index.html 时于 `</head>` 前注入 `window.__CHENGUANG_FAMILY__=true`（按 index.html mtime 缓存，重建即失效）；前端判定"标记 or 8787 端口"，双判据兼容 file:// 旧用法。**隧道场景务必访问 http(s):// 根路径进首页拿标记；若 OpenFrp 映射带子路径，相对资源仍可加载**（hash 路由+相对 base 天然兼容）。
+2. **Admin 密码门**：`index.cjs` 对"公网来源的写接口"（POST/PUT/DELETE /api/dishes*、/api/orders/:id/status）返回 401 `admin_auth_required`；`POST /api/admin/login` 校密换 7 天 httpOnly cookie（`cg_admin`，随机 token 仅存内存）。读接口与 POST /api/orders（公网点餐）放行。密码来源：`server/admin-password.txt`（gitignore，已加入）或环境变量 `FAMILY_ADMIN_PASSWORD`；未配置时公网写 401、登录 503（公网管理禁用，局域网如旧）。前端 `src/lib/adminGate.js` 包装 fetch 捕获 401 → 弹密码层（纯内联样式走 CSS 变量，p6 门禁零告警）→ 成功自动重放原请求。
+3. **公网识别两态 + 强制开关**：XFF 头或外网来源 IP → 公网。**⚠️OpenFrp 文档：HTTP 隧道 frpc 自动加 XFF；HTTPS 隧道不加**——故提供 `server/public-mode.txt`（内容 `1`）或 `FAMILY_PUBLIC_MODE=1`：开启后所有写操作一律过门（本机也不例外）。**用 HTTPS 隧道或不确定时必须开此开关**，否则密码门形同虚设。
+4. 验证记录：隔离实例（_pubtest/_gatecheck，用后即删）8 项全过——注入✓ 公网PUT无cookie 401✓ 局域网PUT 200✓ 公网下单 201✓ 错密码 401✓ 对密码+cookie 公网PUT 200✓ 换会话无cookie 401✓ 公网模式(无XFF)强制401/放行✓；四件套全绿；`.gitignore` 已排除 admin-password.txt / public-mode.txt。
+
+**待办（部署侧，下轮接续）**：用户在 OpenFrp 注册实名 → 建 HTTP 隧道（127.0.0.1:8787）→ 拿到公网域名 → 本机写 admin-password.txt（建议同时写 public-mode.txt=1）→ **重启 8787 服务**（当前运行中的仍是旧代码！exe 需 `npm run pack:exe` 重打或改用 node/新 exe）→ 手机实测公网浏览/下单/管理三链路 + 真实 dist 注入验证。隧道掉线自恢复可考虑计划任务保活。
+
+**边界**：单实例内存态+写盘，家庭并发足够；localStorage 设备数据（购物车/主题/收藏）不随服务端共享；密码门是"公网化最低安全垫"，非完整账号体系（token 重启失效需重新输一次）。
 
 ## 11. 给接力的开场白模板
 
