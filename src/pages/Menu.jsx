@@ -6,26 +6,18 @@ import PageHeader from '../components/PageHeader'
 import ThemeToggle from '../components/ui/ThemeToggle'
 import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
+import Chip from '../components/ui/Chip'
 import DishRow from '../components/ui/DishRow'
 import PageContainer from '../components/ui/PageContainer'
 import EmptyState from '../components/ui/EmptyState'
 import LuckyDishCard from '../components/ui/LuckyDishCard'
 import { useFavorites } from '../lib/favorites'
 import { isNightSnack } from '../lib/nightRules'
+import { SCENES, scenePick } from '../lib/sceneRules'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
-import { pickOne, MENU_TITLES, MENU_NOTES } from '../lib/sweetCopy'
+import { pickOne, MENU_TITLES, MENU_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { tap, vibrate } from '../lib/sfx'
-
-// 仅保留 emoji；旧版彩虹色全部移除，改用晨光玻璃 + 赤陶/鼠尾草绿强调
-const CATEGORY_CONFIG = {
-  '全部': { emoji: '✨' }, '夜宵': { emoji: '🌙' }, '家常菜': { emoji: '🍳' }, '硬菜': { emoji: '🥩' }, '素菜': { emoji: '🥬' },
-  '主食': { emoji: '🍚' }, '小吃': { emoji: '🍢' }, '水果': { emoji: '🍎' }, '饮品': { emoji: '🧋' },
-  '汤类': { emoji: '🍲' }, '川菜': { emoji: '🌶️' }, '粤菜': { emoji: '🥢' }, '湘菜': { emoji: '🔥' },
-  '鲁菜': { emoji: '🍤' }, '苏菜': { emoji: '🪷' }, '浙菜': { emoji: '🐟' }, '闽菜': { emoji: '🦐' },
-  '徽菜': { emoji: '🍲' }, '东北菜': { emoji: '🥟' }, '西北菜': { emoji: '🍖' }, '云贵菜': { emoji: '🍄' },
-  '其他': { emoji: '🍽️' },
-}
 
 function WhoSelector({ whoAmI, setWhoAmI }) {
   return (
@@ -60,6 +52,9 @@ export default function Menu() {
   const [activeCategory, setActiveCategory] = useState('全部')
   const [keyword, setKeyword] = useState('')
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [retryToken, setRetryToken] = useState(0)
+  const [activeScene, setActiveScene] = useState(null) // 场景快选（sceneRules 前端过滤，与菜系正交）
   const [searchFocused, setSearchFocused] = useState(false)
   const [showAllCategories, setShowAllCategories] = useState(false)
   const [particles, setParticles] = useState([])
@@ -74,21 +69,21 @@ export default function Menu() {
   const isFavScope = scope === 'fav'
 
   useEffect(() => {
-    setLoading(true)
+    setLoading(true); setLoadError(false)
     const night = activeCategory === '夜宵' // 前端规则伪分类（nightRules），后端无此 category
     fetch(night ? '/api/dishes/all' : `/api/dishes?category=${encodeURIComponent(activeCategory)}`)
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
       .then(data => { setDishes(night ? data.filter(isNightSnack) : data); setLoading(false) })
-      .catch(() => setLoading(false))
-  }, [activeCategory])
+      .catch(() => { setLoading(false); setLoadError(true) })
+  }, [activeCategory, retryToken])
 
   // 收藏页签的数据源是本地收藏夹，全部页签是服务端返回；关键词对两者都生效
   const filteredDishes = useMemo(() => {
     const q = keyword.trim().toLowerCase()
-    const base = isFavScope ? favorites : dishes
+    const base = isFavScope ? favorites : activeScene ? scenePick(dishes, activeScene) : dishes
     if (!q) return base
     return base.filter(d => `${d.name} ${d.category} ${d.description || ''}`.toLowerCase().includes(q))
-  }, [isFavScope, favorites, dishes, keyword])
+  }, [isFavScope, favorites, dishes, keyword, activeScene])
 
   // /favorites 旧链接会重定向到 /menu?fav=1；若此时已停在 /menu（组件未重挂载），这里热同步页签
   useEffect(() => {
@@ -98,7 +93,7 @@ export default function Menu() {
 
   // 长列表分页渲染：初始 30 条 + 加载更多，避免 400+ 行一次性进 DOM（筛选条件变化时重置）
   const [visibleCount, setVisibleCount] = useState(30)
-  useEffect(() => { setVisibleCount(30) }, [activeCategory, scope, keyword])
+  useEffect(() => { setVisibleCount(30) }, [activeCategory, scope, keyword, activeScene])
   const visibleDishes = useMemo(
     () => filteredDishes.slice(0, visibleCount),
     [filteredDishes, visibleCount],
@@ -197,22 +192,22 @@ export default function Menu() {
 
         {!loading && <LuckyDishCard dishes={dishes} onAdd={addItem} spawnParticle={spawnParticle} />}
 
-        {/* 分类标签 - 可折叠分组网格布局 */}
+        {/* 场景快选（2026-09-19 critique）：情侣心智语言的第一决策入口，再点一次取消；纯前端过滤当前列表 */}
+        <div className="flex flex-wrap gap-2">
+          {SCENES.map(s => (
+            <Chip key={s.key} active={activeScene === s.key}
+              onClick={() => { setActiveScene(cur => (cur === s.key ? null : s.key)); tap(); vibrate(6) }}>
+              {s.label}
+            </Chip>
+          ))}
+        </div>
+
+        {/* 分类标签 - 可折叠分组网格布局（2026-09-19 收敛到共享 Chip：去 emoji、44px 触达、active clay 渐变） */}
         <div className="mb-3">
           <div className="flex flex-wrap gap-2 items-center">
-            {visibleCats(CATEGORY_GROUPS[0].items).map(cat => {
-              const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG['其他']
-              const active = activeCategory === cat
-              return (
-                <motion.button key={cat}
-                  whileTap={{ scale: 0.95 }}
-                  whileHover={{ y: -1 }}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${active ? 'd3-btn d3-btn-primary text-[#FFFDF9]' : 'd3-btn-sm text-[var(--color-ash)] hover:text-[var(--color-bone)]'}`}>
-                  <span className="text-xs">{cfg.emoji}</span>{cat}
-                </motion.button>
-              )
-            })}
+            {visibleCats(CATEGORY_GROUPS[0].items).map(cat => (
+              <Chip key={cat} active={activeCategory === cat} onClick={() => setActiveCategory(cat)}>{cat}</Chip>
+            ))}
             {!showAllCategories && (
               <motion.button
                 key="toggle-btn"
@@ -253,19 +248,9 @@ export default function Menu() {
                     <div key={group.label}>
                       <div className="text-xs font-extrabold px-0.5 pb-1 text-[var(--color-clay)]">{group.label}</div>
                       <div className="flex flex-wrap gap-2">
-                        {visibleCats(group.items).map(cat => {
-                          const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG['其他']
-                          const active = activeCategory === cat
-                          return (
-                            <motion.button key={cat}
-                              whileTap={{ scale: 0.95 }}
-                              whileHover={{ y: -1 }}
-                              onClick={() => setActiveCategory(cat)}
-                              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${active ? 'd3-btn d3-btn-primary text-[#FFFDF9]' : 'd3-btn-sm text-[var(--color-ash)] hover:text-[var(--color-bone)]'}`}>
-                              <span className="text-xs">{cfg.emoji}</span>{cat}
-                            </motion.button>
-                          )
-                        })}
+                        {visibleCats(group.items).map(cat => (
+                          <Chip key={cat} active={activeCategory === cat} onClick={() => setActiveCategory(cat)}>{cat}</Chip>
+                        ))}
                       </div>
                     </div>
                   ))}
@@ -275,7 +260,23 @@ export default function Menu() {
           </AnimatePresence>
         </div>
 
-        {loading ? (
+        {loadError ? (
+          <EmptyState
+            emoji="📡"
+            title="厨房暂时断联"
+            desc={pickOne(RETRY_NOTES)}
+            action={
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setRetryToken(t => t + 1)}
+                className="d3-btn d3-btn-primary px-6 py-2.5 text-sm font-bold"
+                style={{ borderRadius: 'var(--radius-btn)' }}
+              >
+                再试一次
+              </motion.button>
+            }
+          />
+        ) : loading ? (
           <div className="space-y-3.5">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="d3-card p-3.5 flex items-center gap-3 overflow-hidden">

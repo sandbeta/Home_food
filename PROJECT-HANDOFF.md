@@ -90,6 +90,7 @@ src/
 │   ├── seedMenuExtra.js     HowToCook 灌库菜品 342 道（生成，勿手改）
 │   ├── seedNightExtra.js    夜宵手写种子 25 道（id 900-924，emoji 占位）
 │   ├── nightRules.js        ★夜宵判定规则库（isNightSnack/nightPick，首页选品+点菜筛选共用）
+│   ├── sceneRules.js        ★场景快选规则（SCENES 吃辣/清淡/快手/仪式感 + scenePick，Menu 前端过滤）
 │   ├── adminGate.js         ★公网 Admin 密码门（包装 fetch 捕获 401→弹层输密→换 cookie 重放；见 §10.5）
 │   ├── seedRecipes.js       菜谱数据 342 份（生成，懒加载，勿手改）
 │   └── sweetCopy.js         ★ 全站个性化文案池（懒洋洋昵称 + 各页标题/情话，随机抽取）
@@ -149,6 +150,7 @@ scripts/
 | 旧命名清零 | AddDishModal 全量迁移新令牌（新增 --color-clay-deep 深赤陶）；index.css 删除全部历史别名定义（cream 系 13 处用法迁至 ink-900/850）；Icons 新增 gear 并推广到后台快捷入口 + Profile（3 调用点）| 本轮 |
 | 质量体检轮 | 全工程审计后修复：灵感卡打字乱跳（改吃全量池）、死 Fredoka 字体、死端点 categories 移除、Fisher-Yates 无偏洗牌、featIdx 归零、状态 emoji 统一 🎉、Menu 列表分页（初始 30+加载更多）、mockApi 内存态缓存；新增 mockApi 冒烟测试 8 项（npm test）；README 重写 + prd.md 标注历史；preview 同步最新视觉 | 本轮 |
 | 编辑杂志换装 | 全站视觉换装「编辑杂志质感」（所有者选定）：纸面卡/收圆角/深专色渐变/松间距/大衬线/眉题页头/编号主推卡；StoveStage、HotDishes 两处硬编码色收编令牌；DishDetail 价格补对齐 caramel 原则。build/lint/test/静态门禁全过 | 本轮 |
+| critique 整改（P0/P1 三连） | impeccable 双评审（Menu+Home 各 27/36）落地：**Menu/Home fetch 失败不再静默空列表**——loadError/homeFailed 态 + EmptyState「厨房暂时断联」+「再试一次」（RETRY_NOTES 安慰池进 sweetCopy），Home 另有首屏 LoadingState 与 0 菜「去点菜」引导；**分类 chips 收敛到共享 Chip 组件**（CATEGORY_CONFIG emoji 删除，44px 触达 + active clay 渐变一次到位，修「emoji 图标违反 Don't」与双实现漂移）；**LuckyDishCard 撤 GlassCard** 改 d3-card-face 纸面（玻璃退后律）；**新增场景快选行**（sceneRules.js 四场景前端过滤，与菜系列表正交、再点取消）——回应「分类是数据库语言」尖锐问题，菜系保留在「更多菜系」。四件套全绿；检测器二进制缺失（.part 残件+下载挂起），确定性扫描缺席已声明 | `待填` |
 | Vercel 动效工程 | 参考 emilkowalski/skills（Vercel/Linear 设计工程师）的动画规范整改全站动效：① scale(0) 起跳全改 ≥0.9 淡入（DockLayer 购物车球、D3StatusRing、Cart 庆祝），去 180° 翻转/旋转 ② UI 动画压进 300ms 档（cardEntrance 500→340ms，状态环内盘 600→400ms 去 [0.34,1.56] 过冲曲线）③ 高频按压收敛到 0.92–0.97（Stepper/DishRow/收藏星/移除等多处），Stepper 数字弹跳去旋转、弹簧 stiffness 320/damping 26 去"跳跳床"④ 移除按钮 hover 90° 旋转、购物车球 hover 上浮等高频表演元素；Menu 清空按钮回弹曲线改标准 ease-out。顺带：PAYER 补 fill 字段（单源），OrderDetail 买单徽章改实底高对比（AA 底 #96612E 白字 ≥5:1）、备注分隔线与 +1 粒子收专色。装饰性低频动画（StoveStage 蒸汽/✨）按规范豁免保留。全部门禁通过 | 本轮 |
 | 双人格色阶 | 参考 yeun/open-color（MIT）补齐 clay/sage 各 10 档色阶，写入 index.css 的 @theme static（--clay-00..90 / --sage-00..90）。推导法：open-color 全 13 色族 130 值 → CIE LCh(D65) → 逐档均值曲线 → 以现主色为锚点做明度加法平移 + 彩度比值缩放 + 色相均值漂移，越出色域裁剪彩度。锚定档 clay-70=#C8683F、sage-60=#7FA37A 与现值逐字节相同，本轮纯基础设施、页面观感零变化，无组件被迫改用。待办：hover/active/disabled 与夜宵模式择机绑定色阶档（当前仍是临时 rgba 拼） | 本轮 |
 | 提亮方案一 | 所有者反馈"太暗沉"，主色沿色阶上提：clay #C8683F→#EC8A60(clay-50)、sage #7FA37A→#A4C39E(sage-40)，soft 各提一档；ink 三档底与 body-bg/scrim/hero-wash 同步提白；渐变改为 新主色→原锚点 的同族双档（观感更透但白字对比降至 2.5:1，深端 clay-70+ 兜底按压/夜宵）；全站 26 文件旧人格色 rgba 与旧 hex 字面量统一迁移，HotDishes 榜单色收编令牌；夜宵模式人格色不反相原则不变。build/lint/test/静态门禁全过 | 本轮 |

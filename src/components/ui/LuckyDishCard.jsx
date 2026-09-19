@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import GlassCard from '../GlassCard'
+// GlassCard 已撤（2026-09-19 critique）：内容层禁玻璃（DESIGN.md 玻璃退后律），手气签换纸面卡
 import KissIcon from '../KissIcon'
 import { getCategoryEmoji, getDishImage } from '../../lib/categoryIcons'
 import { usePrefersReducedMotion } from '../../theme/motion'
@@ -88,7 +88,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
   const dishImg = getDishImage(dish)
 
   return (
-    <GlassCard className="p-4 mb-4 overflow-hidden relative">
+    <div className="d3-card-face p-4 mb-4 overflow-hidden relative">
       {/* 氛围光斑：赤陶 + 鼠尾草双色，呼应双人格 */}
       <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full animate-float-gentle"
         style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--clay-50) 14%, transparent), transparent 70%)' }} />
@@ -185,6 +185,6 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
           </motion.div>
         </div>
       </div>
-    </GlassCard>
+    </div>
   )
 }

@@ -8,10 +8,12 @@ import PageContainer from '../components/ui/PageContainer'
 import SectionHeader from '../components/ui/SectionHeader'
 import Icon from '../components/ui/Icons'
 import ThemeToggle from '../components/ui/ThemeToggle'
+import EmptyState from '../components/ui/EmptyState'
+import LoadingState from '../components/ui/LoadingState'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter, EASE, usePrefersReducedMotion } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
-import { NICKNAME, pickOne, HOME_NOTES } from '../lib/sweetCopy'
+import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -39,6 +41,10 @@ const ROTATE_MS = 5000
 export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
   const [dishes, setDishes] = useState([])
+  // 三态（2026-09-19 critique）：加载中/失败可重试/0 菜引导——此前静默空白像页面坏了
+  const [homeLoading, setHomeLoading] = useState(true)
+  const [homeFailed, setHomeFailed] = useState(false)
+  const [reloadToken, setReloadToken] = useState(0)
   const [rotIdx, setRotIdx] = useState(0)
   const [gridOffset, setGridOffset] = useState(0)
   // 交互后重建定时器：避免用户刚点完「换一道」，1 秒后又被自动轮换顶掉
@@ -50,8 +56,10 @@ export default function Home() {
   const reduced = usePrefersReducedMotion()
 
   useEffect(() => {
-    fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3)))
-    fetch('/api/dishes?category=全部').then(r => r.json()).then(d => {
+    fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3))).catch(() => {})
+    fetch('/api/dishes?category=全部')
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
+      .then(d => {
       // 主推大卡优先用带实拍图的菜（无图菜在大卡上只有一枚小 emoji，观感太素）；
       // 两组各自洗牌后拼接，保证主推位永远有图。Fisher-Yates 无偏洗牌。
       const shuf = (arr) => {
@@ -65,8 +73,10 @@ export default function Home() {
       setDishes([...shuf(d.filter(x => getDishImage(x))), ...shuf(d.filter(x => !getDishImage(x)))])
       setRotIdx(0) // 新数据到来时轮换指针归零
       setGridOffset(0)
-    })
-  }, [])
+      setHomeLoading(false)
+      })
+      .catch(() => { setHomeLoading(false); setHomeFailed(true) })
+  }, [reloadToken])
 
   // 标签页切到后台时停摆：既省电，也避免用户切回来时大卡已经翻到陌生的菜
   useEffect(() => {
@@ -110,6 +120,41 @@ export default function Home() {
       <PageHeader title={`${getGreeting()}，${NICKNAME}`} subtitle={sweetNote} right={<ThemeToggle />} />
 
       <PageContainer>
+        {homeFailed && !dishes.length && (
+          <EmptyState
+            emoji="📡"
+            title="厨房暂时断联"
+            desc={pickOne(RETRY_NOTES)}
+            action={
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => { setHomeFailed(false); setHomeLoading(true); setReloadToken(t => t + 1) }}
+                className="d3-btn d3-btn-primary px-6 py-2.5 text-sm font-bold"
+                style={{ borderRadius: 'var(--radius-btn)' }}
+              >
+                再试一次
+              </motion.button>
+            }
+          />
+        )}
+        {homeLoading && !dishes.length && !homeFailed && <LoadingState emoji="🍳" text="开火备菜中…" />}
+        {!homeLoading && !homeFailed && !dishes.length && (
+          <EmptyState
+            emoji="🍳"
+            title="厨房还空着"
+            desc="去点菜页挑几道，开火第一顿"
+            action={
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/menu')}
+                className="d3-btn d3-btn-primary px-6 py-2.5 text-sm font-bold"
+                style={{ borderRadius: 'var(--radius-btn)' }}
+              >
+                去点菜
+              </motion.button>
+            }
+          />
+        )}
         {/* 今日主推 —— 全页深色锚点：clay 实底 + 白字大号 serif 价格 */}
         {featured && (
           <motion.div {...contentEnter(0.05)}>
