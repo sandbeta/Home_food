@@ -77,7 +77,7 @@ export default function OrderDetail() {
     return () => { dead = true; clearInterval(timer); clearTimeout(bumpTimerRef.current) }
   }, [id])
 
-  if (loading) return <LoadingState emoji="🍳" text="正在查订单..." />
+  if (loading) return <LoadingState text="正在查订单..." />
 
   if (!order) return (
     <EmptyState

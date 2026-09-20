@@ -82,7 +82,7 @@ export default function NightHome() {
                   whileTap={{ scale: 0.985 }}
                   onClick={() => navigate(`/dish/${featured.id}`)}
                   className="relative overflow-hidden cursor-pointer"
-                  style={{ borderRadius: 'var(--radius-card)', background: 'var(--color-clay-gradient)', boxShadow: 'var(--shadow-4)' }}
+                  style={{ borderRadius: 'var(--radius-card)', background: 'var(--anchor-ink)', boxShadow: 'var(--shadow-4)' }}
                 >
                   <div className="relative h-40 overflow-hidden flex items-center justify-center" style={{ background: 'rgba(255,253,249,0.16)' }}>
                     <div className="absolute w-40 h-40 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,253,249,0.22), transparent 70%)' }} />
@@ -134,6 +134,7 @@ export default function NightHome() {
                     <span className="text-3xl">{getCategoryEmoji(dish.category)}</span>
                     {getDishImage(dish) && (
                       <img src={getDishImage(dish)} alt={dish.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover"
+                        style={{ filter: 'var(--tile-img-filter)' }}
                         onError={(e) => { e.currentTarget.style.display = 'none' }} />
                     )}
                   </div>

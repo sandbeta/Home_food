@@ -53,10 +53,10 @@ export default function MyOrders() {
         </div>
 
         {loading ? (
-          <LoadingState emoji="📋" />
+          <LoadingState />
         ) : filtered.length === 0 ? (
           <EmptyState
-            emoji="📋"
+            icon="stoveOff"
             title={filter ? '这个状态还没有订单' : '还没有下过单'}
             desc={filter ? '换个筛选看看吧~' : '快去一起选点好吃的吧~'}
             action={

@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion'
+import Icon from './Icons'
 
 /**
  * 统一空态 —— 取代各页的手写空态变体。已接入：Cart / Menu / AdminDishes /
  * AdminOrders / MyOrders / OrderDetail / DishDetail。
+ * icon 传入 Icons.jsx 插画名（emptyPlate/stoveOff）时替换 emoji 呈现，二选一。
  */
-export default function EmptyState({ emoji = '🍽️', title, desc, action, className = '' }) {
+export default function EmptyState({ emoji = '🍽️', icon, title, desc, action, className = '' }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -21,13 +23,23 @@ export default function EmptyState({ emoji = '🍽️', title, desc, action, cla
         style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--sage-40) 16%, transparent), transparent 70%)' }}
       />
 
-      <motion.div
-        className="text-7xl mb-5 relative z-10"
-        animate={{ y: [0, -8, 0], rotate: [0, -3, 3, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        {emoji}
-      </motion.div>
+      {icon ? (
+        <motion.div
+          className="mb-5 relative z-10 text-[var(--color-ash)]"
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <Icon name={icon} size={72} strokeWidth={1.4} />
+        </motion.div>
+      ) : (
+        <motion.div
+          className="text-7xl mb-5 relative z-10"
+          animate={{ y: [0, -8, 0], rotate: [0, -3, 3, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          {emoji}
+        </motion.div>
+      )}
 
       {title && (
         <p className="text-base text-[var(--color-bone)] mb-1 font-bold relative z-10">{title}</p>

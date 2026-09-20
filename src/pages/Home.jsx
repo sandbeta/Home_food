@@ -239,7 +239,7 @@ export default function Home() {
             }
           />
         )}
-        {homeLoading && !dishes.length && !homeFailed && <LoadingState emoji="🍳" text="开火备菜中…" />}
+        {homeLoading && !dishes.length && !homeFailed && <LoadingState text="开火备菜中…" />}
         {!homeLoading && !homeFailed && !dishes.length && (
           <EmptyState
             emoji="🍳"
@@ -289,7 +289,7 @@ export default function Home() {
                   className="relative overflow-hidden cursor-pointer"
                   style={{
                     borderRadius: 'var(--radius-card)',
-                    background: 'var(--color-clay-gradient)',
+                    background: 'var(--anchor-ink)',
                     boxShadow: 'var(--shadow-4)',
                   }}
                 >

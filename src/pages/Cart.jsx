@@ -164,7 +164,7 @@ export default function Cart() {
 
       {items.length === 0 ? (
         <EmptyState
-          emoji="🛒"
+          icon="emptyPlate"
           title="还没选好呀"
           desc="饿了吗？去点点好吃的吧~"
           action={
@@ -263,7 +263,7 @@ export default function Cart() {
             className="overflow-hidden"
             style={{
               borderRadius: 'var(--radius-card)',
-              background: 'var(--color-clay-gradient)',
+              background: 'var(--anchor-ink)',
               boxShadow: 'var(--shadow-4)',
               padding: 'var(--space-card-p)',
             }}

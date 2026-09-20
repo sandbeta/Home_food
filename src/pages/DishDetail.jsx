@@ -42,7 +42,7 @@ export default function DishDetail() {
 
   const persona = PERSONA[whoAmI]
 
-  if (loading) return <LoadingState emoji="🍳" text="正在端上来..." />
+  if (loading) return <LoadingState text="正在端上来..." />
 
   if (!dish) return (
     <EmptyState
@@ -90,7 +90,21 @@ export default function DishDetail() {
               <h2 className="font-serif text-xl font-bold text-[var(--color-bone)] truncate">{dish.name}</h2>
               <span className="d3-badge shrink-0">{dish.category}</span>
             </div>
-            <p className="text-sm text-[var(--color-ash)] leading-relaxed">{dish.description || '一道美味的菜品~'}</p>
+            <p className="text-sm text-[var(--color-ash)] leading-relaxed">
+              {(() => {
+                const t = dish.description || '一道美味的菜品~'
+                return (
+                  <>
+                    <span
+                      className="font-serif font-bold"
+                      style={{ fontSize: '2.1em', lineHeight: 0.85, float: 'left', marginRight: 6, marginTop: 4, color: 'var(--clay-deep)' }}
+                      aria-hidden="true"
+                    >{t[0]}</span>
+                    {t.slice(1)}
+                  </>
+                )
+              })()}
+            </p>
             <div className="flex items-center gap-1.5 mt-3">
               <KissIcon className="w-5 h-5 text-[var(--color-love)]" />
               <span className="font-serif text-2xl font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{dish.price}</span>
