@@ -138,7 +138,7 @@ export default function HotDishes() {
                   className="flex items-center gap-3"
                   style={{ padding: 'var(--space-card-p)', borderTop: idx ? '1px solid var(--color-glass-border)' : 'none' }}>
                   {/* 名次 */}
-                  <span className="font-serif text-lg font-bold w-7 text-center shrink-0 tabular-nums"
+                  <span className="font-serif text-display font-bold w-12 text-center shrink-0 tabular-nums leading-none"
                     style={{ color: idx < 3 ? RANK_COLORS[idx] : 'var(--color-mist)' }}>
                     {idx + 1}
                   </span>
@@ -152,6 +152,9 @@ export default function HotDishes() {
                       </span>
                     </div>
                     <p className="text-xs text-[var(--color-ash)] mt-0.5">{t.heat}</p>
+                    <div className="mt-1.5 h-[3px] rounded-full overflow-hidden" style={{ background: 'var(--color-glass-border)' }}>
+                      <div className="h-full rounded-full" style={{ width: (parseFloat((t.heat.match(/([\d.]+)%/) || [0, '0'])[1]) || 0) + '%', background: 'var(--color-clay-gradient)' }} />
+                    </div>
                   </div>
                   {/* 行动区：菜单里有 → 看菜谱/点一份；没有 → 提示 */}
                   {dish ? (

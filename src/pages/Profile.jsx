@@ -56,7 +56,7 @@ export default function Profile() {
             {persona.emoji}
           </motion.div>
           <h2
-            className="text-lg font-bold font-serif"
+            className="text-3xl font-bold font-serif leading-tight"
             style={{
               backgroundImage: persona.gradient,
               WebkitBackgroundClip: 'text',

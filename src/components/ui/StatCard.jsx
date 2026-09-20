@@ -14,13 +14,13 @@ export default function StatCard({ value, label, emoji, prefix = '', accent = 'v
     >
       {emoji && <div className="text-lg mb-0.5">{emoji}</div>}
       <div
-        className="font-serif text-2xl font-bold tabular-nums leading-tight"
+        className="font-serif text-display font-bold tabular-nums leading-none"
         style={{ color: accent }}
       >
         {prefix && <span className="text-[0.6em] mr-0.5">{prefix}</span>}
         {value}
       </div>
-      {label && <div className="text-xs text-[var(--color-ash)] mt-1 truncate">{label}</div>}
+      {label && <div className="text-xs text-[var(--color-ash)] mt-1.5 tracking-[0.12em] truncate">{label}</div>}
     </motion.div>
   )
 }
