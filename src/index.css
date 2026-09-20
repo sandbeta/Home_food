@@ -483,6 +483,12 @@ textarea:focus-visible, select:focus-visible {
   0%, 100% { opacity: 0.55; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.12); }
 }
+/* 余温暗火（pending）：灶火将熄未熄的一缕极弱暖光，比正式加热更暗更慢，营造"等你开口就重新起火"的待机感 */
+.stove-glow.ember {
+  opacity: 0.38;
+  filter: blur(9px);
+  animation-duration: 3.4s;
+}
 /* 灶膛炽热口：火点着后炉口透出的红光（熄火的 pending / 起锅的 completed 没有） */
 .stove-base.is-live::before {
   content: '';

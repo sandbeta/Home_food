@@ -192,7 +192,7 @@ export default function OrderDetail() {
                 </div>
                 <div className="flex items-center gap-1">
                   <KissIcon className="w-4 h-4 text-[var(--color-love)]" />
-                  <span className="font-serif text-2xl font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{order.total_price}</span>
+                  <span className="font-serif text-3xl font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{order.total_price}</span>
                 </div>
               </div>
             </div>

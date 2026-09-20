@@ -14,6 +14,7 @@ export default function D3CartOrb() {
 
   return (
     <motion.button
+      id="cart-orb"
       aria-label={`购物车，${totalCount} 件`}
       className="relative rounded-full flex items-center justify-center"
       style={{

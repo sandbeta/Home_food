@@ -130,6 +130,7 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
 
           {/* 炉火光晕：灶膛加热时锅底映出的暖橙氛围（动画受全局 reduced-motion 停摆） */}
           {preparing && <div className="stove-glow" />}
+          {pending && <div className="stove-glow ember" />}
 
           {/* ── 锅 ── */}
           <div className="absolute left-1/2 -translate-x-1/2" style={{ top: 30 }}>

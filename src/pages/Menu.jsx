@@ -18,7 +18,7 @@ import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { pickOne, MENU_TITLES, MENU_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { tap, vibrate } from '../lib/sfx'
-import { EASE } from '../theme/motion'
+import { EASE, usePrefersReducedMotion } from '../theme/motion'
 
 function WhoSelector({ whoAmI, setWhoAmI }) {
   return (
@@ -64,6 +64,7 @@ export default function Menu() {
   const { favorites, has, toggle } = useFavorites()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const reduced = usePrefersReducedMotion()
 
   // 收藏已并入本页：'all'=全部菜品，'fav'=我的收藏
   // 支持 ?fav=1 直达收藏（/favorites 旧路由重定向到这里）
@@ -118,10 +119,14 @@ export default function Menu() {
     tap()
     vibrate(8)
     const id = Date.now() + Math.random()
-    setParticles(prev => [...prev, { id, x, y }])
+    const orb = document.getElementById('cart-orb')
+    let tx, ty
+    if (orb) { const r = orb.getBoundingClientRect(); tx = r.left + r.width / 2; ty = r.top + r.height / 2 }
+    else { const shellW = Math.min(480, window.innerWidth); const shellL = (window.innerWidth - shellW) / 2; tx = shellL + shellW - 56; ty = window.innerHeight - 52 }
+    setParticles(prev => [...prev, { id, x, y, tx, ty }])
     setTimeout(() => {
       setParticles(prev => prev.filter(p => p.id !== id))
-    }, 950)
+    }, 620)
   }
 
   const partner = PERSONA[whoAmI]
@@ -362,12 +367,14 @@ export default function Menu() {
         {particles.map(p => (
           <motion.div
             key={p.id}
-            initial={{ opacity: 1, y: 0, scale: 0.8 }}
-            animate={{ opacity: 0, y: -60, scale: 1.4 }}
+            initial={{ x: p.x, y: p.y, opacity: 1, scale: reduced ? 1 : 0.8 }}
+            animate={reduced
+              ? { x: p.x, y: p.y - 40, opacity: 0, scale: 1.3 }
+              : { x: [p.x, (p.x + p.tx) / 2, p.tx - 10], y: [p.y, Math.min(p.y, p.ty) - 52, p.ty - 10], opacity: [1, 1, 0.9], scale: [0.8, 1.15, 0.55] }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reduced ? 0.4 : 0.55, ease: EASE, times: [0, 0.55, 1] }}
             className="fixed z-[100] pointer-events-none"
-            style={{ left: p.x, top: p.y }}
+            style={{ left: 0, top: 0 }}
           >
             <div className="flex items-center gap-0.5 text-[#FFFDF9] text-xs font-bold px-2 py-1 rounded-full shadow-lg" style={{ background: 'var(--color-clay)' }}>
               <span>+1</span>
