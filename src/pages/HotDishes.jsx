@@ -12,6 +12,7 @@ import { contentEnter } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
 import { HOT_TRENDS, matchTrendDish } from '../lib/hotRecipes'
 import { tap, vibrate } from '../lib/sfx'
+import { morphTo, heroNameFor, cacheList } from '../lib/vt'
 
 // 排名色：前三金/银铜，其余安静
 const RANK_COLORS = ['var(--color-clay)', 'var(--color-mist)', 'var(--color-caramel)']
@@ -25,7 +26,7 @@ export default function HotDishes() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    fetch('/api/dishes?category=全部').then(r => r.json()).then(setDishes)
+    fetch('/api/dishes?category=全部').then(r => r.json()).then(d => { setDishes(d); cacheList('hot', d) })
     fetch('/api/orders').then(r => r.json()).then(setOrders)
   }, [])
 
@@ -93,12 +94,12 @@ export default function HotDishes() {
                 <motion.div
                   key={dish.id}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate(`/dish/${dish.id}`)}
-                  className="d3-card-face shrink-0 cursor-pointer overflow-hidden"
+                  onClick={(e) => morphTo(navigate, `/dish/${dish.id}`, e, dish, '/hot')}
+                  className="vt-dish-host d3-card-face shrink-0 cursor-pointer overflow-hidden"
                   style={{ width: 132 }}
                 >
-                  <div className="relative h-20 overflow-hidden flex items-center justify-center"
-                    style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))' }}>
+                  <div className="vt-dish-frame relative h-20 overflow-hidden flex items-center justify-center"
+                    style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))', viewTransitionName: heroNameFor(dish.id) }}>
                     <span className="text-4xl">{getCategoryEmoji(dish.category)}</span>
                     {getDishImage(dish) && (
                       <img src={getDishImage(dish)} alt={dish.name} loading="lazy"
@@ -153,7 +154,7 @@ export default function HotDishes() {
                     </div>
                     <p className="text-xs text-[var(--color-ash)] mt-0.5">{t.heat}</p>
                     <div className="mt-1.5 h-[3px] rounded-full overflow-hidden" style={{ background: 'var(--color-glass-border)' }}>
-                      <div className="h-full rounded-full" style={{ width: (parseFloat((t.heat.match(/([\d.]+)%/) || [0, '0'])[1]) || 0) + '%', background: 'var(--color-clay-gradient)' }} />
+                      <div className="h-full rounded-full ink-reveal-line" style={{ width: (parseFloat((t.heat.match(/([\d.]+)%/) || [0, '0'])[1]) || 0) + '%', background: 'var(--color-clay-gradient)' }} />
                     </div>
                   </div>
                   {/* 行动区：菜单里有 → 看菜谱/点一份；没有 → 提示 */}

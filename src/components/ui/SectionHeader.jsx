@@ -18,7 +18,7 @@ export default function SectionHeader({ title, action, index, className = '' }) 
         )}
         <span
           aria-hidden
-          className="shrink-0 w-4 h-[2px] rounded-full"
+          className="shrink-0 w-4 h-[2px] rounded-full ink-reveal-line"
           style={{ background: 'var(--color-clay)' }}
         />
         <h2 className="font-serif text-2xl font-semibold text-[var(--color-bone)] truncate">

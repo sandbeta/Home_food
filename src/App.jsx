@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { CartProvider } from './components/CartContext'
 import DockLayer from './components/DockLayer'
 import NightSnackSheet from './components/NightSnackSheet'
+import AmbientLightCanvas from './components/AmbientLightCanvas'
 import { useTheme } from './theme/useTheme'
 import { pageEnter } from './theme/motion'
 
@@ -34,6 +35,8 @@ function App() {
   const location = useLocation()
   const { isNight } = useTheme()
   const isAdmin = location.pathname.startsWith('/admin')
+  // VT 形变导航：旁路 AnimatePresence，让 View Transitions 独占本次转场（否则 mode=wait 的 exit 会拖住新页快照）
+  const viaVT = !!(location.state && location.state.vt)
 
   return (
     <CartProvider>
@@ -43,19 +46,20 @@ function App() {
       >
         {/* 晨光环境光：赤陶主光（左） + 鼠尾草绿辅光（右），低透，仅作氛围 */}
         <div
-          className="fixed top-[-120px] w-80 h-80 rounded-full blur-[90px] pointer-events-none"
+          className="fixed top-[-120px] w-80 h-80 rounded-full blur-[90px] pointer-events-none ambient-a"
           style={{
             left: 'calc(50% - var(--shell-w) / 2 - 20px)',
             background: 'radial-gradient(circle, color-mix(in srgb, var(--clay-50) 10%, transparent) 0%, transparent 70%)',
           }}
         />
         <div
-          className="fixed top-1/3 w-64 h-64 rounded-full blur-[90px] pointer-events-none"
+          className="fixed top-1/3 w-64 h-64 rounded-full blur-[90px] pointer-events-none ambient-b"
           style={{
             right: 'calc(50% - var(--shell-w) / 2 - 20px)',
             background: 'radial-gradient(circle, color-mix(in srgb, var(--sage-40) 10%, transparent) 0%, transparent 70%)',
           }}
         />
+        <AmbientLightCanvas />
 
         {/*
           底部留白由令牌给出，取代原先硬编码的 pb-28：
@@ -71,7 +75,7 @@ function App() {
             导致 PageHeader 的吸顶失效、FullBleedHero 的 fixed 定位错乱。
           */}
           <AnimatePresence mode="wait">
-            <motion.div key={location.pathname} {...pageEnter}>
+            <motion.div key={location.pathname} {...(viaVT ? { initial: false, animate: { opacity: 1 }, exit: {} } : pageEnter)}>
               <Suspense fallback={<PageLoader />}>
                 <Routes location={location}>
                   <Route path="/" element={<Navigate to="/home" replace />} />

@@ -18,6 +18,7 @@ import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { pickOne, MENU_TITLES, MENU_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { tap, vibrate } from '../lib/sfx'
+import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 import { EASE, usePrefersReducedMotion } from '../theme/motion'
 
 function WhoSelector({ whoAmI, setWhoAmI }) {
@@ -50,10 +51,11 @@ const CATEGORY_GROUPS = [
 ]
 
 export default function Menu() {
-  const [dishes, setDishes] = useState([])
+  // 形变种子：从详情飞回来时首帧就有带图行，heroNameFor 才挂得上名（无缓存则维持骨架）
+  const [dishes, setDishes] = useState(() => getCachedList('menu') || [])
   const [activeCategory, setActiveCategory] = useState('全部')
   const [keyword, setKeyword] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => !getCachedList('menu'))
   const [loadError, setLoadError] = useState(false)
   const [retryToken, setRetryToken] = useState(0)
   const [activeScene, setActiveScene] = useState(null) // 场景快选（sceneRules 前端过滤，与菜系正交）
@@ -72,11 +74,12 @@ export default function Menu() {
   const isFavScope = scope === 'fav'
 
   useEffect(() => {
-    setLoading(true); setLoadError(false)
+    if (!getCachedList('menu')) setLoading(true)
+    setLoadError(false)
     const night = activeCategory === '夜宵' // 前端规则伪分类（nightRules），后端无此 category
     fetch(night ? '/api/dishes/all' : `/api/dishes?category=${encodeURIComponent(activeCategory)}`)
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
-      .then(data => { setDishes(night ? data.filter(isNightSnack) : data); setLoading(false) })
+      .then(data => { const list = night ? data.filter(isNightSnack) : data; setDishes(list); cacheList('menu', list); setLoading(false) })
       .catch(() => { setLoading(false); setLoadError(true) })
   }, [activeCategory, retryToken])
 
@@ -337,7 +340,8 @@ export default function Menu() {
                 showFav
                 favorited={has(dish.id)}
                 onToggleFav={toggle}
-                onClick={() => navigate(`/dish/${dish.id}`)}
+                onClick={(e) => morphTo(navigate, `/dish/${dish.id}`, e, dish, '/menu')}
+                vtName={heroNameFor(dish.id)}
                 addLabel={`添加${dish.name}`}
                 accent={partner.gradient}
                 onAdd={(d, e) => {

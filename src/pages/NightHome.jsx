@@ -20,6 +20,7 @@ import { HERO_IMAGES } from '../theme/images'
 import { contentEnter, cardEntrance, tapScale, usePrefersReducedMotion, EASE } from '../theme/motion'
 import { pickOne, NIGHT_HOME_TITLES, NIGHT_HOME_NOTES } from '../lib/sweetCopy'
 import { vibrate } from '../lib/sfx'
+import { morphTo, heroNameFor, cacheList } from '../lib/vt'
 
 const shuffle = (arr) => {
   const a = [...arr]
@@ -47,7 +48,7 @@ export default function NightHome() {
 
   useEffect(() => {
     fetch('/api/dishes?category=全部').then(r => r.json()).then(d => {
-      setPool(shuffle(nightPick(d)))
+      { const l = shuffle(nightPick(d)); setPool(l); cacheList('night', l) }
     }).catch(() => {})
   }, [])
 
@@ -80,7 +81,7 @@ export default function NightHome() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.26, ease: EASE }}
                   whileTap={{ scale: 0.985 }}
-                  onClick={() => navigate(`/dish/${featured.id}`)}
+                  onClick={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
                   className="relative overflow-hidden cursor-pointer"
                   style={{ borderRadius: 'var(--radius-card)', background: 'var(--anchor-ink)', boxShadow: 'var(--shadow-4)' }}
                 >
@@ -125,12 +126,12 @@ export default function NightHome() {
                 <motion.div
                   key={dish.id}
                   {...cellEnter(idx)}
-                  className="d3-card-face relative flex flex-col cursor-pointer"
+                  className="vt-dish-host d3-card-face relative flex flex-col cursor-pointer"
                   style={{ padding: 'var(--space-card-p)' }}
-                  onClick={() => navigate(`/dish/${dish.id}`)}
+                  onClick={(e) => morphTo(navigate, `/dish/${dish.id}`, e, dish, '/home')}
                 >
-                  <div className="relative h-16 rounded-xl overflow-hidden flex items-center justify-center mb-2.5"
-                    style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))' }}>
+                  <div className="vt-dish-frame relative h-16 rounded-xl overflow-hidden flex items-center justify-center mb-2.5"
+                    style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))', viewTransitionName: heroNameFor(dish.id) }}>
                     <span className="text-3xl">{getCategoryEmoji(dish.category)}</span>
                     {getDishImage(dish) && (
                       <img src={getDishImage(dish)} alt={dish.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover"

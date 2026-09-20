@@ -12,7 +12,7 @@ import { motion } from 'framer-motion'
  *
  * 注意：本组件的 sticky 依赖「页面包裹层不带 transform」，见 motion.js 的 pageEnter 说明。
  */
-export default function PageHeader({ title, eyebrow, subtitle, back = false, backTo, right }) {
+export default function PageHeader({ title, eyebrow, subtitle, back = false, backTo, right, onBack }) {
   const navigate = useNavigate()
   const goBack = () => (backTo ? navigate(backTo) : navigate(-1))
 
@@ -40,7 +40,7 @@ export default function PageHeader({ title, eyebrow, subtitle, back = false, bac
           {back && (
             <motion.button
               whileTap={{ scale: 0.9 }}
-              onClick={goBack}
+              onClick={onBack || goBack}
               aria-label="返回"
               className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
               style={{

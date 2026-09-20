@@ -5,7 +5,7 @@ import { heroFallback } from '../theme/images'
 // 全屏底片层：object-cover 美食大图 + 晨光浅叠层，衬于页面内容之下
 // variant: 'immersive'（图清晰微提亮 + 顶部浅渐隐）| 'functional'（轻模糊 + 浅遮罩，作功能页背景）
 // 宽度与 App 容器(480)对齐，桌面预览也不溢出；KenBurns 在 reduced-motion 下关闭
-export default function FullBleedHero({ src, variant = 'immersive', alt = '', children, className = '' }) {
+export default function FullBleedHero({ src, variant = 'immersive', alt = '', children, className = '', name }) {
   const reduce = usePrefersReducedMotion()
   const functional = variant === 'functional'
   return (
@@ -16,6 +16,7 @@ export default function FullBleedHero({ src, variant = 'immersive', alt = '', ch
         transform: 'translateX(-50%)',
         width: 'min(var(--shell-w), 100%)',
         background: 'var(--color-ink-900)',
+        viewTransitionName: name,
       }}
     >
       <motion.img

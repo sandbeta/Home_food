@@ -24,6 +24,7 @@ export default function DishRow({
   accent = 'var(--color-clay-gradient)',
   showFav = false,
   className = '',
+  vtName,
 }) {
   const image = getDishImage(dish)
   const emoji = getCategoryEmoji(dish.category)
@@ -55,8 +56,9 @@ export default function DishRow({
       >
         {/* 缩略图：emoji 垫底，图片盖在上面；远程图挂了就露出 emoji（灌库菜多为外链图） */}
         <div
-          className="relative w-[70px] h-[70px] shrink-0 overflow-hidden flex items-center justify-center"
+          className="vt-dish-frame relative w-[70px] h-[70px] shrink-0 overflow-hidden flex items-center justify-center"
           style={{
+            viewTransitionName: vtName,
             borderRadius: 'var(--radius-lg)',
             background:
               'linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-850) 50%, color-mix(in srgb, var(--clay-50) 6%, transparent) 100%)',

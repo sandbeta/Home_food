@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useCart } from '../components/CartContext'
 import PageHeader from '../components/PageHeader'
@@ -13,22 +13,26 @@ import LoadingState from '../components/ui/LoadingState'
 import { useFavorites } from '../lib/favorites'
 import { HERO_IMAGES } from '../theme/images'
 import { getDishImage } from '../lib/categoryIcons'
+import { getCachedDish, cacheDish, heroNameFor, morphBack } from '../lib/vt'
 import { PERSONA } from '../theme/persona'
 
 export default function DishDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const morphFrom = location.state && location.state.morphFrom // 仅形变进入时存在；刷新/普通进入走原生返回
   const { addItem, whoAmI } = useCart()
   const { has, toggle } = useFavorites()
-  const [dish, setDish] = useState(null)
+  const [dish, setDish] = useState(() => getCachedDish(id)) // 形变首帧命中缓存：有图才飞得起来
   const [quantity, setQuantity] = useState(1)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => !getCachedDish(id))
 
   useEffect(() => {
     setLoading(true)
     fetch(`/api/dishes/${id}`).then(r => r.json())
       .then(data => {
         setDish(data && data.id != null ? data : null)
+        if (data && data.id != null) cacheDish(data)
         setLoading(false)
       })
       .catch(() => { setDish(null); setLoading(false) })
@@ -63,11 +67,12 @@ export default function DishDetail() {
 
   return (
     <div className="relative">
-      <FullBleedHero src={getDishImage(dish) || HERO_IMAGES.dish} variant="immersive" alt={dish.name} />
+      <FullBleedHero src={getDishImage(dish) || HERO_IMAGES.dish} variant="immersive" alt={dish.name} name={heroNameFor(dish.id)} />
 
       <PageHeader
         title={dish.name}
         back
+        onBack={morphFrom ? () => morphBack(navigate, morphFrom) : undefined}
         right={
           <motion.button
             whileTap={{ scale: 0.9 }}

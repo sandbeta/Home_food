@@ -565,6 +565,42 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
+/* ========== overdrive · 共享元素形变时序（不支持 VT 的浏览器忽略本段，无副作用） ===== */
+::view-transition-group(dish-hero) { animation-timing-function: var(--ease-soft, cubic-bezier(0.22, 1, 0.36, 1)); }
+::view-transition-old(dish-hero),
+::view-transition-new(dish-hero) { animation-duration: 0.36s; }
+
+/* ========== overdrive · 滚动驱动油墨显影（Chrome/Edge/Safari 支持 view() 时间线；
+   其余浏览器整段不生效 = 静力回退，无闪烁） ========== */
+@keyframes ink-draw { from { transform: scaleX(0); opacity: 0.25; } to { transform: scaleX(1); opacity: 1; } }
+@supports (animation-timeline: view()) {
+  .ink-reveal-line {
+    transform-origin: left center;
+    animation: ink-draw linear both;
+    animation-timeline: view();
+    animation-range: entry 8% entry 48%;
+  }
+}
+
+/* 壳层环境光两斑缓慢漂移（全端氛围；reduced 下由末尾降级块停摆） */
+@keyframes ambient-drift-a { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(26px, -18px); } }
+@keyframes ambient-drift-b { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-22px, 16px); } }
+.ambient-a { animation: ambient-drift-a 26s ease-in-out infinite; }
+.ambient-b { animation: ambient-drift-b 21s ease-in-out infinite; }
+
+/* WebGL 晨光画布：低分辨率 + 外层 blur 叠加；JS 失败时组件自行移走，
+   底层静态 CSS 光斑本就常在，不留空洞 */
+.ambient-gl {
+  position: fixed;
+  top: -10%;
+  left: 0;
+  width: 100%;
+  height: 120%;
+  pointer-events: none;
+  filter: blur(28px);
+  z-index: 1;
+}
+
 /* ========== 动效降级 ========== */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

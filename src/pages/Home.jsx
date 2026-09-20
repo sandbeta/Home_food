@@ -14,6 +14,7 @@ import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter, EASE, usePrefersReducedMotion } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
 import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
+import { morphTo, heroNameFor, cacheList } from '../lib/vt'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -82,7 +83,7 @@ export default function Home() {
         }
         return a
       }
-      setDishes([...shuf(d.filter(x => getDishImage(x))), ...shuf(d.filter(x => !getDishImage(x)))])
+      { const list = [...shuf(d.filter(x => getDishImage(x))), ...shuf(d.filter(x => !getDishImage(x)))]; setDishes(list); cacheList('home', list) }
       setRotIdx(0) // 新数据到来时轮换指针归零
       setGridOffset(0)
       setHomeLoading(false)
@@ -168,7 +169,7 @@ export default function Home() {
                 type="button"
                 {...contentEnter(0.14)}
                 whileTap={{ scale: 0.96 }}
-                onClick={() => navigate(`/dish/${featured.id}`)}
+                onClick={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
                 aria-label={`封面菜：${featured.name}`}
                 className="absolute right-0 -bottom-4 w-[124px] text-left cursor-pointer"
               >
@@ -178,8 +179,8 @@ export default function Home() {
                     style={{ borderRadius: 'var(--radius-tile)', boxShadow: 'var(--shadow-4)' }}
                   >
                     <span
-                      className="relative flex h-[124px] items-center justify-center text-5xl overflow-hidden"
-                      style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))' }}
+                      className="vt-dish-frame relative flex h-[124px] items-center justify-center text-5xl overflow-hidden"
+                      style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))', viewTransitionName: heroNameFor(featured.id) }}
                     >
                       <span>{getCategoryEmoji(featured.category)}</span>
                       {getDishImage(featured) && (
@@ -220,7 +221,7 @@ export default function Home() {
             </div>
           </div>
           {/* 刊头条收口发丝线：与页头分隔线同一套栏目语言；留出封面卡卡注的下垂高度 */}
-          <div style={{ borderTop: '1px solid var(--color-glass-border)', marginTop: 32 }} />
+          <div className="ink-reveal-line" style={{ borderTop: '1px solid var(--color-glass-border)', marginTop: 32 }} />
         </motion.div>
         {homeFailed && !dishes.length && (
           <EmptyState
@@ -361,8 +362,8 @@ export default function Home() {
                   <motion.div
                     key={dish.id}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate(`/dish/${dish.id}`)}
-                    className="d3-card-face cursor-pointer flex items-center gap-3 relative"
+                    onClick={(e) => morphTo(navigate, `/dish/${dish.id}`, e, dish, '/home')}
+                    className="vt-dish-host d3-card-face cursor-pointer flex items-center gap-3 relative"
                     style={{ padding: 'var(--space-card-p)' }}
                   >
                     <div
@@ -372,8 +373,8 @@ export default function Home() {
                       {chef === 'me' ? '🐱' : '🐰'}
                     </div>
                     <div
-                      className="relative w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
-                      style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))' }}
+                      className="vt-dish-frame relative w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
+                      style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))', viewTransitionName: heroNameFor(dish.id) }}
                     >
                       <span>{getCategoryEmoji(dish?.category)}</span>
                       {getDishImage(dish) && (
