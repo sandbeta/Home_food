@@ -193,6 +193,7 @@ const REAL_IMAGE_OVERRIDES = {
   901: '/dish-images/real/901.webp',
   902: '/dish-images/real/902.webp',
   903: '/dish-images/real/903.webp',
+  904: '/dish-images/real/904.webp',
   905: '/dish-images/htc/905.jpg',
   906: '/dish-images/real/906.webp',
   907: '/dish-images/real/907.webp',
@@ -204,6 +205,7 @@ const REAL_IMAGE_OVERRIDES = {
   915: '/dish-images/real/915.webp',
   916: '/dish-images/real/916.webp',
   917: '/dish-images/real/917.webp',
+  919: '/dish-images/real/919.webp',
   923: '/dish-images/real/923.webp',
   924: '/dish-images/real/924.webp',
 }

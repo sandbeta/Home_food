@@ -57,7 +57,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 3. **所有用户侧页面用 `PageHeader`**（back/backTo/right）；后台三页一律包 `AdminShell`。后台标题保持功能命名（工具页不加情话）。
 4. **颜色单源真值**：色值只写在 `src/index.css` + `src/theme/persona.js`；页面一律 `var(--color-*)`；给运行时 var() 用的令牌放 `@theme static`（防树摇）。新玻璃浓度用 `--glass-strong`。
 5. **文案单源真值**：所有页头标题/情话池集中在 **`src/lib/sweetCopy.js`**（NICKNAME='懒洋洋' + 各页标题/副标题池），六页每次进入随机抽取。**改情话只动这个文件**；新增页面文案也放这里。
-6. **不可变文件（最小改动，改须逐处说明）**：`src/components/CartContext.jsx`、`src/lib/mockApi.js`（已因数据接线 +2 行与菜谱注入 +3 行、夜宵种子接线 +3 行 import/push 与 1 处注释更新、真实图覆盖表集中注入一段（表+两条 forEach，见 §5），均有据）、`src/lib/favorites.js`。
+6. **不可变文件（最小改动，改须逐处说明）**：`src/components/CartContext.jsx`、`src/lib/mockApi.js`（已因数据接线 +2 行与菜谱注入 +3 行、夜宵种子接线 +3 行 import/push 与 1 处注释更新、真实图覆盖表集中注入一段（表+两条 forEach，见 §5）、夜宵池补图覆盖表 +2 条（919/904，见 §5 与台账），均有据）、`src/lib/favorites.js`。
 7. 共享组件放 `src/components/ui/`，≥2 处真实调用点才建；`Icons.jsx` 是图标基元集，单调用点也保留。
 8. 提交信息用中文，说明「为什么」；**提交前跑 lint + build + `p6_static_gate.py`**。
 9. **四件套别用 `2>&1 | Select-Object` 吞退出码**：构建失败时管道可能仍返回成功假象，判定必须看 `built in` 成功行或 `$LASTEXITCODE`（本轮 ui/ThemeToggle 曾把 `../theme` 写成少一层，就是靠 build 报错抓到的）。`src/components/ui/` 下引主题模块一律 `../../theme/`。
@@ -65,7 +65,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 ## 5. 数据层（菜品 432 道 + 菜谱 342 份）
 
 - 种子库 = `mockApi.js` 内 65 道原始菜 + `src/lib/seedMenuExtra.js`（**342 道，由 HowToCook 生成**，勿手改）+ `src/lib/seedNightExtra.js`（**25 道夜宵手写种子**，id 900-924，emoji 占位无图）。
-- **真实图覆盖表（2026-09-18 图片真实化）**：所有者要求预览图用真实照片、不用 AI 生成。`mockApi.js` 内新增 `REAL_IMAGE_OVERRIDES`（78 条 id→路径，集中一段、生成文件不动）+ 两条 forEach（覆盖应用 / AI 图清退）。图片来源 = HowToCook 仓库实拍 27 张（GitHub blob API 拉取：11 张直接覆盖原 `dish-{id}.webp` 路径不变、16 张入 `htc/`）+ Wikimedia Commons CC 照片 35 张（`public/dish-images/real/{id}.webp`，560px webp）。原 65 道 AI 图：35 道换真实图、19 道删文件清退留 emoji、11 道即上列覆盖。全库带真实图 231/432，其余 emoji 占位。⚠️ Wikimedia 搜索错配率高（菜单/街景/古画/人物像混入），所有新图经联系表逐张目检后才保留，宁缺毋滥。
+- **真实图覆盖表（2026-09-18 图片真实化）**：所有者要求预览图用真实照片、不用 AI 生成。`mockApi.js` 内新增 `REAL_IMAGE_OVERRIDES`（80 条 id→路径，集中一段、生成文件不动）+ 两条 forEach（覆盖应用 / AI 图清退）。图片来源 = HowToCook 仓库实拍 27 张（GitHub blob API 拉取：11 张直接覆盖原 `dish-{id}.webp` 路径不变、16 张入 `htc/`）+ Wikimedia Commons CC 照片 37 张（`public/dish-images/real/{id}.webp`，560px webp）。原 65 道 AI 图：35 道换真实图、19 道删文件清退留 emoji、11 道即上列覆盖。全库带真实图 233/432，其余 emoji 占位。⚠️ Wikimedia 搜索错配率高（菜单/街景/古画/人物像混入），所有新图经联系表逐张目检后才保留，宁缺毋滥。
 - 数据源：[Anduin2017/HowToCook](https://github.com/Anduin2017/HowToCook)（**公有领域/Unlicense**）。生成器 `scripts/build_htc_seed.py` 一条命令产出三件套：菜品摘要（seedMenuExtra.js）、本地压缩预览图（`public/dish-images/htc/`，153 张 560px/JPEG）、菜谱（seedRecipes.js）。
 - **菜谱数据**：`src/lib/seedRecipes.js`（352KB，键=菜品 id，含 原料清单/步骤/难度星级/卡路里/小贴士）。**懒加载**：仅详情页经 mockApi 动态 import 注入 `/api/dishes/:id` 响应，列表与首屏不背体积。
 - 详情页「男朋友的菜谱」卡：原料 pill + 编号步骤 + 💡小贴士；原 65 道老菜无菜谱数据，卡片自动隐藏。
@@ -107,7 +107,7 @@ src/
 ├── pages/                   11 页：Home/NightHome(夜宵专属首页)/Menu/DishDetail/Cart/MyOrders/OrderDetail/
 │                            Profile/Admin/AdminDishes/AdminOrders
 │                            （Checkout、Favorites 已删，路由保留重定向）
-public/dish-images/         菜品预览图：htc/ 169 张（生成 153 + 真实化轮补 16）、real/ 35 张（Wikimedia CC）、dish-*.webp 仅存 11 张（均已被 HowToCook 实拍覆盖，其余 AI 图已删）
+public/dish-images/         菜品预览图：htc/ 169 张（生成 153 + 真实化轮补 16）、real/ 37 张（Wikimedia CC）、dish-*.webp 仅存 11 张（均已被 HowToCook 实拍覆盖，其余 AI 图已删）
 server/                    家庭本地服务端（零依赖 Node，双击 exe 或 npm run family，见 §10）
 ├── index.cjs              运行入口（CJS，兼 Node SEA exe 入口）：/api 一比一复刻 mockApi + 托管 dist（注入 __CHENGUANG_FAMILY__ 标记）+ 公网写门控（§10.5）+ state.json 原子持久化 + fatal 防闪退
 ├── admin-password.txt     公网管理密码（本机私有，gitignore；不存在=公网管理禁用）
@@ -163,6 +163,7 @@ scripts/
 | DishRow 收藏钮对齐 | 所有者截图反馈点菜页爱心与加购钮"歪歪扭扭"：心钮原 `right-2`(8px) 贴卡角，加购钮在内容区（右缘距卡边 --space-card-p=18px），且两钮半径不同（16 vs 20px）→ 圆心横向差 14px。改 `right-[calc(var(--space-card-p)_+_4px)]`：右缘 22px，圆心 38px 与加购钮圆心(18+20)同垂线，纵向上下呼应成一条轴。仅 DishRow 一处，Home 网格/后台 manage 变体不受影响（showFav 只在 Menu 开启） | `01c920f` |
 | 夜宵改版（弹窗修复+专属首页） | 所有者两反馈：①**弹窗只在初次有效**——根因=上轮 SHOWN_KEY 按 slotStamp 做了"每时段只弹一次"持久化去重，同晚关过/刷新过就再也不弹。改为组件常驻 App 外壳 + isNight 转变即弹（light→night 切换、夜宵态刷新都触发；关一次后切页不重弹），废弃 localStorage 去重 ②**夜宵要另一套界面**——新增 `pages/NightHome.jsx`：深夜主推大卡（手动"换一道"，不做自动轮换陪吃更安静）+「这些点得多」双列网格每格一键加购 + 全店夜宵入口；App.jsx 路由层 `/home` 按 isNight 分发（懒加载分包），Home.jsx 撤销上轮的 nightPick 派生恢复纯白天版。文案池 NIGHT_HOME_TITLES/NOTES 进 sweetCopy。四大语义与底导不动。build/lint/test/门禁全过 | `51c8f36` |
 | 菜品图真实化 | 所有者要求预览图全部真实照片、禁 AI 生成（实测确认原 65 张 dish-*.webp 带"AI生成"水印）。三批抓取：HowToCook 仓库实拍 27（GitHub blob API，jsDelivr/tarball 国内均不可用）、Wikimedia Commons CC 照片 35（代理开启后可达；三批共 115 搜，**联系表逐张目检剔除 33 张错配**——菜单/街景/古画/人物像混入率高，宁缺毋滥）、其余留 emoji。mockApi 注入 REAL_IMAGE_OVERRIDES 78 条+覆盖应用/AI 清退两条 forEach；19 张无真实图可配的 AI 图删文件。全库真实图 231/432，dish-*.webp 仅剩 11 张且均为 HowToCook 实拍覆盖。四件套全过 | `842cd6a`+`89c37b3` |
+| 夜宵池补图（impeccable 第二轮第 1 条） | 所有者要"视觉优先做加法"，补图列最大杠杆。HowToCook 图源已尽（无图菜=该仓库本身无配图的菜谱），转 Wikimedia 重试夜宵池 8 道无图菜：两批 14 搜，目检联系表后**只有 2 张干净匹配入库**（919 麻辣拌、904 孜然烤鸡翅），牛肉河粉/炒蛏子两张"边缘图"与 4 张错配（橄榄饭/韩式辣炒年糕/马来炸年糕）全部按宁缺毋滥弃用；酒酿圆子、卤味拼盘维持 emoji。覆盖表 78→80、real/ 35→37、全库 231→233。四件套全过 | 本轮 |
 | 家庭局域网服务端 | 所有者要家庭使用+数据本地存储（选定"各手机共享同一后端"场景）。新增 `server/index.mjs`：零依赖 Node HTTP，接口一比一复刻 mockApi（降序/available 过滤/服务端重算总价/recipe 注入/missingSeed 按名补齐），数据原子写 `server/data/state.json`（tmp+rename，gitignore），同时托管 dist/ 静态（SPA 兜底+防目录穿越），绑 0.0.0.0:8787 并打印局域网地址。`main.jsx` 按端口 8787 判定模式：家庭=真实 fetch、其余=动态装载 mock（种子包不进关键路径）；vite proxy 3000→8787；`scripts/export-seeds.mjs` 导出 432 菜+342 菜谱种子 JSON。E2E 15 项+重启持久化全过。文档新增 §10 部署手册（三步启动/种子重导/备份=拷 state.json/边界声明）。顺带清账：删除 35 张数据层早已清退但磁盘残留的孤儿 AI 图，兑现"零 AI 残留" | `827f6ca` |
 | 双击启动 exe | 所有者要"点一下就能启动服务端"。服务端 mjs→**CJS**（`server/index.cjs`，SEA 硬性要求；行为回归 10 项全过后删旧 mjs）；SEA 路径解析：exe 认 server/ 内（推荐）与项目根两种摆位，种子缺失报友好错误。`scripts/pack-exe.mjs`+`npm run pack:exe` 一键打包：`--experimental-sea-config` 出 blob → 复制本机 node.exe（v24，88MB）→ npx postject 注入（签名破坏警告属预期）→ 清中间物；exe/dist/state 全部 gitignore。双击体验硬化：`fatal()` 统一所有致命错误（端口占用/种子缺失/初始化失败）——打印原因+等回车关窗（readSync，stdin 不可用时 Atomics.wait 挂起防闪退），顶部 uncaughtException 兜底；修掉两处 `holdOpen()+process.exit` 并存导致"保持窗口"形同虚设的 bug（libuv 句柄未净时强退还会触发断言崩溃，回归脚本实测复现过）。产物实测：exe 直跑 432 菜接口+页面 200+E2E 十项全过、数据落 exe 旁 server/data。文档 §10/§6/台账同步，部署手册改推双击 exe | 本轮 |
 | 首页封面刊头条（impeccable bolder） | 所有者要求用 impeccable bolder 放大 Home hero 区胆量（编辑杂志身份内）。落地：PageContainer 首块新增「封面刊头条」——超大衬线刊名「晨光/厨房」拆两行错位排布（clamp 52–74px、行高 0.94、字距 -0.04em，第一行左缩进 44px、第二行右缩进 112px 形成对角张力），左缘书脊竖排当日日期（writing-mode: vertical-rl），右下倾斜 5° 的封面菜照片卡叠压刊名第二行右角（复用今日主推 featured 与 DishRow 同款图回退，点击进详情），folio 行（The Kitchen Zine + No.周数深赤陶衬线）压在大字下方，收口发丝线（marginTop 32 给封面卡注脚让位）。hero 令牌仅调参未绕开：白天 `--hero-wash-immersive` 上段 0.52/0.58→0.62/0.70（52% 处 0.78→0.80）、`--hero-filter-immersive` brightness 1.04→0.97/saturate 1.05→1.02，夜宵反相块未动。入场全走内层 contentEnter，外层无 transform，PageHeader sticky 与 fixed 定位不受影响。零新色值/字体/圆角（全消费 var 令牌），断头路门禁 0。四件套全绿 + 浏览器实截白天首页/菜单页目检（folio 期号与封面卡注脚重叠已在核验轮修掉）。NightHome 未动（夜宵另有界面） | 本轮 |
