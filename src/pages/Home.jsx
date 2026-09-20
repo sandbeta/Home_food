@@ -224,7 +224,7 @@ export default function Home() {
         </motion.div>
         {homeFailed && !dishes.length && (
           <EmptyState
-            emoji="📡"
+            emoji="📡" tone="error"
             title="厨房暂时断联"
             desc={pickOne(RETRY_NOTES)}
             action={

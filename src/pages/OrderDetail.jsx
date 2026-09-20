@@ -81,7 +81,7 @@ export default function OrderDetail() {
 
   if (!order) return (
     <EmptyState
-      emoji="😵"
+      emoji="😵" tone="error"
       title="找不到这个订单了"
       desc="它可能已被删除，或者链接不对~"
       action={

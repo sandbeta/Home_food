@@ -269,7 +269,7 @@ export default function Menu() {
 
         {loadError ? (
           <EmptyState
-            emoji="📡"
+            emoji="📡" tone="error"
             title="厨房暂时断联"
             desc={pickOne(RETRY_NOTES)}
             action={

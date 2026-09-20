@@ -142,8 +142,8 @@ components:
 
 ### Tertiary（情感与数值）
 - **Caramel 焦糖**（#B5793F）：所有价格数字与金额，衬线呈现——"钱"在这个家里由焦糖负责
-- **Love Blush 柔霞红**（#D98C84）：收藏/喜爱态与购物车角标
-- **Danger Rust 铁锈红**（#C2543F）：删除与破坏性动作（⚠️当前以 `--color-danger` 定义于 index.css，全库仅 1 处引用，实际删除键走 love——推广前先二选一，勿双源）
+- **Love Blush 柔霞红**（#D98C84）：收藏/喜爱态与购物车角标（纯情感角色）
+- **Danger Rust 铁锈红**（#C2543F）：删除与错误警示的**唯一色源**（Cart 移除钮、AdminDishes 删除钮、EmptyState `tone="error"` 的断联/找不到态、Admin 密码门错误文字）。小字与标题级文字警示一律吃 `color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))` 混色——bone 随夜宵反相，白天/暗底两档自动过 AA。love×danger 双源旧账已结案：love 只管情感，danger 只管警示
 
 ### Neutral（纸与墨）
 - **Warm Paper 暖纸白**（#FDFBF7）：页面底（夜宵 → 木炭黑 #232019）

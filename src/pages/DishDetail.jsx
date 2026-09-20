@@ -46,7 +46,7 @@ export default function DishDetail() {
 
   if (!dish) return (
     <EmptyState
-      emoji="😵"
+      emoji="😵" tone="error"
       title="找不到这道菜"
       desc="它可能已被下架，或者链接不对~"
       action={
