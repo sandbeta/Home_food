@@ -23,6 +23,12 @@ function getGreeting() {
   return '晚上好'
 }
 
+// 封面刊头条的竖排日期（实时信息，非文案池内容）
+function todayLine() {
+  const d = new Date()
+  return `${d.getMonth() + 1}月${d.getDate()}日 周${'日一二三四五六'[d.getDay()]}`
+}
+
 // 常点人 mock：按菜品 id 稳定分配 🐱/🐰，让双人格出现在首页网格里
 const chefOf = (dish) => (dish.id % 2 === 0 ? 'me' : 'partner')
 
@@ -54,6 +60,12 @@ export default function Home() {
   const [sweetNote] = useState(() => pickOne(HOME_NOTES))
   const navigate = useNavigate()
   const reduced = usePrefersReducedMotion()
+  // 刊头条的期号 = 年内第几周（实时信息）
+  const weekNo = (() => {
+    const now = new Date()
+    const start = new Date(now.getFullYear(), 0, 1)
+    return Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7)
+  })()
 
   useEffect(() => {
     fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3))).catch(() => {})
@@ -120,6 +132,96 @@ export default function Home() {
       <PageHeader title={`${getGreeting()}，${NICKNAME}`} subtitle={sweetNote} right={<ThemeToggle />} />
 
       <PageContainer>
+        {/* —— 封面刊头条（bolder 2026-09-19）：杂志封面语言 ——
+            超大衬线刊名拆两行错位排布（晨光右上起、厨房右下收），书脊侧竖排日期，
+            封面菜照片卡倾斜叠压刊名右下（图文叠压），
+            folio 小字行（刊名英文 + 期号日期）压在大字之下、发丝线之上——
+            杂志封面的正典顺序：报头是主角，刊号信息退为页脚注。
+            整条落在 hero 底图上沿、靠加浓的 wash 顶部保对比；
+            入场位移全在内层 motion，外层不带 transform。 */}
+        <motion.div {...contentEnter(0.04)} className="relative">
+          <div className="relative">
+            {/* 书脊竖排日期 */}
+            <span
+              aria-hidden="true"
+              className="absolute left-0 top-2 text-[10px] font-bold"
+              style={{ writingMode: 'vertical-rl', letterSpacing: '0.3em', color: 'var(--color-ash)' }}
+            >
+              {todayLine()}
+            </span>
+            {/* 错位刊名：两行大字各占一角，中间留出对角线张力 */}
+            <h2
+              className="font-serif font-bold"
+              style={{
+                fontSize: 'clamp(52px, 15vw, 74px)',
+                lineHeight: 0.94,
+                letterSpacing: '-0.035em',
+                color: 'var(--color-bone)',
+              }}
+            >
+              <span className="block" style={{ paddingLeft: 44 }}>晨光</span>
+              <span className="block text-right" style={{ paddingRight: 112 }}>厨房</span>
+            </h2>
+            {/* 封面菜照片卡：倾斜 5° 叠压刊名第二行右角 */}
+            {featured && (
+              <motion.button
+                type="button"
+                {...contentEnter(0.14)}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => navigate(`/dish/${featured.id}`)}
+                aria-label={`封面菜：${featured.name}`}
+                className="absolute right-0 -bottom-4 w-[124px] text-left cursor-pointer"
+              >
+                <span className="block rotate-[5deg]">
+                  <span
+                    className="d3-card-face block overflow-hidden"
+                    style={{ borderRadius: 'var(--radius-tile)', boxShadow: 'var(--shadow-4)' }}
+                  >
+                    <span
+                      className="relative flex h-[124px] items-center justify-center text-5xl overflow-hidden"
+                      style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))' }}
+                    >
+                      <span>{getCategoryEmoji(featured.category)}</span>
+                      {getDishImage(featured) && (
+                        <img
+                          src={getDishImage(featured)}
+                          alt=""
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full object-cover"
+                          onError={(e) => { e.currentTarget.style.display = 'none' }}
+                        />
+                      )}
+                    </span>
+                  </span>
+                  <span
+                    className="mt-1.5 block text-right text-[10px] font-bold truncate"
+                    style={{ color: 'var(--color-ash)', letterSpacing: '0.06em' }}
+                  >
+                    封面 · {featured.name}
+                  </span>
+                </span>
+              </motion.button>
+            )}
+            {/* folio 行：英文刊名 + 期号，左对齐一行读完；右侧整块让给悬挂的封面卡 */}
+            <div className="relative mt-4 flex items-baseline gap-3">
+              <span
+                className="text-[10px] font-bold uppercase truncate"
+                style={{ letterSpacing: '0.18em', color: 'var(--color-ash)' }}
+              >
+                The Kitchen Zine
+              </span>
+              <span aria-hidden="true" style={{ width: 18, borderTop: '1px solid var(--color-glass-border)' }} />
+              <span
+                className="shrink-0 font-serif text-sm font-bold tabular-nums"
+                style={{ color: 'var(--clay-deep)' }}
+              >
+                No.{String(weekNo).padStart(2, '0')}
+              </span>
+            </div>
+          </div>
+          {/* 刊头条收口发丝线：与页头分隔线同一套栏目语言；留出封面卡卡注的下垂高度 */}
+          <div style={{ borderTop: '1px solid var(--color-glass-border)', marginTop: 32 }} />
+        </motion.div>
         {homeFailed && !dishes.length && (
           <EmptyState
             emoji="📡"
@@ -210,14 +312,14 @@ export default function Home() {
                   </div>
                   <div className="flex items-end justify-between gap-3 px-5 pb-4 pt-3.5">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.2em', color: 'rgba(255,253,249,0.78)' }}>
+                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.18em', color: 'rgba(255,253,249,0.78)' }}>
                         No.{String(rotIdx % rotSource.length + 1).padStart(2, '0')} · 今日主推
                       </p>
                       <p className="font-serif text-2xl font-bold text-[#FFFDF9] truncate mt-1">{featured.name}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <KissIcon className="w-4 h-4 text-[#FFFDF9]" />
-                      <span className="font-serif text-2xl font-extrabold text-[#FFFDF9] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{featured.price}</span>
+                      <span className="font-serif text-2xl font-bold text-[#FFFDF9] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{featured.price}</span>
                     </div>
                   </div>
 

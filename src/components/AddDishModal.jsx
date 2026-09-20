@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { sheetUp, usePrefersReducedMotion } from '../theme/motion'
 
 const CATEGORY_OPTIONS = [
   { value: '家常菜', emoji: '🍳' }, { value: '硬菜', emoji: '🥩' }, { value: '素菜', emoji: '🥬' },
@@ -12,14 +13,15 @@ const CATEGORY_OPTIONS = [
 ]
 
 const FIELDS = [
-  { label: '菜名', key: 'name', type: 'text', placeholder: '红烧肉', required: true, icon: '🍜' },
-  { label: '亲亲数量', key: 'price', type: 'number', inputMode: 'numeric', placeholder: '15', min: '0', step: '1', required: true, icon: '💕' },
-  { label: '图片链接', key: 'image_url', type: 'url', placeholder: 'https://...', icon: '🖼️' },
-  { label: '一句话描述', key: 'description', type: 'text', placeholder: '好吃到飞起~', icon: '✨' },
+  { label: '菜名', key: 'name', type: 'text', placeholder: '红烧肉', required: true },
+  { label: '亲亲数量', key: 'price', type: 'number', inputMode: 'numeric', placeholder: '15', min: '0', step: '1', required: true },
+  { label: '图片链接', key: 'image_url', type: 'url', placeholder: 'https://...' },
+  { label: '一句话描述', key: 'description', type: 'text', placeholder: '好吃到飞起~' },
 ]
 
 export default function AddDishModal({ dish, onClose, onSave }) {
   const [form, setForm] = useState({ name: '', price: '', category: '家常菜', image_url: '', description: '' })
+  const reduce = usePrefersReducedMotion()
 
   useEffect(() => {
     if (dish) setForm({ name: dish.name || '', price: dish.price || '', category: dish.category || '家常菜', image_url: dish.image_url || '', description: dish.description || '' })
@@ -32,23 +34,19 @@ export default function AddDishModal({ dish, onClose, onSave }) {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="fixed inset-0 z-50"
         style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,38,32,0.35)' }} />
-      <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-        transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+      <motion.div
+        {...(reduce ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
         className="fixed bottom-0 left-0 right-0 mx-auto z-50"
         style={{ maxWidth: 'var(--shell-w)' }}>
+        {/* 管理端 quieter：拖拽把手/徽标/彩点等赤陶装饰全部退为中性，彩只留底部唯一主操作；
+            输入框左侧 emoji 图标为纯装饰（label 已有文字），随降温移除 */}
         <div className="d3-card-face rounded-t-3xl max-h-[85vh] overflow-hidden">
           <div className="flex justify-center pt-3 pb-1">
-            <div className="w-12 h-1.5 rounded-full" style={{ background: 'linear-gradient(90deg, color-mix(in srgb, var(--color-clay) 14%, transparent), var(--color-clay), color-mix(in srgb, var(--color-clay) 14%, transparent))' }} />
+            <div className="w-12 h-1.5 rounded-full" style={{ background: 'color-mix(in srgb, var(--color-ash) 30%, transparent)' }} />
           </div>
           <div className="px-5 pb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-clay) 14%, transparent), var(--color-clay))' }}>
-                <span className="text-sm">{dish ? '✏️' : '➕'}</span>
-              </div>
-              <h2 className="text-lg font-bold text-[var(--color-bone)]">{dish ? '改改这道菜' : '加一道新菜'}</h2>
-            </div>
-            <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-ash)] hover:scale-105 active:scale-95 transition-transform border border-[var(--color-glass-border)] bg-[var(--color-glass)]">
+            <h2 className="text-lg font-bold text-[var(--color-bone)]">{dish ? '改改这道菜' : '加一道新菜'}</h2>
+            <button onClick={onClose} aria-label="关闭" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform border border-[var(--color-glass-border)] bg-[var(--color-glass)]">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
             </button>
           </div>
@@ -56,30 +54,23 @@ export default function AddDishModal({ dish, onClose, onSave }) {
             <div className="space-y-4">
               {FIELDS.map(f => (
                 <div key={f.key}>
-                  <label className="text-sm text-[var(--color-ash)] block mb-1.5 font-semibold flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-clay)' }} />
+                  <label className="text-sm text-[var(--color-ash)] block mb-1.5 font-semibold">
                     {f.label}
                   </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none opacity-60">{f.icon}</span>
-                    <input type={f.type} value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                      className="d3-input w-full pl-9 pr-3 py-2.5 text-sm placeholder:text-[var(--color-ash)]/40 bg-[var(--color-ink-850)]"
-                      placeholder={f.placeholder} min={f.min} step={f.step} required={f.required} inputMode={f.inputMode} />
-                  </div>
+                  <input type={f.type} value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
+                    className="d3-input w-full px-3.5 py-2.5 text-sm placeholder:text-[var(--color-ash)]/40"
+                    placeholder={f.placeholder} min={f.min} step={f.step} required={f.required} inputMode={f.inputMode} />
                 </div>
               ))}
 
               <div>
-                <label className="text-sm text-[var(--color-ash)] block mb-1.5 font-semibold flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: 'var(--color-sage)' }} />
-                  分类
-                </label>
+                <label className="text-sm text-[var(--color-ash)] block mb-1.5 font-semibold">分类</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm pointer-events-none opacity-60">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm pointer-events-none opacity-60">
                     {CATEGORY_OPTIONS.find(c => c.value === form.category)?.emoji || '🍽️'}
                   </span>
                     <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
-                    className="d3-input w-full pl-9 pr-3 py-2.5 text-sm bg-[var(--color-ink-850)] appearance-none cursor-pointer">
+                    className="d3-input w-full pl-10 pr-3 py-2.5 text-sm appearance-none cursor-pointer">
                     {CATEGORY_OPTIONS.map(c => (
                       <option key={c.value} value={c.value}>{c.emoji} {c.value}</option>
                     ))}
@@ -93,11 +84,10 @@ export default function AddDishModal({ dish, onClose, onSave }) {
 
             <div className="flex gap-3 pt-6">
               <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onClose}
-                className="d3-btn-sm flex-1 py-3 rounded-2xl font-bold text-sm border-2 transition-colors duration-150 bg-[var(--color-ink-850)]"
+                className="d3-btn-sm flex-1 py-3 rounded-2xl font-bold text-sm border transition-colors duration-150"
                 style={{ borderColor: 'var(--color-glass-border)', color: 'var(--color-ash)', background: 'transparent' }}>算了</motion.button>
               <motion.button type="submit" whileTap={{ scale: 0.97 }}
-                className="d3-btn d3-btn-primary flex-1 py-3 rounded-2xl text-white font-bold text-sm transition-shadow duration-200"
-                style={{ background: 'linear-gradient(135deg, var(--color-clay), var(--color-clay-deep))', boxShadow: '0 4px 15px color-mix(in srgb, var(--clay-50) 35%, transparent)' }}>好啦</motion.button>
+                className="d3-btn d3-btn-primary flex-1 py-3 rounded-2xl text-white font-bold text-sm">好啦</motion.button>
             </div>
           </form>
         </div>

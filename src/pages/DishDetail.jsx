@@ -73,7 +73,7 @@ export default function DishDetail() {
             whileTap={{ scale: 0.9 }}
             onClick={() => toggle(dish)}
             aria-label={has(dish.id) ? '取消收藏' : '收藏'}
-            className="w-9 h-9 rounded-full flex items-center justify-center text-lg glass"
+            className="w-11 h-11 rounded-full flex items-center justify-center text-lg glass"
           >
             <motion.span animate={has(dish.id) ? { scale: [1, 1.3, 1] } : { scale: 1 }} transition={{ duration: 0.3 }}>
               {has(dish.id) ? '⭐' : '🤍'}
@@ -102,7 +102,7 @@ export default function DishDetail() {
         <GlassCard delay={0.1}>
           <div className="flex items-center justify-between" style={{ padding: 'var(--space-card-p)' }}>
             <span className="text-sm font-bold text-[var(--color-bone)]">数量</span>
-            <Stepper value={quantity} onChange={setQuantity} min={1} size={36} />
+            <Stepper value={quantity} onChange={setQuantity} min={1} size={44} />
           </div>
         </GlassCard>
 
@@ -113,7 +113,7 @@ export default function DishDetail() {
               whileTap={{ scale: 0.97, y: 2 }}
               whileHover={{ y: -1 }}
               onClick={handleAdd}
-              className="d3-btn w-full py-4 text-center font-extrabold text-base"
+              className="d3-btn w-full py-4 text-center font-bold text-base"
               style={{ background: persona.gradient, color: '#FFFDF9' }}
             >
               <span className="relative z-10">{persona.emoji} 加入购物车</span>
@@ -131,7 +131,7 @@ export default function DishDetail() {
                   {dish.recipe.difficulty && <span className="d3-badge">{dish.recipe.difficulty}</span>}
                   {dish.recipe.calories && (
                     <span className="text-xs font-semibold px-2 py-1 rounded-full text-[var(--color-ash)]"
-                      style={{ background: 'var(--color-glass)', border: '1px solid var(--color-glass-border)' }}>
+                      style={{ background: 'rgba(43,38,32,0.05)', border: '1px solid var(--color-glass-border)' }}>
                       🔥 {dish.recipe.calories}
                     </span>
                   )}
@@ -144,7 +144,7 @@ export default function DishDetail() {
                   <div className="flex flex-wrap gap-1.5">
                     {dish.recipe.ingredients.map((it, i) => (
                       <span key={i} className="text-xs px-2.5 py-1 rounded-full text-[var(--color-ash)]"
-                        style={{ background: 'var(--color-glass)', border: '1px solid var(--color-glass-border)' }}>
+                        style={{ background: 'rgba(43,38,32,0.05)', border: '1px solid var(--color-glass-border)' }}>
                         {it}
                       </span>
                     ))}

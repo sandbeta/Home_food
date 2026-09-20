@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-19T21:37:47+08:00",
+  "title": "Design System: 晨光厨房 Chenguang Kitchen",
+  "extensions": {
+    "colorMeta": {
+      "clay": {
+        "role": "primary",
+        "displayName": "Sun-baked Clay 晒透蜜橘",
+        "canonical": "#DD794E",
+        "tonalRamp": ["#FFF3EF", "#FFE5DC", "#FFD0BE", "#FFB597", "#F99E78", "#EC8A60", "#DD794E", "#C8683F", "#B55B35", "#9F4F2D"]
+      },
+      "sage": {
+        "role": "secondary",
+        "displayName": "Morning Sage 晨雾鼠尾草",
+        "canonical": "#A4C39E",
+        "tonalRamp": ["#F9FDF8", "#EBF4E8", "#D5E6D1", "#BBD3B5", "#A4C39E", "#90B38A", "#7FA37A", "#6E9269", "#62835D", "#557351"]
+      },
+      "caramel": { "role": "tertiary", "displayName": "Caramel 焦糖（价格专属）", "canonical": "#B5793F" },
+      "love": { "role": "tertiary", "displayName": "Love Blush 柔霞红（收藏/角标）", "canonical": "#D98C84" },
+      "danger": { "role": "tertiary", "displayName": "Danger Rust 铁锈红（已定义未启用）", "canonical": "#C2543F" },
+      "paper": { "role": "neutral", "displayName": "Warm Paper 暖纸白", "canonical": "#FDFBF7" },
+      "card-surface": { "role": "neutral", "displayName": "Card Paper 卡面纸", "canonical": "#FFFDFA" },
+      "on-dark": { "role": "neutral", "displayName": "Dock Paper 暖白（深底白字）", "canonical": "#FFFDF9" },
+      "ink": { "role": "neutral", "displayName": "Ink 墨（暖棕黑）", "canonical": "#2B2620" },
+      "ash": { "role": "neutral", "displayName": "Ash 灰（次文字）", "canonical": "#6B6155" },
+      "mist": { "role": "neutral", "displayName": "Mist 雾（占位，≥5:1）", "canonical": "#75695B" },
+      "night-paper": { "role": "neutral", "displayName": "Night Paper 夜宵木炭黑", "canonical": "#232019" },
+      "night-ink": { "role": "neutral", "displayName": "Night Ink 夜宵暖白字", "canonical": "#F2EDE3" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display 刊名级", "purpose": "PageHeader 大标题与大数字；Playfair 紧字距。" },
+      "headline": { "displayName": "Headline 文章题", "purpose": "卡内主标题。" },
+      "title": { "displayName": "Title 区块题", "purpose": "section-title 基准 18px。" },
+      "body": { "displayName": "Body 正文", "purpose": "15px/1.7 系统无衬线，中文主力。" },
+      "label": { "displayName": "Label 眉题", "purpose": "kicker 全大写 0.18em；徽章与小标签。" }
+    },
+    "shadows": [
+      { "name": "shadow-1", "value": "0 1px 2px rgba(43, 38, 32, 0.05)", "purpose": "发丝级贴底：返回钮、静默卡。" },
+      { "name": "shadow-2", "value": "0 2px 8px rgba(43, 38, 32, 0.06)", "purpose": "卡片静止态。" },
+      { "name": "shadow-3", "value": "0 8px 24px rgba(43, 38, 32, 0.08)", "purpose": "停靠层与浮起。" },
+      { "name": "shadow-4", "value": "0 16px 44px rgba(43, 38, 32, 0.12)", "purpose": "模态与弹层。" },
+      { "name": "shadow-5", "value": "0 30px 70px rgba(43, 38, 32, 0.16)", "purpose": "最高层，罕用预留。" },
+      { "name": "glow-clay", "value": "0 0 0 3px rgba(236,138,96,0.18), 0 6px 20px rgba(236,138,96,0.22)", "purpose": "我的人格聚焦晕（原文用 color-mix clay-50）。" },
+      { "name": "glow-sage", "value": "0 0 0 3px rgba(164,195,158,0.18), 0 6px 20px rgba(164,195,158,0.22)", "purpose": "TA 的人格聚焦晕。" },
+      { "name": "card-hover", "value": "0 6px 20px rgba(43, 38, 32, 0.08)", "purpose": "卡片 hover 只加深阴影，不位移。" }
+    ],
+    "motion": [
+      { "name": "ease-soft", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "全站统一缓动。" },
+      { "name": "dur-fast", "value": "0.15s", "purpose": "按钮态/颜色过渡。" },
+      { "name": "dur-base", "value": "0.25s", "purpose": "常规进退场。" },
+      { "name": "dur-slow", "value": "0.45s", "purpose": "页面转场与主题底色过渡。" },
+      { "name": "nav-glow-spring", "value": "type:spring stiffness:500 damping:28", "purpose": "导航激活胶囊滑动（framer-motion layoutId）。" },
+      { "name": "press-scale", "value": "tap 0.94–0.98", "purpose": "按压缩感：主按钮 0.98，小件 0.94/0.97。" }
+    ],
+    "breakpoints": [
+      { "name": "shell", "value": "480px" },
+      { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce)" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "唯一动作按钮：clay 实底 + 暖白字 + 顶部高光压痕。",
+      "html": "<button class=\"ds-btn-primary\">去点菜</button>",
+      "css": ".ds-btn-primary { font-family: system-ui, 'PingFang SC', sans-serif; font-weight: 700; font-size: 15px; background: #DD794E; color: #FFFDF9; border: none; border-radius: 12px; padding: 12px 20px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18); cursor: pointer; transition: filter .15s ease, box-shadow .2s ease, transform .15s ease; } .ds-btn-primary:hover { filter: brightness(1.04); box-shadow: 0 2px 6px rgba(159,79,45,0.22), inset 0 1px 0 rgba(255,255,255,0.18); } .ds-btn-primary:active { transform: scale(0.98); filter: brightness(0.97); } .ds-btn-primary:focus-visible { outline: 2px solid #BBD3B5; outline-offset: 2px; }"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "列表行内/次级动作：浅陶实底 + 发丝边。",
+      "html": "<button class=\"ds-btn-quiet\">编辑</button>",
+      "css": ".ds-btn-quiet { font-family: system-ui, 'PingFang SC', sans-serif; font-weight: 600; font-size: 13px; background: #F6F0E7; color: #2B2620; border: 1px solid rgba(43,38,32,0.08); border-radius: 8px; padding: 8px 14px; cursor: pointer; transition: background .2s ease, transform .15s ease; } .ds-btn-quiet:hover { background: #EBE0D0; } .ds-btn-quiet:active { transform: scale(0.97); opacity: 0.85; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip-active",
+      "description": "筛选胶囊：静默纸面 / 激活 clay 渐变，最小高 44px。",
+      "html": "<div class=\"ds-chip-row\"><button class=\"ds-chip ds-chip-on\">全部</button><button class=\"ds-chip\">荤菜</button><button class=\"ds-chip\">素菜</button></div>",
+      "css": ".ds-chip-row { display: inline-flex; gap: 8px; } .ds-chip { font-family: system-ui, 'PingFang SC', sans-serif; font-weight: 600; font-size: 14px; min-height: 44px; padding: 10px 16px; border-radius: 9999px; border: 1px solid rgba(43,38,32,0.08); background: #F6F0E7; color: #6B6155; cursor: pointer; transition: color .2s, background .2s, transform .15s; } .ds-chip:active { transform: scale(0.94); } .ds-chip-on { background: linear-gradient(180deg, #DD794E 0%, #B55B35 100%); color: #FFFDF9; border-color: transparent; box-shadow: 0 4px 12px rgba(236,138,96,0.26); }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "墨 3% 浅底 + focus clay 晕环。",
+      "html": "<input class=\"ds-input\" placeholder=\"搜索菜品…\" />",
+      "css": ".ds-input { font-family: system-ui, 'PingFang SC', sans-serif; font-size: 15px; color: #2B2620; background: rgba(43,38,32,0.03); border: 1px solid rgba(43,38,32,0.08); border-radius: 12px; padding: 12px 16px; width: 260px; transition: border-color .2s ease, box-shadow .2s ease; } .ds-input::placeholder { color: #75695B; } .ds-input:focus { outline: none; border-color: rgba(236,138,96,0.55); box-shadow: 0 0 0 4px rgba(236,138,96,0.14); }"
+    },
+    {
+      "name": "Paper Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "内容层纸卡：实底 + 发丝边 + shadow-2；hover 仅加深阴影。",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">番茄炒蛋</div><div class=\"ds-card-price\">¥ 12.00</div></div>",
+      "css": ".ds-card { font-family: system-ui, 'PingFang SC', sans-serif; width: 300px; background: #FFFDFA; border: 1px solid rgba(43,38,32,0.08); border-radius: 24px; padding: 16px; box-shadow: 0 2px 8px rgba(43,38,32,0.06); transition: box-shadow .28s ease; } .ds-card:hover { box-shadow: 0 6px 20px rgba(43,38,32,0.08); } .ds-card-title { font-family: 'Playfair Display', 'Songti SC', serif; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; color: #2B2620; } .ds-card-price { font-family: 'Playfair Display', 'Songti SC', serif; font-variant-numeric: tabular-nums lining-nums; color: #B5793F; font-weight: 700; margin-top: 6px; }"
+    },
+    {
+      "name": "Dock Pill Nav",
+      "kind": "nav",
+      "description": "底部停靠药丸：纸面胶囊 + clay 渐变激活态（layoutId 滑动）。",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-nav-btn ds-nav-on\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 10.5 12 3l9 7.5\"/><path d=\"M5 9.5V21h14V9.5\"/><path d=\"M10 21v-6h4v6\"/></svg></button><button class=\"ds-nav-btn\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 12a8 8 0 0 0 16 0H4z\"/><path d=\"m9.5 8 8-5\"/><path d=\"m13 7.5 8-2\"/></svg></button><button class=\"ds-nav-btn\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 3h10a1 1 0 0 1 1 1v17l-3-2-3 2-3-2-3 2V4a1 1 0 0 1 1-1z\"/><path d=\"M9 8h6\"/><path d=\"M9 12h6\"/></svg></button><button class=\"ds-nav-btn\"><svg viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4.5 21c.8-3.8 3.9-5.5 7.5-5.5s6.7 1.7 7.5 5.5\"/></svg></button></nav>",
+      "css": ".ds-nav { display: inline-flex; gap: 4px; align-items: center; justify-content: space-around; background: #FFFDF9; border: 1px solid rgba(43,38,32,0.08); border-radius: 9999px; min-height: 72px; padding: 8px 10px; box-shadow: 0 8px 24px rgba(43,38,32,0.08); } .ds-nav-btn { width: 52px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent; border-radius: 9999px; color: #6B6155; cursor: pointer; transition: color .2s; } .ds-nav-on { background: linear-gradient(180deg, #DD794E 0%, #B55B35 100%); color: #FFFDF9; box-shadow: 0 6px 18px rgba(236,138,96,0.28); }"
+    },
+    {
+      "name": "Cart Orb",
+      "kind": "custom",
+      "refersTo": "dock-orb",
+      "description": "购物车球：clay 渐变陶瓷纽扣 + love 角标（仅非空时挂载）。",
+      "html": "<button class=\"ds-orb\"><span style=\"font-size:24px\">🛒</span><span class=\"ds-orb-badge\">3</span></button>",
+      "css": ".ds-orb { position: relative; width: 64px; height: 64px; border-radius: 9999px; border: none; background: linear-gradient(180deg, #EC8A60 0%, #DD794E 55%, #B55B35 100%); box-shadow: 0 6px 20px rgba(236,138,96,0.4), 0 12px 32px rgba(43,38,32,0.22), inset 0 2px 4px rgba(255,255,255,0.45), inset 0 -2px 4px rgba(159,79,45,0.3); cursor: pointer; transition: transform .15s ease; } .ds-orb:hover { transform: scale(1.04); } .ds-orb:active { transform: scale(0.94); } .ds-orb-badge { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; border-radius: 9999px; background: #D98C84; color: #fff; border: 2px solid #FDFBF7; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(217,140,132,0.45); }"
+    },
+    {
+      "name": "Magazine Page Header",
+      "kind": "custom",
+      "description": "页头三件套：眉题 kicker + 衬线大标题 + 贯通发丝线。",
+      "html": "<header class=\"ds-hdr\"><p class=\"ds-hdr-kicker\">TODAY'S MENU</p><h1 class=\"ds-hdr-title\">今晚吃啥</h1><div class=\"ds-hdr-rule\"></div></header>",
+      "css": ".ds-hdr { font-family: system-ui, 'PingFang SC', sans-serif; padding: 0 24px; background: linear-gradient(180deg, rgba(253,251,247,0.86) 0%, rgba(0,0,0,0) 100%); } .ds-hdr-kicker { margin: 0 0 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #6B6155; } .ds-hdr-title { margin: 0; font-family: 'Playfair Display', 'Songti SC', serif; font-size: 40px; font-weight: 700; line-height: 1.06; letter-spacing: -0.035em; color: #2B2620; } .ds-hdr-rule { border-top: 1px solid rgba(43,38,32,0.08); margin-top: 16px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Kitchen Zine（两人厨房别册）",
+    "overview": "晨光厨房不是一款点餐软件，而是一本只印给两个人看的家庭杂志：暖纸白的版面摊在阳光下的餐桌上，蜜橘色是「我🐱」的油墨，薄荷绿是「TA🐰」的油墨，菜是栏目、订单是连载、情话是编者注。整套系统在「编辑杂志质感」的克制框架里运行——纸面实底卡片、发丝级边框、收敛的圆角、衬线大标题；温度不靠花哨装饰，靠双人格色彩的对比与随机抽取的情话文案。气质定性：克制的手作感。夜宵模式下整本别册换成暖木炭黑夜纸——双人格色与情感色一律不变。",
+    "keyCharacteristics": [
+      "暖纸基底：页底/区块底/卡面三层暖白，从不使用纯白或冷灰",
+      "双人格温度对比：clay（我，暖）× sage（TA，冷），价格永远穿 caramel 焦糖",
+      "一页一锚点：每屏恰好一块 clay 实底白字深色锚卡",
+      "眉题 + 衬线大标题 + 底部贯通发丝线 = 页头三件套",
+      "夜宵反相只换表面/文字/遮罩令牌，情感与人格色跨主题恒定"
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "clay 只属于动作与激活态。它出现在哪里，哪里就是「可以点」。大面积色块用 clay 装饰 = 稀释了它的指令性。", "section": "colors" },
+      { "name": "The One Anchor Rule", "body": "每个页面恰好一块 clay 实底白字深色锚卡。第二块锚点出现即版面失衡。", "section": "colors" },
+      { "name": "The Same-Lovers Rule", "body": "夜宵模式只反相表面/文字/遮罩令牌；clay、sage、love、caramel 白天黑夜是同一组值。", "section": "colors" },
+      { "name": "The Price Wears Caramel Rule", "body": "一切金额/价格 = 衬线 + caramel；字号随场景，颜色与字族不换。", "section": "typography" },
+      { "name": "The Eyebrow Rule", "body": "页头副标题一律大写宽字距小字（0.18em/11px/700），衬线大标题之下、发丝线之上。", "section": "typography" },
+      { "name": "The Warm Shadow Rule", "body": "亮色模式禁止纯黑阴影；rgba 必须带 ink 的棕相。", "section": "elevation" },
+      { "name": "The Glass Recedes Rule", "body": "玻璃模糊是导航/操作层的特权；内容卡是纸，不是玻璃。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 新页面一律 PageHeader + PageContainer + DockLayer（后台三页包 AdminShell）；边距节奏只吃 --space-* 标尺",
+      "Do 颜色只写进 src/index.css 与 src/theme/persona.js 两处，页面消费 var(--color-*)；运行时 var() 令牌放 @theme static",
+      "Do 人格/情感语义走 persona.js 映射；≥2 真实调用点才建 ui/ 组件",
+      "Do 深色锚点卡白字统一 #FFFDF9；深底与白字组合必须达 WCAG AA",
+      "Do 页转场只动 opacity，位移放内层——外层 transform 会杀死 sticky 页头",
+      "Do 图标取自 ui/Icons.jsx 细线 SVG；文案进 lib/sweetCopy.js 单源",
+      "Do 动效吃 --dur-* + --ease-soft，并为 prefers-reduced-motion 留降级"
+    ],
+    "donts": [
+      "Don't 在 JSX 硬编码白名单外十六进制色（p6_static_gate.py 会拦）",
+      "Don't 给导航/快捷入口新增 emoji 图标；Don't 用纯黑阴影或冷白卡面",
+      "Don't 把 clay 用作大面积装饰底；Don't 一屏放两块深色锚点卡",
+      "Don't 给内容层卡面开 backdrop-blur；Don't 在 --radius-* 标尺外随手写圆角值",
+      "Don't 在页面包裹层加 transform；Don't 绕过 mockApi/fetch 直连数据（接口语义改动 mock 与 server 两端同步）",
+      "Don't 提议 WeUI/扁平微信风（所有者已实测否决并 revert）"
+    ]
+  }
+}

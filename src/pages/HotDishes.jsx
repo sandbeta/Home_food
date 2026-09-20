@@ -105,7 +105,7 @@ export default function HotDishes() {
                         className="absolute inset-0 w-full h-full object-cover"
                         onError={(e) => { e.currentTarget.style.display = 'none' }} />
                     )}
-                    <span className="absolute top-1.5 left-1.5 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full text-[#FFFDF9]"
+                    <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full text-[#FFFDF9]"
                       style={{ background: idx < 3 ? RANK_COLORS[idx] : 'rgba(43,38,32,0.45)' }}>
                       NO.{idx + 1}
                     </span>
@@ -138,7 +138,7 @@ export default function HotDishes() {
                   className="flex items-center gap-3"
                   style={{ padding: 'var(--space-card-p)', borderTop: idx ? '1px solid var(--color-glass-border)' : 'none' }}>
                   {/* 名次 */}
-                  <span className="font-serif text-lg font-extrabold w-7 text-center shrink-0 tabular-nums"
+                  <span className="font-serif text-lg font-bold w-7 text-center shrink-0 tabular-nums"
                     style={{ color: idx < 3 ? RANK_COLORS[idx] : 'var(--color-mist)' }}>
                     {idx + 1}
                   </span>

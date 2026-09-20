@@ -17,7 +17,7 @@ import { useCart } from '../components/CartContext'
 import { nightPick } from '../lib/nightRules'
 import { getCategoryEmoji, getDishImage } from '../lib/categoryIcons'
 import { HERO_IMAGES } from '../theme/images'
-import { contentEnter, EASE } from '../theme/motion'
+import { contentEnter, cardEntrance, tapScale, usePrefersReducedMotion, EASE } from '../theme/motion'
 import { pickOne, NIGHT_HOME_TITLES, NIGHT_HOME_NOTES } from '../lib/sweetCopy'
 import { vibrate } from '../lib/sfx'
 
@@ -35,8 +35,15 @@ export default function NightHome() {
   const [rotIdx, setRotIdx] = useState(0)
   const navigate = useNavigate()
   const { addItem } = useCart()
+  const reduced = usePrefersReducedMotion()
   const [title] = useState(() => pickOne(NIGHT_HOME_TITLES))
   const [note] = useState(() => pickOne(NIGHT_HOME_NOTES))
+
+  // 网格错峰：8 格作为「一排端上桌」整体逐格亮相（cardEntrance + 0.06 步进，
+  // 基准 0.1 让区块标题先到、格子随后）；reduced 下去掉位移只留短淡入，反馈仍可读
+  const cellEnter = (idx) => reduced
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.2, delay: 0.1 + idx * 0.06 } }
+    : cardEntrance(0.1 + idx * 0.06)
 
   useEffect(() => {
     fetch('/api/dishes?category=全部').then(r => r.json()).then(d => {
@@ -59,18 +66,18 @@ export default function NightHome() {
             <SectionHeader
               title="深夜主推"
               action={
-                <button onClick={() => setRotIdx(i => i + 1)} className="text-xs text-[var(--color-clay)] font-bold">
+                <motion.button whileTap={tapScale} onClick={() => setRotIdx(i => i + 1)} className="text-xs text-[var(--color-clay)] font-bold">
                   换一道 →
-                </button>
+                </motion.button>
               }
             />
             <div className="relative mt-3">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={featured.id}
-                  initial={{ opacity: 0, scale: 0.96 }}
+                  initial={{ opacity: 0, scale: reduced ? 1 : 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
+                  exit={{ opacity: 0 }}
                   transition={{ duration: 0.26, ease: EASE }}
                   whileTap={{ scale: 0.985 }}
                   onClick={() => navigate(`/dish/${featured.id}`)}
@@ -87,7 +94,7 @@ export default function NightHome() {
                   </div>
                   <div className="flex items-end justify-between gap-3 px-5 pb-4 pt-3.5">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.2em', color: 'rgba(255,253,249,0.78)' }}>
+                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.18em', color: 'rgba(255,253,249,0.78)' }}>
                         🌙 深夜 · {featured.category}
                       </p>
                       <p className="font-serif text-2xl font-bold text-[#FFFDF9] truncate mt-1">{featured.name}</p>
@@ -97,7 +104,7 @@ export default function NightHome() {
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
                       <KissIcon className="w-4 h-4 text-[#FFFDF9]" />
-                      <span className="font-serif text-2xl font-extrabold text-[#FFFDF9] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{featured.price}</span>
+                      <span className="font-serif text-2xl font-bold text-[#FFFDF9] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{featured.price}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -114,12 +121,10 @@ export default function NightHome() {
               action={<button onClick={() => navigate('/menu?cat=夜宵')} className="text-xs text-[var(--color-clay)] font-bold">全店夜宵 →</button>}
             />
             <div className="grid grid-cols-2 gap-3 mt-3">
-              {grid.map((dish) => (
+              {grid.map((dish, idx) => (
                 <motion.div
                   key={dish.id}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.26, ease: EASE }}
+                  {...cellEnter(idx)}
                   className="d3-card-face relative flex flex-col cursor-pointer"
                   style={{ padding: 'var(--space-card-p)' }}
                   onClick={() => navigate(`/dish/${dish.id}`)}
@@ -136,7 +141,7 @@ export default function NightHome() {
                   <div className="flex items-center justify-between gap-2 mt-1.5">
                     <div className="flex items-center gap-1 shrink-0">
                       <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
-                      <span className="font-serif text-base font-extrabold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.7em]">¥</span>{dish.price}</span>
+                      <span className="font-serif text-base font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.7em]">¥</span>{dish.price}</span>
                     </div>
                     <motion.button
                       whileTap={{ scale: 0.92 }}

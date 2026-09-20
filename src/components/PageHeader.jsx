@@ -67,10 +67,10 @@ export default function PageHeader({ title, eyebrow, subtitle, back = false, bac
           <div className="min-w-0">
             {(eyebrow || subtitle) && (
               <p
-                className="text-[10px] font-bold uppercase mb-1 truncate"
+                className="text-[11px] font-bold uppercase mb-1 truncate"
                 style={{
                   letterSpacing: '0.18em',
-                  color: 'var(--color-mist)',
+                  color: 'var(--color-ash)',
                 }}
               >
                 {eyebrow || subtitle}

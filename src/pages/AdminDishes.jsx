@@ -87,23 +87,17 @@ export default function AdminDishes() {
                 variant="manage"
                 actions={
                   <>
+                    {/* 管理端 quieter：行内次级动作全部中性化（安静纸面按钮），
+                        人格色让位给右上角唯一主操作「+ 添加」；删除保留 danger 语义色 */}
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleToggle(dish)}
                       className="flex-1 py-2 text-xs font-bold"
                       style={{
                         borderRadius: 'var(--radius-ctl)',
-                        ...(dish.available
-                          ? {
-                              background: 'linear-gradient(135deg, var(--color-sage-soft), var(--color-sage))',
-                              color: 'var(--color-bone)',
-                              boxShadow: '0 2px 8px color-mix(in srgb, var(--sage-40) 25%, transparent)',
-                            }
-                          : {
-                              background: 'var(--color-glass)',
-                              color: 'var(--color-ash)',
-                              border: '1px solid var(--color-glass-border)',
-                            }),
+                        background: 'var(--surface)',
+                        color: 'var(--color-ash)',
+                        border: '1px solid var(--color-glass-border)',
                       }}
                     >
                       {dish.available ? '✓ 上架' : '已下架'}
@@ -112,11 +106,12 @@ export default function AdminDishes() {
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => { setEditingDish(dish); setShowModal(true) }}
-                      className="flex-1 py-2 text-xs font-bold text-white"
+                      className="flex-1 py-2 text-xs font-bold"
                       style={{
                         borderRadius: 'var(--radius-ctl)',
-                        background: 'var(--color-caramel)',
-                        boxShadow: '0 2px 8px color-mix(in srgb, var(--color-caramel) 20%, transparent)',
+                        background: 'var(--surface)',
+                        color: 'var(--color-bone)',
+                        border: '1px solid var(--color-glass-border)',
                       }}
                     >
                       编辑
@@ -125,11 +120,12 @@ export default function AdminDishes() {
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleDelete(dish.id)}
-                      className="flex-1 py-2 text-xs font-bold text-white"
+                      className="flex-1 py-2 text-xs font-bold"
                       style={{
                         borderRadius: 'var(--radius-ctl)',
-                        background: 'linear-gradient(135deg, var(--color-love), var(--color-danger))',
-                        boxShadow: '0 2px 8px rgba(194,84,63,0.2)',
+                        background: 'var(--surface)',
+                        color: 'var(--color-danger)',
+                        border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
                       }}
                     >
                       删除
@@ -146,7 +142,7 @@ export default function AdminDishes() {
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setVisibleCount(c => c + 30)}
-          className="d3-btn-sm py-2.5 text-sm font-bold text-[var(--color-clay)] border border-[var(--color-clay)]/30 self-center px-6"
+          className="d3-btn-sm py-2.5 text-sm font-bold text-[var(--color-ash)] self-center px-6"
           style={{ borderRadius: 'var(--radius-btn)' }}
         >
           加载更多（还有 {dishes.length - visibleDishes.length} 道）

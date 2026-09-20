@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../components/CartContext'
@@ -13,8 +13,9 @@ import Stepper from '../components/ui/Stepper'
 import EmptyState from '../components/ui/EmptyState'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
-import { cardEntrance } from '../theme/motion'
-import { pickOne, CART_TITLES, CART_NOTES } from '../lib/sweetCopy'
+import { cardEntrance, EASE, usePrefersReducedMotion } from '../theme/motion'
+import { pickOne, CART_TITLES, CART_NOTES, ORDER_PLACED_NOTE } from '../lib/sweetCopy'
+import { tap, vibrate } from '../lib/sfx'
 
 function CartRow({ item, onUpdate, onRemove }) {
   return (
@@ -26,7 +27,7 @@ function CartRow({ item, onUpdate, onRemove }) {
       className="flex items-center gap-3 py-1.5"
     >
       <div className="flex-1 min-w-0">
-        <h3 className="font-semibold text-sm text-[var(--color-bone)] truncate">{item.name}</h3>
+        <h3 className="font-sans font-semibold text-sm text-[var(--color-bone)] truncate">{item.name}</h3>
         <div className="flex items-center gap-1 mt-0.5">
           <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
           <span className="font-serif text-sm font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{item.price}</span>
@@ -44,7 +45,7 @@ function CartRow({ item, onUpdate, onRemove }) {
         whileHover={{ scale: 1.08 }}
         onClick={() => onRemove(item.dish_id, item.added_by)}
         aria-label={`移除${item.name}`}
-        className="text-[var(--color-mist)] active:text-[var(--color-danger)] ml-0.5 shrink-0"
+        className="text-[var(--color-ash)] active:text-[var(--color-danger)] ml-0.5 shrink-0"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
           <line x1="18" y1="6" x2="6" y2="18" />
@@ -70,6 +71,8 @@ export default function Cart() {
   const [payer, setPayer] = useState('aa')
   const [submitting, setSubmitting] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
+  const skipRef = useRef(null)
+  const reduce = usePrefersReducedMotion()
   const [pageTitle] = useState(() => pickOne(CART_TITLES))
   const [pageNote] = useState(() => pickOne(CART_NOTES))
   const navigate = useNavigate()
@@ -93,9 +96,17 @@ export default function Cart() {
         }),
       })
       const order = await res.json()
-      setCelebrating(true)
-      await new Promise((r) => setTimeout(r, 1200))
       clearCart()
+      setCelebrating(true)
+      tap()
+      vibrate([12, 40, 18])
+      // 让惊喜播 ~1.1s 再进详情页；点覆盖层任意处立即让路（不阻塞主任务）
+      await new Promise((resolve) => {
+        skipRef.current = resolve
+        setTimeout(resolve, 1100)
+      })
+      skipRef.current = null
+      setCelebrating(false)
       navigate(`/orders/${order.id}`)
     } catch {
       alert('提交失败，再试一次嘛~')
@@ -103,28 +114,43 @@ export default function Cart() {
     }
   }
 
-  // 下单成功覆盖层
+  // 下单成功瞬间 ——「锅已上灶」：小锅落坐灶台、蒸汽扶一缕，然后让路给详情页。
+  // 灶台熄火等待，此刻不开火（点火是厨房那边的动作，OrderDetail 轮询到 preparing 时灶火才真亮）。
   if (celebrating) {
     return (
       <div
-        className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-sm"
+        className="fixed inset-0 z-[60] flex flex-col items-center justify-center backdrop-blur-sm cursor-pointer"
         style={{ background: 'color-mix(in srgb, var(--color-ink-900) 96%, transparent)' }}
+        onClick={() => skipRef.current?.()}
       >
-        <motion.div
-          initial={{ scale: 0.92, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 200, damping: 12 }}
-          className="text-8xl mb-4"
-        >
-          🎉
-        </motion.div>
+        <div className="relative" style={{ width: 130, height: 128 }}>
+          {/* 灶台（复用 StoveStage 底座；覆盖层里自定吸底） */}
+          <div className="stove-base" style={{ top: 'auto', bottom: 0 }} />
+          {/* 锅落坐：从上方轻放下来（reduced 只做淡入） */}
+          <motion.span
+            className="absolute left-1/2 text-6xl"
+            style={{ bottom: 24, x: '-50%' }}
+            initial={reduce ? { opacity: 0 } : { y: -44, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.12, duration: reduce ? 0.2 : 0.28, ease: EASE }}
+          >
+            🍲
+          </motion.span>
+          {/* 落灶后蒸汽扶起一记（一次性：2.6s 循环在离开前只会完整升一蓬） */}
+          {!reduce && (
+            <div className="absolute left-1/2 -translate-x-1/2 flex gap-2 pointer-events-none" style={{ bottom: 96 }}>
+              <span className="steam-puff" style={{ animationDelay: '0.5s' }} />
+              <span className="steam-puff" style={{ animationDelay: '0.9s' }} />
+            </div>
+          )}
+        </div>
         <motion.p
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-2xl font-bold text-[var(--color-bone)]"
+          transition={{ delay: 0.34, duration: 0.24, ease: EASE }}
+          className="text-lg font-bold text-[var(--color-bone)] mt-4"
         >
-          下单成功！
+          {ORDER_PLACED_NOTE}
         </motion.p>
       </div>
     )
@@ -244,18 +270,15 @@ export default function Cart() {
           >
             <div className="flex justify-between items-center">
               <span className="text-[#FFFDF9]/85 font-semibold">合计</span>
-              <div className="flex items-center gap-1.5">
-                <KissIcon className="w-5 h-5 text-[#FFFDF9]" />
-                <motion.span
-                  key={totalPrice}
-                  initial={{ scale: 1.3, y: -4 }}
-                  animate={{ scale: 1, y: 0 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                  className="font-serif text-display font-bold text-[#FFFDF9] tabular-nums"
-                >
-                  <span className="text-[0.6em] mr-1 opacity-90">¥</span>{totalPrice}
-                </motion.span>
-              </div>
+              <motion.span
+                key={totalPrice}
+                initial={{ scale: 1.3, y: -4 }}
+                animate={{ scale: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                className="font-serif text-display font-bold text-[#FFFDF9] tabular-nums"
+              >
+                <span className="text-[0.6em] mr-1 opacity-90">¥</span>{totalPrice}
+              </motion.span>
             </div>
 
             <div

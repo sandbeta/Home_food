@@ -38,7 +38,7 @@ export default function DishRow({
           whileTap={{ scale: 0.9 }}
           onClick={(e) => { e.stopPropagation(); onToggleFav(dish) }}
           aria-label={favorited ? '取消收藏' : '收藏'}
-          className="absolute top-2 right-[calc(var(--space-card-p)_+_4px)] z-20 w-8 h-8 rounded-full flex items-center justify-center text-base glass"
+          className="absolute top-2 right-[calc(var(--space-card-p)_+_4px)] z-20 w-11 h-11 rounded-full flex items-center justify-center text-base glass"
         >
           <motion.span
             animate={favorited ? { scale: [1, 1.3, 1] } : { scale: 1 }}
@@ -76,7 +76,7 @@ export default function DishRow({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <h3 className="font-extrabold text-base text-[var(--color-bone)] truncate">
+            <h3 className="font-sans font-bold text-base text-[var(--color-bone)] truncate">
               {dish.name}
             </h3>
             <span className="badge-soft text-xs px-1.5 py-0.5 rounded-full font-bold text-[var(--color-ash)]">
@@ -93,7 +93,7 @@ export default function DishRow({
           <div className="flex items-center justify-between mt-2.5 gap-2">
             <div className="flex items-center gap-1 shrink-0">
               <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-              <span className="font-serif text-lg font-extrabold text-[var(--color-caramel)] leading-tight tabular-nums">
+              <span className="font-serif text-lg font-bold text-[var(--color-caramel)] leading-tight tabular-nums">
                 <span className="text-[0.7em] mr-px">¥</span>{dish.price}
               </span>
             </div>
@@ -104,7 +104,7 @@ export default function DishRow({
                 whileHover={{ scale: 1.08 }}
                 onClick={(e) => { e.stopPropagation(); onAdd(dish, e) }}
                 aria-label={addLabel || `添加${dish.name}`}
-                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
                 style={{
                   background: accent,
                   boxShadow: '0 4px 12px rgba(43,38,32,0.18), inset 0 1px 0 rgba(255,255,255,0.25)',

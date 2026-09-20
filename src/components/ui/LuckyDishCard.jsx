@@ -96,7 +96,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
         style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--sage-40) 10%, transparent), transparent 70%)', animationDelay: '1s' }} />
 
       <div className="relative flex items-center justify-between mb-3">
-        <span className="badge-soft text-xs font-extrabold px-2.5 py-1 rounded-full"
+        <span className="badge-soft text-xs font-bold px-2.5 py-1 rounded-full"
           style={{ background: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', color: 'var(--color-clay)' }}>
           手气签 · 今日灵感
         </span>
@@ -144,11 +144,11 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
 
         {/* 信息区：滚动中做轻微模糊，落定后清晰弹出 */}
         <div className={`flex-1 min-w-0 transition-all duration-200 ${drawing ? 'blur-[1.5px] opacity-70' : ''}`}>
-          <h3 className="font-bold text-lg text-[var(--color-bone)] truncate">{dish.name}</h3>
+          <h3 className="font-sans font-bold text-lg text-[var(--color-bone)] truncate">{dish.name}</h3>
           <p className="text-xs text-[var(--color-ash)] mt-0.5 line-clamp-1">{dish.description || '好吃的~'}</p>
           <div className="flex items-center gap-1 mt-1.5">
             <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />
-            <span className="font-serif text-base font-extrabold text-[var(--color-caramel)]"><span className="text-[0.75em] mr-px">¥</span>{dish.price}</span>
+            <span className="font-serif text-base font-bold text-[var(--color-caramel)]"><span className="text-[0.75em] mr-px">¥</span>{dish.price}</span>
           </div>
         </div>
 

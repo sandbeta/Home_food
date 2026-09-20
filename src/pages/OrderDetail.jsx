@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
 import GlassCard from '../components/GlassCard'
 import FullBleedHero from '../components/FullBleedHero'
@@ -11,7 +11,9 @@ import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import { HERO_IMAGES } from '../theme/images'
 import { ORDER_STATUS, PAYER } from '../theme/persona'
+import { EASE, usePrefersReducedMotion } from '../theme/motion'
 import { pickOne, DETAIL_TITLES } from '../lib/sweetCopy'
+import { settle, vibrate } from '../lib/sfx'
 
 const STATUS_MAP = {
   pending: { ...ORDER_STATUS.pending, emoji: '⏳', desc: '交给厨房啦，等着就好~' },
@@ -19,17 +21,60 @@ const STATUS_MAP = {
   completed: { ...ORDER_STATUS.completed, emoji: '🎉', desc: '快来吃吧，趁热~' },
 }
 
+// 灶火接力：订单未完成时低频拉状态（12s 一查，切后台不查、完成即停）。
+// 真实流转（后台点菜推进）到达的那一秒，才给"火点着了/起锅了"的即时反馈。
+const POLL_MS = 12000
+const BUMP_MS = 1300
+const STATUS_FLOW = ['pending', 'preparing', 'completed']
+
 export default function OrderDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(true)
   const [pageTitle] = useState(() => pickOne(DETAIL_TITLES))
+  const reduce = usePrefersReducedMotion()
+  const [bump, setBump] = useState(null) // 'ignite' | 'serve' | null：真实流转到达的一记反馈
+  const statusRef = useRef(null)
+  const bumpTimerRef = useRef(null)
+
+  const fireBump = (kind) => {
+    setBump(kind)
+    if (kind === 'ignite') { settle(); vibrate([16, 60, 24]) }
+    else vibrate(30)
+    clearTimeout(bumpTimerRef.current)
+    bumpTimerRef.current = setTimeout(() => setBump(null), BUMP_MS)
+  }
 
   useEffect(() => {
+    let dead = false
     fetch(`/api/orders/${id}`).then(r => r.json())
-      .then(data => { setOrder(data); setLoading(false) })
-      .catch(() => setLoading(false))
+      .then(data => {
+        if (dead) return
+        setOrder(data)
+        setLoading(false)
+        statusRef.current = data.status
+      })
+      .catch(() => { if (!dead) setLoading(false) })
+
+    // 低频接力：未完成才轮询；标签页隐藏时跳过本轮，completed 后永不再发
+    const timer = setInterval(() => {
+      if (dead || document.hidden) return
+      if (!statusRef.current || statusRef.current === 'completed') return
+      fetch(`/api/orders/${id}`).then(r => (r.ok ? r.json() : null)).then(next => {
+        if (dead || !next || !next.status) return
+        const prev = statusRef.current
+        statusRef.current = next.status
+        if (next.status !== prev) {
+          // 只在真实前进流转时报喜（completed 必 bump；pending→preparing 点火）
+          if (STATUS_FLOW.indexOf(next.status) > STATUS_FLOW.indexOf(prev)) {
+            fireBump(next.status === 'preparing' ? 'ignite' : 'serve')
+          }
+        }
+        setOrder(next)
+      }).catch(() => {})
+    }, POLL_MS)
+    return () => { dead = true; clearInterval(timer); clearTimeout(bumpTimerRef.current) }
   }, [id])
 
   if (loading) return <LoadingState emoji="🍳" text="正在查订单..." />
@@ -68,12 +113,43 @@ export default function OrderDetail() {
         {/* 灶台舞台：熄火 / 点火焖煮 / 起锅，三态各有戏 */}
         <GlassCard>
           <div className="p-5 text-center overflow-hidden relative">
+            {/* 灶火接力·点火：pending→preparing 到达的一刻，一束光晕从灶台绽放（一次性，1.3s 自熄） */}
+            <AnimatePresence>
+              {bump === 'ignite' && !reduce && (
+                <motion.div
+                  key="ignite"
+                  className="absolute inset-0 pointer-events-none z-20"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0, 1, 0.85, 0] }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1.2, ease: EASE, times: [0, 0.18, 0.5, 1] }}
+                  style={{
+                    background: 'radial-gradient(circle at 50% 62%, color-mix(in srgb, var(--clay-50) 26%, transparent), transparent 62%)',
+                  }}
+                />
+              )}
+            </AnimatePresence>
             <div className="relative z-10">
               <StoveStage statusKey={order.status} createdAt={order.created_at} />
-              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
+              {/* key=状态：流转到达即重挂，chip 以 ORDER_STATUS 新色脉冲一次（reduced 只淡入换色） */}
+              <motion.span
+                key={order.status}
+                initial={{ opacity: 0 }}
+                animate={reduce ? { opacity: 1 } : {
+                  opacity: 1,
+                  scale: order.status === 'pending' ? 1 : [1, 1.12, 1],
+                  boxShadow: order.status === 'pending'
+                    ? '0 0 0 0 transparent'
+                    : [
+                        `0 0 0 0 color-mix(in srgb, ${status.ring[1]} 0%, transparent)`,
+                        `0 0 0 7px color-mix(in srgb, ${status.ring[1]} 26%, transparent)`,
+                        `0 0 0 0 color-mix(in srgb, ${status.ring[1]} 0%, transparent)`,
+                      ],
+                }}
+                transition={{ delay: 0.4, duration: reduce ? 0.2 : 0.9, ease: EASE }}
                 className="inline-block px-4 py-1 rounded-full text-sm font-bold"
                 style={{ background: status.chipBg, color: status.chipColor }}>{status.text}</motion.span>
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+              <motion.p key={`desc-${order.status}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
                 className="text-[var(--color-ash)] text-sm mt-2">{status.desc}</motion.p>
             </div>
           </div>
@@ -82,7 +158,7 @@ export default function OrderDetail() {
         {/* 菜品明细 + 谁买单 + 合计 */}
         <GlassCard delay={0.1}>
           <div className="p-4">
-            <h2 className="font-bold text-sm text-[var(--color-bone)] mb-3 flex items-center gap-2">
+            <h2 className="font-sans font-bold text-sm text-[var(--color-bone)] mb-3 flex items-center gap-2">
               📝 都选了啥
             </h2>
             <div className="space-y-1">

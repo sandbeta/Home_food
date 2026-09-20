@@ -19,12 +19,13 @@ export default function AdminShell({
 }) {
   return (
     <div className="relative">
-      {/* 晨光渐变头部：赤陶 → 鼠尾草，极低透明度，仅作氛围 */}
+      {/* 中性氛围头部（管理端 quieter）：极低透明度的暖墨渐隐替代原赤陶→鼠尾草彩带，
+          保留「后台也有头部层次」的连续性，人格色不再铺底 */}
       <div
         className="absolute top-0 left-0 right-0 h-56 pointer-events-none"
         style={{
           background:
-            'linear-gradient(180deg, color-mix(in srgb, var(--clay-50) 10%, transparent) 0%, color-mix(in srgb, var(--sage-40) 6%, transparent) 45%, transparent 100%)',
+            'linear-gradient(180deg, rgba(43, 38, 32, 0.04) 0%, rgba(43, 38, 32, 0.015) 45%, transparent 100%)',
         }}
       />
 

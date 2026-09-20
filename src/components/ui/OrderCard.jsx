@@ -48,11 +48,11 @@ export default function OrderCard({
             <div className="flex items-center gap-2 min-w-0">
               {isAdmin ? (
                 <>
-                  <span className="text-xs text-[var(--color-ash)] font-mono bg-[var(--color-glass)] px-1.5 py-0.5 rounded border border-[var(--color-glass-border)] shrink-0">
+                  <span className="text-xs text-[var(--color-ash)] font-mono bg-[var(--surface)] px-1.5 py-0.5 rounded border border-[var(--color-glass-border)] shrink-0">
                     #{order.id}
                   </span>
                   {payerLabel && (
-                    <span className="text-xs bg-[var(--color-glass)] text-[var(--color-ash)] px-2 py-0.5 rounded-full font-semibold border border-[var(--color-glass-border)] shrink-0">
+                    <span className="text-xs bg-[var(--surface)] text-[var(--color-ash)] px-2 py-0.5 rounded-full font-semibold border border-[var(--color-glass-border)] shrink-0">
                       {payerLabel}
                     </span>
                   )}
@@ -79,7 +79,7 @@ export default function OrderCard({
           <p className="text-sm text-[var(--color-bone)] line-clamp-1 font-medium">{itemNames}</p>
 
           {showNote && order.note && (
-            <div className="mt-1.5 px-2 py-1.5 rounded-lg relative overflow-hidden bg-[var(--color-glass)] border border-[var(--color-glass-border)]">
+            <div className="mt-1.5 px-2 py-1.5 rounded-lg relative overflow-hidden bg-[var(--surface)] border border-[var(--color-glass-border)]">
               <div className="absolute left-0 top-0 bottom-0 w-0.5 rounded-full" style={{ background: 'var(--color-clay)' }} />
               <p className="text-xs text-[var(--color-ash)] pl-1.5 flex items-center gap-1">💬 {order.note}</p>
             </div>

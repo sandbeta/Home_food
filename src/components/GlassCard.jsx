@@ -1,18 +1,18 @@
 import { motion } from 'framer-motion'
 import { cardEntrance } from '../theme/motion'
 
-// 浮起磨砂玻璃卡：圆角 28，统一入场（y:24→0 + opacity + ease-out≈0.5s）
+// 内容卡：严格重制后为纯色暖陶实面（玻璃只留给导航层），圆角走同心标尺，统一入场
 // props: className / delay / glow(boxShadow 字符串) / style / 其余透传 motion props
 export default function GlassCard({ as: _Tag = 'div', className = '', delay = 0, glow, children, style, ...rest }) {
   return (
     <motion.div
       {...cardEntrance(delay)}
-      className={`glass rounded-[var(--radius-card)] ${className}`}
+      className={`rounded-[var(--radius-card)] border border-[var(--color-glass-border)] bg-[var(--surface)] ${className}`}
       style={{
         ...style,
         ...(glow
           ? { boxShadow: glow }
-          : { boxShadow: '0 8px 24px rgba(43,38,32,0.08)' }),
+          : { boxShadow: 'var(--shadow-3)' }),
       }}
       {...rest}
     >

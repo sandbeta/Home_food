@@ -9,7 +9,7 @@ export default function Chip({ active = false, onClick, children, className = ''
       whileTap={{ scale: 0.94 }}
       onClick={onClick}
       aria-pressed={active}
-      className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors duration-200 ${className}`}
+      className={`shrink-0 min-h-[44px] px-4 py-2.5 rounded-full text-sm font-semibold inline-flex items-center transition-colors duration-200 ${className}`}
       style={
         active
           ? {
@@ -19,7 +19,7 @@ export default function Chip({ active = false, onClick, children, className = ''
               boxShadow: '0 4px 12px color-mix(in srgb, var(--clay-50) 26%, transparent)',
             }
           : {
-              background: 'var(--color-glass)',
+              background: 'var(--surface)',
               color: 'var(--color-ash)',
               border: '1px solid var(--color-glass-border)',
             }

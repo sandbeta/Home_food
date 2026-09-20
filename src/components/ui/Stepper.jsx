@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
  * 数量步进器 —— 取代此前 Cart(30px) 与 DishDetail(36px) 两套各自的实现。
  * 减号在 min 时禁用，避免把数量减到 0 以下。
  */
-export default function Stepper({ value, onChange, min = 1, size = 32, className = '' }) {
+export default function Stepper({ value, onChange, min = 1, size = 44, className = '' }) {
   const dec = () => { if (value > min) onChange(value - 1) }
   const inc = () => onChange(value + 1)
 
@@ -19,7 +19,7 @@ export default function Stepper({ value, onChange, min = 1, size = 32, className
         className="rounded-full flex items-center justify-center text-[var(--color-bone)] disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ width: size, height: size, background: 'rgba(43,38,32,0.05)' }}
       >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       </motion.button>
@@ -47,7 +47,7 @@ export default function Stepper({ value, onChange, min = 1, size = 32, className
           boxShadow: '0 2px 8px color-mix(in srgb, var(--clay-50) 28%, transparent)',
         }}
       >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>

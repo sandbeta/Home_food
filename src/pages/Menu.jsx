@@ -18,6 +18,7 @@ import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { pickOne, MENU_TITLES, MENU_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { tap, vibrate } from '../lib/sfx'
+import { EASE } from '../theme/motion'
 
 function WhoSelector({ whoAmI, setWhoAmI }) {
   return (
@@ -27,7 +28,8 @@ function WhoSelector({ whoAmI, setWhoAmI }) {
         const active = whoAmI === opt.value
         return (
           <motion.button key={opt.value} whileTap={{ scale: 0.95 }} onClick={() => setWhoAmI(opt.value)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-2xl text-sm font-bold transition-all duration-300 ease-out ${active ? (opt.value === 'me' ? 'avatar-me glow-clay' : 'avatar-partner glow-sage') : 'text-[var(--color-ash)] hover:bg-white/5'}`}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-colors duration-300 ${active ? (opt.value === 'me' ? 'avatar-me glow-clay' : 'avatar-partner glow-sage') : 'text-[var(--color-ash)] hover:bg-white/5'}`}
+            style={{ borderRadius: 'var(--radius-ctl)' }}
             animate={active ? { scale: 1.02 } : { scale: 1 }}>
             <motion.span className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center text-xs"
               animate={active ? { rotate: [0, -8, 8, 0] } : { rotate: 0 }}
@@ -146,7 +148,7 @@ export default function Menu() {
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setScope(opt.value)}
                 aria-pressed={active}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-all duration-300"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-colors duration-300"
                 style={{
                   borderRadius: 'var(--radius-ctl)',
                   ...(active
@@ -166,11 +168,11 @@ export default function Menu() {
         </div>
 
         {/* 搜索框 */}
-        <div className={`d3-card-face flex items-center gap-2 px-3 py-2.5 mb-4 bg-[var(--color-ink-800)]/80 transition-all duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}>
+        <div className={`d3-card-face flex items-center gap-2 px-3 py-2.5 mb-4 bg-[var(--color-ink-800)]/80 transition-[box-shadow,border-color] duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}>
           <motion.svg className={`w-4 h-4 text-[var(--color-ash)] transition-colors duration-300 ${searchFocused ? 'text-[var(--color-clay)]' : ''}`}
             viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
             animate={searchFocused ? { rotate: 90 } : { rotate: 0 }}
-            transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}>
+            transition={{ duration: 0.4, ease: EASE }}>
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
           </motion.svg>
           <input value={keyword} onChange={e => setKeyword(e.target.value)}
@@ -213,7 +215,7 @@ export default function Menu() {
                 key="toggle-btn"
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowAllCategories(true)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border border-[var(--color-clay)]/30 text-[var(--color-clay)] hover:bg-[var(--color-clay)]/5 transition-all duration-300">
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border border-[var(--color-clay)]/30 text-[var(--color-clay)] hover:bg-[var(--color-clay)]/5 transition-colors duration-300">
                 更多菜系
                 <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 4.5L6 7.5L9 4.5" />
@@ -229,7 +231,7 @@ export default function Menu() {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+                transition={{ duration: 0.3, ease: EASE }}
                 className="overflow-hidden"
               >
                 <div className="pt-2 space-y-1.5">
@@ -246,7 +248,7 @@ export default function Menu() {
                   </div>
                   {CATEGORY_GROUPS.slice(1).map(group => (
                     <div key={group.label}>
-                      <div className="text-xs font-extrabold px-0.5 pb-1 text-[var(--color-clay)]">{group.label}</div>
+                      <div className="text-xs font-bold px-0.5 pb-1 text-[var(--color-ash)]">{group.label}</div>
                       <div className="flex flex-wrap gap-2">
                         {visibleCats(group.items).map(cat => (
                           <Chip key={cat} active={activeCategory === cat} onClick={() => setActiveCategory(cat)}>{cat}</Chip>
@@ -277,9 +279,9 @@ export default function Menu() {
             }
           />
         ) : loading ? (
-          <div className="space-y-3.5">
+          <div className="space-y-4">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="d3-card p-3.5 flex items-center gap-3 overflow-hidden">
+              <div key={i} className="d3-card flex items-center gap-3 overflow-hidden" style={{ padding: 'var(--space-card-p)' }}>
                 <div className="w-[70px] h-[70px] rounded-[var(--radius-tile)] animate-shimmer-fade shrink-0" />
                 <div className="flex-1 space-y-2.5">
                   <div className="h-[16px] w-[55%] animate-shimmer-fade rounded-full" style={{ animationDelay: `${i * 0.15}s` }} />
@@ -367,7 +369,7 @@ export default function Menu() {
             className="fixed z-[100] pointer-events-none"
             style={{ left: p.x, top: p.y }}
           >
-            <div className="flex items-center gap-0.5 text-[#FFFDF9] text-xs font-extrabold px-2 py-1 rounded-full shadow-lg" style={{ background: 'var(--color-clay)' }}>
+            <div className="flex items-center gap-0.5 text-[#FFFDF9] text-xs font-bold px-2 py-1 rounded-full shadow-lg" style={{ background: 'var(--color-clay)' }}>
               <span>+1</span>
               <KissIcon className="w-3 h-3" />
             </div>

@@ -7,8 +7,8 @@ import SectionHeader from '../components/ui/SectionHeader'
 import Icon from '../components/ui/Icons'
 
 const QUICK_LINKS = [
-  { label: '菜品管理', icon: 'menu', color: 'var(--color-clay)', path: '/admin/dishes', accent: 'var(--color-clay)' },
-  { label: '厨房看板', icon: 'orders', color: 'var(--color-sage)', path: '/admin/orders', accent: 'var(--color-sage)' },
+  { label: '菜品管理', icon: 'menu', color: 'var(--color-ash)', path: '/admin/dishes' },
+  { label: '厨房看板', icon: 'orders', color: 'var(--color-ash)', path: '/admin/orders' },
 ]
 
 export default function Admin() {
@@ -30,9 +30,9 @@ export default function Admin() {
   }, [])
 
   const statCards = [
-    { label: '菜品', value: stats.dishes, accent: 'var(--color-clay)' },
-    { label: '订单', value: stats.orders, accent: 'var(--color-caramel)' },
-    { label: '今日', value: stats.today, accent: 'var(--color-sage)' },
+    { label: '菜品', value: stats.dishes, accent: 'var(--color-bone)' },
+    { label: '订单', value: stats.orders, accent: 'var(--color-bone)' },
+    { label: '今日', value: stats.today, accent: 'var(--color-bone)' },
   ]
 
   return (
@@ -49,12 +49,12 @@ export default function Admin() {
         {QUICK_LINKS.map((link) => (
           <motion.button
             key={link.label}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => navigate(link.path)}
-            className="d3-card-face flex-1 p-5 text-center flex flex-col items-center gap-2.5"
-            style={{ borderLeft: `3px solid ${link.accent}`, padding: 'var(--space-card-p)' }}
+            className="d3-card-face flex-1 text-center flex flex-col items-center gap-2.5"
+            style={{ padding: 'var(--space-card-p)' }}
           >
-            <Icon name={link.icon} size={30} style={{ color: link.color }} />
+            <Icon name={link.icon} size={26} style={{ color: link.color }} />
             <span className="text-sm font-bold text-[var(--color-bone)]">{link.label}</span>
           </motion.button>
         ))}

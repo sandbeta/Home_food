@@ -13,7 +13,7 @@ import { useTheme } from '../theme/useTheme'
 import { nightPick } from '../lib/nightRules'
 import { getCategoryEmoji } from '../lib/categoryIcons'
 import { pickOne, NIGHT_SNACK_NOTES } from '../lib/sweetCopy'
-import { usePrefersReducedMotion } from '../theme/motion'
+import { sheetUp, cardEntrance, glowPulse, tapScale, usePrefersReducedMotion } from '../theme/motion'
 
 /** Fisher-Yates 无偏洗牌取前 n 道 */
 const shuffleTake = (arr, n) => {
@@ -48,6 +48,12 @@ export default function NightSnackSheet() {
   const goAll = () => { setOpen(false); navigate('/menu?cat=夜宵') }
   const close = () => setOpen(false)
 
+  // 六宫格随托盘升起后逐格亮相（cardEntrance + 0.06 步进，基准 0.22 等 spring 起势，
+  // 末格 0.52s 起、0.86s 内全部落定）；reduced 去位移只留淡入
+  const cellEnter = (idx) => reduced
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.2, delay: 0.15 + idx * 0.06 } }
+    : cardEntrance(0.22 + idx * 0.06)
+
   if (!dishes.length) return null
 
   return createPortal(
@@ -60,10 +66,7 @@ export default function NightSnackSheet() {
             style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,38,32,0.35)' }}
           />
           <motion.div
-            initial={reduced ? { opacity: 0 } : { y: '100%' }}
-            animate={reduced ? { opacity: 1 } : { y: 0 }}
-            exit={reduced ? { opacity: 0 } : { y: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+            {...(reduced ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
             className="fixed bottom-0 left-0 right-0 mx-auto z-50"
             style={{ maxWidth: 'var(--shell-w)' }}
           >
@@ -73,10 +76,13 @@ export default function NightSnackSheet() {
               </div>
               <div className="px-5 pb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm"
-                    style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-clay) 14%, transparent), var(--color-clay))' }}>
+                  <motion.div
+                    {...(reduced ? {} : glowPulse('color-mix(in srgb, var(--sage-40) 22%, transparent)'))}
+                    className="w-8 h-8 rounded-xl flex items-center justify-center text-sm"
+                    style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-clay) 14%, transparent), var(--color-clay))' }}
+                  >
                     🌙
-                  </div>
+                  </motion.div>
                   <div>
                     <h2 className="text-base font-bold font-serif text-[var(--color-bone)] leading-tight">深夜食堂开张了</h2>
                     <p className="text-[11px] text-[var(--color-ash)]">{note}</p>
@@ -90,8 +96,8 @@ export default function NightSnackSheet() {
 
               {/* 宵夜六宫格：emoji 大图标 + 菜名 + caramel 衬线价 + 一键加购 */}
               <div className="px-4 pb-1 grid grid-cols-2 gap-2">
-                {dishes.map(d => (
-                  <div key={d.id} className="flex items-center gap-2 rounded-2xl px-2.5 py-2"
+                {dishes.map((d, idx) => (
+                  <motion.div key={d.id} {...cellEnter(idx)} className="flex items-center gap-2 rounded-2xl px-2.5 py-2"
                     style={{ background: 'color-mix(in srgb, var(--color-clay) 6%, transparent)', border: '1px solid color-mix(in srgb, var(--color-clay) 12%, transparent)' }}>
                     <span className="text-xl shrink-0" aria-hidden>{getCategoryEmoji(d.category)}</span>
                     <div className="min-w-0 flex-1">
@@ -103,12 +109,12 @@ export default function NightSnackSheet() {
                       style={{ background: 'var(--color-clay)' }}>
                       +
                     </motion.button>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
               <div className="px-5 pb-7 pt-3">
-                <motion.button whileTap={{ scale: 0.97 }} onClick={goAll}
+                <motion.button whileTap={tapScale} onClick={goAll}
                   className="d3-btn d3-btn-primary w-full py-3 text-sm">
                   去菜单看全店夜宵 →
                 </motion.button>

@@ -11,10 +11,7 @@ export default function SectionHeader({ title, action, className = '' }) {
           className="shrink-0 w-4 h-[2px] rounded-full"
           style={{ background: 'var(--color-clay)' }}
         />
-        <h2
-          className="font-serif text-2xl font-semibold text-[var(--color-bone)] truncate"
-          style={{ letterSpacing: '-0.02em' }}
-        >
+        <h2 className="font-serif text-2xl font-semibold text-[var(--color-bone)] truncate">
           {title}
         </h2>
       </div>

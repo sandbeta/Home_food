@@ -88,6 +88,9 @@ export const PROFILE_TITLES = [
   '懒洋洋专属页',
 ]
 
+// 下单成功覆盖层（「锅已上灶」瞬间的定场文案）
+export const ORDER_PLACED_NOTE = '锅已上灶，交给厨房啦'
+
 // 夜宵弹窗（深夜食堂开屏推荐副标题）
 export const NIGHT_SNACK_NOTES = [
   '给懒洋洋留了盏灯，也留了锅',

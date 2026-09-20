@@ -16,16 +16,17 @@ const STATUS_FILTERS = [
 
 const PAYER_LABEL = { aa: 'AA', me: '我请', partner: 'TA请' }
 
-// 状态推进按钮：冷暖语义 —— 开始做=赤陶(暖)，做好了=鼠尾草绿(冷)
+// 状态推进按钮（管理端唯一主操作位）：冷暖语义照旧 —— 开始做=赤陶(暖)，做好了=鼠尾草绿(冷)
+// 管理端 quieter：去光晕与 hover 浮起，按钮以实底安静存在，反馈只留按压缩放
 const STATUS_ACTIONS = {
   pending: {
     next: 'preparing', text: '开始做', emoji: '🔥',
-    gradient: PERSONA.me.gradient, color: '#FFFDF9', glow: 'color-mix(in srgb, var(--clay-50) 30%, transparent)',
+    gradient: PERSONA.me.gradient, color: '#FFFDF9',
   },
   preparing: {
     next: 'completed', text: '做好了', emoji: '✅',
     gradient: 'linear-gradient(135deg, var(--color-sage-soft), var(--color-sage))',
-    color: 'var(--color-bone)', glow: 'color-mix(in srgb, var(--sage-40) 30%, transparent)',
+    color: 'var(--color-bone)',
   },
 }
 
@@ -84,15 +85,13 @@ export default function AdminOrders() {
                 action={
                   action && (
                     <motion.button
-                      whileTap={{ scale: 0.95 }}
-                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
                       onClick={() => handleStatusChange(order.id, action.next)}
                       className="px-3.5 py-1.5 text-xs font-bold flex items-center gap-1 shrink-0"
                       style={{
                         borderRadius: 'var(--radius-ctl)',
                         background: action.gradient,
                         color: action.color,
-                        boxShadow: `0 2px 10px ${action.glow}`,
                       }}
                     >
                       {action.emoji} {action.text}
