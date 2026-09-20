@@ -188,7 +188,7 @@ export default function OrderDetail() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-[var(--color-bone)]">合计</span>
                   {order.payer && <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: payer.fill, color: payer.label === 'AA' ? '#FFFDF9' : (order.payer === 'me' ? '#FFFDF9' : '#1A2417') }}>{payer.label}</span>}
+                    style={{ background: payer.fill, color: payer.label === 'AA' ? 'var(--color-on-dark)' : (order.payer === 'me' ? 'var(--color-on-dark)' : 'var(--color-on-sage)') }}>{payer.label}</span>}
                 </div>
                 <div className="flex items-center gap-1">
                   <KissIcon className="w-4 h-4 text-[var(--color-love)]" />

@@ -71,6 +71,9 @@
   --radius-ctl: 8px;     /* 输入 / 小控件（同心：card 24 − 卡内边距 16 = 8） */
   --radius-sheet: 28px;  /* 底部浮层顶部 */
   --clay-deep: #9F4F2D;  /* 深赤陶（渐变收尾/按压态·提亮后=clay-90） */
+  --color-on-dark: #FFFDF9;   /* 深色锚卡/实底上的暖白字（DESIGN.md on-dark 令牌化） */
+  --color-on-sage: #1A2417;   /* sage 实底上的深绿字（TA 侧反色唯一值） */
+  --color-ember: #9A9082;     /* 熄火余温灰棕（=ORDER_STATUS.pending.ring，StoveStage 待机柔光） */
 
   /* —— Open Color 法双人格色阶 ——
      推导：open-color v1.9.1 全 13 色族 130 值转 CIE LCh(D65)，逐档取均值成标准曲线，
@@ -188,13 +191,6 @@ body::before {
 
 #root { position: relative; z-index: 1; }
 
-/* ========== 3D Core Utilities ========== */
-.preserve-3d { transform-style: preserve-3d; }
-.backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.perspective-sm { perspective: 600px; }
-.perspective-md { perspective: 1000px; }
-.perspective-lg { perspective: 1400px; }
-
 /* ========== Typography ========== */
 button, a, select { cursor: pointer; }
 input, textarea, select { color: var(--color-bone); }
@@ -221,6 +217,14 @@ textarea:focus-visible, select:focus-visible {
   outline-offset: 2px;
 }
 
+/* ========== 浏览器自带表面主题化 ==========
+   选中高亮与输入光标是"设计过的页面"最廉价的信号：冷蓝选区会瞬间破坏暖纸氛围 */
+::selection { background: var(--clay-10); color: var(--color-bone); }
+[data-theme="night"] ::selection { background: color-mix(in srgb, var(--clay-50) 45%, transparent); color: var(--color-bone); }
+input, textarea { caret-color: var(--color-clay); }
+[data-theme="night"] input,
+[data-theme="night"] textarea { caret-color: var(--clay-40); }
+
 /* ========== 玻璃系统 ========== */
 .glass {
   background: var(--color-glass);
@@ -233,7 +237,6 @@ textarea:focus-visible, select:focus-visible {
   .glass { background: rgba(255, 253, 249, 0.92); }
   .d3-card-face { background: rgba(255, 253, 249, 0.92) !important; }
 }
-.glass-elevated { box-shadow: 0 4px 16px rgba(43, 38, 32, 0.07); }
 .glass-me {
   border: 1px solid color-mix(in srgb, var(--clay-50) 40%, transparent);
   background: linear-gradient(180deg, color-mix(in srgb, var(--clay-50) 10%, transparent) 0%, rgba(255,253,249,0.04) 100%);
@@ -256,7 +259,7 @@ textarea:focus-visible, select:focus-visible {
   -webkit-backdrop-filter: blur(8px) saturate(110%);
   backdrop-filter: blur(8px) saturate(110%);
   box-shadow: 0 2px 10px rgba(43, 38, 32, 0.05);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, background-color var(--dur-slow) var(--ease-soft), border-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft);
 }
 .d3-card:hover .d3-card-face {
   box-shadow: 0 6px 20px rgba(43, 38, 32, 0.08);
@@ -267,7 +270,7 @@ textarea:focus-visible, select:focus-visible {
   position: relative;
   border-radius: var(--radius-btn);
   font-weight: 700;
-  transition: opacity 0.15s ease, transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease, background-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft);
 }
 .d3-btn-primary {
   background: var(--color-clay);
@@ -298,7 +301,7 @@ textarea:focus-visible, select:focus-visible {
   border-radius: var(--radius-btn);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft);
 }
 .d3-input::placeholder { color: var(--color-mist); }
 .d3-input:focus {
@@ -328,11 +331,8 @@ textarea:focus-visible, select:focus-visible {
 }
 .avatar-partner {
   background: linear-gradient(180deg, var(--sage-40) 0%, var(--sage-60) 100%);
-  color: #1A2417;
+  color: var(--color-on-sage);
 }
-/* 旧 bg-warm / bg-cool 在新语言里退为亮色，避免旧页开天窗 */
-.bg-warm { background: linear-gradient(135deg, #F5EADB 0%, #EBE0D0 100%); }
-.bg-cool { background: linear-gradient(135deg, #E9F3E6 0%, #DCEAD7 100%); }
 
 /* 双人格辉光 */
 .glow-clay     { box-shadow: 0 0 0 3px color-mix(in srgb, var(--clay-50) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--clay-50) 22%, transparent); }
@@ -342,89 +342,12 @@ textarea:focus-visible, select:focus-visible {
 .avatar-me.is-active    { animation: pulse-glow-gold 2.4s ease-in-out infinite; }
 .avatar-partner.is-active { animation: pulse-glow-platinum 2.4s ease-in-out infinite; }
 
-/* ========== Utility Components ========== */
-.gradient-text-clay {
-  background: var(--color-clay);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.gradient-text-gold {
-  background: var(--color-clay);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.gradient-text {
-  background: var(--color-clay);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.divider { height: 1px; background: var(--color-glass-border); border: none; margin: 12px 0; }
-
-.section-title {
-  font-family: var(--font-serif);
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-bone);
-  letter-spacing: -0.01em;
-  position: relative;
-  padding-bottom: 8px;
-}
-.section-title::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 30px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--color-clay);
-}
-
-/* 软卡 — 轻量容器，用于分组块 */
-.soft-block {
-  background: rgba(43, 38, 32, 0.03);
-  border: 1px solid var(--color-glass-border);
-  border-radius: 14px;
-}
-
 /* ========== Animations ========== */
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-@keyframes wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-2deg); } 75% { transform: rotate(2deg); } }
 @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.82; } }
-@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-@keyframes slide-up { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes scale-in { from { opacity: 0; transform: scale(0.88); } to { opacity: 1; transform: scale(1); } }
-@keyframes slide-from-bottom { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-
-/* 3D animations */
-@keyframes d3-float { 0%, 100% { transform: translateY(0) rotateX(2deg); } 50% { transform: translateY(-6px) rotateX(0deg); } }
-@keyframes d3-pulse { 0%, 100% { transform: translateZ(0); } 50% { transform: translateZ(8px); } }
-@keyframes d3-spin-slow { from { transform: rotateZ(0deg); } to { transform: rotateZ(360deg); } }
-@keyframes d3-bounce-in { 0% { transform: scale(0) rotateX(45deg); opacity: 0; } 50% { transform: scale(1.1) rotateX(-5deg); } 70% { transform: scale(0.95) rotateX(2deg); } 100% { transform: scale(1) rotateX(0); opacity: 1; } }
-@keyframes d3-pop { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
-@keyframes d3-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-5px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
-@keyframes d3-heartbeat { 0%, 100% { transform: scale(1); } 14% { transform: scale(1.18); } 28% { transform: scale(1); } 42% { transform: scale(1.12); } 70% { transform: scale(1); } }
 
 .animate-float { animation: float 3s ease-in-out infinite; }
-.animate-wiggle { animation: wiggle 2s ease-in-out infinite; }
 .animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
-.animate-slide-up { animation: slide-up 0.35s ease-out; }
-.animate-fade-in { animation: fade-in 0.4s ease-out; }
-.animate-scale-in { animation: scale-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.animate-slide-from-bottom { animation: slide-from-bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
-
-.animate-d3-float { animation: d3-float 4s ease-in-out infinite; }
-.animate-d3-pulse { animation: d3-pulse 2.5s ease-in-out infinite; }
-.animate-d3-spin-slow { animation: d3-spin-slow 20s linear infinite; }
-.animate-d3-bounce-in { animation: d3-bounce-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-.animate-d3-pop { animation: d3-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-.animate-d3-shake { animation: d3-shake 0.4s ease-in-out; }
-.animate-d3-heartbeat { animation: d3-heartbeat 1.2s ease-in-out; }
 
 /* ========== Project-specific utilities ========== */
 @keyframes shimmer-fade { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
@@ -437,14 +360,6 @@ textarea:focus-visible, select:focus-visible {
 @keyframes float-gentle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 .animate-float-gentle { animation: float-gentle 6s ease-in-out infinite; }
 
-@keyframes pulse-glow-clay {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--clay-50) 40%, transparent); }
-  50% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--clay-50) 32%, transparent); }
-}
-@keyframes pulse-glow-sage {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sage-40) 40%, transparent); }
-  50% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--sage-40) 30%, transparent); }
-}
 @keyframes pulse-glow-gold {
   0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--clay-50) 40%, transparent); }
   50% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--clay-50) 32%, transparent); }
@@ -453,13 +368,8 @@ textarea:focus-visible, select:focus-visible {
   0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--sage-40) 40%, transparent); }
   50% { box-shadow: 0 0 22px 4px color-mix(in srgb, var(--sage-40) 30%, transparent); }
 }
-.animate-pulse-glow-clay { animation: pulse-glow-clay 2.4s ease-in-out infinite; }
-.animate-pulse-glow-sage { animation: pulse-glow-sage 2.4s ease-in-out infinite; }
 .animate-pulse-glow-gold { animation: pulse-glow-gold 2.4s ease-in-out infinite; }
 .animate-pulse-glow-platinum { animation: pulse-glow-platinum 2.4s ease-in-out infinite; }
-
-@keyframes cart-empty-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-.animate-cart-empty-bounce { animation: cart-empty-bounce 2s ease-in-out infinite; }
 
 /* 主推卡自动轮换进度条 —— 预告下一次切换，避免画面"自己乱动"；时长由调用方按轮换间隔内联下发 */
 @keyframes rot-progress { from { width: 0%; } to { width: 100%; } }
@@ -606,19 +516,18 @@ textarea:focus-visible, select:focus-visible {
   [data-theme="night"] .d3-card-face { background: rgba(44, 39, 32, 0.94) !important; }
 }
 
-/* 输入框 / 软分组块：亮底是"压暗 4%"，暗底改为"提亮 5%" */
-[data-theme="night"] .d3-input,
-[data-theme="night"] .soft-block {
+/* 输入框：亮底是"压暗 4%"，暗底改为"提亮 5%" */
+[data-theme="night"] .d3-input {
   background: rgba(242, 237, 227, 0.09);
 }
 
 /* 卡片阴影在暗底上的强度单独校准（d3-card-face 是硬编码 rgba，需覆盖） */
 [data-theme="night"] .d3-card-face { box-shadow: 0 10px 34px rgba(0, 0, 0, 0.42); }
 [data-theme="night"] .d3-card:hover .d3-card-face { box-shadow: 0 16px 44px rgba(0, 0, 0, 0.52); }
-[data-theme="night"] .glass-elevated { box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5); }
 
-/* 主题切换的底色过渡（渐变底不受 transition 影响，属可接受的不完美） */
-body { transition: background-color var(--dur-slow) var(--ease-soft); }
+/* 主题切换过渡：底色之外，文字/边框/卡面颜色一起走 --dur-slow，
+   否则夜宵反相时背景渐变缓、卡片文字硬切，观感"闪"（渐变底不受影响，仍属可接受的不完美） */
+body { transition: background-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft); }
 
 /* ============================================================
    严格重制覆盖块（2026-09-19）
@@ -664,5 +573,4 @@ body { transition: background-color var(--dur-slow) var(--ease-soft); }
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .preserve-3d { transform-style: flat !important; }
 }

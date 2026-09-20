@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { usePrefersReducedMotion, EASE } from '../theme/motion'
+import Icon from './ui/Icons'
 
 /**
  * 灶台舞台 —— 订单详情页的「做菜叙事」动画，取代旧版静态状态环 D3StatusRing。
@@ -55,7 +56,7 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
             ? 'radial-gradient(circle, color-mix(in srgb, var(--sage-40) 22%, transparent), transparent 70%)'
             : preparing
               ? 'radial-gradient(circle, color-mix(in srgb, var(--clay-50) 20%, transparent), transparent 70%)'
-              : 'radial-gradient(circle, rgba(154,144,130,0.16), transparent 70%)',
+              : 'radial-gradient(circle, color-mix(in srgb, var(--color-ember) 16%, transparent), transparent 70%)',
         }}
       />
 
@@ -162,7 +163,7 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
                 <span className="stove-flame" style={{ height: 14, animationDelay: '0.5s' }} />
               </div>
             ) : (
-              <span className="absolute left-1/2 -translate-x-1/2 -top-1 text-xs opacity-60">🔥</span>
+              <Icon name="flame" size={14} strokeWidth={1.8} className="absolute left-1/2 -translate-x-1/2 -top-1 opacity-40" />
             )}
           </div>
 
