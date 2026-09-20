@@ -261,6 +261,7 @@ export default function Home() {
         {featured && (
           <motion.div {...contentEnter(0.05)}>
             <SectionHeader
+              index={1}
               title="今日推荐"
               action={
                 <button
@@ -317,9 +318,9 @@ export default function Home() {
                       </p>
                       <p className="font-serif text-2xl font-bold text-[#FFFDF9] truncate mt-1">{featured.name}</p>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <KissIcon className="w-4 h-4 text-[#FFFDF9]" />
-                      <span className="font-serif text-2xl font-bold text-[#FFFDF9] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{featured.price}</span>
+                    <div className="flex items-baseline gap-1 shrink-0">
+                      <KissIcon className="w-4 h-4 shrink-0 translate-y-[-2px] text-[#FFFDF9]" />
+                      <span className="font-serif font-bold text-[#FFFDF9] tabular-nums" style={{ fontSize: '2rem', letterSpacing: '-0.035em', lineHeight: 1 }}><span className="text-[0.55em] mr-0.5">¥</span>{featured.price}</span>
                     </div>
                   </div>
 
@@ -349,6 +350,7 @@ export default function Home() {
         {popular.length > 0 && (
           <motion.div {...contentEnter(0.1)}>
             <SectionHeader
+              index={2}
               title="常点的"
               action={<button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-clay)] font-bold">全部 →</button>}
             />
@@ -402,6 +404,7 @@ export default function Home() {
         {recentOrders.length > 0 && (
           <motion.div {...contentEnter(0.15)}>
             <SectionHeader
+              index={3}
               title="最近订单"
               action={<button onClick={() => navigate('/orders')} className="text-xs text-[var(--color-clay)] font-bold">全部</button>}
             />
