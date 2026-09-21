@@ -3,15 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import KissIcon from './KissIcon'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { EASE, contentEnter, usePrefersReducedMotion } from '../theme/motion'
-import LazySheep from './ui/LazySheep'
-import { heroNameFor } from '../lib/vt'
 
 // ============================================================
 // 抓娃娃点餐机（V3 · 可交互签名组件，2026-09-21 所有者要求"独立可交互有动画特效"）
 // ------------------------------------------------------------
 // 与上一版的根本区别：上一版机构交给素材自带、组件只淡入淡出换菜；
 // 这一版**自绘整套爪钩机构**（轨道 + 滑车 + 缆线 + 三指开合爪），
-// 被抓的玩偶用可表情的自绘 LazySheep，点「抓取」或点罩子即演一遍完整抓取：
+// 被抓的"物品"= 当前主推菜品圆盘（实拍图 / 分类 emoji 兜底），点「抓取」或点罩子即演一遍完整抓取：
 //   下爪 → 合钳(星芒) → 提起 → 横移到出菜口 → 松爪落槽(彩纸+机身一震+抓到浮标) → 换新玩偶落下。
 // 抓到即"抓一个算一个"：落槽一刻回调 onCatch(dish)（Home 接购物车 addItem）。
 // 纪律：
@@ -126,7 +124,6 @@ export default function ClawMachine({
   const held = ['close', 'lift', 'carry'].includes(phase)
   const resting = ['idle', 'aim', 'drop'].includes(phase)
   const falling = phase === 'release'
-  const mood = phase === 'idle' || phase === 'aim' ? 'doze' : phase === 'drop' ? 'sniff' : 'happy'
   const plushTop = resting ? GEO.pileTop : clawTop(cable) + 16
   const plushX = ['carry', 'release'].includes(phase) ? GEO.chuteX : '50%'
 
@@ -191,7 +188,12 @@ export default function ClawMachine({
                   }
                   exit={{ x: '-50%', opacity: 0, transition: { duration: 0.18 } }}
                 >
-                  <LazySheep size={78} mood={mood} breathe={!grabbing} />
+                  {/* 被抓的"物品"= 当前主推菜品圆盘（实拍图 / 分类 emoji 兜底）——抓一个算一个 */}
+                  <div className="relative flex items-center justify-center overflow-hidden"
+                    style={{ width: 92, height: 92, borderRadius: '50%', background: 'var(--plate-bg)', border: '2px solid var(--color-clay-soft)', boxShadow: '0 8px 20px rgba(43,36,41,0.14), inset 0 2px 0 rgba(255,255,255,0.6)' }}>
+                    <span className="text-5xl" style={{ filter: 'var(--tile-img-filter)' }}>{getCategoryEmoji(shown.category)}</span>
+                    {image && <img src={image} alt={shown.name} className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -242,17 +244,6 @@ export default function ClawMachine({
                 </motion.div>
               )}
             </AnimatePresence>
-
-            {/* 主推菜圆盘（右下角小票，供 VT 共享元素） */}
-            {shown && (
-              <div className="absolute z-10" style={{ right: 10, bottom: 10 }}>
-                <div className="vt-dish-frame relative w-[52px] h-[52px] rounded-xl flex items-center justify-center overflow-hidden"
-                  style={{ viewTransitionName: heroNameFor(shown.id), background: 'var(--plate-bg)', border: '2px solid var(--color-clay-soft)' }}>
-                  <span className="text-2xl" style={{ filter: 'var(--tile-img-filter)' }}>{getCategoryEmoji(shown.category)}</span>
-                  {image && <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
-                </div>
-              </div>
-            )}
           </motion.div>
         </div>
 
