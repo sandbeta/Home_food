@@ -12,16 +12,12 @@ export default function Stepper({ value, onChange, min = 1, size = 44, className
     <div className={`flex items-center gap-1.5 ${className}`}>
       <motion.button
         whileTap={{ scale: 0.92 }}
+        whileHover={{ scale: 1.06 }}
         onClick={dec}
         disabled={value <= min}
         aria-label="减少"
         className="rounded-full flex items-center justify-center text-[var(--color-bone)] disabled:opacity-40 disabled:cursor-not-allowed"
-        style={{
-          width: size,
-          height: size,
-          background: 'var(--color-ink-850)',
-          border: '2px solid var(--color-line)',
-        }}
+        style={{ width: size, height: size, background: 'rgba(43,36,41,0.05)' }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
           <line x1="5" y1="12" x2="19" y2="12" />
@@ -40,14 +36,14 @@ export default function Stepper({ value, onChange, min = 1, size = 44, className
 
       <motion.button
         whileTap={{ scale: 0.92 }}
+        whileHover={{ scale: 1.06 }}
         onClick={inc}
         aria-label="增加"
-        className="rounded-full flex items-center justify-center text-[var(--color-on-dark)]"
+        className="rounded-full flex items-center justify-center text-white"
         style={{
           width: size,
           height: size,
           background: 'var(--color-clay)',
-          border: '2px solid var(--clay-deep)',
           boxShadow: '0 2px 8px color-mix(in srgb, var(--clay-50) 28%, transparent)',
         }}
       >

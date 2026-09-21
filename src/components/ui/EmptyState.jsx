@@ -1,19 +1,16 @@
 import { motion } from 'framer-motion'
 import Icon from './Icons'
-import Character from './Character'
+import LazySheep from './LazySheep'
 
 /**
  * 统一空态 —— 取代各页的手写空态变体。已接入：Cart / Menu / AdminDishes /
  * AdminOrders / MyOrders / OrderDetail / DishDetail。
- *
- * 主图三选一（V3 设计稿：空态=角色插画 + 引导按钮）：
- *  - who=CHARACTER 的 key → 官方角色素材（推荐，大尺寸肖像位）
- *  - icon=Icons.jsx 插画名（emptyPlate/stoveOff/potBoil）→ 细线插画
- *  - 否则吃 emoji
+ * icon 传入 Icons.jsx 插画名（emptyPlate/stoveOff）时替换 emoji 呈现，二选一；
+ * icon="lazySheep" 时呈现懒羊羊头像（mood 可选，默认 doze）。
  */
-export default function EmptyState({ emoji = '🍽️', icon, who, title, desc, action, tone, className = '' }) {
-  // tone='error'：警示有温度——光斑与标题交给洋红红家族（bone 反相混色，双主题自动可读）；
-  // 文案/主图/按钮语义不动，色只做氛围强化，不做唯一编码。
+export default function EmptyState({ emoji = '🍽️', icon, mood, title, desc, action, tone, className = '' }) {
+  // tone='error'：警示有温度——光斑与标题交给铁锈红家族（bone 反相混色，双主题自动可读）；
+  // 文案/emoji/按钮语义不动，色只做氛围强化，不做唯一编码。
   const isError = tone === 'error'
   return (
     <motion.div
@@ -21,7 +18,7 @@ export default function EmptyState({ emoji = '🍽️', icon, who, title, desc, 
       animate={{ opacity: 1 }}
       className={`relative flex flex-col items-center justify-center py-16 overflow-hidden ${className}`}
     >
-      {/* 晨光光斑：玫瑰粉 + 鼠尾草双色，呼应双人格 */}
+      {/* 晨光光斑：赤陶 + 鼠尾草双色，呼应双人格 */}
       <div
         className="absolute top-8 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full opacity-15 pointer-events-none"
         style={{ background: isError ? 'radial-gradient(circle, color-mix(in srgb, var(--color-danger) 16%, transparent), transparent 70%)' : 'radial-gradient(circle, color-mix(in srgb, var(--clay-50) 18%, transparent), transparent 70%)' }}
@@ -31,13 +28,13 @@ export default function EmptyState({ emoji = '🍽️', icon, who, title, desc, 
         style={{ background: isError ? 'radial-gradient(circle, color-mix(in srgb, var(--color-danger) 10%, transparent), transparent 70%)' : 'radial-gradient(circle, color-mix(in srgb, var(--sage-40) 16%, transparent), transparent 70%)' }}
       />
 
-      {who ? (
+      {icon === 'lazySheep' ? (
         <motion.div
-          className="mb-5 relative z-10"
+          className="mb-5 relative z-10 text-[var(--color-sage)]"
           animate={{ y: [0, -6, 0] }}
-          transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <Character who={who} size={104} />
+          <LazySheep size={100} mood={mood || 'doze'} />
         </motion.div>
       ) : icon ? (
         <motion.div

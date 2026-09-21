@@ -130,38 +130,26 @@ export default function OrderDetail() {
               )}
             </AnimatePresence>
             <div className="relative z-10">
-              {/* 三段跑灯（V3 设计稿）：当前段 clay 实底，已走完的段转 sage ——
-                  状态不再是页脚一枚小胶囊，而是灶台上方一整排"进度灯"。 */}
-              <div className="flex gap-2 mb-4">
-                {STATUS_FLOW.map((key, idx) => {
-                  const s = STATUS_MAP[key]
-                  const cur = STATUS_FLOW.indexOf(order.status)
-                  const isNow = idx === cur
-                  const isDone = idx < cur
-                  return (
-                    <motion.span
-                      key={key}
-                      initial={false}
-                      animate={isNow && !reduce ? {
-                        scale: [1, 1.06, 1],
-                        boxShadow: [
-                          `0 0 0 0 color-mix(in srgb, ${s.ring[1]} 0%, transparent)`,
-                          `0 0 0 7px color-mix(in srgb, ${s.ring[1]} 26%, transparent)`,
-                          `0 0 0 0 color-mix(in srgb, ${s.ring[1]} 0%, transparent)`,
-                        ],
-                      } : { scale: 1, boxShadow: '0 0 0 0 transparent' }}
-                      transition={{ duration: 0.9, ease: EASE }}
-                      className={`status-seg ${isNow ? 'is-now' : isDone ? 'is-done' : ''}`}
-                    >
-                      <span aria-hidden>{s.emoji}</span>
-                      {s.text}
-                    </motion.span>
-                  )
-                })}
-              </div>
-
               <StoveStage statusKey={order.status} createdAt={order.created_at} />
-              <motion.p key={`desc-${order.status}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+              {/* key=状态：流转到达即重挂，chip 以 ORDER_STATUS 新色脉冲一次（reduced 只淡入换色） */}
+              <motion.span
+                key={order.status}
+                initial={{ opacity: 0 }}
+                animate={reduce ? { opacity: 1 } : {
+                  opacity: 1,
+                  scale: order.status === 'pending' ? 1 : [1, 1.12, 1],
+                  boxShadow: order.status === 'pending'
+                    ? '0 0 0 0 transparent'
+                    : [
+                        `0 0 0 0 color-mix(in srgb, ${status.ring[1]} 0%, transparent)`,
+                        `0 0 0 7px color-mix(in srgb, ${status.ring[1]} 26%, transparent)`,
+                        `0 0 0 0 color-mix(in srgb, ${status.ring[1]} 0%, transparent)`,
+                      ],
+                }}
+                transition={{ delay: 0.4, duration: reduce ? 0.2 : 0.9, ease: EASE }}
+                className="inline-block px-4 py-1 rounded-full text-sm font-bold"
+                style={{ background: status.chipBg, color: status.chipColor }}>{status.text}</motion.span>
+              <motion.p key={`desc-${order.status}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
                 className="text-[var(--color-ash)] text-sm mt-2">{status.desc}</motion.p>
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 > **给接力的 AI / 开发者**：本文档自包含，读完即可接手。
 > **协作铁律：每一次代码/数据/文案修改，都必须同步更新本文档（进度表、文件地图、坑清单按需），随代码一起提交。** 这是项目所有者定的规矩。
-> 最后更新：2026-09-21　代码 HEAD：懒羊羊抓娃娃主题 V3 设计稿落地（本轮提交）　工作区：干净
+> 最后更新：2026-09-19　代码 HEAD：首页封面刊头条轮（impeccable bolder，本轮提交）　工作区：干净
 > 注：本文档自身的 docs 提交在代码 HEAD 之后，仓库实际 HEAD 会多一笔，属正常。
 
 ---
@@ -50,20 +50,6 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 
 **编辑杂志换装（2026-09-17）**：在晨光厨房色板与四大核心语义不变的前提下换装为「编辑杂志质感」——卡片由半透玻璃改为暖纸实底（`--color-glass: #FFF9FB`）+ 发丝边框 + 浅投影；圆角整体收敛（card 28→20px）；品牌渐变从 135° 粉橙对改为 180° 深梅粉/深鼠尾草（低饱和"专色"感）；页面边距 16→20px、区块节奏 20→26px、行高 1.6→1.7、display 字阶 34→40px 收紧字距；PageHeader 改为眉题（kicker 大写字距）+ 大衬线标题 + 底部贯通发丝线；SectionHeader 前缀梅粉短线；首页主推卡徽章改 No.xx 编号眉题。夜宵模式与 reduced-motion 降级逻辑未动。若所有者不喜欢，revert 本轮提交即可整体回退。
 
-**懒羊羊抓娃娃主题 V3 换装（2026-09-21，本轮）** —— 设计稿 `懒羊羊抓娃娃主题设计稿 V3 · 粉色基调`（源文件 `E:\晨光厨房-交付包\lazy-theme-design-20260921T064417653Z\懒羊羊抓娃娃主题设计稿.html`，PDF 同目录 `pdf\20260921\`）落地为**形态层**，色板与圆角标尺**逐值吻合、零改动**：
-
-| 层 | 内容 |
-|---|---|
-| 世界件 | 页头最顶常驻**羊毛云朵檐** `.wool-edge`（吸顶跟随，全站唯一机器语言）；首页/宵夜页尾**草地收边** `.grass-hem`（夜宵自动压暗） |
-| 签名组件 | **ClawMachine 抓娃娃点餐机**：机顶羊毛檐 + 机名 + `No.xx` 糖牌 + 泡泡时钟（clay 实底，实时时间）；玻璃罩内吊官方角色素材 + 主推菜圆盘；出菜口面板（菜名 + caramel 价 + 换一道）；「换一道」= 提走旧的→放下新的 ≈0.95s；自动轮换走底部 clay 进度条 |
-| 描边两档 | `--color-line`（rgba(43,36,41,.14)／夜宵 bone 20% 混色）做**普通卡/瓦片/胶囊**的 2px 可见轮廓；`--clay-deep` 做**签名件**（娃娃机机身、主按钮、激活胶囊、购物车球、加号钮）。原 1px 发丝边退位为"纸的接缝"（区块分隔、页头贯通线、列表行内规则线） |
-| 角色素材 | 官方抠图 PNG 进 `public/lazy-assets/`（12 张）+ `theme/characters.js` 单源映射 + `ui/Character.jsx` 统一样式壳。**分工**：官方素材管大尺寸/静态肖像位（页头徽记 白天懒羊羊·夜宵灰太狼、空态主图、娃娃机吊挂）；自绘 `LazySheep` 管小尺寸+表情（购物车球四表情、加载陪等、灶边陪等、身份徽章、App 骨架环） |
-| 新令牌 | `--plate-bg` 图鉴盘底（双主题同族端点；不消费它会在夜宵下渲染成灰球，实测踩过）；`.pill-tag` 图鉴药丸；`.status-seg` 订单三段跑灯 |
-| 页面层 | 详情页原料改 `.pill-tag`、菜谱小贴士分隔改 2px 虚线；购物车条目改"糖果清单行"（分类圆牌 + 步进器 36px 档）、买单三选恢复三色（AA 金棕描边／我请 clay 实底／TA请 sage 实底——此前三档统一 clay，把 TA 的身份色吞了）；订单详情加三段跑灯；点菜/热门搜索框改糖果胶囊 |
-| 修掉的旧 bug | ①娃娃机曾自绘爪钩叠在"自带爪钩的官方素材"上 → 重影（已删自绘机构，见 DESIGN.md 纪律）②`PayerSelector` 残留已废弃的过冲缓动曲线 `[0.34,1.56,0.64,1]` → 收编 EASE ③夜宵图鉴盘灰球 |
-
-⚠️ 与设计稿的**唯一有意偏离**：设计稿六屏都没有 Hero 大图（全站纯粉纸），而 Menu/DishDetail/Cart/Orders/Profile/Hot 六页仍保留 `FullBleedHero` 底片层（编辑杂志身份的既有语言，本轮未动）。若要完全对齐设计稿，需把这六页的 Hero 一并摘除，并把 DishDetail 的大图改成设计稿里的「图鉴卡 hero-plate」（VT 共享元素形变名 `heroNameFor` 需一并从 FullBleedHero 挪过去）——属独立一轮，见 §8 待办。
-
 ## 4. 架构约定（改代码前先读）
 
 1. **页面转场绝不能带 transform**（App.jsx `pageEnter` 纯 opacity），否则 PageHeader 吸顶失效、FullBleedHero 错乱。位移用 `contentEnter` 放内层。
@@ -94,7 +80,6 @@ src/
 ├── index.css                @theme 色板 + @theme static 标尺 + 组件类(.glass/.d3-*/.section-title)
 ├── theme/
 │   ├── persona.js           PERSONA/ORDER_STATUS/PAYER + helpers（双人格真源）
-│   ├── characters.js        ★官方角色素材单源映射（CHARACTER + CLAW_POOL 轮换池，路径只在此登记）
 │   ├── useTheme.js          ★主题源：时段判定(21-5点night)+手动覆盖仅当时段有效+跨界/回前台自动回归
 │   ├── motion.js            pageEnter(纯opacity!)/contentEnter/cardEntrance/sheetUp/tapScale
 │   └── images.js            HERO_IMAGES/三级图片回退
@@ -116,16 +101,14 @@ src/
 │   ├── D3CartOrb.jsx        购物车球（入场/退场由 DockLayer 编排）
 │   ├── NightSnackSheet.jsx  ★夜宵开屏弹窗（进入夜宵即弹六宫格宵夜，一键加购；App 外壳常驻）
 │   ├── GlassCard / FullBleedHero(name=VT形变名) / KissIcon / AddDishModal（D3StatusRing 已删，见台账"机械债清零"）
-│   ├── ClawMachine.jsx      ★签名组件·抓娃娃点餐机（羊毛檐+泡泡时钟+玻璃罩吊角色+主推圆盘+出菜口；Home/NightHome 共用，夜宵变体 showClock=false）
 │   ├── AmbientLightCanvas.jsx  ★overdrive WebGL 晨光（渐进增强，失败即静默退场回 CSS 光斑）
-│   └── ui/                  共享组件：Icons(细线图标集)/Character(官方角色素材壳)/LazySheep(自绘四表情小羊)/
-│                            DishRow/OrderCard/EmptyState/LoadingState/PayerSelector/Stepper/StatCard/
-│                            SectionHeader/Chip/LuckyDishCard/PageContainer/AdminShell/ThemeToggle(页头夜宵快捷钮)
+│   └── ui/                  共享组件：Icons(细线图标集)/DishRow/OrderCard/EmptyState/
+│                            LoadingState/PayerSelector/Stepper/StatCard/SectionHeader/
+│                            Chip/PageContainer/AdminShell/ThemeToggle(页头夜宵快捷钮)
 ├── pages/                   11 页：Home/NightHome(夜宵专属首页)/Menu/DishDetail/Cart/MyOrders/OrderDetail/
 │                            Profile/Admin/AdminDishes/AdminOrders
 │                            （Checkout、Favorites 已删，路由保留重定向）
 public/dish-images/         菜品预览图：htc/ 169 张（生成 153 + 真实化轮补 16）、real/ 37 张（Wikimedia CC）、dish-*.webp 仅存 11 张（均已被 HowToCook 实拍覆盖，其余 AI 图已删）
-public/lazy-assets/         官方角色抠图 12 张（V3 娃娃机主题）：4 张抓娃娃场景挂点池 + 3 张页头打卡徽记 + 5 张场景点缀；映射见 theme/characters.js
 server/                    家庭本地服务端（零依赖 Node，双击 exe 或 npm run family，见 §10）
 ├── index.cjs              运行入口（CJS，兼 Node SEA exe 入口）：/api 一比一复刻 mockApi + 托管 dist（注入 __CHENGUANG_FAMILY__ 标记）+ 公网写门控（§10.5）+ state.json 原子持久化 + fatal 防闪退
 ├── admin-password.txt     公网管理密码（本机私有，gitignore；不存在=公网管理禁用）
@@ -208,13 +191,10 @@ scripts/
 | 浅粉收口第六轮 | 所有者要「再浅一点的粉、所有 UI 符合粉调」（TA 绿经确认保留）：纸面提浅一档（页底#FCE7F0/区块#FADCE9/次级#F8D0E1/卡面#FFF4F8/药丸#FFF8FB，溶底组随动）；UI 归粉——on-dark 暖米白→#FFF9FC（JSX #FFFDF9 字面量收编 var 消费）、clay-60→#BE4E67 保白字 ≥4.5、灶台暖橙火→玫瑰粉火、灶体灰→梅灰、灶膛口→夜梅色、favicon 初代蜜橘→现主粉、theme-color→页底同值。门槛按真实消费路径全组合 ≥4.5:1 后写入。夜宵/TA 绿/结构零改动。四件套全绿 | 本轮 || 本轮 |
 | 懒羊羊形象化（impeccable craft） | 所有者要求参考《喜羊羊与灰太狼》懒羊羊设计 UI，**明确约束：不改原有色调、不动原有彩蛋**。落地为纯形态层：新 `components/ui/LazySheep.jsx`——冰淇淋卷发型+羊毛刘海+口水巾（sage-30 面饰）细线头像，四表情 mood 系统（doze 犯困/sleep 熟睡/sniff 闻香/happy 满足）+ SheepZzz 飘字；4.5s 统一慢呼吸律动。接入 12 文件：PageHeader 全站页头左侧常驻小羊（晨光 doze/夜宵 sniff）；D3CartOrb 球心 🛒→羊脸（件数 0/1/4/8 触发 sleep→doze→sniff→happy）；LoadingState 锅边趴睡羊+App 骨架环陪睡；EmptyState 加 icon="lazySheep" 分支（Cart 空车用 sleep、Home 空锅引导用 doze）；StoveStage pending 灶边陪睡/preparing 闻香守灶/completed 盘边羊升级为 happy 正脸+💤→zZ；LuckyDishCard 签筒旁小羊摇签时 sniff 摇晃；NightSnackSheet 开张徽标换 sniff；Profile 进阶徽章 chip 的 sheep 线图标换 happy 正脸；Cart 下单庆祝层加 sniff 小羊。**零改动清单**：index.css/sweetCopy.js/persona.js/useTheme.js/motion.js 全部原样（色调令牌与彩蛋文案池零触碰；partnerBadge 进阶、摇一摇抽签、文案随机池行为不变）。新色值零（全消费 var 令牌，p6 门禁 0/0/0）；装饰层 aria-hidden；全部动效 reduced-motion 降级。build/lint/test 全绿（lint 剩 1 条为 CartContext 历史警告）；Chrome 无头截图核验 7 面（day home/menu/cart/profile、night home 弹窗徽标、桌面 1440、注入购物车球的 sniff 态）。注意：LazySheep 的 happy 腮红用 --clay-30、sheepBreath 常量刻意不导出（避 react-refresh 警告） | 本轮 |
 | 懒羊羊 v2 重画（所有者打回） | 所有者看后判定 v1"不是懒羊羊的元素"——细线轮廓缩到 30px 糊成一团，识别特征全丢。**推倒重画为实心插画**，锁死原作四大识别特征：①头顶冰淇淋卷发型（向右盘起的"雪糕"卷，本羊灵魂）②云朵状羊毛刘海帽（下缘波浪压额）③圆白脸+绿豆眼（四表情保留：doze 眼皮下压/sleep 弯闭眼/sniff 圆眼放大+高光+腮红/happy 眯眼笑）④下巴 sage-30 口水巾+扇贝缘；耳朵两瓣白叶。配色仍零新色值：WOOL=--color-on-dark（static 不随夜宵反相）、线稿瞳仁=--clay-deep、巾=sage-30、腮红=clay-30，夜宵下羊长相不变。同步提存在感：页头徽记 30→38（容器 9→11）、购物车球 40→50、空态主图 84→100、灶边 26→32、盘边 34→40、签筒 22→28、徽章 18→24（恢复口水巾）、弹窗 24→30、骨架 17→22、锅边 26→34；MyOrders 空态 stoveOff→lazySheep sleep（所有者截图点名处）、Cart 空车 sleep→doze（睁眼更醒目）。build/lint/p6 门禁全绿；无头截图核验 orders 空态（卷发型+睡眼+绿巾可辨识）与 home 页头徽记。截图踩坑复记：lazy 分块页（cart/profile）无头截图常空白=分块未及加载的时序假象，须以 dump-dom 计数为准（羊 svg 2/文案在/无 React error） | 本轮 |
-| **懒羊羊抓娃娃主题 V3 落地**（本轮） | 所有者给《懒羊羊抓娃娃主题设计稿 V3·粉色基调》，要求「按设计稿重构 UI，保留原有功能」。上一轮已落一半（ClawMachine/characters.js/lazy-assets/Home+NightHome 换装，未提交），本轮补齐并修缺陷：**修重影**——官方挂点素材自带横梁+缆线+带爱心的爪钩，组件又自绘一套 ClawHook/rail/bar/rop，叠起来双爪（删自绘机构，改为整幅素材 150×150 contain 顶对齐，四张纵横比都 <1 故挂点天然对齐；抓取演出改为"提走旧的→放下新的"两拍 ≈0.95s）；**修灰球**——图鉴盘底 `radial-gradient(on-dark → surface)` 两端分属反相/不反相色系，夜宵下渲染成灰球（新增 `--plate-bg` 双主题同族令牌，娃娃机圆盘 + DishRow 缩略图接入）；**修吞色**——PayerSelector 三档曾统一 `d3-btn-primary`（全 clay），把 TA 的 sage 身份色吞了（恢复设计稿三色：AA 金棕描边／我请 clay 实底／TA请 sage 实底），并清掉该文件残留的已废弃过冲曲线。**世界层**：`--color-line` 描边两档（普通卡 2px 可见糖果轮廓／签名件 2px clay-deep；原 1px 发丝边退位为"纸的接缝"），页头最顶常驻羊毛云朵檐，页尾草地收边；**材质层 12 个组件**（PageHeader 官方角色徽记+羊毛檐、Chip、Stepper、DishRow 图鉴圆牌、Character 新建、EmptyState 空态改官方素材、GlassCard、FloatingPillNav/D3CartOrb/ThemeToggle 描边、OrderCard 芯片、PayerSelector）；**页面层**（详情 pill-tag 原料 + 虚线小贴士、购物车糖果清单行 + 分类圆牌 + 步进器 36px 档、订单三段跑灯 `.status-seg`、点菜/热门搜索改糖果胶囊）。`CartContext` 加 `category` 字段（1 行，购物车圆牌用；旧本地购物车无此字段 → `getCategoryEmoji` 回退 🍽️，无需迁移）。四件套全绿（build/lint 1 条 CartContext 历史警告/test 8 项/p6 门禁 0·0·0），Edge 实测截图 8 张逐屏目检（白天首页/点菜/详情/购物车/订单详情 + 夜宵首页弹窗与静态；夜宵盘底修复前后对比确认）。**与设计稿唯一有意偏离**：六屏设计稿无 Hero 大图，本项目 Menu/DishDetail/Cart/Orders/Profile/Hot 六页仍保留 FullBleedHero（既有编辑杂志语言），未擅自摘除，列为 §8 待办请所有者拍板 | 本轮 |
 
 ## 8. 已知待办 / 候选项
 
-- **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。
 - 测试覆盖仅 mockApi 冒烟（8 项），UI 组件无自动化测试——demo 项目可接受，引入框架时优先补 DishRow/OrderCard。
-- 官方角色素材（`public/lazy-assets/`）为本人非商用家庭自用；若要对外分发，需替换为自绘 LazySheep 或取得授权。
 - ~~D3StatusRing 内圈一处 rgba(0,0,0,0.5) 暗影为有意保留~~ ✅ 组件整体已删（死文件零引用，见台账"机械债清零"）；--ring-size 令牌仍由 StoveStage 消费。
 - ~~AddDishModal 旧命名残留~~ ✅ 已清零（见台账「旧命名清零」）；~~preview 落后~~ ✅ 已同步（但 clay-60 回退与色阶绑定后的 preview 仍未重建，观感等价影响小）。
 - ~~hover/active 状态色绑定色阶~~ ✅ 人格色家族已全量绑定（见台账「色阶绑定收敛」）；ink 系中性灰 rgba **有意不绑**——--color-bone 在夜宵模式反相，若 rgba 绑 bone 会改变暗底观感（违反等价原则），需要时另立语义令牌。

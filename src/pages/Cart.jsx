@@ -12,20 +12,12 @@ import PayerSelector from '../components/ui/PayerSelector'
 import Stepper from '../components/ui/Stepper'
 import EmptyState from '../components/ui/EmptyState'
 import LazySheep from '../components/ui/LazySheep'
-import { getCategoryEmoji } from '../lib/categoryIcons'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { cardEntrance, EASE, usePrefersReducedMotion } from '../theme/motion'
 import { pickOne, CART_TITLES, CART_NOTES, ORDER_PLACED_NOTE } from '../lib/sweetCopy'
 import { tap, vibrate } from '../lib/sfx'
 
-/**
- * 购物车条目 —— V3 设计稿的"糖果清单行"：
- * 分类图鉴圆牌 + 菜名 + caramel 单价 + 步进器 + 移除。
- * 条目自己是一枚 2px 糖果描边小卡，坐在人格分组卡（我点的 / TA 点的）里面——
- * 卡套卡在这里是"清单纸片贴在分组封套上"的分组感，不是重复边框。
- * 步进器 36px 档（22–44 双档的中间档）：比页内 44px 收敛，又守住触达下限。
- */
 function CartRow({ item, onUpdate, onRemove }) {
   return (
     <motion.div
@@ -33,16 +25,8 @@ function CartRow({ item, onUpdate, onRemove }) {
       initial={{ opacity: 0, x: -15 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 15, height: 0 }}
-      className="flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-tile)]"
-      style={{ background: 'var(--surface)', border: '2px solid var(--color-line)' }}
+      className="flex items-center gap-3 py-1.5"
     >
-      <div
-        className="w-9 h-9 shrink-0 rounded-[12px] flex items-center justify-center text-base"
-        style={{ background: 'var(--color-ink-850)', border: '2px solid var(--color-line)' }}
-      >
-        {getCategoryEmoji(item.category)}
-      </div>
-
       <div className="flex-1 min-w-0">
         <h3 className="font-sans font-semibold text-sm text-[var(--color-bone)] truncate">{item.name}</h3>
         <div className="flex items-center gap-1 mt-0.5">
@@ -54,18 +38,17 @@ function CartRow({ item, onUpdate, onRemove }) {
       <Stepper
         value={item.quantity}
         min={1}
-        size={36}
         onChange={(v) => onUpdate(item.dish_id, v, item.added_by)}
       />
 
       <motion.button
         whileTap={{ scale: 0.94 }}
+        whileHover={{ scale: 1.08 }}
         onClick={() => onRemove(item.dish_id, item.added_by)}
         aria-label={`移除${item.name}`}
-        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[var(--color-ash)] active:text-[var(--color-danger)]"
-        style={{ border: '2px solid var(--color-line)' }}
+        className="text-[var(--color-ash)] active:text-[var(--color-danger)] ml-0.5 shrink-0"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
           <line x1="18" y1="6" x2="6" y2="18" />
           <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
@@ -186,7 +169,8 @@ export default function Cart() {
 
       {items.length === 0 ? (
         <EmptyState
-          who="badgeDay"
+          icon="lazySheep"
+          mood="doze"
           title="还没选好呀"
           desc="饿了吗？去点点好吃的吧~"
           action={
@@ -210,7 +194,7 @@ export default function Cart() {
                 <span className="font-bold text-[var(--color-bone)]">我点的</span>
                 <span className="ml-auto text-sm font-bold text-[var(--color-clay)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{meTotal}</span>
               </div>
-              <div className="space-y-2">
+              <div>
                 <AnimatePresence>
                   {meItems.map((item) => (
                     <CartRow
@@ -233,7 +217,7 @@ export default function Cart() {
                 <span className="font-bold text-[var(--color-bone)]">TA 点的</span>
                 <span className="ml-auto text-sm font-bold text-[var(--color-sage)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{partnerTotal}</span>
               </div>
-              <div className="space-y-2">
+              <div>
                 <AnimatePresence>
                   {partnerItems.map((item) => (
                     <CartRow
@@ -286,7 +270,6 @@ export default function Cart() {
             style={{
               borderRadius: 'var(--radius-card)',
               background: 'var(--anchor-ink)',
-              border: '2px solid var(--clay-deep)',
               boxShadow: 'var(--shadow-4)',
               padding: 'var(--space-card-p)',
             }}
@@ -322,7 +305,6 @@ export default function Cart() {
                 borderRadius: 'var(--radius-btn)',
                 background: 'var(--color-on-dark)',
                 color: 'var(--color-clay)',
-                border: '2px solid var(--clay-deep)',
                 boxShadow: 'var(--shadow-2)',
               }}
             >

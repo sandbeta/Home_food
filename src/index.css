@@ -75,13 +75,6 @@
   --color-on-sage: #1A2417;   /* sage 实底上的深绿字（TA 侧反色唯一值） */
   --color-ember: #9C8F96;     /* 熄火余温梅灰（=ORDER_STATUS.pending.ring，StoveStage 待机柔光） */
 
-  /* —— 糖果描边（V3 设计稿 --line，2026-09-21 娃娃机世界层）——
-     发丝边（--color-glass-border，8%）是"纸的接缝"，只够暗示分层；
-     娃娃机世界要的是可见轮廓——糖果外框。故单立 14% 一档：
-     亮色=墨的低浓度，夜宵=骨白 20% 混色（合成后 ≈ #4D4347，与设计稿 n-line #463B44 同档）。
-     消费规则：普通卡片/瓦片/输入用 --color-line；签名件（娃娃机机身、主按钮、激活胶囊）用 --clay-deep。 */
-  --color-line: rgba(43, 36, 41, 0.14);
-
   /* —— Open Color 法双人格色阶 ——
      推导：open-color v1.9.1 全 13 色族 130 值转 CIE LCh(D65)，逐档取均值成标准曲线，
      以现主色为锚点做「明度加法平移 + 彩度比值缩放 + 色相均值漂移」，越出色域者裁剪彩度。
@@ -107,12 +100,6 @@
   --sage-70: #6E9269;
   --sage-80: #62835D;
   --sage-90: #557351;
-
-  /* —— 图鉴盘底（V3 设计稿：菜品/角色的圆形图鉴位）——
-     必须单独成令牌：早期写法 `radial-gradient(on-dark → surface)` 在夜宵下
-     会从奶油白渐变到夜纸黑，渲染成一颗"灰球"（on-dark 不反相、surface 反相，
-     两个端点分属不同色系）。这里两端都取同族表面色，双主题各自成立。 */
-  --plate-bg: radial-gradient(circle at 50% 34%, var(--color-on-dark), var(--color-ink-850) 78%);
 
   /* —— 遮罩 / 背景（夜宵模式反相点：亮暗两档只换这几个令牌） —— */
   --scrim-top: rgba(252, 231, 240, 0.88);          /* PageHeader 吸顶渐隐 */
@@ -241,7 +228,7 @@ input, textarea { caret-color: var(--color-clay); }
 /* ========== 玻璃系统 ========== */
 .glass {
   background: var(--color-glass);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-glass-border);
   -webkit-backdrop-filter: blur(8px) saturate(110%);
   backdrop-filter: blur(8px) saturate(110%);
 }
@@ -268,7 +255,7 @@ input, textarea { caret-color: var(--color-clay); }
   z-index: 10;
   border-radius: var(--radius-card);
   background: var(--color-glass);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-glass-border);
   -webkit-backdrop-filter: blur(8px) saturate(110%);
   backdrop-filter: blur(8px) saturate(110%);
   box-shadow: 0 2px 10px rgba(43, 36, 41, 0.05);
@@ -288,7 +275,6 @@ input, textarea { caret-color: var(--color-clay); }
 .d3-btn-primary {
   background: var(--color-clay);
   color: #FFF9FC;
-  border: 2px solid var(--clay-deep);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .d3-btn-primary:hover {
@@ -303,7 +289,7 @@ input, textarea { caret-color: var(--color-clay); }
   font-weight: 600;
   font-size: 0.8125rem;
   background: var(--surface); /* 对比度修复：默认实底，小字不再浮在照片上 */
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-glass-border);
   transition: opacity 0.15s ease, transform 0.15s ease, background 0.2s ease, color 0.2s ease;
 }
 .d3-btn-sm:active { transform: scale(0.97); opacity: 0.85; }
@@ -311,7 +297,7 @@ input, textarea { caret-color: var(--color-clay); }
 /* ========== Input ========== */
 .d3-input {
   background: rgba(43, 36, 41, 0.03);
-  border: 2px solid var(--color-line);
+  border: 1px solid var(--color-glass-border);
   border-radius: var(--radius-btn);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
@@ -505,10 +491,6 @@ input, textarea { caret-color: var(--color-clay); }
   --color-glass: rgba(243, 236, 239, 0.08);
   --surface: #2E2229; /* 夜宵内容卡面：深莓紫实面 */
   --color-glass-border: rgba(243, 236, 239, 0.16);
-  /* 糖果描边夜宵档：由 bone 反相值派生（20% 混色合成 ≈ #4D4347），不另立色值 */
-  --color-line: color-mix(in srgb, var(--color-bone) 20%, transparent);
-  /* 图鉴盘底夜宵档：两端都是暗底同族表面色，不再用 on-dark（它不反相，会泛灰ball） */
-  --plate-bg: radial-gradient(circle at 50% 34%, var(--color-ink-800), var(--color-ink-900) 78%);
   /* 遮罩与背景反相 */
   --scrim-top: rgba(36, 27, 33, 0.85);
   --glass-strong: rgba(46, 34, 41, 0.90); /* 停靠药丸：夜宵改为暗玻璃 */
@@ -560,16 +542,15 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
   backdrop-filter: none;
 }
 
-/* 双人格卡：由"半透明渐变玻璃"改为"实面色 + 人格色描边/晕影"，温度对比保留；
-   V3 设计稿统一糖果描边后，人格卡描边也由 1px 升到 2px（人格色优先于通用 --color-line） */
+/* 双人格卡：由"半透明渐变玻璃"改为"实面色 + 人格色描边/晕影"，温度对比保留 */
 .glass-me {
   background: color-mix(in srgb, var(--clay-00) 55%, var(--surface));
-  border: 2px solid color-mix(in srgb, var(--clay-50) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--clay-50) 40%, transparent);
   box-shadow: 0 10px 30px rgba(43, 36, 41, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--clay-50) 10%, transparent);
 }
 .glass-partner {
   background: color-mix(in srgb, var(--sage-00) 55%, var(--surface));
-  border: 2px solid color-mix(in srgb, var(--sage-40) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sage-40) 40%, transparent);
   box-shadow: 0 10px 30px rgba(43, 36, 41, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--sage-40) 10%, transparent);
 }
 [data-theme="night"] .glass-me {
@@ -620,119 +601,6 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
   filter: blur(28px);
   z-index: 1;
 }
-
-/* ========== 懒羊羊抓娃娃机 · 世界件（2026-09-21 · V3 设计稿落地） ==========
-   色值全部引用既有令牌（clay 系/on-dark/sage/love），零新色值。 */
-
-/* 羊毛云朵檐：娃娃机机顶的波浪白檐（radial 波瓣拼接，可平铺） */
-.wool-edge {
-  height: 26px;
-  background:
-    radial-gradient(circle 12px at 12px 100%, var(--color-on-dark) 11px, transparent 12px),
-    radial-gradient(circle 16px at 36px 100%, var(--color-on-dark) 15px, transparent 16px),
-    radial-gradient(circle 12px at 60px 100%, var(--color-on-dark) 11px, transparent 12px);
-  background-size: 72px 100%;
-  background-repeat: repeat-x;
-  filter: drop-shadow(0 2px 0 rgba(43, 36, 41, 0.12));
-}
-
-/* 草地收边：页面底部双波草皮（亮/暗一档绿叠厚度，夜宵自动压暗） */
-.grass-hem {
-  height: 28px;
-  background:
-    radial-gradient(circle 16px at 16px 100%, var(--color-sage) 15px, transparent 16px),
-    radial-gradient(circle 11px at 44px 100%, var(--sage-60) 10px, transparent 11px);
-  background-size: 62px 100%;
-  background-repeat: repeat-x;
-}
-[data-theme="night"] .grass-hem { filter: brightness(0.62) saturate(0.8); }
-
-/* 泡泡时钟：机顶 clay 实底胶囊（on-dark 白字，达 AA） */
-.claw-clock {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  background: var(--color-clay);
-  border: 2px solid var(--clay-deep);
-  border-radius: 999px;
-  padding: 4px 14px;
-}
-.claw-clock .time {
-  font-family: var(--font-serif);
-  font-size: 1.25rem; font-weight: 700; letter-spacing: 0.1em;
-  color: var(--color-on-dark); font-variant-numeric: tabular-nums lining-nums;
-}
-.claw-clock .date { font-size: 0.62rem; font-weight: 700; line-height: 1.2; color: var(--color-on-dark); opacity: 0.92; }
-
-/* 玻璃罩：机内天空（白天樱粉渐白 / 夜宵夜纸渐深） */
-.claw-case {
-  background: linear-gradient(180deg, #FDEFF4 0%, var(--surface) 62%);
-}
-[data-theme="night"] .claw-case {
-  background: linear-gradient(180deg, var(--color-ink-800) 0%, var(--surface) 62%);
-}
-
-/* 悬挂轨道/横梁/缆线：**不画**。
-   官方角色素材（lazy-apple / meimei-lolli / hui-cupcake / lazy-medal）本身就是
-   完整的抓娃娃场景——画面内已含横梁 + 缆线 + 带爱心的爪钩 + 被夹住的角色。
-   再叠一层自绘机构会重影，故机构交给素材自带，组件只负责"提走旧的、放下新的"。 */
-
-/* 出菜口面板：区块底 + 内高光线（奶油立体感）+ 糖果描边上唇 */
-.claw-tray {
-  background: linear-gradient(180deg, var(--surface), var(--color-ink-850));
-  border-top: 2px solid var(--color-line);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-on-dark) 70%, transparent);
-}
-
-/* 角色轻摆（挂在爪下的"被抓"感；reduced 由全局降级块停摆） */
-@keyframes hang-sway { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
-.hang-sway { animation: hang-sway 3s ease-in-out infinite; transform-origin: top center; }
-
-/* 悬赏挂位：素材盒固定 150×150 + object-contain + 顶对齐。
-   池内四张素材纵横比都 <1（高瘦），contain 后高度撑满盒高 → 素材自带的横梁
-   天然贴在盒顶，读作"从机顶横梁吊下来"；四张素材挂点因此绝对对齐，无需逐张调参。 */
-.claw-sprite {
-  width: 150px;
-  height: 150px;
-  object-fit: contain;
-  object-position: top center;
-  filter: drop-shadow(0 6px 0 rgba(43, 36, 41, 0.10));
-}
-
-/* 图鉴卡药丸标签（设计稿 .pill-tag）：原料/难度/热量等行内数据 */
-.pill-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border: 2px solid var(--color-line);
-  border-radius: 999px;
-  padding: 4px 12px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: var(--color-ink-850);
-  color: var(--color-ash);
-}
-
-/* 订单状态三段跑灯（设计稿 .status-row）：当前段 clay 实底高亮，已走完的段转 sage。
-   clay 用于此处的理由：它是"进行中"的进行态，与 StoveStage 灶火同色同义，
-   不是被打扮的装饰底（见 DESIGN.md One Voice 的豁免条款）。 */
-.status-seg {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 4px;
-  border-radius: 999px;
-  border: 2px solid var(--color-line);
-  background: var(--surface);
-  color: var(--color-ash);
-  font-size: 0.75rem;
-  font-weight: 700;
-  transition: background-color var(--dur-slow) var(--ease-soft),
-    color var(--dur-slow) var(--ease-soft),
-    border-color var(--dur-slow) var(--ease-soft);
-}
-.status-seg.is-now { background: var(--color-clay); color: var(--color-on-dark); border-color: var(--clay-deep); }
-.status-seg.is-done { background: var(--color-sage); color: var(--color-on-sage); border-color: var(--sage-60); }
 
 /* ========== 动效降级 ========== */
 @media (prefers-reduced-motion: reduce) {

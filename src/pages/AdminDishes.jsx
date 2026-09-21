@@ -97,7 +97,7 @@ export default function AdminDishes() {
                         borderRadius: 'var(--radius-ctl)',
                         background: 'var(--surface)',
                         color: 'var(--color-ash)',
-                        border: '2px solid var(--color-line)',
+                        border: '1px solid var(--color-glass-border)',
                       }}
                     >
                       {dish.available ? '✓ 上架' : '已下架'}
@@ -111,7 +111,7 @@ export default function AdminDishes() {
                         borderRadius: 'var(--radius-ctl)',
                         background: 'var(--surface)',
                         color: 'var(--color-bone)',
-                        border: '2px solid var(--color-line)',
+                        border: '1px solid var(--color-glass-border)',
                       }}
                     >
                       编辑

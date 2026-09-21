@@ -18,7 +18,7 @@ export default function ThemeToggle() {
       className="w-10 h-10 rounded-full flex items-center justify-center text-base"
       style={{
         background: 'var(--color-glass)',
-        border: '2px solid var(--color-line)',
+        border: '1px solid var(--color-glass-border)',
         boxShadow: 'var(--shadow-1)',
       }}
     >

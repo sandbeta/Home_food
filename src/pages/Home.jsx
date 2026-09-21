@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
-import ClawMachine from '../components/ClawMachine'
+import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
 import PageContainer from '../components/ui/PageContainer'
 import SectionHeader from '../components/ui/SectionHeader'
@@ -11,7 +11,8 @@ import ThemeToggle from '../components/ui/ThemeToggle'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
-import { contentEnter, usePrefersReducedMotion } from '../theme/motion'
+import { contentEnter, EASE, usePrefersReducedMotion } from '../theme/motion'
+import { HERO_IMAGES } from '../theme/images'
 import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { morphTo, heroNameFor, cacheList } from '../lib/vt'
 
@@ -23,6 +24,11 @@ function getGreeting() {
   return '晚上好'
 }
 
+// 封面刊头条的竖排日期（实时信息，非文案池内容）
+function todayLine() {
+  const d = new Date()
+  return `${d.getMonth() + 1}月${d.getDate()}日 周${'日一二三四五六'[d.getDay()]}`
+}
 
 // 常点人 mock：按菜品 id 稳定分配 🐱/🐑，让双人格出现在首页网格里
 const chefOf = (dish) => (dish.id % 2 === 0 ? 'me' : 'partner')
@@ -55,6 +61,12 @@ export default function Home() {
   const [sweetNote] = useState(() => pickOne(HOME_NOTES))
   const navigate = useNavigate()
   const reduced = usePrefersReducedMotion()
+  // 刊头条的期号 = 年内第几周（实时信息）
+  const weekNo = (() => {
+    const now = new Date()
+    const start = new Date(now.getFullYear(), 0, 1)
+    return Math.ceil(((now - start) / 86400000 + start.getDay() + 1) / 7)
+  })()
 
   useEffect(() => {
     fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3))).catch(() => {})
@@ -116,27 +128,101 @@ export default function Home() {
 
   return (
     <div className="relative">
+      <FullBleedHero src={HERO_IMAGES.home} variant="immersive" alt="今日美食" />
+
       <PageHeader title={`${getGreeting()}，${NICKNAME}`} subtitle={sweetNote} right={<ThemeToggle />} />
 
       <PageContainer>
-        {/* —— 抓娃娃点餐机（V3 设计稿签名交互）：主页第一焦点 ——
-            主推菜住玻璃罩，"换一道"=爪子垂下抓取；泡泡时钟常驻机顶。
-            悬停暂停自动轮换的口径与旧版一致。 */}
-        {featured && (
-          <div
-            onMouseEnter={() => setPaused(true)}
-            onMouseLeave={() => setPaused(false)}
-          >
-            <ClawMachine
-              dish={featured}
-              indexNo={(rotIdx % rotSource.length) + 1}
-              onGrab={nextDish}
-              onOpen={() => navigate(`/dish/${featured.id}`)}
-              rotate={canRotate ? { key: `${featured.id}-${rotateToken}-${paused}-${tabVisible}`, durationMs: ROTATE_MS } : null}
-            />
+        {/* —— 封面刊头条（bolder 2026-09-19）：杂志封面语言 ——
+            超大衬线刊名拆两行错位排布（晨光右上起、厨房右下收），书脊侧竖排日期，
+            封面菜照片卡倾斜叠压刊名右下（图文叠压），
+            folio 小字行（刊名英文 + 期号日期）压在大字之下、发丝线之上——
+            杂志封面的正典顺序：报头是主角，刊号信息退为页脚注。
+            整条落在 hero 底图上沿、靠加浓的 wash 顶部保对比；
+            入场位移全在内层 motion，外层不带 transform。 */}
+        <motion.div {...contentEnter(0.04)} className="relative">
+          <div className="relative">
+            {/* 书脊竖排日期 */}
+            <span
+              aria-hidden="true"
+              className="absolute left-0 top-2 text-[10px] font-bold"
+              style={{ writingMode: 'vertical-rl', letterSpacing: '0.3em', color: 'var(--color-ash)' }}
+            >
+              {todayLine()}
+            </span>
+            {/* 错位刊名：两行大字各占一角，中间留出对角线张力 */}
+            <h2
+              className="font-serif font-bold"
+              style={{
+                fontSize: 'clamp(52px, 15vw, 74px)',
+                lineHeight: 0.94,
+                letterSpacing: '-0.035em',
+                color: 'var(--color-bone)',
+              }}
+            >
+              <span className="block" style={{ paddingLeft: 44 }}>晨光</span>
+              <span className="block text-right" style={{ paddingRight: 112 }}>厨房</span>
+            </h2>
+            {/* 封面菜照片卡：倾斜 5° 叠压刊名第二行右角 */}
+            {featured && (
+              <motion.button
+                type="button"
+                {...contentEnter(0.14)}
+                whileTap={{ scale: 0.96 }}
+                onClick={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
+                aria-label={`封面菜：${featured.name}`}
+                className="absolute right-0 -bottom-4 w-[124px] text-left cursor-pointer"
+              >
+                <span className="block rotate-[5deg]">
+                  <span
+                    className="d3-card-face block overflow-hidden"
+                    style={{ borderRadius: 'var(--radius-tile)', boxShadow: 'var(--shadow-4)' }}
+                  >
+                    <span
+                      className="vt-dish-frame relative flex h-[124px] items-center justify-center text-5xl overflow-hidden"
+                      style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))', viewTransitionName: heroNameFor(featured.id) }}
+                    >
+                      <span>{getCategoryEmoji(featured.category)}</span>
+                      {getDishImage(featured) && (
+                        <img
+                          src={getDishImage(featured)}
+                          alt=""
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full object-cover"
+                          onError={(e) => { e.currentTarget.style.display = 'none' }}
+                        />
+                      )}
+                    </span>
+                  </span>
+                  <span
+                    className="mt-1.5 block text-right text-[10px] font-bold truncate"
+                    style={{ color: 'var(--color-ash)', letterSpacing: '0.06em' }}
+                  >
+                    封面 · {featured.name}
+                  </span>
+                </span>
+              </motion.button>
+            )}
+            {/* folio 行：英文刊名 + 期号，左对齐一行读完；右侧整块让给悬挂的封面卡 */}
+            <div className="relative mt-4 flex items-baseline gap-3">
+              <span
+                className="text-[10px] font-bold uppercase truncate"
+                style={{ letterSpacing: '0.18em', color: 'var(--color-ash)' }}
+              >
+                The Kitchen Zine
+              </span>
+              <span aria-hidden="true" style={{ width: 18, borderTop: '1px solid var(--color-glass-border)' }} />
+              <span
+                className="shrink-0 font-serif text-sm font-bold tabular-nums"
+                style={{ color: 'var(--clay-deep)' }}
+              >
+                No.{String(weekNo).padStart(2, '0')}
+              </span>
+            </div>
           </div>
-        )}
-
+          {/* 刊头条收口发丝线：与页头分隔线同一套栏目语言；留出封面卡卡注的下垂高度 */}
+          <div className="ink-reveal-line" style={{ borderTop: '1px solid var(--color-glass-border)', marginTop: 32 }} />
+        </motion.div>
         {homeFailed && !dishes.length && (
           <EmptyState
             emoji="📡" tone="error"
@@ -157,7 +243,8 @@ export default function Home() {
         {homeLoading && !dishes.length && !homeFailed && <LoadingState text="开火备菜中…" />}
         {!homeLoading && !homeFailed && !dishes.length && (
           <EmptyState
-            who="badgeDay"
+            icon="lazySheep"
+            mood="doze"
             title="厨房还空着"
             desc="懒羊羊盯着空锅，去点菜页挑几道开火"
             action={
@@ -172,11 +259,100 @@ export default function Home() {
             }
           />
         )}
+        {/* 今日主推 —— 全页深色锚点：clay 实底 + 白字大号 serif 价格 */}
+        {featured && (
+          <motion.div {...contentEnter(0.05)}>
+            <SectionHeader
+              index={1}
+              title="今日推荐"
+              action={
+                <button
+                  onClick={nextDish}
+                  className="text-xs text-[var(--color-clay)] font-bold"
+                >
+                  换一道 →
+                </button>
+              }
+            />
+            <div
+              className="relative mt-3"
+              onMouseEnter={() => setPaused(true)}
+              onMouseLeave={() => setPaused(false)}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={featured.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.28, ease: EASE }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => navigate(`/dish/${featured.id}`)}
+                  className="relative overflow-hidden cursor-pointer"
+                  style={{
+                    borderRadius: 'var(--radius-card)',
+                    background: 'var(--anchor-ink)',
+                    boxShadow: 'var(--shadow-4)',
+                  }}
+                >
+                  <div
+                    className="relative h-44 overflow-hidden flex items-center justify-center"
+                    style={{ background: 'color-mix(in srgb, var(--color-on-dark) 16%, transparent)' }}
+                  >
+                    <div
+                      className="absolute w-44 h-44 rounded-full"
+                      style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-on-dark) 22%, transparent), transparent 70%)' }}
+                    />
+                    <span className="text-7xl relative">{getCategoryEmoji(featured.category)}</span>
+                    {getDishImage(featured) && (
+                      <img
+                        src={getDishImage(featured)}
+                        alt={featured.name}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        onError={(e) => { e.currentTarget.style.display = 'none' }}
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-end justify-between gap-3 px-5 pb-4 pt-3.5">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.18em', color: 'color-mix(in srgb, var(--color-on-dark) 78%, transparent)' }}>
+                        No.{String(rotIdx % rotSource.length + 1).padStart(2, '0')} · 今日主推
+                      </p>
+                      <p className="font-serif text-2xl font-bold text-[var(--color-on-dark)] truncate mt-1">{featured.name}</p>
+                    </div>
+                    <div className="flex items-baseline gap-1 shrink-0">
+                      <KissIcon className="w-4 h-4 shrink-0 translate-y-[-2px] text-[var(--color-on-dark)]" />
+                      <span className="font-serif font-bold text-[var(--color-on-dark)] tabular-nums" style={{ fontSize: '2rem', letterSpacing: '-0.035em', lineHeight: 1 }}><span className="text-[0.55em] mr-0.5">¥</span>{featured.price}</span>
+                    </div>
+                  </div>
+
+                  {/* 轮换进度条：预告下一次切换，让用户不会觉得画面"自己乱动" */}
+                  {canRotate && (
+                    <div
+                      className="absolute bottom-0 left-0 right-0 h-[2px]"
+                      style={{ background: 'color-mix(in srgb, var(--color-on-dark) 18%, transparent)' }}
+                    >
+                      <div
+                        key={`${featured.id}-${rotateToken}-${paused}-${tabVisible}`}
+                        className="h-full rot-progress-bar"
+                        style={{
+                          background: 'color-mix(in srgb, var(--color-on-dark) 78%, transparent)',
+                          animationDuration: `${ROTATE_MS}ms`,
+                        }}
+                      />
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+
         {/* 常点的 */}
         {popular.length > 0 && (
           <motion.div {...contentEnter(0.1)}>
             <SectionHeader
-              index={1}
+              index={2}
               title="常点的"
               action={<button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-clay)] font-bold">全部 →</button>}
             />
@@ -230,7 +406,7 @@ export default function Home() {
         {recentOrders.length > 0 && (
           <motion.div {...contentEnter(0.15)}>
             <SectionHeader
-              index={2}
+              index={3}
               title="最近订单"
               action={<button onClick={() => navigate('/orders')} className="text-xs text-[var(--color-clay)] font-bold">全部</button>}
             />
@@ -267,9 +443,6 @@ export default function Home() {
           </motion.div>
         )}
       </PageContainer>
-
-      {/* 牧场草地收边：页面在草皮上落幕（夜宵自动压暗） */}
-      <div aria-hidden="true" className="grass-hem relative z-[2]" style={{ marginTop: 'var(--space-section)' }} />
     </div>
   )
 }

@@ -22,7 +22,7 @@ export function CartProvider({ children }) {
       if (existing) {
         return prev.map(i => i.dish_id === dish.id && i.added_by === whoAmI ? { ...i, quantity: i.quantity + 1 } : i)
       }
-      return [...prev, { dish_id: dish.id, name: dish.name, price: dish.price, category: dish.category, quantity: 1, added_by: whoAmI }]
+      return [...prev, { dish_id: dish.id, name: dish.name, price: dish.price, quantity: 1, added_by: whoAmI }]
     })
   }, [whoAmI])
 

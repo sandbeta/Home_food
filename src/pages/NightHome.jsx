@@ -6,9 +6,9 @@
 // ============================================================
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
-import ClawMachine from '../components/ClawMachine'
+import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
 import PageContainer from '../components/ui/PageContainer'
 import SectionHeader from '../components/ui/SectionHeader'
@@ -16,7 +16,8 @@ import ThemeToggle from '../components/ui/ThemeToggle'
 import { useCart } from '../components/CartContext'
 import { nightPick } from '../lib/nightRules'
 import { getCategoryEmoji, getDishImage } from '../lib/categoryIcons'
-import { contentEnter, cardEntrance, usePrefersReducedMotion } from '../theme/motion'
+import { HERO_IMAGES } from '../theme/images'
+import { contentEnter, cardEntrance, tapScale, usePrefersReducedMotion, EASE } from '../theme/motion'
 import { pickOne, NIGHT_HOME_TITLES, NIGHT_HOME_NOTES } from '../lib/sweetCopy'
 import { vibrate } from '../lib/sfx'
 import { morphTo, heroNameFor, cacheList } from '../lib/vt'
@@ -56,20 +57,61 @@ export default function NightHome() {
 
   return (
     <div className="relative">
+      <FullBleedHero src={HERO_IMAGES.home} variant="immersive" alt="深夜食堂" />
       <PageHeader title={title} subtitle={note} right={<ThemeToggle />} />
 
       <PageContainer>
-        {/* 深夜主推 —— 娃娃机宵夜变体：无泡泡时钟（安静陪吃），手动换一道不自动轮换 */}
+        {/* 深夜主推 —— 深色锚点大卡，可手动换一道（夜宵界面不做自动轮换，安静陪吃） */}
         {featured && (
-          <ClawMachine
-            dish={featured}
-            indexNo={(rotIdx % (pool.length || 1)) + 1}
-            onGrab={() => setRotIdx(i => i + 1)}
-            onOpen={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
-            showClock={false}
-            title="深夜宵夜机"
-            note="深夜主推 · 安静陪吃"
-          />
+          <motion.div {...contentEnter(0.05)}>
+            <SectionHeader
+              title="深夜主推"
+              action={
+                <motion.button whileTap={tapScale} onClick={() => setRotIdx(i => i + 1)} className="text-xs text-[var(--color-clay)] font-bold">
+                  换一道 →
+                </motion.button>
+              }
+            />
+            <div className="relative mt-3">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={featured.id}
+                  initial={{ opacity: 0, scale: reduced ? 1 : 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.26, ease: EASE }}
+                  whileTap={{ scale: 0.985 }}
+                  onClick={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
+                  className="relative overflow-hidden cursor-pointer"
+                  style={{ borderRadius: 'var(--radius-card)', background: 'var(--anchor-ink)', boxShadow: 'var(--shadow-4)' }}
+                >
+                  <div className="relative h-40 overflow-hidden flex items-center justify-center" style={{ background: 'rgba(255, 249, 252,0.16)' }}>
+                    <div className="absolute w-40 h-40 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255, 249, 252,0.22), transparent 70%)' }} />
+                    <span className="text-7xl relative">{getCategoryEmoji(featured.category)}</span>
+                    {getDishImage(featured) && (
+                      <img src={getDishImage(featured)} alt={featured.name} className="absolute inset-0 w-full h-full object-cover"
+                        onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                    )}
+                  </div>
+                  <div className="flex items-end justify-between gap-3 px-5 pb-4 pt-3.5">
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.18em', color: 'color-mix(in srgb, var(--color-on-dark) 78%, transparent)' }}>
+                        LAZY SHEEP · {featured.category}
+                      </p>
+                      <p className="font-serif text-2xl font-bold text-[var(--color-on-dark)] truncate mt-1">{featured.name}</p>
+                      {featured.description && (
+                        <p className="text-xs text-[var(--color-on-dark)]/82 truncate mt-1">{featured.description}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <KissIcon className="w-4 h-4 text-[var(--color-on-dark)]" />
+                      <span className="font-serif text-2xl font-bold text-[var(--color-on-dark)] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{featured.price}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </motion.div>
         )}
 
         {/* 宵夜网格：每格一键加购，不用进详情 */}
@@ -119,9 +161,6 @@ export default function NightHome() {
           </motion.div>
         )}
       </PageContainer>
-
-      {/* 牧场草地收边（夜宵自动压暗） */}
-      <div aria-hidden="true" className="grass-hem relative z-[2]" style={{ marginTop: 'var(--space-section)' }} />
     </div>
   )
 }

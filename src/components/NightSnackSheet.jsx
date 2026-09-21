@@ -90,7 +90,7 @@ export default function NightSnackSheet() {
                   </div>
                 </div>
                 <button onClick={close} aria-label="关闭夜宵推荐"
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform border-2 border-[var(--color-line)] bg-[var(--color-glass)]">
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform border border-[var(--color-glass-border)] bg-[var(--color-glass)]">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                 </button>
               </div>

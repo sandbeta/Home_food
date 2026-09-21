@@ -126,7 +126,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
             aria-checked={soundOn}
             aria-label={soundOn ? '关闭音效' : '开启音效'}
             className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0"
-            style={{ background: 'var(--color-glass)', border: '2px solid var(--color-line)' }}
+            style={{ background: 'var(--color-glass)', border: '1px solid var(--color-glass-border)' }}
           >
             {soundOn ? '🔔' : '🔕'}
           </motion.button>

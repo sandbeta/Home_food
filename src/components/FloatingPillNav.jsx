@@ -36,7 +36,7 @@ export default function FloatingPillNav() {
       style={{
         minHeight: 'var(--dock-h)',
         background: 'var(--glass-strong)',
-        border: '2px solid var(--color-line)',
+        border: '1px solid var(--color-glass-border)',
         boxShadow: 'var(--shadow-3)',
       }}
     >

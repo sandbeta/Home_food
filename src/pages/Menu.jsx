@@ -175,10 +175,9 @@ export default function Menu() {
           })}
         </div>
 
-        {/* 搜索框 —— V3 设计稿：一枚糖果描边胶囊（此前是方卡套输入框，两层边界互相打架） */}
-        <div className={`d3-card-face flex items-center gap-2 px-4 py-2 transition-[box-shadow,border-color] duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}
-          style={{ borderRadius: '999px', background: 'var(--surface)' }}>
-          <motion.svg className={`w-4 h-4 shrink-0 text-[var(--color-ash)] transition-colors duration-300 ${searchFocused ? 'text-[var(--color-clay)]' : ''}`}
+        {/* 搜索框 */}
+        <div className={`d3-card-face flex items-center gap-2 px-3 py-2.5 mb-4 bg-[var(--color-ink-800)]/80 transition-[box-shadow,border-color] duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}>
+          <motion.svg className={`w-4 h-4 text-[var(--color-ash)] transition-colors duration-300 ${searchFocused ? 'text-[var(--color-clay)]' : ''}`}
             viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
             animate={searchFocused ? { rotate: 90 } : { rotate: 0 }}
             transition={{ duration: 0.4, ease: EASE }}>
@@ -187,16 +186,16 @@ export default function Menu() {
           <input value={keyword} onChange={e => setKeyword(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
-            placeholder="想吃什么搜一下…"
-            className="flex-1 min-w-0 bg-transparent border-0 outline-none text-sm text-[var(--color-bone)] placeholder:text-[var(--color-mist)]" />
+            placeholder="搜搜想吃的菜..."
+            className="d3-input bg-transparent flex-1 text-sm placeholder:text-[var(--color-mist)] outline-none" />
           <AnimatePresence>
             {keyword && (
               <motion.button onClick={() => setKeyword('')}
                 initial={{ opacity: 0, scale: 0.9, width: 0 }}
                 animate={{ opacity: 1, scale: 1, width: 'auto' }}
                 exit={{ opacity: 0, scale: 0.8, width: 0 }}
-                transition={{ duration: 0.22, ease: EASE }}
-                className="text-xs text-[var(--color-clay)] font-bold px-1 whitespace-nowrap overflow-hidden shrink-0">清空</motion.button>
+                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                className="text-xs text-[var(--color-clay)] font-bold px-1 whitespace-nowrap overflow-hidden">清空</motion.button>
             )}
           </AnimatePresence>
         </div>

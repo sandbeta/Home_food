@@ -7,7 +7,7 @@ export default function GlassCard({ as: _Tag = 'div', className = '', delay = 0,
   return (
     <motion.div
       {...cardEntrance(delay)}
-      className={`rounded-[var(--radius-card)] border-2 border-[var(--color-line)] bg-[var(--surface)] ${className}`}
+      className={`rounded-[var(--radius-card)] border border-[var(--color-glass-border)] bg-[var(--surface)] ${className}`}
       style={{
         ...style,
         ...(glow
