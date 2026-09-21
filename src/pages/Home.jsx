@@ -14,6 +14,7 @@ import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter, usePrefersReducedMotion } from '../theme/motion'
 import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { morphTo, heroNameFor, cacheList } from '../lib/vt'
+import { useCart } from '../components/CartContext'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -55,6 +56,7 @@ export default function Home() {
   const [sweetNote] = useState(() => pickOne(HOME_NOTES))
   const navigate = useNavigate()
   const reduced = usePrefersReducedMotion()
+  const { addItem } = useCart()
 
   useEffect(() => {
     fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3))).catch(() => {})
@@ -130,6 +132,7 @@ export default function Home() {
             <ClawMachine
               dish={featured}
               indexNo={(rotIdx % rotSource.length) + 1}
+              onCatch={addItem}
               onGrab={nextDish}
               onOpen={() => navigate(`/dish/${featured.id}`)}
               rotate={canRotate ? { key: `${featured.id}-${rotateToken}-${paused}-${tabVisible}`, durationMs: ROTATE_MS } : null}

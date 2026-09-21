@@ -64,6 +64,7 @@ export default function NightHome() {
           <ClawMachine
             dish={featured}
             indexNo={(rotIdx % (pool.length || 1)) + 1}
+            onCatch={addItem}
             onGrab={() => setRotIdx(i => i + 1)}
             onOpen={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
             showClock={false}

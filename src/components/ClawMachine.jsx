@@ -1,29 +1,35 @@
-import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import KissIcon from './KissIcon'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { EASE, contentEnter, usePrefersReducedMotion } from '../theme/motion'
-import { CHARACTER, CLAW_POOL } from '../theme/characters'
+import LazySheep from './ui/LazySheep'
 import { heroNameFor } from '../lib/vt'
 
 // ============================================================
-// 抓娃娃点餐机（V3 设计稿 · 粉色基调落地，2026-09-21）
+// 抓娃娃点餐机（V3 · 可交互签名组件，2026-09-21 所有者要求"独立可交互有动画特效"）
 // ------------------------------------------------------------
-// 首页第一焦点：主推菜住进玻璃罩，罩顶吊着官方角色素材轻摆；
-// 「换一道」= 提走旧的 → 放下新的（两拍 + 一记落定，≈1.0s）。
-// 机顶：羊毛云朵檐 + 机名 + No.xx 编号糖牌 + 泡泡时钟。
+// 与上一版的根本区别：上一版机构交给素材自带、组件只淡入淡出换菜；
+// 这一版**自绘整套爪钩机构**（轨道 + 滑车 + 缆线 + 三指开合爪），
+// 被抓的玩偶用可表情的自绘 LazySheep，点「抓取」或点罩子即演一遍完整抓取：
+//   下爪 → 合钳(星芒) → 提起 → 横移到出菜口 → 松爪落槽(彩纸+机身一震+抓到浮标) → 换新玩偶落下。
+// 抓到即"抓一个算一个"：落槽一刻回调 onCatch(dish)（Home 接购物车 addItem）。
 // 纪律：
-//  - 颜色零硬编码，全部 var() 令牌（单源门禁）
-//  - **不画爪钩/横梁/缆线**：素材自带完整抓娃娃场景，叠自绘机构会重影（见 index.css 注）
-//  - reduced-motion：素材不摆，换菜退化为淡入
-//  - 自动轮换时钟与进度条由 Home 编排，本组件只负责"演"
-//  - 外层不带 transform（转场红线），位移全在内层
+//  - 颜色零硬编码，全 var() 令牌（过 p6 色值门禁）
+//  - 外层不带 transform（转场红线），所有位移在机内元素上
+//  - prefers-reduced-motion：不演行程，直接淡入换新玩偶 + 立即 onCatch
+//  - 图标一律 SVG / 自绘，无 emoji 图标（菜品占位 emoji 是数据不是图标）
 // ============================================================
 
-/* 抓取节拍（ms）：总时长 ≈0.95s，低频装饰动效，不受 UI 300ms 档约束 */
-const BEAT = { lift: 320, land: 400, settle: 200 }
+/* 抓取节拍（ms）——低频签名演出，不受 UI 300ms 档约束（设计稿 A7：娃娃机抓取 ≈1.2s） */
+const BEAT = { drop: 360, close: 170, lift: 460, carry: 330, release: 320, settle: 340 }
+const SEQ = ['drop', 'close', 'lift', 'carry', 'release', 'settle']
 
-/** 泡泡时钟：实时时间糖牌（实时信息，非文案池内容）；宵夜版 visible=false 不渲染 */
+/* 机内几何（px / %） */
+const GEO = { railY: 16, carH: 12, cableUp: 22, cableDown: 112, clawH: 46, pileTop: 150, slotTop: 246, chuteX: '18%' }
+const clawTop = (cable) => GEO.railY + GEO.carH + cable
+
+/** 泡泡时钟：实时时间糖牌（宵夜档 visible=false 不渲染） */
 function BubbleClock({ visible = true }) {
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
@@ -42,88 +48,99 @@ function BubbleClock({ visible = true }) {
   )
 }
 
-/**
- * @param dish      当前主推菜（id 变化即触发抓取演出）
- * @param onGrab    「换一道」回调（Home：手动换 + 重置轮换计时）
- * @param onOpen    点罩进详情（透传 click 事件，供 VT 共享元素形变取卡面）
- * @param indexNo   轮换序号（No.xx 糖牌 + 角色轮换）
- * @param rotate    { key, durationMs } | null —— 自动轮换进度条
- */
+/** 三指爪钩：open 控制指爪外张/合拢，随缆线一起升降 */
+function Claw({ open, x, cable, grabbing }) {
+  const jawRot = open ? 26 : 4
+  return (
+    <motion.div
+      className="absolute z-20 pointer-events-none"
+      style={{ left: x, top: GEO.railY, transform: 'translateX(-50%)' }}
+      animate={{ left: x }}
+      transition={{ duration: grabbing ? BEAT.carry / 1000 : 0.4, ease: EASE }}
+    >
+      {/* 滑车 */}
+      <div style={{ width: 26, height: GEO.carH, borderRadius: 6, background: 'var(--color-clay)', border: '2px solid var(--clay-deep)', margin: '0 auto', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.4)' }} />
+      {/* 缆线 */}
+      <motion.div style={{ width: 2, background: 'var(--clay-deep)', margin: '0 auto' }} animate={{ height: cable }} transition={{ duration: 0.36, ease: EASE }} />
+      {/* 爪头 + 三指 */}
+      <svg width={GEO.clawH} height={GEO.clawH} viewBox="0 0 46 46" style={{ display: 'block', margin: '-2px auto 0', overflow: 'visible' }}>
+        <circle cx="23" cy="6" r="5.5" fill="var(--color-clay)" stroke="var(--clay-deep)" strokeWidth="2" />
+        <circle cx="23" cy="6" r="1.8" fill="var(--color-love)" />
+        {[-1, 0, 1].map((dir) => (
+          <motion.g key={dir} style={{ originX: 23, originY: 10 }}
+            animate={{ rotate: dir === 0 ? 0 : (open ? dir * jawRot : dir * jawRot * 0.16) }}
+            transition={{ duration: 0.18, ease: EASE }}>
+            <path d={dir === 0 ? 'M23 10 L23 30' : `M23 10 Q${23 + dir * 12} 20 ${23 + dir * 10} 31`}
+              fill="none" stroke="var(--clay-deep)" strokeWidth="3" strokeLinecap="round" />
+            <path d={dir === 0 ? 'M23 30 l-3 -4 M23 30 l3 -4' : `M${23 + dir * 10} 31 l${dir * 3} -4`}
+              fill="none" stroke="var(--clay-deep)" strokeWidth="3" strokeLinecap="round" />
+          </motion.g>
+        ))}
+      </svg>
+    </motion.div>
+  )
+}
+
 export default function ClawMachine({
-  dish,
-  onGrab,
-  onOpen,
-  indexNo = 1,
-  rotate,
-  showClock = true,
-  title = '抓娃娃点餐机',
-  note = '今日主推 · 抓到一个算一个',
+  dish, onOpen, onCatch, onGrab, indexNo = 1,
+  rotate, showClock = true,
+  title = '抓娃娃点餐机', note = '今日主推 · 抓到一个算一个',
 }) {
   const reduced = usePrefersReducedMotion()
-  const [shown, setShown] = useState(dish)
-  const [phase, setPhase] = useState('idle') // idle | lift | land | settle
-  const prevId = useRef(dish?.id)
+  const [phase, setPhase] = useState('idle')
+  const [frozen, setFrozen] = useState(dish)   // 抓取期间锁住当前玩偶，防自动轮换中途换菜致动画错乱
+  const [burst, setBurst] = useState(0)      // 星芒/彩纸触发计数
+  const [confetti, setConfetti] = useState(0)
+  const [label, setLabel] = useState(null)   // 抓到浮标 {name, key}
+  const [shake, setShake] = useState(0)
   const timers = useRef([])
+  const grabbing = phase !== 'idle'
+  const shown = grabbing ? frozen : dish
+  const image = shown ? getDishImage(shown) : null
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
+  const after = (ms, fn) => { timers.current.push(setTimeout(fn, ms)) }
 
-  useEffect(() => {
-    if (!dish) return
-    if (dish.id === prevId.current) { setShown(dish); return }
-    prevId.current = dish.id
-    if (reduced) { setShown(dish); return }
-    timers.current.forEach(clearTimeout)
-    timers.current = [
-      setTimeout(() => setPhase('lift'), 30),
-      setTimeout(() => { setShown(dish); setPhase('land') }, 30 + BEAT.lift),
-      setTimeout(() => setPhase('settle'), 30 + BEAT.lift + BEAT.land),
-      setTimeout(() => setPhase('idle'), 30 + BEAT.lift + BEAT.land + BEAT.settle),
-    ]
-  }, [dish, reduced])
+  const runGrab = useCallback(() => {
+    if (grabbing || !dish) return
+    if (reduced) {                       // 降级：不演行程，淡入换新 + 立即结算
+      onCatch?.(dish); onGrab?.()
+      return
+    }
+    setFrozen(dish)
+    let t = 0
+    SEQ.forEach((p) => { after(t, () => setPhase(p)); t += BEAT[p] })
+    after(BEAT.drop, () => setBurst((b) => b + 1))                 // 合钳瞬间星芒
+    after(BEAT.drop + BEAT.close + BEAT.lift + BEAT.carry, () => { // 落槽：彩纸 + 震动 + 结算
+      setPhase('release'); setConfetti((c) => c + 1); setShake((s) => s + 1)
+      setLabel({ name: dish.name, key: Date.now() })
+      onCatch?.(dish)
+    })
+    after(t, () => { setPhase('idle'); onGrab?.() })               // 收尾换新玩偶
+  }, [grabbing, dish, reduced, onCatch, onGrab])
 
-  if (!shown) return null
-  const image = getDishImage(shown)
-  const grabbing = phase !== 'idle'
-  /* 挂爪角色：随轮换序号轮换官方素材池 */
-  const char = CHARACTER[CLAW_POOL[(indexNo - 1) % CLAW_POOL.length]]
-
-  /* 素材位移：提走（升上去淡出）→ 放下（从上方落回，带回弹） */
-  const spriteAnim =
-    phase === 'lift'
-      ? { y: -52, opacity: 0.15, scale: 0.94 }
-      : phase === 'land'
-        ? { y: 0, opacity: 1, scale: 1 }
-        : phase === 'settle'
-          ? { y: [0, -8, 0], opacity: 1, scale: 1 }
-          : { y: 0, opacity: 1, scale: 1 }
-  const spriteDur =
-    phase === 'lift' ? BEAT.lift / 1000 : phase === 'land' ? BEAT.land / 1000 : phase === 'settle' ? BEAT.settle / 1000 : 0.24
+  /* 各相位下爪钩 / 玩偶的目标几何 */
+  const cable = ['drop', 'close'].includes(phase) ? GEO.cableDown : GEO.cableUp
+  const jawOpen = !['close', 'lift', 'carry'].includes(phase)
+  const carX = ['carry', 'release'].includes(phase) ? GEO.chuteX : '50%'
+  const held = ['close', 'lift', 'carry'].includes(phase)
+  const resting = ['idle', 'aim', 'drop'].includes(phase)
+  const falling = phase === 'release'
+  const mood = phase === 'idle' || phase === 'aim' ? 'doze' : phase === 'drop' ? 'sniff' : 'happy'
+  const plushTop = held ? clawTop(GEO.cableUp) + GEO.clawH - 14 : resting ? GEO.pileTop : clawTop(GEO.cableDown) + GEO.clawH - 14
+  const plushX = ['carry', 'release'].includes(phase) ? GEO.chuteX : '50%'
 
   return (
     <motion.div {...contentEnter(0.05)}>
-      {/* 机身外壳：粉纸大卡 + 深梅粉描边（签名件用 clay-deep，与普通糖果描边区分） */}
-      <div
-        className="d3-card-face overflow-hidden"
-        style={{ boxShadow: 'var(--shadow-4)', border: '2px solid var(--clay-deep)' }}
-      >
-        {/* 机顶：羊毛云朵檐 + 机名 + No.xx + 泡泡时钟 */}
+      <div className="d3-card-face overflow-hidden" style={{ boxShadow: 'var(--shadow-4)', border: '2px solid var(--clay-deep)' }}>
+        {/* 机顶：羊毛檐 + 机名 + No.xx 糖牌 + 泡泡时钟 */}
         <div className="relative">
           <div className="wool-edge" aria-hidden="true" />
-          <div
-            className="flex items-center justify-between gap-3 px-4 pt-2.5 pb-3"
-            style={{ borderBottom: '2px dashed var(--color-line)' }}
-          >
+          <div className="flex items-center justify-between gap-3 px-4 pt-2.5 pb-3" style={{ borderBottom: '2px dashed var(--color-line)' }}>
             <div className="flex items-center gap-2 min-w-0">
               <h2 className="font-serif text-xl font-bold text-[var(--color-bone)] truncate">{title}</h2>
-              <span
-                aria-hidden
-                className="shrink-0 inline-flex items-center justify-center px-2 h-[22px] rounded-full font-serif text-[11px] font-bold tabular-nums"
-                style={{
-                  background: 'var(--clay-10)',
-                  color: 'var(--clay-deep)',
-                  border: '2px solid color-mix(in srgb, var(--color-clay) 40%, transparent)',
-                }}
-              >
+              <span aria-hidden className="shrink-0 inline-flex items-center justify-center px-2 h-[22px] rounded-full font-serif text-[11px] font-bold tabular-nums"
+                style={{ background: 'var(--clay-10)', color: 'var(--clay-deep)', border: '2px solid color-mix(in srgb, var(--color-clay) 40%, transparent)' }}>
                 No.{String(indexNo).padStart(2, '0')}
               </span>
             </div>
@@ -131,106 +148,142 @@ export default function ClawMachine({
           </div>
         </div>
 
-        {/* 玻璃罩：吊挂角色（素材自带横梁+爪钩）+ 主推菜圆盘 */}
+        {/* 玻璃罩：可交互抓取舞台（点任意处即演一遍抓取） */}
         <div className="mx-3">
-          <div
-            className="claw-case relative h-[264px] overflow-hidden cursor-pointer"
-            style={{ border: '2px solid var(--color-line)', borderRadius: 'var(--radius-tile)' }}
-            onClick={onOpen}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter') onOpen?.() }}
-            aria-label={`今日主推：${shown.name}，点击查看做法`}
+          <motion.div
+            className="claw-case relative overflow-hidden cursor-pointer"
+            style={{ height: 264, border: '2px solid var(--color-line)', borderRadius: 'var(--radius-tile)' }}
+            animate={shake ? { x: [0, -4, 4, -3, 3, 0] } : { x: 0 }}
+            transition={{ duration: 0.4, ease: EASE }}
+            onClick={runGrab}
+            role="button" tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); runGrab() } }}
+            aria-label={`抓娃娃点餐机，当前主推 ${shown?.name ?? ''}，点按抓取`}
           >
-            {/* 罩内彩点（静态装饰；避开中央吊挂区，贴边分布） */}
-            <span aria-hidden className="absolute w-2.5 h-2.5 rounded-full" style={{ left: '7%', top: '26%', background: 'var(--clay-soft)' }} />
-            <span aria-hidden className="absolute w-2 h-2 rounded-full" style={{ right: '8%', top: '18%', background: 'var(--sage-30)' }} />
-            <span aria-hidden className="absolute w-2 h-2 rounded-full" style={{ left: '10%', bottom: '30%', background: 'var(--color-love)', opacity: 0.5 }} />
-            <span aria-hidden className="absolute w-2 h-2 rounded-full" style={{ right: '12%', bottom: '38%', background: 'var(--sage-30)' }} />
+            {/* 顶部轨道 */}
+            <div className="absolute" style={{ left: 12, right: 12, top: GEO.railY + 4, height: 5, borderRadius: 999, background: 'color-mix(in srgb, var(--clay-deep) 45%, transparent)' }} />
+            {/* 罩内彩点 */}
+            <span aria-hidden className="absolute w-2.5 h-2.5 rounded-full" style={{ left: '9%', top: '30%', background: 'var(--clay-soft)' }} />
+            <span aria-hidden className="absolute w-2 h-2 rounded-full" style={{ right: '10%', top: '22%', background: 'var(--sage-30)' }} />
+            <span aria-hidden className="absolute w-2 h-2 rounded-full" style={{ left: '13%', bottom: '26%', background: 'var(--color-love)', opacity: 0.5 }} />
 
-            {/* 吊挂角色：素材整幅（含横梁/缆线/爪钩/被抓的羊），盒顶对齐 → 读作从机顶横梁吊下 */}
-            <div className="absolute left-1/2 top-0 z-20 pointer-events-none" style={{ transform: 'translateX(-50%)' }}>
-              <motion.img
-                src={char.src}
-                alt=""
-                className={`claw-sprite ${reduced || grabbing ? '' : 'hang-sway'}`}
-                initial={false}
-                animate={spriteAnim}
-                transition={{ duration: spriteDur, ease: EASE }}
-              />
+            {/* 出菜口（落槽） */}
+            <div className="absolute" style={{ left: GEO.chuteX, bottom: 8, transform: 'translateX(-50%)', width: 74, height: 26, borderRadius: '0 0 12px 12px', background: 'var(--color-ink-800)', border: '2px solid var(--color-line)', borderTop: 'none' }}>
+              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold" style={{ color: 'var(--color-ash)', letterSpacing: '0.1em' }}>出菜口</span>
             </div>
 
-            {/* 主推菜圆盘：换菜时淡入落位（守动效规范）；vt-dish-frame 供详情形变共享元素 */}
-            <div className="absolute inset-x-0 bottom-2 flex justify-center pointer-events-none">
-              <div
-                key={shown.id}
-                className="vt-dish-frame relative w-[124px] h-[124px] rounded-full flex items-center justify-center overflow-hidden"
-                style={{
-                  viewTransitionName: heroNameFor(shown.id),
-                  background: 'var(--plate-bg)',
-                  border: '2px solid var(--color-clay-soft)',
-                  boxShadow: '0 8px 22px rgba(43,36,41,0.12), inset 0 2px 0 rgba(255,255,255,0.6)',
-                  opacity: phase === 'lift' ? 0.3 : 1,
-                  transform: phase === 'lift' ? 'scale(0.94)' : 'scale(1)',
-                  transition: 'opacity 0.26s var(--ease-soft), transform 0.26s var(--ease-soft)',
-                }}
-              >
-                <span className="text-5xl" style={{ filter: 'var(--tile-img-filter)' }}>{getCategoryEmoji(shown.category)}</span>
-                {image && (
-                  <img
-                    src={image}
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover"
-                    onError={(e) => { e.currentTarget.style.display = 'none' }}
-                  />
-                )}
+            {/* 爪钩机构 */}
+            <Claw open={jawOpen} x={carX} cable={cable} grabbing={grabbing} />
+
+            {/* 被抓的玩偶：闲置在中央 / 被提起随爪走 / 落槽下坠 */}
+            <AnimatePresence mode="popLayout">
+              {shown && (
+                <motion.div
+                  key={phase === 'release' ? `fall-${shown.id}` : `p-${shown.id}`}
+                  className="absolute z-10 pointer-events-none"
+                  style={{ left: plushX, top: plushTop, transform: 'translateX(-50%)' }}
+                  initial={reduced ? { opacity: 0 } : { opacity: 0, y: -26, scale: 0.82 }}
+                  animate={
+                    falling
+                      ? { left: GEO.chuteX, top: GEO.slotTop, opacity: 0, rotate: [0, -18, 14, 0], transition: { duration: BEAT.release / 1000, ease: [0.5, 0, 0.9, 0.6] } }
+                      : { left: plushX, top: plushTop, opacity: 1, y: 0, scale: 1, rotate: held ? [0, -3, 3, 0] : 0,
+                          transition: { duration: reduced ? 0.24 : 0.42, ease: EASE } }
+                  }
+                  exit={{ opacity: 0, transition: { duration: 0.18 } }}
+                >
+                  <LazySheep size={78} mood={mood} breathe={!grabbing} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* 合钳星芒 */}
+            <AnimatePresence>
+              {burst > 0 && !reduced && ['close', 'lift'].includes(phase) && (
+                <motion.div key={burst} className="absolute z-30 pointer-events-none" style={{ left: '50%', top: clawTop(GEO.cableDown) + 10, transform: 'translateX(-50%)' }}>
+                  {[0, 1, 2, 3, 4, 5].map((k) => {
+                    const a = (k / 6) * Math.PI * 2
+                    return <motion.span key={k} className="absolute block rounded-full"
+                      style={{ width: 6, height: 6, background: k % 2 ? 'var(--color-love)' : 'var(--clay-soft)' }}
+                      initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                      animate={{ x: Math.cos(a) * 34, y: Math.sin(a) * 34, opacity: 0, scale: 0.3 }}
+                      transition={{ duration: 0.5, ease: EASE }} />
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* 落槽彩纸 */}
+            <AnimatePresence>
+              {confetti > 0 && !reduced && (
+                <motion.div key={confetti} className="absolute z-30 pointer-events-none" style={{ left: GEO.chuteX, top: GEO.slotTop - 30, transform: 'translateX(-50%)' }}>
+                  {[0, 1, 2, 3, 4, 5, 6].map((k) => (
+                    <motion.span key={k} className="absolute block"
+                      style={{ width: 6, height: 9, borderRadius: 2, background: ['var(--color-clay)', 'var(--color-love)', 'var(--sage)', 'var(--color-caramel)'][k % 4] }}
+                      initial={{ x: 0, y: 0, opacity: 1, rotate: 0 }}
+                      animate={{ x: (k - 3) * 13, y: [0, -26, 10], opacity: [1, 1, 0], rotate: 240 }}
+                      transition={{ duration: 0.7, ease: EASE }} />
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* 抓到浮标 */}
+            <AnimatePresence>
+              {label && (
+                <motion.div key={label.key} className="absolute z-40 pointer-events-none"
+                  style={{ left: GEO.chuteX, top: GEO.slotTop - 44, transform: 'translateX(-50%)' }}
+                  initial={{ opacity: 0, y: 8, scale: 0.9 }} animate={{ opacity: 1, y: -8, scale: 1 }}
+                  exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3, ease: EASE }}
+                  onAnimationComplete={() => setTimeout(() => setLabel((l) => (l && l.key === label.key ? null : l)), 700)}>
+                  <span className="inline-flex items-center gap-1 px-2.5 h-7 rounded-full font-bold text-xs whitespace-nowrap"
+                    style={{ background: 'var(--color-clay)', color: 'var(--color-on-dark)', border: '2px solid var(--clay-deep)', boxShadow: 'var(--shadow-3)' }}>
+                    <KissIcon className="w-3.5 h-3.5" /> 抓到「{label.name}」
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* 主推菜圆盘（右下角小票，供 VT 共享元素） */}
+            {shown && (
+              <div className="absolute z-10" style={{ right: 10, bottom: 10 }}>
+                <div className="vt-dish-frame relative w-[52px] h-[52px] rounded-xl flex items-center justify-center overflow-hidden"
+                  style={{ viewTransitionName: heroNameFor(shown.id), background: 'var(--plate-bg)', border: '2px solid var(--color-clay-soft)' }}>
+                  <span className="text-2xl" style={{ filter: 'var(--tile-img-filter)' }}>{getCategoryEmoji(shown.category)}</span>
+                  {image && <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+                </div>
               </div>
-            </div>
-          </div>
+            )}
+          </motion.div>
         </div>
 
-        {/* 出菜口面板：菜名 + 价格 + 换一道 */}
+        {/* 出菜面板：菜名（点看做法）+ 价格 + 抓取按钮 */}
         <div className="claw-tray flex items-end justify-between gap-3 px-5 pt-3 pb-4">
           <div className="min-w-0">
-            <p className="text-[11px] font-bold truncate" style={{ letterSpacing: '0.05em', color: 'var(--color-ash)' }}>
-              {note}
-            </p>
-            <p className="font-serif text-2xl font-bold text-[var(--color-bone)] truncate mt-0.5">{shown.name}</p>
+            <p className="text-[11px] font-bold truncate" style={{ letterSpacing: '0.05em', color: 'var(--color-ash)' }}>{note}</p>
+            <button onClick={onOpen} className="font-serif text-2xl font-bold text-[var(--color-bone)] truncate mt-0.5 max-w-full" style={{ textUnderlineOffset: 3 }}>
+              {shown?.name}
+            </button>
           </div>
           <div className="flex items-center gap-3 shrink-0">
             <div className="flex items-baseline gap-1">
               <KissIcon className="w-4 h-4 shrink-0 translate-y-[-2px] text-[var(--color-love)]" />
               <span className="font-serif font-bold text-[var(--color-caramel)] tabular-nums" style={{ fontSize: '2rem', lineHeight: 1 }}>
-                <span className="text-[0.55em] mr-0.5">¥</span>{shown.price}
+                <span className="text-[0.55em] mr-0.5">¥</span>{shown?.price}
               </span>
             </div>
-            <motion.button
-              whileTap={{ scale: 0.93 }}
-              onClick={(e) => { e.stopPropagation(); onGrab?.() }}
-              disabled={grabbing}
-              aria-label="换一道"
-              className="font-serif text-sm font-bold px-4 py-2.5 rounded-full"
-              style={{
-                background: 'var(--color-clay)',
-                color: 'var(--color-on-dark)',
-                border: '2px solid var(--clay-deep)',
-                boxShadow: '0 4px 12px color-mix(in srgb, var(--color-clay) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.25)',
-                opacity: grabbing ? 0.55 : 1,
-              }}
-            >
-              {grabbing ? '抓取中…' : '换一道'}
+            <motion.button whileTap={{ scale: 0.93 }} onClick={(e) => { e.stopPropagation(); runGrab() }} disabled={grabbing}
+              aria-label="抓取这一只" className="font-serif text-sm font-bold px-4 py-2.5 rounded-full"
+              style={{ background: 'var(--color-clay)', color: 'var(--color-on-dark)', border: '2px solid var(--clay-deep)',
+                boxShadow: '0 4px 12px color-mix(in srgb, var(--color-clay) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.25)', opacity: grabbing ? 0.6 : 1 }}>
+              {grabbing ? '抓取中…' : '抓取'}
             </motion.button>
           </div>
         </div>
 
-        {/* 自动轮换进度条：预告下一次抓取（clay 细线） */}
+        {/* 自动轮换进度条（闲置时预告下一次） */}
         {rotate && !grabbing && (
           <div className="h-[3px]" style={{ background: 'color-mix(in srgb, var(--clay-deep) 10%, transparent)' }}>
-            <div
-              key={rotate.key}
-              className="h-full rot-progress-bar"
-              style={{ background: 'var(--color-clay)', animationDuration: `${rotate.durationMs}ms` }}
-            />
+            <div key={rotate.key} className="h-full rot-progress-bar" style={{ background: 'var(--color-clay)', animationDuration: `${rotate.durationMs}ms` }} />
           </div>
         )}
       </div>
