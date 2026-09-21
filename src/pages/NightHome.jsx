@@ -55,7 +55,7 @@ export default function NightHome() {
   const grid = useMemo(() => pool.filter(d => d.id !== featured?.id).slice(0, 8), [pool, featured])
 
   return (
-    <div className="relative">
+    <div className="relative flex flex-col" style={{ minHeight: 'calc(100dvh - var(--bottom-inset))' }}>
       <PageHeader title={title} subtitle={note} right={<ThemeToggle />} />
 
       <PageContainer>
@@ -121,8 +121,10 @@ export default function NightHome() {
         )}
       </PageContainer>
 
+      {/* 撑满剩余高度，把草地收边推到底 */}
+      <div aria-hidden="true" style={{ flex: '1 1 auto', minHeight: 'var(--space-section)' }} />
       {/* 牧场草地收边（夜宵自动压暗） */}
-      <div aria-hidden="true" className="grass-hem relative z-[2]" style={{ marginTop: 'var(--space-section)' }} />
+      <div aria-hidden="true" className="grass-hem relative z-[2]" />
     </div>
   )
 }
