@@ -67,7 +67,7 @@ function Claw({ open, x, cable, grabbing }) {
         <circle cx="23" cy="6" r="5.5" fill="var(--color-clay)" stroke="var(--clay-deep)" strokeWidth="2" />
         <circle cx="23" cy="6" r="1.8" fill="var(--color-love)" />
         {[-1, 0, 1].map((dir) => (
-          <motion.g key={dir} style={{ originX: 23, originY: 10 }}
+          <motion.g key={dir} style={{ transformOrigin: '23px 10px', transformBox: 'view-box' }}
             animate={{ rotate: dir === 0 ? 0 : (open ? dir * jawRot : dir * jawRot * 0.16) }}
             transition={{ duration: 0.18, ease: EASE }}>
             <path d={dir === 0 ? 'M23 10 L23 30' : `M23 10 Q${23 + dir * 12} 20 ${23 + dir * 10} 31`}
@@ -127,7 +127,7 @@ export default function ClawMachine({
   const resting = ['idle', 'aim', 'drop'].includes(phase)
   const falling = phase === 'release'
   const mood = phase === 'idle' || phase === 'aim' ? 'doze' : phase === 'drop' ? 'sniff' : 'happy'
-  const plushTop = held ? clawTop(GEO.cableUp) + GEO.clawH - 14 : resting ? GEO.pileTop : clawTop(GEO.cableDown) + GEO.clawH - 14
+  const plushTop = held ? clawTop(cable) + GEO.clawH - 14 : resting ? GEO.pileTop : clawTop(cable) + GEO.clawH - 14
   const plushX = ['carry', 'release'].includes(phase) ? GEO.chuteX : '50%'
 
   return (
@@ -177,7 +177,7 @@ export default function ClawMachine({
 
             {/* 被抓的玩偶：闲置在中央 / 被提起随爪走 / 落槽下坠 */}
             <AnimatePresence mode="popLayout">
-              {shown && (
+              {shown && (resting || held || falling) && (
                 <motion.div
                   key={phase === 'release' ? `fall-${shown.id}` : `p-${shown.id}`}
                   className="absolute z-10 pointer-events-none"
