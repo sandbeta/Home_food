@@ -7,6 +7,7 @@ import NightSnackSheet from './components/NightSnackSheet'
 import AmbientLightCanvas from './components/AmbientLightCanvas'
 import { useTheme } from './theme/useTheme'
 import { pageEnter } from './theme/motion'
+import LazySheep, { SheepZzz } from './components/ui/LazySheep'
 
 // 路由懒加载 — 按需加载页面，减小初始 bundle 体积
 const Home = lazy(() => import('./pages/Home'))
@@ -26,7 +27,14 @@ const AdminOrders = lazy(() => import('./pages/AdminOrders'))
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
-      <div className="w-8 h-8 border-2 border-[var(--color-clay)]/20 border-t-[var(--color-clay)] rounded-full animate-spin" />
+      <div className="relative">
+        <div className="w-8 h-8 border-2 border-[var(--color-clay)]/20 border-t-[var(--color-clay)] rounded-full animate-spin" />
+        {/* 转圈也挡不住困：懒羊羊陪等 */}
+        <div className="absolute inset-0 flex items-center justify-center text-[var(--color-sage)]">
+          <LazySheep size={22} mood="sleep" bib={false} breathe={false} />
+        </div>
+        <SheepZzz size={9} className="top-0" />
+      </div>
     </div>
   )
 }

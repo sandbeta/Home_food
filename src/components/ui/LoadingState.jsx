@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { usePrefersReducedMotion } from '../../theme/motion'
 import Icon from './Icons'
+import LazySheep, { SheepZzz } from './LazySheep'
 
 /**
  * 统一加载态 —— 取代各页手写的相同实现。已接入：AdminDishes / AdminOrders /
@@ -30,6 +31,11 @@ export default function LoadingState({ emoji, text = '加载中...' }) {
           >
             <Icon name="potBoil" size={52} strokeWidth={1.6} />
           </motion.div>
+          {/* 懒羊羊趴在锅边等饭，睡着（zZ 飘起）——"等"是它的舒适区 */}
+          <div className="absolute -right-4 -bottom-1 text-[var(--color-sage)]">
+            <LazySheep size={34} mood="sleep" bib={false} />
+            <SheepZzz size={9} className="-top-2 -right-1" />
+          </div>
         </div>
       ) : (
         <div className="relative">

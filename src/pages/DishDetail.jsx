@@ -133,7 +133,7 @@ export default function DishDetail() {
               whileHover={{ y: -1 }}
               onClick={handleAdd}
               className="d3-btn w-full py-4 text-center font-bold text-base"
-              style={{ background: persona.gradient, color: '#FFFDF9' }}
+              style={{ background: persona.gradient, color: 'var(--color-on-dark)' }}
             >
               <span className="relative z-10">{persona.emoji} 加入购物车</span>
             </motion.button>
@@ -150,7 +150,7 @@ export default function DishDetail() {
                   {dish.recipe.difficulty && <span className="d3-badge">{dish.recipe.difficulty}</span>}
                   {dish.recipe.calories && (
                     <span className="text-xs font-semibold px-2 py-1 rounded-full text-[var(--color-ash)]"
-                      style={{ background: 'rgba(43,38,32,0.05)', border: '1px solid var(--color-glass-border)' }}>
+                      style={{ background: 'rgba(43,36,41,0.05)', border: '1px solid var(--color-glass-border)' }}>
                       🔥 {dish.recipe.calories}
                     </span>
                   )}
@@ -163,7 +163,7 @@ export default function DishDetail() {
                   <div className="flex flex-wrap gap-1.5">
                     {dish.recipe.ingredients.map((it, i) => (
                       <span key={i} className="text-xs px-2.5 py-1 rounded-full text-[var(--color-ash)]"
-                        style={{ background: 'rgba(43,38,32,0.05)', border: '1px solid var(--color-glass-border)' }}>
+                        style={{ background: 'rgba(43,36,41,0.05)', border: '1px solid var(--color-glass-border)' }}>
                         {it}
                       </span>
                     ))}
@@ -179,7 +179,7 @@ export default function DishDetail() {
                       <li key={i} className="flex gap-2.5">
                         <span
                           className="w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5"
-                          style={{ background: 'var(--color-clay-gradient)', color: '#FFFDF9' }}
+                          style={{ background: 'var(--color-clay-gradient)', color: 'var(--color-on-dark)' }}
                         >
                           {i + 1}
                         </span>

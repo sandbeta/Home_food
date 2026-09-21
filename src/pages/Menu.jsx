@@ -25,7 +25,7 @@ function WhoSelector({ whoAmI, setWhoAmI }) {
   return (
     <div className="d3-card-face p-1.5 flex items-center gap-1.5 mb-4">
       <span className="pl-2 pr-1 text-xs text-[var(--color-ash)] font-bold">给谁点</span>
-      {[{ value: 'me', label: '自己', icon: '🐱' }, { value: 'partner', label: 'TA', icon: '🐰' }].map(opt => {
+      {[{ value: 'me', label: '自己', icon: '🐱' }, { value: 'partner', label: 'TA', icon: '🐑' }].map(opt => {
         const active = whoAmI === opt.value
         return (
           <motion.button key={opt.value} whileTap={{ scale: 0.95 }} onClick={() => setWhoAmI(opt.value)}
@@ -162,7 +162,7 @@ export default function Menu() {
                   ...(active
                     ? {
                         background: 'var(--color-clay-gradient)',
-                        color: '#FFFDF9',
+                        color: 'var(--color-on-dark)',
                         boxShadow: '0 4px 12px color-mix(in srgb, var(--clay-50) 26%, transparent)',
                       }
                     : { color: 'var(--color-ash)' }),
@@ -380,7 +380,7 @@ export default function Menu() {
             className="fixed z-[100] pointer-events-none"
             style={{ left: 0, top: 0 }}
           >
-            <div className="flex items-center gap-0.5 text-[#FFFDF9] text-xs font-bold px-2 py-1 rounded-full shadow-lg" style={{ background: 'var(--color-clay)' }}>
+            <div className="flex items-center gap-0.5 text-[var(--color-on-dark)] text-xs font-bold px-2 py-1 rounded-full shadow-lg" style={{ background: 'var(--color-clay)' }}>
               <span>+1</span>
               <KissIcon className="w-3 h-3" />
             </div>

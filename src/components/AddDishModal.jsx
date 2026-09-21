@@ -33,7 +33,7 @@ export default function AddDishModal({ dish, onClose, onSave }) {
     <>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="fixed inset-0 z-50"
-        style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,38,32,0.35)' }} />
+        style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,36,41,0.35)' }} />
       <motion.div
         {...(reduce ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
         className="fixed bottom-0 left-0 right-0 mx-auto z-50"

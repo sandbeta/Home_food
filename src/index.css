@@ -12,35 +12,35 @@
 }
 
 /* ============================================================
-   晨光厨房 · Sunlit Kitchen 设计系统
-   暖调亮色晨光底 + 轻量玻璃质感 + 双人格温度对比
-   我(me)=蜜橘 #DD794E(clay-60) / TA(partner)=冷鼠尾草绿 #A4C39E(sage-40)
+   晨光厨房 · Rosy Kitchen 设计系统（2026-09-20 粉色换装）
+   粉纸亮色底 + 轻量玻璃质感 + 双人格温度对比
+   我(me)=玫瑰粉 #BE4E67(clay-60) / TA(partner)=冷鼠尾草绿 #A4C39E(sage-40)
    ============================================================ */
 @theme {
-  /* —— 表面 / 底（晨光暖骨白） —— */
-  --color-ink-900: #FDFBF7;   /* 主底 暖纸白（提亮） */
-  --color-ink-850: #F6F0E7;   /* 区块底 浅陶（提亮） */
-  --color-ink-800: #EBE0D0;   /* 次级底（提亮） */
+  /* —— 表面 / 底（晨光粉纸白） —— */
+  --color-ink-900: #FCE7F0;   /* 主底 浅樱粉（第六轮再浅一档） */
+  --color-ink-850: #FADCE9;   /* 区块底 玫瑰粉（浅档） */
+  --color-ink-800: #F8D0E1;   /* 次级底 玫瑰粉（搜索框底等） */
 
   /* —— 文字 —— */
-  --color-bone: #2B2620;      /* 主文字 墨 */
-  --color-ash: #6B6155;       /* 次文字 */
-  --color-mist: #75695B;      /* 三级 / 占位（对比度修复：2.9:1 → ≈5:1） */
+  --color-bone: #2B2429;      /* 主文字 墨 */
+  --color-ash: #5F5259;       /* 次文字（全纸浸染各底 ≥4.5:1） */
+  --color-mist: #5E4F56;      /* 三级 / 占位（全纸浸染各底 ≥4.5:1） */
 
   /* —— 双人格强调（温度对比） —— */
-  --color-clay: var(--clay-60); /* 我(me) 蜜橘(clay-60 折中档,白字对比达标) */
-  --color-clay-soft: var(--clay-40); /* 蜜橘高光(clay-40) */
+  --color-clay: var(--clay-60); /* 我(me) 玫瑰粉(clay-60，白字 ≥4.5:1 达 AA) */
+  --color-clay-soft: var(--clay-40); /* 玫瑰高光(clay-40) */
   --color-sage: var(--sage-40);      /* TA(partner) 薄荷绿(冷·提亮=sage-40) */
   --color-sage-soft: var(--sage-30); /* 薄荷高光(sage-30) */
 
   /* —— 状态 —— */
-  --color-caramel: #B5793F;   /* 中性暖强调 焦糖 */
-  --color-love: #D98C84;      /* 喜爱/收藏/购物车角标（情感色，不再兼删除） */
-  --color-danger: #C2543F;    /* 删除与错误警示唯一色源（字/氛围用 70%+bone 混色（全背景扫描双主题 ≥4.5:1）） */
+  --color-caramel: #9A575F;   /* 中性暖强调 玫瑰金棕（价格专属，粉卡面 ≥4.5:1） */
+  --color-love: #D96488;      /* 喜爱/收藏/购物车角标（情感色，玫粉，不再兼删除） */
+  --color-danger: #C13E4E;    /* 删除与错误警示唯一色源（字/氛围用 70%+bone 混色（全背景扫描双主题 ≥4.5:1）） */
 
   /* —— 玻璃 —— */
-  --color-glass: #FFFDFA;
-  --color-glass-border: rgba(43,38,32,0.08);
+  --color-glass: #FFF4F8;
+  --color-glass-border: rgba(43,36,41,0.08);
   /* —— 品牌渐变 —— */
   --color-clay-gradient: linear-gradient(180deg, var(--clay-60) 0%, var(--clay-80) 100%);
   --color-sage-gradient: linear-gradient(180deg, var(--sage-40) 0%, var(--sage-70) 100%);
@@ -70,26 +70,26 @@
   --radius-btn: 12px;    /* 按钮 */
   --radius-ctl: 8px;     /* 输入 / 小控件（同心：card 24 − 卡内边距 16 = 8） */
   --radius-sheet: 28px;  /* 底部浮层顶部 */
-  --clay-deep: #9F4F2D;  /* 深赤陶（渐变收尾/按压态·提亮后=clay-90） */
-  --color-on-dark: #FFFDF9;   /* 深色锚卡/实底上的暖白字（DESIGN.md on-dark 令牌化） */
+  --clay-deep: #7F2A3D;  /* 深梅粉（渐变收尾/按压态·=clay-90） */
+  --color-on-dark: #FFF9FC;   /* 深色锚卡/实底上的粉白字（第六轮归粉） */
   --color-on-sage: #1A2417;   /* sage 实底上的深绿字（TA 侧反色唯一值） */
-  --color-ember: #9A9082;     /* 熄火余温灰棕（=ORDER_STATUS.pending.ring，StoveStage 待机柔光） */
+  --color-ember: #9C8F96;     /* 熄火余温梅灰（=ORDER_STATUS.pending.ring，StoveStage 待机柔光） */
 
   /* —— Open Color 法双人格色阶 ——
      推导：open-color v1.9.1 全 13 色族 130 值转 CIE LCh(D65)，逐档取均值成标准曲线，
      以现主色为锚点做「明度加法平移 + 彩度比值缩放 + 色相均值漂移」，越出色域者裁剪彩度。
      clay-70 与 sage-60 即现主色（逐字节相同），故本轮写入不改变任何现有观感。
      语义：00-10 浅底 / 20-30 hover 与激活底 / 70 按压态 / 80-90 深底文字与标题 */
-  --clay-00: #FFF3EF;
-  --clay-10: #FFE5DC;
-  --clay-20: #FFD0BE;
-  --clay-30: #FFB597;
-  --clay-40: #F99E78;
-  --clay-50: #EC8A60;
-  --clay-60: #DD794E;
-  --clay-70: #C8683F;
-  --clay-80: #B55B35;
-  --clay-90: #9F4F2D;
+  --clay-00: #FEF3F6;
+  --clay-10: #FCE7EC;
+  --clay-20: #FCE6EB;
+  --clay-30: #F6C1CD;
+  --clay-40: #EA98AA;
+  --clay-50: #D8748A;
+  --clay-60: #BE4E67;
+  --clay-70: #AE3C56;
+  --clay-80: #973148;
+  --clay-90: #7F2A3D;
   --sage-00: #F9FDF8;
   --sage-10: #EBF4E8;
   --sage-20: #D5E6D1;
@@ -102,13 +102,13 @@
   --sage-90: #557351;
 
   /* —— 遮罩 / 背景（夜宵模式反相点：亮暗两档只换这几个令牌） —— */
-  --scrim-top: rgba(253, 251, 247, 0.86);          /* PageHeader 吸顶渐隐 */
-  --hero-wash-functional: rgba(253, 251, 247, 0.72); /* functional Hero 压暗罩 */
-  --hero-wash-immersive: linear-gradient(180deg, rgba(253,251,247,0.62) 0%, rgba(253,251,247,0.70) 30%, rgba(253,251,247,0.80) 52%, rgba(253,251,247,0.94) 80%, #FDFBF7 100%);
-  --body-bg: #FAF4EA;
+  --scrim-top: rgba(252, 231, 240, 0.88);          /* PageHeader 吸顶渐隐 */
+  --hero-wash-functional: rgba(252, 231, 240, 0.74); /* functional Hero 压暗罩 */
+  --hero-wash-immersive: linear-gradient(180deg, rgba(252,231,240,0.55) 0%, rgba(252,231,240,0.66) 30%, rgba(252,231,240,0.78) 52%, rgba(252,231,240,0.94) 80%, #FCE7F0 100%);
+  --body-bg: radial-gradient(120% 80% at 50% 0%, #FEF5F9 0%, var(--color-ink-900) 55%, #F9DCE9 100%);
   --vignette: none;
   /* —— 锚点卡油墨（bolder 2026-09-20）：clay 渐变之上叠顶部 on-dark 高光，模拟油墨浓淡反光；文字区在底部深色端不受影响 —— */
-  --anchor-ink: radial-gradient(120% 64% at 50% 0%, rgba(255, 253, 249, 0.16), transparent 58%), var(--color-clay-gradient);
+  --anchor-ink: radial-gradient(120% 64% at 50% 0%, rgba(255, 249, 252, 0.16), transparent 58%), var(--color-clay-gradient);
   /* —— 网格菜品图滤镜（夜宵反相点：暗底上图片收一档亮度溶进夜纸；白天无滤镜）—— */
   --tile-img-filter: none;
   /* Hero 图片滤镜（夜宵反相点：暗底上大图必须收亮度去饱和，否则抢文字） */
@@ -136,18 +136,18 @@
   --dock-h: 72px;    /* 停靠行总高（取药丸与球二者较大） */
   --dock-orb: 64px;  /* 购物车球直径 */
   --dock-gap: 12px;  /* 球与药丸之间的间距 */
-  --glass-strong: #FFFDF9; /* 停靠层药丸底色：编辑杂志实纸底 */
-  --surface: #F6F0E7; /* 内容层卡面：纯色暖陶（严格重制：玻璃只留给导航层） */
+  --glass-strong: #FFF8FB; /* 停靠层药丸底色：操作层最亮纸 */
+  --surface: #FFF4F8; /* 内容层卡面：浅粉纸（第六轮随纸面提浅） */
   --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
   --bottom-inset: calc(var(--dock-h) + var(--safe-bottom) + 16px);
   --bottom-inset-compact: calc(var(--safe-bottom) + 24px);
 
   /* —— 暖调阴影（不用纯黑，与晨光底协调） —— */
-  --shadow-1: 0 1px 2px rgba(43, 38, 32, 0.05);
-  --shadow-2: 0 2px 8px rgba(43, 38, 32, 0.06);
-  --shadow-3: 0 8px 24px rgba(43, 38, 32, 0.08);
-  --shadow-4: 0 16px 44px rgba(43, 38, 32, 0.12);
-  --shadow-5: 0 30px 70px rgba(43, 38, 32, 0.16);
+  --shadow-1: 0 1px 2px rgba(43, 36, 41, 0.05);
+  --shadow-2: 0 2px 8px rgba(43, 36, 41, 0.06);
+  --shadow-3: 0 8px 24px rgba(43, 36, 41, 0.08);
+  --shadow-4: 0 16px 44px rgba(43, 36, 41, 0.12);
+  --shadow-5: 0 30px 70px rgba(43, 36, 41, 0.16);
   /* 双人格辉光 */
   --shadow-glow-clay: 0 0 0 3px color-mix(in srgb, var(--clay-50) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--clay-50) 22%, transparent);
   --shadow-glow-sage: 0 0 0 3px color-mix(in srgb, var(--sage-40) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--sage-40) 22%, transparent);
@@ -173,7 +173,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
-  /* 晨光暖骨白底：顶部微亮、四周轻 vignette，让美食图成为最亮处 */
+  /* 晨光粉纸底：顶部微亮、四周轻 vignette，让美食图成为最亮处 */
   background:
     var(--body-bg);
 }
@@ -219,7 +219,7 @@ textarea:focus-visible, select:focus-visible {
 
 /* ========== 浏览器自带表面主题化 ==========
    选中高亮与输入光标是"设计过的页面"最廉价的信号：冷蓝选区会瞬间破坏暖纸氛围 */
-::selection { background: var(--clay-10); color: var(--color-bone); }
+::selection { background: var(--clay-30); color: var(--color-bone); }
 [data-theme="night"] ::selection { background: color-mix(in srgb, var(--clay-50) 45%, transparent); color: var(--color-bone); }
 input, textarea { caret-color: var(--color-clay); }
 [data-theme="night"] input,
@@ -234,18 +234,18 @@ input, textarea { caret-color: var(--color-clay); }
 }
 /* 低配 / 不支持 backdrop-filter 时退为实底半透明 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass { background: rgba(255, 253, 249, 0.92); }
-  .d3-card-face { background: rgba(255, 253, 249, 0.92) !important; }
+  .glass { background: rgba(255, 235, 243, 0.94); }
+  .d3-card-face { background: rgba(255, 235, 243, 0.94) !important; }
 }
 .glass-me {
   border: 1px solid color-mix(in srgb, var(--clay-50) 40%, transparent);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--clay-50) 10%, transparent) 0%, rgba(255,253,249,0.04) 100%);
-  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--clay-50) 10%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--clay-50) 10%, transparent) 0%, rgba(255,235,243,0.05) 100%);
+  box-shadow: 0 10px 30px rgba(43, 36, 41, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--clay-50) 10%, transparent);
 }
 .glass-partner {
   border: 1px solid color-mix(in srgb, var(--sage-40) 40%, transparent);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--sage-40) 10%, transparent) 0%, rgba(255,253,249,0.04) 100%);
-  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--sage-40) 10%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sage-40) 10%, transparent) 0%, rgba(255,235,243,0.05) 100%);
+  box-shadow: 0 10px 30px rgba(43, 36, 41, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--sage-40) 10%, transparent);
 }
 
 /* ========== Card ========== */
@@ -258,11 +258,11 @@ input, textarea { caret-color: var(--color-clay); }
   border: 1px solid var(--color-glass-border);
   -webkit-backdrop-filter: blur(8px) saturate(110%);
   backdrop-filter: blur(8px) saturate(110%);
-  box-shadow: 0 2px 10px rgba(43, 38, 32, 0.05);
+  box-shadow: 0 2px 10px rgba(43, 36, 41, 0.05);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, background-color var(--dur-slow) var(--ease-soft), border-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft);
 }
 .d3-card:hover .d3-card-face {
-  box-shadow: 0 6px 20px rgba(43, 38, 32, 0.08);
+  box-shadow: 0 6px 20px rgba(43, 36, 41, 0.08);
 }
 
 /* ========== Button ========== */
@@ -274,7 +274,7 @@ input, textarea { caret-color: var(--color-clay); }
 }
 .d3-btn-primary {
   background: var(--color-clay);
-  color: #FFFDF9;
+  color: #FFF9FC;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 .d3-btn-primary:hover {
@@ -296,7 +296,7 @@ input, textarea { caret-color: var(--color-clay); }
 
 /* ========== Input ========== */
 .d3-input {
-  background: rgba(43, 38, 32, 0.03);
+  background: rgba(43, 36, 41, 0.03);
   border: 1px solid var(--color-glass-border);
   border-radius: var(--radius-btn);
   -webkit-backdrop-filter: blur(10px);
@@ -320,14 +320,14 @@ input, textarea { caret-color: var(--color-clay); }
   font-weight: 700;
   border-radius: 999px;
   background: color-mix(in srgb, var(--clay-50) 8%, transparent);
-  color: var(--color-clay);
+  color: var(--clay-80);
   border: 1px solid color-mix(in srgb, var(--clay-50) 16%, transparent);
 }
 
 /* ========== Avatar & Backgrounds ========== */
 .avatar-me {
   background: linear-gradient(180deg, var(--clay-50) 0%, var(--clay-70) 100%);
-  color: #FFFDF9;
+  color: #FFF9FC;
 }
 .avatar-partner {
   background: linear-gradient(180deg, var(--sage-40) 0%, var(--sage-60) 100%);
@@ -337,7 +337,7 @@ input, textarea { caret-color: var(--color-clay); }
 /* 双人格辉光 */
 .glow-clay     { box-shadow: 0 0 0 3px color-mix(in srgb, var(--clay-50) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--clay-50) 22%, transparent); }
 .glow-sage     { box-shadow: 0 0 0 3px color-mix(in srgb, var(--sage-40) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--sage-40) 22%, transparent); }
-.glow-love     { box-shadow: 0 6px 20px rgba(217,140,132,0.25); }
+.glow-love     { box-shadow: 0 6px 20px rgba(217,100,136,0.25); }
 /* 激活态脉冲（配合 is-active 使用） */
 .avatar-me.is-active    { animation: pulse-glow-gold 2.4s ease-in-out infinite; }
 .avatar-partner.is-active { animation: pulse-glow-platinum 2.4s ease-in-out infinite; }
@@ -352,7 +352,7 @@ input, textarea { caret-color: var(--color-clay); }
 /* ========== Project-specific utilities ========== */
 @keyframes shimmer-fade { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 .animate-shimmer-fade {
-  background: rgba(43, 38, 32, 0.05);
+  background: rgba(43, 36, 41, 0.05);
   border-radius: 9999px;
   animation: shimmer-fade 1.4s ease-in-out infinite;
 }
@@ -375,7 +375,7 @@ input, textarea { caret-color: var(--color-clay); }
 @keyframes rot-progress { from { width: 0%; } to { width: 100%; } }
 .rot-progress-bar { animation: rot-progress linear both; }
 
-/* 炉火余温：锅底映出的暖橙光晕，呼吸节奏比火焰慢半拍 */
+/* 炉火余温：锅底映出的玫瑰火光晕，呼吸节奏比火焰慢半拍 */
 .stove-glow {
   position: absolute;
   left: 50%;
@@ -384,7 +384,7 @@ input, textarea { caret-color: var(--color-clay); }
   height: 64px;
   margin-left: -65px;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(232, 150, 79, 0.40), color-mix(in srgb, var(--clay-50) 12%, transparent) 60%, transparent 75%);
+  background: radial-gradient(closest-side, rgba(230, 138, 164, 0.40), color-mix(in srgb, var(--clay-50) 12%, transparent) 60%, transparent 75%);
   filter: blur(6px);
   animation: stove-breathe 2.2s ease-in-out infinite;
   pointer-events: none;
@@ -409,7 +409,7 @@ input, textarea { caret-color: var(--color-clay); }
   width: 28px;
   height: 8px;
   border-radius: 50%;
-  background: radial-gradient(closest-side, #F5B87E, var(--clay-70) 70%, transparent);
+  background: radial-gradient(closest-side, #F5ADC5, var(--clay-70) 70%, transparent);
   animation: live-mouth 1.4s ease-in-out infinite;
 }
 @keyframes live-mouth {
@@ -426,8 +426,8 @@ input, textarea { caret-color: var(--color-clay); }
   width: 96px;
   height: 30px;
   border-radius: 10px 10px 14px 14px;
-  background: linear-gradient(180deg, #6B6155 0%, #4A4239 100%);
-  box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.18), 0 6px 14px rgba(43, 38, 32, 0.25);
+  background: linear-gradient(180deg, #5E4F58 0%, #463B44 100%);
+  box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.18), 0 6px 14px rgba(43, 36, 41, 0.25);
 }
 /* 灶膛口 */
 .stove-base::after {
@@ -439,13 +439,13 @@ input, textarea { caret-color: var(--color-clay); }
   width: 34px;
   height: 12px;
   border-radius: 6px 6px 8px 8px;
-  background: #241f1a;
+  background: #241B21;
 }
 .stove-flame {
   display: block;
   width: 7px;
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  background: linear-gradient(180deg, #F5D9A8 0%, #E8964F 45%, var(--clay-70) 100%);
+  background: linear-gradient(180deg, #FBDCE8 0%, #E87198 45%, var(--clay-70) 100%);
   transform-origin: bottom center;
   animation: flame-flicker 0.7s ease-in-out infinite;
   filter: blur(0.3px);
@@ -475,27 +475,28 @@ input, textarea { caret-color: var(--color-clay); }
 
 /* ========== 夜宵模式（night）：令牌反相 ==========
    全站颜色都从 @theme 变量消费，这里只在 html[data-theme="night"] 上反相一组
-   表面/文字/玻璃/遮罩令牌，clay/sage 双人格色与 love/caramel 点缀保持不变，
+   表面/文字/玻璃/遮罩令牌，clay(玫瑰粉)/sage 双人格色与 love/caramel 点缀保持不变，
    让"温度对比"在夜里依然是同一对情侣的颜色。 */
 [data-theme="night"] {
-  /* 表面：暖木炭黑（保留棕相，不用死黑） */
-  --color-ink-900: #232019;
-  --color-ink-850: #2C2720;
-  --color-ink-800: #383128;
+  /* 表面：深莓紫（保留粉相，不用死黑） */
+  --color-ink-900: #241B21;
+  --color-ink-850: #2E2229;
+  --color-ink-800: #3A2B33;
   /* 文字反相 */
-  --color-bone: #F2EDE3;
-  --color-ash: #A89E8F;
-  --color-mist: #9A9082;      /* 三级 / 占位（暗底上≈5:1达标） */
+  --color-bone: #F3ECEF;
+  --color-ash: #AB9EA6;
+  --color-mist: #9D9197;      /* 三级 / 占位（暗底上≈5.5:1达标） */
+  --color-caramel: #C08492;      /* 夜宵价格提亮为浅玫瑰金（夜卡面 5.2:1 达 AA；白天 #9A575F 粉卡面 ≥4.5:1） */
   /* 玻璃：白雾 → 微弱高光 + 浅发丝边 */
-  --color-glass: rgba(242, 237, 227, 0.08);
-  --surface: #2C2720; /* 夜宵内容卡面：暖木炭黑实面 */
-  --color-glass-border: rgba(242, 237, 227, 0.16);
+  --color-glass: rgba(243, 236, 239, 0.08);
+  --surface: #2E2229; /* 夜宵内容卡面：深莓紫实面 */
+  --color-glass-border: rgba(243, 236, 239, 0.16);
   /* 遮罩与背景反相 */
-  --scrim-top: rgba(35, 32, 25, 0.85);
-  --glass-strong: rgba(44, 39, 32, 0.90); /* 停靠药丸：夜宵改为暗玻璃 */
-  --hero-wash-functional: rgba(35, 32, 25, 0.72);
-  --hero-wash-immersive: linear-gradient(180deg, rgba(35,32,25,0.55) 0%, rgba(35,32,25,0.76) 22%, rgba(35,32,25,0.92) 46%, rgba(35,32,25,0.97) 100%);
-  --body-bg: radial-gradient(120% 80% at 50% 0%, #332C23 0%, var(--color-ink-900) 55%, #1B1812 100%);
+  --scrim-top: rgba(36, 27, 33, 0.85);
+  --glass-strong: rgba(46, 34, 41, 0.90); /* 停靠药丸：夜宵改为暗玻璃 */
+  --hero-wash-functional: rgba(36, 27, 33, 0.72);
+  --hero-wash-immersive: linear-gradient(180deg, rgba(36,27,33,0.55) 0%, rgba(36,27,33,0.76) 22%, rgba(36,27,33,0.92) 46%, rgba(36,27,33,0.97) 100%);
+  --body-bg: radial-gradient(120% 80% at 50% 0%, #33242C 0%, var(--color-ink-900) 55%, #1C1419 100%);
   --vignette: radial-gradient(130% 100% at 50% 40%, transparent 60%, rgba(0, 0, 0, 0.34) 100%);
   /* 阴影：深底上改用纯黑系才可见 */
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
@@ -513,12 +514,12 @@ input, textarea { caret-color: var(--color-clay); }
 /* 玻璃底不支持 backdrop-blur 时的实底回退也要跟着反相 */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-theme="night"] .glass,
-  [data-theme="night"] .d3-card-face { background: rgba(44, 39, 32, 0.94) !important; }
+  [data-theme="night"] .d3-card-face { background: rgba(46, 34, 41, 0.94) !important; }
 }
 
 /* 输入框：亮底是"压暗 4%"，暗底改为"提亮 5%" */
 [data-theme="night"] .d3-input {
-  background: rgba(242, 237, 227, 0.09);
+  background: rgba(243, 236, 239, 0.09);
 }
 
 /* 卡片阴影在暗底上的强度单独校准（d3-card-face 是硬编码 rgba，需覆盖） */
@@ -545,12 +546,12 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
 .glass-me {
   background: color-mix(in srgb, var(--clay-00) 55%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--clay-50) 40%, transparent);
-  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--clay-50) 10%, transparent);
+  box-shadow: 0 10px 30px rgba(43, 36, 41, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--clay-50) 10%, transparent);
 }
 .glass-partner {
   background: color-mix(in srgb, var(--sage-00) 55%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--sage-40) 40%, transparent);
-  box-shadow: 0 10px 30px rgba(43, 38, 32, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--sage-40) 10%, transparent);
+  box-shadow: 0 10px 30px rgba(43, 36, 41, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--sage-40) 10%, transparent);
 }
 [data-theme="night"] .glass-me {
   background: color-mix(in srgb, var(--clay-90) 26%, var(--surface));
@@ -561,7 +562,7 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
 
 /* 输入框去玻璃：实底 + 聚焦晕环（focus ring 保留，可访问性不受影响） */
 .d3-input {
-  background: rgba(43, 38, 32, 0.04);
+  background: rgba(43, 36, 41, 0.04);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }

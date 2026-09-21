@@ -12,6 +12,7 @@ import { useCart } from './CartContext'
 import { useTheme } from '../theme/useTheme'
 import { nightPick } from '../lib/nightRules'
 import { getCategoryEmoji } from '../lib/categoryIcons'
+import LazySheep from './ui/LazySheep'
 import { pickOne, NIGHT_SNACK_NOTES } from '../lib/sweetCopy'
 import { sheetUp, cardEntrance, glowPulse, tapScale, usePrefersReducedMotion } from '../theme/motion'
 
@@ -63,7 +64,7 @@ export default function NightSnackSheet() {
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={close} className="fixed inset-0 z-50"
-            style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,38,32,0.35)' }}
+            style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,36,41,0.35)' }}
           />
           <motion.div
             {...(reduced ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
@@ -81,7 +82,7 @@ export default function NightSnackSheet() {
                     className="w-8 h-8 rounded-xl flex items-center justify-center text-sm"
                     style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-clay) 14%, transparent), var(--color-clay))' }}
                   >
-                    🌙
+                    <LazySheep size={30} mood="sniff" />
                   </motion.div>
                   <div>
                     <h2 className="text-base font-bold font-serif text-[var(--color-bone)] leading-tight">深夜食堂开张了</h2>
@@ -105,7 +106,7 @@ export default function NightSnackSheet() {
                       <p className="text-xs font-serif font-bold text-[var(--color-caramel)]"><span className="text-[0.75em]">¥</span>{d.price}</p>
                     </div>
                     <motion.button whileTap={{ scale: 0.9 }} onClick={() => addItem(d)} aria-label={`加购${d.name}`}
-                      className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-base font-bold text-[#FFFDF9]"
+                      className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-base font-bold text-[var(--color-on-dark)]"
                       style={{ background: 'var(--color-clay)' }}>
                       +
                     </motion.button>

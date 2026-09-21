@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion'
 import Icon from './Icons'
+import LazySheep from './LazySheep'
 
 /**
  * 统一空态 —— 取代各页的手写空态变体。已接入：Cart / Menu / AdminDishes /
  * AdminOrders / MyOrders / OrderDetail / DishDetail。
- * icon 传入 Icons.jsx 插画名（emptyPlate/stoveOff）时替换 emoji 呈现，二选一。
+ * icon 传入 Icons.jsx 插画名（emptyPlate/stoveOff）时替换 emoji 呈现，二选一；
+ * icon="lazySheep" 时呈现懒羊羊头像（mood 可选，默认 doze）。
  */
-export default function EmptyState({ emoji = '🍽️', icon, title, desc, action, tone, className = '' }) {
+export default function EmptyState({ emoji = '🍽️', icon, mood, title, desc, action, tone, className = '' }) {
   // tone='error'：警示有温度——光斑与标题交给铁锈红家族（bone 反相混色，双主题自动可读）；
   // 文案/emoji/按钮语义不动，色只做氛围强化，不做唯一编码。
   const isError = tone === 'error'
@@ -26,7 +28,15 @@ export default function EmptyState({ emoji = '🍽️', icon, title, desc, actio
         style={{ background: isError ? 'radial-gradient(circle, color-mix(in srgb, var(--color-danger) 10%, transparent), transparent 70%)' : 'radial-gradient(circle, color-mix(in srgb, var(--sage-40) 16%, transparent), transparent 70%)' }}
       />
 
-      {icon ? (
+      {icon === 'lazySheep' ? (
+        <motion.div
+          className="mb-5 relative z-10 text-[var(--color-sage)]"
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <LazySheep size={100} mood={mood || 'doze'} />
+        </motion.div>
+      ) : icon ? (
         <motion.div
           className="mb-5 relative z-10 text-[var(--color-ash)]"
           animate={{ y: [0, -6, 0] }}

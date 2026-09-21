@@ -11,6 +11,7 @@ import PageContainer from '../components/ui/PageContainer'
 import PayerSelector from '../components/ui/PayerSelector'
 import Stepper from '../components/ui/Stepper'
 import EmptyState from '../components/ui/EmptyState'
+import LazySheep from '../components/ui/LazySheep'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { cardEntrance, EASE, usePrefersReducedMotion } from '../theme/motion'
@@ -126,6 +127,10 @@ export default function Cart() {
         <div className="relative" style={{ width: 130, height: 128 }}>
           {/* 灶台（复用 StoveStage 底座；覆盖层里自定吸底） */}
           <div className="stove-base" style={{ top: 'auto', bottom: 0 }} />
+          {/* 锅一上灶，懒羊羊闻着味就醒了（欧羊的饭点反射） */}
+          <div className="absolute text-[var(--color-sage)]" style={{ right: -16, bottom: -4 }}>
+            <LazySheep size={30} mood="sniff" />
+          </div>
           {/* 锅落坐：从上方轻放下来（reduced 只做淡入） */}
           <motion.span
             className="absolute left-1/2 text-6xl"
@@ -164,7 +169,8 @@ export default function Cart() {
 
       {items.length === 0 ? (
         <EmptyState
-          icon="emptyPlate"
+          icon="lazySheep"
+          mood="doze"
           title="还没选好呀"
           desc="饿了吗？去点点好吃的吧~"
           action={
@@ -207,7 +213,7 @@ export default function Cart() {
           {partnerItems.length > 0 && (
             <GlassCard className="glass-partner" glow={PERSONA.partner.glow} style={{ padding: 'var(--space-card-p)' }}>
               <div className="flex items-center gap-2 mb-3">
-                <div className="avatar-partner w-7 h-7 rounded-full flex items-center justify-center text-xs">🐰</div>
+                <div className="avatar-partner w-7 h-7 rounded-full flex items-center justify-center text-xs">🐑</div>
                 <span className="font-bold text-[var(--color-bone)]">TA 点的</span>
                 <span className="ml-auto text-sm font-bold text-[var(--color-sage)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{partnerTotal}</span>
               </div>
@@ -269,13 +275,13 @@ export default function Cart() {
             }}
           >
             <div className="flex justify-between items-center">
-              <span className="text-[#FFFDF9]/85 font-semibold">合计</span>
+              <span className="text-[var(--color-on-dark)]/85 font-semibold">合计</span>
               <motion.span
                 key={totalPrice}
                 initial={{ scale: 1.3, y: -4 }}
                 animate={{ scale: 1, y: 0 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                className="font-serif text-display font-bold text-[#FFFDF9] tabular-nums"
+                className="font-serif text-display font-bold text-[var(--color-on-dark)] tabular-nums"
               >
                 <span className="text-[0.6em] mr-1 opacity-90">¥</span>{totalPrice}
               </motion.span>
@@ -283,10 +289,10 @@ export default function Cart() {
 
             <div
               className="flex items-center gap-1.5 mb-3.5 mt-2 py-1.5 px-2.5 rounded-xl self-start"
-              style={{ background: 'rgba(43,38,32,0.14)' }}
+              style={{ background: 'rgba(43,36,41,0.14)' }}
             >
               <span className="text-xs">⏱️</span>
-              <span className="text-xs text-[#FFFDF9]/85">预估等待约 20-30 分钟</span>
+              <span className="text-xs text-[var(--color-on-dark)]/85">预估等待约 20-30 分钟</span>
             </div>
 
             <motion.button
@@ -297,7 +303,7 @@ export default function Cart() {
               className="w-full disabled:opacity-50 py-3.5 font-bold text-base"
               style={{
                 borderRadius: 'var(--radius-btn)',
-                background: '#FFFDF9',
+                background: 'var(--color-on-dark)',
                 color: 'var(--color-clay)',
                 boxShadow: 'var(--shadow-2)',
               }}

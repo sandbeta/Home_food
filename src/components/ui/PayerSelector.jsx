@@ -36,7 +36,7 @@ export default function PayerSelector({ value, onChange, className = '' }) {
             style={{
               ...(active
                 ? { borderColor: p.border, boxShadow: p.glow }
-                : { background: 'rgba(43,38,32,0.04)' }),
+                : { background: 'rgba(43,36,41,0.04)' }),
             }}
           >
             {active && (

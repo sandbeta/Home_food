@@ -106,8 +106,8 @@ export default function HotDishes() {
                         className="absolute inset-0 w-full h-full object-cover"
                         onError={(e) => { e.currentTarget.style.display = 'none' }} />
                     )}
-                    <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full text-[#FFFDF9]"
-                      style={{ background: idx < 3 ? RANK_COLORS[idx] : 'rgba(43,38,32,0.45)' }}>
+                    <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full text-[var(--color-on-dark)]"
+                      style={{ background: idx < 3 ? RANK_COLORS[idx] : 'rgba(43,36,41,0.45)' }}>
                       NO.{idx + 1}
                     </span>
                   </div>
@@ -164,7 +164,7 @@ export default function HotDishes() {
                         whileTap={{ scale: 0.93 }}
                         onClick={() => navigate(`/dish/${dish.id}`)}
                         className="d3-btn-sm px-2.5 py-1.5 text-xs font-bold text-[var(--color-ash)]"
-                        style={{ background: 'rgba(43,38,32,0.05)' }}
+                        style={{ background: 'rgba(43,36,41,0.05)' }}
                       >
                         菜谱
                       </motion.button>
@@ -178,7 +178,7 @@ export default function HotDishes() {
                           boxShadow: '0 4px 10px color-mix(in srgb, var(--clay-50) 28%, transparent), inset 0 1px 0 rgba(255,255,255,0.3)',
                         }}
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFDF9" strokeWidth="2.8" strokeLinecap="round">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-on-dark)" strokeWidth="2.8" strokeLinecap="round">
                           <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                         </svg>
                       </motion.button>
@@ -210,7 +210,7 @@ export default function HotDishes() {
             className="fixed left-1/2 -translate-x-1/2 z-[90] pointer-events-none"
             style={{ bottom: 'calc(var(--bottom-inset) + 8px)' }}
           >
-            <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold text-[#FFFDF9]"
+            <div className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold text-[var(--color-on-dark)]"
               style={{ background: 'var(--color-clay-gradient)', boxShadow: 'var(--shadow-4)' }}>
               <KissIcon className="w-3.5 h-3.5" />
               {toast.text}

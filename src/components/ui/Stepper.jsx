@@ -17,7 +17,7 @@ export default function Stepper({ value, onChange, min = 1, size = 44, className
         disabled={value <= min}
         aria-label="减少"
         className="rounded-full flex items-center justify-center text-[var(--color-bone)] disabled:opacity-40 disabled:cursor-not-allowed"
-        style={{ width: size, height: size, background: 'rgba(43,38,32,0.05)' }}
+        style={{ width: size, height: size, background: 'rgba(43,36,41,0.05)' }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
           <line x1="5" y1="12" x2="19" y2="12" />

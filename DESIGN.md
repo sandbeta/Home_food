@@ -1,24 +1,24 @@
 ---
 name: 晨光厨房 Chenguang Kitchen
-description: 一本只印给两个人看的厨房别册——暖纸白、双人格温度对比、编辑杂志式的克制手作感
+description: 一本只印给两个人看的厨房别册——粉纸白、双人格温度对比、编辑杂志式的克制手作感
 colors:
-  clay: "#DD794E"
-  clay-soft: "#F99E78"
-  clay-deep: "#9F4F2D"
+  clay: "#BE4E67"
+  clay-soft: "#EA98AA"
+  clay-deep: "#7F2A3D"
   sage: "#A4C39E"
   sage-soft: "#BBD3B5"
-  caramel: "#B5793F"
-  love: "#D98C84"
-  danger: "#C2543F"
-  paper: "#FDFBF7"
-  paper-block: "#F6F0E7"
-  card-surface: "#FFFDFA"
-  on-dark: "#FFFDF9"
-  ink: "#2B2620"
-  ash: "#6B6155"
-  mist: "#75695B"
-  night-paper: "#232019"
-  night-ink: "#F2EDE3"
+  caramel: "#9A575F"
+  love: "#D96488"
+  danger: "#C13E4E"
+  paper: "#FCE7F0"
+  paper-block: "#FADCE9"
+  card-surface: "#FFF4F8"
+  on-dark: "#FFF9FC"
+  ink: "#2B2429"
+  ash: "#5F5259"
+  mist: "#5E4F56"
+  night-paper: "#241B21"
+  night-ink: "#F3ECEF"
 typography:
   display:
     fontFamily: "'Playfair Display', 'Songti SC', 'SimSun', serif"
@@ -91,7 +91,7 @@ components:
     rounded: "9999px"
     padding: "10px 16px"
   input-field:
-    backgroundColor: "rgba(43, 38, 32, 0.03)"
+    backgroundColor: "rgba(43, 36, 41, 0.03)"
     textColor: "{colors.ink}"
     rounded: "{rounded.btn}"
     padding: "12px 16px"
@@ -116,41 +116,41 @@ components:
 
 **创意北极星："The Kitchen Zine（两人厨房别册）"**
 
-晨光厨房不是一款点餐软件，而是一本只印给两个人看的家庭杂志：暖纸白的版面摊在阳光下的餐桌上，蜜橘色是"我🐱"的油墨，薄荷绿是"TA🐰"的油墨，菜是栏目、订单是连载、情话是编者注。整套系统在"编辑杂志质感"的克制框架里运行——纸面实底卡片、发丝级边框、收敛的圆角、衬线大标题；温度不靠花哨装饰，靠双人格色彩的对比与随机抽取的情话文案。
+晨光厨房不是一款点餐软件，而是一本只印给两个人看的家庭杂志：粉纸白的版面摊在阳光下的餐桌上，玫瑰粉色是"我🐱"的油墨，薄荷绿是"TA🐰"的油墨，菜是栏目、订单是连载、情话是编者注。整套系统在"编辑杂志质感"的克制框架里运行——纸面实底卡片、发丝级边框、收敛的圆角、衬线大标题；温度不靠花哨装饰，靠双人格色彩的对比与随机抽取的情话文案。
 
-气质定性：**克制的手作感**。所有组件安静为底、动时点睛——hover 只亮一档光泽，按压只缩 2%，玻璃模糊严格限制在导航/操作层。每屏恰好一个"深色锚点"（蜜橘实底 + 暖白字的大卡），其余是浅色纸面；这是杂志"一张跨页大图 + 细密文字栏"的版面律。21:00–05:00 夜宵模式下整本别册换成暖木炭黑夜纸——双人格色与情感色一律不变：夜里也还是这两个人的颜色。
+气质定性：**克制的手作感**。所有组件安静为底、动时点睛——hover 只亮一档光泽，按压只缩 2%，玻璃模糊严格限制在导航/操作层。每屏恰好一个"深色锚点"（玫瑰粉实底 + 暖白字的大卡），其余是浅色纸面；这是杂志"一张跨页大图 + 细密文字栏"的版面律。21:00–05:00 夜宵模式下整本别册换成深莓紫夜纸——双人格色与情感色一律不变：夜里也还是这两个人的颜色。
 
 **关键特征：**
-- 暖纸基底：页面底 `paper`、区块底 `paper-block`、卡面 `card-surface`，三层暖白从不使用纯白或冷灰
-- 双人格温度对比：`clay`（我，暖）× `sage`（TA，冷）是唯一的身份色，价格永远穿 `caramel` 焦糖
+- 粉纸基底：页面底 `paper`（浅樱粉）、区块底 `paper-block`（玫瑰粉）、卡面 `card-surface`（粉纸档），四层全吃粉，亮区只剩深色锚点卡与停靠药丸
+- 双人格温度对比：`clay`（我，暖）× `sage`（TA，冷）是唯一的身份色，价格永远穿 `caramel` 玫瑰金棕
 - 一页一锚点：每屏恰好一块 clay 实底白字深色锚卡
 - 眉题 + 衬线大标题 + 底部贯通发丝线 = 页头三件套
 - 夜宵反相只换表面/文字/遮罩令牌，情感与人格色跨主题恒定
 
 ## Colors
 
-调色板是一支暖色调的编辑部油墨盘：纸面近白微暖，墨色近黑带棕，两支配色一个像晒透的陶土、一个像晨雾里的薄荷。
+调色板是一支粉调的编辑部油墨盘：纸面樱花粉浸染三档，墨色近黑带梅，两支配色一个像晒透的玫瑰花瓣、一个像晨雾里的薄荷。
 
-### Primary（我 · 蜜橘）
-- **Sun-baked Clay 晒透蜜橘**（#DD794E）：唯一动作色与激活态色——主按钮、导航激活药丸、强调链接、选中态。clay 色阶 00–90 覆盖浅底到深底全部场景
-- **Clay Light 蜜橘高光**（#F99E78, clay-40）：hover 与激活浅底
-- **Deep Terracotta 深赤陶**（#9F4F2D, clay-90）：渐变收尾与按压态
+### Primary（我 · 玫瑰粉）
+- **Rose Clay 晒透玫瑰粉**（#BE4E67）：唯一动作色与激活态色——主按钮、导航激活药丸、强调链接、选中态。clay 色阶 00–90 覆盖浅底到深底全部场景
+- **Rose Light 玫瑰高光**（#EA98AA, clay-40）：hover 与激活浅底
+- **Deep Plum Rose 深梅粉**（#7F2A3D, clay-90）：渐变收尾与按压态
 
 ### Secondary（TA · 鼠尾草）
 - **Morning Sage 晨雾鼠尾草**（#A4C39E, sage-40）："TA"的一切——身份渐变、选中态（如谁买单的 TA请）、sage 系徽章
 - **Sage Haze 薄荷高光**（#BBD3B5, sage-30）：TA 侧浅底
 
 ### Tertiary（情感与数值）
-- **Caramel 焦糖**（#B5793F）：所有价格数字与金额，衬线呈现——"钱"在这个家里由焦糖负责
-- **Love Blush 柔霞红**（#D98C84）：收藏/喜爱态与购物车角标（纯情感角色）
-- **Danger Rust 铁锈红**（#C2543F）：删除与错误警示的**唯一色源**（Cart 移除钮、AdminDishes 删除钮、EmptyState `tone="error"` 的断联/找不到态、Admin 密码门错误文字）。小字与标题级文字警示一律吃 `color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))` 混色——bone 随夜宵反相，白天/暗底两档自动过 AA。love×danger 双源旧账已结案：love 只管情感，danger 只管警示
+- **Rosegold 玫瑰金棕**（#9A575F，夜宵提亮为浅玫瑰金 #C08492）：所有价格数字与金额，衬线呈现——"钱"在这个家里由玫瑰金棕负责
+- **Rose Blush 玫霞粉**（#D96488）：收藏/喜爱态与购物车角标（纯情感角色）
+- **Danger Magenta 洋红红**（#C13E4E）：删除与错误警示的**唯一色源**（Cart 移除钮、AdminDishes 删除钮、EmptyState `tone="error"` 的断联/找不到态、Admin 密码门错误文字）。小字与标题级文字警示一律吃 `color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))` 混色——bone 随夜宵反相，白天/暗底两档自动过 AA。love×danger 双源旧账已结案：love 只管情感，danger 只管警示
 
 ### Neutral（纸与墨）
-- **Warm Paper 暖纸白**（#FDFBF7）：页面底（夜宵 → 木炭黑 #232019）
-- **Clay Block 浅陶区块底**（#F6F0E7）：区块/安静按钮底
-- **Card Paper 卡面纸**（#FFFDFA）：主卡面；**Dock Paper 药丸纸**（#FFFDF9）：停靠层与深底上的白字（on-dark）
-- **Ink 墨**（#2B2620，夜宵 → #F2EDE3）：主文字；**Ash 灰**（#6B6155）：次文字；**Mist 雾**（#75695B）：占位/三级（对比 ≥5:1 达标线）
-- 发丝边框统一 `rgba(43,38,32,0.08)`——墨的低浓度，不是新颜色
+- **Rosy Paper 浅樱粉**（#FCE7F0）：页面底（浅档浸染）（夜宵 → 深莓紫 #241B21）
+- **Rose Block 玫瑰粉区块底**（#FADCE9）：区块/安静按钮底
+- **Card Paper 卡面粉纸**（#FFF4F8）：主卡面；**Dock Paper 药丸纸**（#FFF9FC）：停靠层与深底上的白字（on-dark）
+- **Ink 墨**（#2B2429，夜宵 → #F3ECEF）：主文字；**Ash 灰**（#5F5259）：次文字；**Mist 雾**（#5E4F56）：占位/三级（全纸浸染各底 ≥4.5:1）
+- 发丝边框统一 `rgba(43,36,41,0.08)`——墨的低浓度，不是新颜色
 
 ### 命名法则
 **The One Voice Rule（一个声音法则）.** `clay` 只属于动作与激活态。它出现在哪里，哪里就是"可以点"。大面积色块用 clay 装饰 = 稀释了它的指令性。
@@ -173,7 +173,7 @@ components:
 - **Label**（700, 11px, 字距 0.18em, 全大写）：眉题 kicker（英文刊名）、小徽章、分类标签
 
 ### 命名法则
-**The Price Wears Caramel Rule（钱穿焦糖）.** 一切金额/价格 = 衬线 + caramel；字号随场景，颜色与字族不换。
+**The Price Wears Caramel Rule（钱穿玫瑰金棕）.** 一切金额/价格 = 衬线 + caramel；字号随场景，颜色与字族不换。
 **The Eyebrow Rule（眉题规则）.** 页头副标题一律大写宽字距小字（0.18em/11px/700），衬线大标题之下、发丝线之上——杂志 kicker 是页面的"栏目名"。
 
 ## Layout
@@ -186,10 +186,10 @@ components:
 
 ## Elevation & Depth
 
-混合体系：**纸面分层为主、暖调阴影为佐**。2026-09 严格重制后，backdrop-blur 玻璃只允许出现在导航/操作层（停靠药丸、吸顶栏、悬浮按钮、模态遮罩）；内容层卡面一律纯色暖陶 + 阴影分层。深度感来自"纸面三白（页底/区块底/卡面）+ 发丝边 + 阴影"的层叠，而非真实透明。
+混合体系：**纸面分层为主、暖调阴影为佐**。2026-09 严格重制后，backdrop-blur 玻璃只允许出现在导航/操作层（停靠药丸、吸顶栏、悬浮按钮、模态遮罩）；内容层卡面一律纯色粉纸 + 阴影分层。深度感来自"纸面四档（樱花页底/玫瑰区块/深玫瑰次级/粉纸卡面）+ 发丝边 + 阴影"的层叠，而非真实透明。
 
-### 阴影词表（暖墨阴影，rgba 基座 = ink 43,38,32；夜宵换纯黑系并加强浓度）
-- **shadow-1**（`0 1px 2px rgba(43,38,32,.05)`）：发丝级贴底（返回钮、静默卡）
+### 阴影词表（暖墨阴影，rgba 基座 = ink 43,36,41；夜宵换纯黑系并加强浓度）
+- **shadow-1**（`0 1px 2px rgba(43,36,41,.05)`）：发丝级贴底（返回钮、静默卡）
 - **shadow-2**（`0 2px 8px .06`）：卡片静止态
 - **shadow-3**（`0 8px 24px .08`）：停靠层/浮起
 - **shadow-4**（`0 16px 44px .12`）：模态/弹层
@@ -232,13 +232,13 @@ DockLayer：paper-strong 实底药丸（全圆、shadow-3）内四枚细线图�
 - **Do** 新页面一律 `PageHeader + PageContainer + DockLayer`（后台三页例外，包 `AdminShell`）；边距节奏只吃 `--space-*` 标尺
 - **Do** 颜色只写进 `src/index.css` 与 `src/theme/persona.js` 两处，页面消费 `var(--color-*)`；给运行时内联 var() 用的令牌必须放 `@theme static`（防树摇）
 - **Do** 人格/情感语义走 persona.js 映射（clay=我、sage=TA、caramel=钱、love=收藏）；新增调用点 <2 的组件不建，≥2 才进 `components/ui/`
-- **Do** 深色锚点卡上的白字统一 on-dark 暖白 #FFFDF9；深色实底与白字组合必须达 WCAG AA（clay-60 现值即为此校准）
+- **Do** 深色锚点卡上的白字统一 on-dark 暖白 #FFF9FC；深色实底与白字组合必须达 WCAG AA（clay-60 现值即为此校准）
 - **Do** 页转场只动 opacity（`pageEnter`），位移动画放内层 `contentEnter`——外层 transform 会杀死 sticky 页头
 - **Do** 图标取自 `ui/Icons.jsx` 细线 SVG（24 viewBox/currentColor）；文案进 `lib/sweetCopy.js` 单源
 - **Do** 动效吃 `--dur-fast/base/slow` + `--ease-soft`，并为 `prefers-reduced-motion` 留降级
 
 ### Don't
-- **Don't** 在 JSX 硬编码十六进制色（静态门禁 `p6_static_gate.py` 会拦：白名单外即红，(43,38,32) 墨系除外）
+- **Don't** 在 JSX 硬编码十六进制色（静态门禁 `p6_static_gate.py` 会拦：白名单外即红，(43,36,41) 墨系除外）
 - **Don't** 给导航/快捷入口新增 emoji 图标；Don't 用纯黑阴影或冷白 #FFFFFF 卡面
 - **Don't** 把 clay 用作大面积装饰底（见 The One Voice Rule）；Don't 一屏放两块深色锚点卡
 - **Don't** 给内容层卡面开 backdrop-blur（玻璃退后律）；Don't 在 `--radius-*` 标尺外随手写圆角值

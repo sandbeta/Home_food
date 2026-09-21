@@ -111,7 +111,7 @@ export default function OrderCard({
                           it.added_by === 'me' ? 'avatar-me' : 'avatar-partner'
                         }`}
                       >
-                        {it.added_by === 'me' ? '🐱' : '🐰'}
+                        {it.added_by === 'me' ? '🐱' : '🐑'}
                       </div>
                     ))}
                   </div>

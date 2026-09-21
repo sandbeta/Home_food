@@ -32,7 +32,7 @@ void main() {
   float d2 = length((uv - c2) * vec2(1.1, 1.0));
   float g1 = exp(-d1 * d1 * 7.0);
   float g2 = exp(-d2 * d2 * 8.0);
-  vec3 clay = vec3(0.922, 0.541, 0.376); // clay-50 #EC8A60 归一
+  vec3 clay = vec3(0.847, 0.455, 0.541); // clay-50 #D8748A 归一
   vec3 sage = vec3(0.643, 0.765, 0.620); // sage-40 #A4C39E 归一
   // 极淡：与静态 radial 光斑同量级，是"氛围"不是"特效"
   float a = clamp(g1 * 0.05 + g2 * 0.035, 0.0, 0.09);

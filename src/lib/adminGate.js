@@ -15,7 +15,7 @@ function askPassword() {
     const overlay = document.createElement('div')
     overlay.setAttribute('style', [
       'position:fixed;inset:0;z-index:9999',
-      'background:rgba(43,38,32,.45)',
+      'background:rgba(43,36,41,.45)',
       'display:flex;align-items:center;justify-content:center',
     ].join(';'))
     overlay.innerHTML = `

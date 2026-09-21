@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import LazySheep from './ui/LazySheep'
+import { useTheme } from '../theme/useTheme'
 
 /**
  * 全站统一页头 —— 编辑杂志版式。
@@ -15,6 +17,8 @@ import { motion } from 'framer-motion'
 export default function PageHeader({ title, eyebrow, subtitle, back = false, backTo, right, onBack }) {
   const navigate = useNavigate()
   const goBack = () => (backTo ? navigate(backTo) : navigate(-1))
+  // 懒羊羊驻颜：晨光模式它犯困（doze），夜宵时段它闻香睁眼（sniff）——深夜食堂开张
+  const { isNight } = useTheme()
 
   return (
     <motion.div
@@ -37,6 +41,16 @@ export default function PageHeader({ title, eyebrow, subtitle, back = false, bac
         }}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
+          {/* 懒羊羊身份徽记：TA 的头像坐在页头，双人格里的"TA"如今有了正脸 */}
+          <div
+            className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-sage)]"
+            style={{
+              background: 'color-mix(in srgb, var(--sage-40) 16%, var(--color-glass))',
+              border: '1px solid color-mix(in srgb, var(--sage-40) 40%, transparent)',
+            }}
+          >
+            <LazySheep size={38} mood={isNight ? 'sniff' : 'doze'} />
+          </div>
           {back && (
             <motion.button
               whileTap={{ scale: 0.9 }}

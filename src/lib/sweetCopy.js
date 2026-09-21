@@ -7,6 +7,12 @@ export const pickOne = (arr) => arr[Math.floor(Math.random() * arr.length)]
 
 export const NICKNAME = '懒洋洋'
 
+// TA 身份卡徽章称号（懒羊羊人设彩蛋，仅 partner 身份显示；随累计订单数进阶）
+export const partnerBadge = (orders = 0) =>
+  orders >= 30 ? '资深干饭懒羊羊'
+  : orders >= 10 ? '吃饱就睡的懒羊羊'
+  : '家里圈养的懒羊羊'
+
 // 首页副标题情话池
 export const HOME_NOTES = [
   '今天想让男朋友投喂点什么呀？',
@@ -19,6 +25,9 @@ export const HOME_NOTES = [
   '饿了就叫我，秒接单',
   '别人有的，我们家懒洋洋也得有',
   '点菜五分钟，干活两小时的是我',
+  '懒羊羊本羊只吃现成的，稍等',
+  '草料…不对，好吃的马上端上来',
+  '喂饱懒羊羊，是今天的第一要务',
 ]
 
 // 点菜页
@@ -99,6 +108,8 @@ export const NIGHT_SNACK_NOTES = [
   '深夜的肉体，需要烧烤来安抚',
   '吃完这顿，梦都是香的',
   '你点的宵夜，我随叫随到',
+  '懒羊羊吃饱就睡，我懂这种活法',
+  '深夜放饭，懒羊羊起床进食',
 ]
 
 // 夜宵首页（深夜食堂）
@@ -108,6 +119,7 @@ export const NIGHT_HOME_TITLES = [
   '饿了吧，我懂',
   '今晚想吃点什么夜的',
   '星星和宵夜都管够',
+  '懒羊羊的深夜食堂',
 ]
 export const NIGHT_HOME_NOTES = [
   '白天归厨房管，晚上归我管',

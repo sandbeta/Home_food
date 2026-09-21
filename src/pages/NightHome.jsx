@@ -85,8 +85,8 @@ export default function NightHome() {
                   className="relative overflow-hidden cursor-pointer"
                   style={{ borderRadius: 'var(--radius-card)', background: 'var(--anchor-ink)', boxShadow: 'var(--shadow-4)' }}
                 >
-                  <div className="relative h-40 overflow-hidden flex items-center justify-center" style={{ background: 'rgba(255,253,249,0.16)' }}>
-                    <div className="absolute w-40 h-40 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,253,249,0.22), transparent 70%)' }} />
+                  <div className="relative h-40 overflow-hidden flex items-center justify-center" style={{ background: 'rgba(255, 249, 252,0.16)' }}>
+                    <div className="absolute w-40 h-40 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255, 249, 252,0.22), transparent 70%)' }} />
                     <span className="text-7xl relative">{getCategoryEmoji(featured.category)}</span>
                     {getDishImage(featured) && (
                       <img src={getDishImage(featured)} alt={featured.name} className="absolute inset-0 w-full h-full object-cover"
@@ -95,17 +95,17 @@ export default function NightHome() {
                   </div>
                   <div className="flex items-end justify-between gap-3 px-5 pb-4 pt-3.5">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.18em', color: 'rgba(255,253,249,0.78)' }}>
-                        🌙 深夜 · {featured.category}
+                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.18em', color: 'color-mix(in srgb, var(--color-on-dark) 78%, transparent)' }}>
+                        LAZY SHEEP · {featured.category}
                       </p>
-                      <p className="font-serif text-2xl font-bold text-[#FFFDF9] truncate mt-1">{featured.name}</p>
+                      <p className="font-serif text-2xl font-bold text-[var(--color-on-dark)] truncate mt-1">{featured.name}</p>
                       {featured.description && (
-                        <p className="text-xs text-[rgba(255,253,249,0.82)] truncate mt-1">{featured.description}</p>
+                        <p className="text-xs text-[var(--color-on-dark)]/82 truncate mt-1">{featured.description}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
-                      <KissIcon className="w-4 h-4 text-[#FFFDF9]" />
-                      <span className="font-serif text-2xl font-bold text-[#FFFDF9] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{featured.price}</span>
+                      <KissIcon className="w-4 h-4 text-[var(--color-on-dark)]" />
+                      <span className="font-serif text-2xl font-bold text-[var(--color-on-dark)] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{featured.price}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -149,7 +149,7 @@ export default function NightHome() {
                       whileTap={{ scale: 0.92 }}
                       onClick={(e) => { e.stopPropagation(); addItem(dish); vibrate(12) }}
                       aria-label={`加购${dish.name}`}
-                      className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-lg font-bold text-[#FFFDF9]"
+                      className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-lg font-bold text-[var(--color-on-dark)]"
                       style={{ background: 'var(--color-clay)' }}
                     >
                       +

@@ -10,8 +10,9 @@ import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
 import { useCart } from '../components/CartContext'
 import { useTheme } from '../theme/useTheme'
-import { pickOne, PROFILE_TITLES } from '../lib/sweetCopy'
+import { pickOne, PROFILE_TITLES, partnerBadge } from '../lib/sweetCopy'
 import Icon from '../components/ui/Icons'
+import LazySheep from '../components/ui/LazySheep'
 
 export default function Profile() {
   const [stats, setStats] = useState({ orders: 0, total: 0 })
@@ -34,7 +35,7 @@ export default function Profile() {
       <PageHeader title={pageTitle} right={<ThemeToggle />} />
 
       <PageContainer>
-        {/* 身份卡 - 点头像切换 🐱/🐰 */}
+        {/* 身份卡 - 点头像切换 🐱/🐑 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -66,7 +67,23 @@ export default function Profile() {
           >
             {whoAmI === 'me' ? '美食家（我）' : '另一半（TA）'}
           </h2>
-          <p className="text-xs text-[var(--color-ash)] mt-1">点头像切换 🐱/🐰 身份</p>
+          {whoAmI === 'partner' && (
+            <motion.div
+              initial={{ opacity: 0, y: 6, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.15, type: 'spring', stiffness: 260, damping: 18 }}
+              className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full"
+              style={{
+                background: PERSONA.partner.chipBg,
+                border: '1px solid color-mix(in srgb, var(--sage-40) 45%, transparent)',
+                color: PERSONA.partner.chipColor,
+              }}
+            >
+              <LazySheep size={24} mood="happy" />
+              <span className="text-xs font-bold">{partnerBadge(stats.orders)}</span>
+            </motion.div>
+          )}
+          <p className="text-xs text-[var(--color-ash)] mt-1">点头像切换 🐱/🐑 身份</p>
         </motion.div>
 
         {/* 统计 */}
@@ -103,7 +120,7 @@ export default function Profile() {
             >
               <motion.span
                 className="absolute top-0.5 left-0.5 w-6 h-6 rounded-full flex items-center justify-center text-[11px]"
-                style={{ background: '#FFFDF9', boxShadow: 'var(--shadow-2)' }}
+                style={{ background: 'var(--color-on-dark)', boxShadow: 'var(--shadow-2)' }}
                 animate={{ x: isNight ? 20 : 0 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               >

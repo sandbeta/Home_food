@@ -30,7 +30,7 @@ function todayLine() {
   return `${d.getMonth() + 1}月${d.getDate()}日 周${'日一二三四五六'[d.getDay()]}`
 }
 
-// 常点人 mock：按菜品 id 稳定分配 🐱/🐰，让双人格出现在首页网格里
+// 常点人 mock：按菜品 id 稳定分配 🐱/🐑，让双人格出现在首页网格里
 const chefOf = (dish) => (dish.id % 2 === 0 ? 'me' : 'partner')
 
 // 主推卡自动轮换节奏。低于 4s 会让人来不及读完菜名与价格，高于 8s 则几乎感知不到在轮换。
@@ -243,9 +243,10 @@ export default function Home() {
         {homeLoading && !dishes.length && !homeFailed && <LoadingState text="开火备菜中…" />}
         {!homeLoading && !homeFailed && !dishes.length && (
           <EmptyState
-            emoji="🍳"
+            icon="lazySheep"
+            mood="doze"
             title="厨房还空着"
-            desc="去点菜页挑几道，开火第一顿"
+            desc="懒羊羊盯着空锅，去点菜页挑几道开火"
             action={
               <motion.button
                 whileTap={{ scale: 0.95 }}
@@ -296,11 +297,11 @@ export default function Home() {
                 >
                   <div
                     className="relative h-44 overflow-hidden flex items-center justify-center"
-                    style={{ background: 'rgba(255,253,249,0.16)' }}
+                    style={{ background: 'color-mix(in srgb, var(--color-on-dark) 16%, transparent)' }}
                   >
                     <div
                       className="absolute w-44 h-44 rounded-full"
-                      style={{ background: 'radial-gradient(circle, rgba(255,253,249,0.22), transparent 70%)' }}
+                      style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--color-on-dark) 22%, transparent), transparent 70%)' }}
                     />
                     <span className="text-7xl relative">{getCategoryEmoji(featured.category)}</span>
                     {getDishImage(featured) && (
@@ -314,14 +315,14 @@ export default function Home() {
                   </div>
                   <div className="flex items-end justify-between gap-3 px-5 pb-4 pt-3.5">
                     <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.18em', color: 'rgba(255,253,249,0.78)' }}>
+                      <p className="text-[10px] font-bold uppercase truncate" style={{ letterSpacing: '0.18em', color: 'color-mix(in srgb, var(--color-on-dark) 78%, transparent)' }}>
                         No.{String(rotIdx % rotSource.length + 1).padStart(2, '0')} · 今日主推
                       </p>
-                      <p className="font-serif text-2xl font-bold text-[#FFFDF9] truncate mt-1">{featured.name}</p>
+                      <p className="font-serif text-2xl font-bold text-[var(--color-on-dark)] truncate mt-1">{featured.name}</p>
                     </div>
                     <div className="flex items-baseline gap-1 shrink-0">
-                      <KissIcon className="w-4 h-4 shrink-0 translate-y-[-2px] text-[#FFFDF9]" />
-                      <span className="font-serif font-bold text-[#FFFDF9] tabular-nums" style={{ fontSize: '2rem', letterSpacing: '-0.035em', lineHeight: 1 }}><span className="text-[0.55em] mr-0.5">¥</span>{featured.price}</span>
+                      <KissIcon className="w-4 h-4 shrink-0 translate-y-[-2px] text-[var(--color-on-dark)]" />
+                      <span className="font-serif font-bold text-[var(--color-on-dark)] tabular-nums" style={{ fontSize: '2rem', letterSpacing: '-0.035em', lineHeight: 1 }}><span className="text-[0.55em] mr-0.5">¥</span>{featured.price}</span>
                     </div>
                   </div>
 
@@ -329,13 +330,13 @@ export default function Home() {
                   {canRotate && (
                     <div
                       className="absolute bottom-0 left-0 right-0 h-[2px]"
-                      style={{ background: 'rgba(255,253,249,0.18)' }}
+                      style={{ background: 'color-mix(in srgb, var(--color-on-dark) 18%, transparent)' }}
                     >
                       <div
                         key={`${featured.id}-${rotateToken}-${paused}-${tabVisible}`}
                         className="h-full rot-progress-bar"
                         style={{
-                          background: 'rgba(255,253,249,0.78)',
+                          background: 'color-mix(in srgb, var(--color-on-dark) 78%, transparent)',
                           animationDuration: `${ROTATE_MS}ms`,
                         }}
                       />
@@ -370,7 +371,7 @@ export default function Home() {
                       className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] border-2 border-[var(--color-ink-900)] ${chef === 'me' ? 'avatar-me' : 'avatar-partner'}`}
                       title={chef === 'me' ? '我常点' : 'TA 常点'}
                     >
-                      {chef === 'me' ? '🐱' : '🐰'}
+                      {chef === 'me' ? '🐱' : '🐑'}
                     </div>
                     <div
                       className="vt-dish-frame relative w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"

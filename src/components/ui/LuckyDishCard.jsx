@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 // GlassCard 已撤（2026-09-19 critique）：内容层禁玻璃（DESIGN.md 玻璃退后律），手气签换纸面卡
 import KissIcon from '../KissIcon'
+import LazySheep from './LazySheep'
 import { getCategoryEmoji, getDishImage } from '../../lib/categoryIcons'
 import { usePrefersReducedMotion } from '../../theme/motion'
 import { sfxEnabled, setSfxEnabled, tick, settle, tap, vibrate } from '../../lib/sfx'
@@ -96,10 +97,18 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
         style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--sage-40) 10%, transparent), transparent 70%)', animationDelay: '1s' }} />
 
       <div className="relative flex items-center justify-between mb-3">
-        <span className="badge-soft text-xs font-bold px-2.5 py-1 rounded-full"
-          style={{ background: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', color: 'var(--color-clay)' }}>
-          手气签 · 今日灵感
-        </span>
+        <div className="flex items-center gap-2 min-w-0">
+          {/* 签筒边的懒羊羊：平时打盹装傻，摇签瞬间眼睛放大——欧皇附体 */}
+          <motion.div animate={drawing ? { rotate: [0, -6, 6, -4, 4, 0], scale: [1, 1.12, 1] } : { rotate: 0, scale: 1 }}
+            transition={drawing ? { duration: 0.5, repeat: Infinity } : { duration: 0.3 }}
+            className="shrink-0 text-[var(--color-clay)]">
+            <LazySheep size={28} mood={drawing ? 'sniff' : 'doze'} bib={false} />
+          </motion.div>
+          <span className="badge-soft text-xs font-bold px-2.5 py-1 rounded-full truncate"
+            style={{ background: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', color: 'var(--color-clay)' }}>
+            手气签 · 今日灵感
+          </span>
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-[var(--color-ash)]">
             {drawing ? '签筒摇一摇…' : '不知道吃啥？摇一下'}

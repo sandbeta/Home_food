@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { usePrefersReducedMotion, EASE } from '../theme/motion'
 import Icon from './ui/Icons'
+import LazySheep, { SheepZzz } from './ui/LazySheep'
 
 /**
  * 灶台舞台 —— 订单详情页的「做菜叙事」动画，取代旧版静态状态环 D3StatusRing。
@@ -85,12 +86,22 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
               <div
                 className="w-24 h-12 rounded-[50%] flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(180deg, #FFFDF9 0%, var(--color-ink-850) 100%)',
-                  boxShadow: '0 10px 24px rgba(43,38,32,0.18), inset 0 2px 4px rgba(255,255,255,0.8)',
+                  background: 'linear-gradient(180deg, #FFF9FC 0%, var(--color-ink-850) 100%)',
+                  boxShadow: '0 10px 24px rgba(43,36,41,0.18), inset 0 2px 4px rgba(255,255,255,0.8)',
                 }}
               >
                 <span className="text-4xl -mt-2">🍽️</span>
               </div>
+              {/* 懒羊羊开饭仪式：小羊趴在盘边缓慢呼吸，配一个睡眠符号 */}
+              <motion.div
+                className="absolute -right-7 bottom-0.5"
+                style={{ color: 'var(--sage-60)' }}
+                animate={reduce ? undefined : { scale: [1, 1.06, 1], y: [0, -1.5, 0] }}
+                transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut', delay: 1.1 }}
+              >
+                <LazySheep size={40} mood="happy" />
+              </motion.div>
+              {!reduce && <SheepZzz size={11} className="-right-8 -top-2" />}
               {!reduce && (
                 <>
                   <motion.span
@@ -132,6 +143,20 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
           {/* 炉火光晕：灶膛加热时锅底映出的暖橙氛围（动画受全局 reduced-motion 停摆） */}
           {preparing && <div className="stove-glow" />}
           {pending && <div className="stove-glow ember" />}
+
+          {/* 懒羊羊守在灶边打盹：饭点未到，先睡一觉（欧羊的等待方式） */}
+          {pending && (
+            <div className="absolute text-[var(--color-sage)]" style={{ right: -6, top: 76 }}>
+              <LazySheep size={32} mood="sleep" bib={false} />
+              <SheepZzz size={9} className="-top-1 -right-1" />
+            </div>
+          )}
+          {/* 饭菜上桌，懒羊羊闻香睁眼 */}
+          {preparing && (
+            <div className="absolute text-[var(--color-sage)]" style={{ right: -6, top: 76 }}>
+              <LazySheep size={32} mood="sniff" bib={false} />
+            </div>
+          )}
 
           {/* ── 锅 ── */}
           <div className="absolute left-1/2 -translate-x-1/2" style={{ top: 30 }}>
