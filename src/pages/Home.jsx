@@ -52,6 +52,7 @@ export default function Home() {
   // 交互后重建定时器：避免用户刚点完「换一道」，1 秒后又被自动轮换顶掉
   const [rotateToken, setRotateToken] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [autoOn, setAutoOn] = useState(true)   // 自动轮换开关（机顶播放/暂停钮；触屏可关）
   const [tabVisible, setTabVisible] = useState(true)
   const [sweetNote] = useState(() => pickOne(HOME_NOTES))
   const navigate = useNavigate()
@@ -100,8 +101,8 @@ export default function Home() {
   const featured = rotSource.length ? rotSource[rotIdx % rotSource.length] : null
   const popular = gridIdx.map(i => dishes[i])
 
-  // reduced-motion / 手指按住卡片 / 标签页隐藏 / 池子不足两道时都不自动轮换
-  const canRotate = !reduced && !paused && tabVisible && rotSource.length > 1
+  // reduced-motion / 关闭自动轮换 / 手指按住卡片 / 标签页隐藏 / 池子不足两道时都不自动轮换
+  const canRotate = !reduced && autoOn && !paused && tabVisible && rotSource.length > 1
 
   useEffect(() => {
     if (!canRotate) return undefined
@@ -122,12 +123,15 @@ export default function Home() {
 
       <PageContainer>
         {/* —— 抓娃娃点餐机（V3 设计稿签名交互）：主页第一焦点 ——
-            主推菜住玻璃罩，"换一道"=爪子垂下抓取；泡泡时钟常驻机顶。
-            悬停暂停自动轮换的口径与旧版一致。 */}
+            主推菜住玻璃罩，"抓取"=爪子垂下夹菜；泡泡时钟 + 自动轮换播放/暂停常驻机顶。
+            悬停/键盘聚焦暂停轮换，触屏起手重置倒计时，避免用户正看时被换走。 */}
         {featured && (
           <div
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
+            onFocus={() => setPaused(true)}
+            onBlur={() => setPaused(false)}
+            onTouchStart={() => setRotateToken((t) => t + 1)}
           >
             <ClawMachine
               dish={featured}
@@ -135,6 +139,8 @@ export default function Home() {
               onCatch={addItem}
               onGrab={nextDish}
               onOpen={() => navigate(`/dish/${featured.id}`)}
+              autoOn={autoOn}
+              onToggleAuto={() => setAutoOn((v) => !v)}
               rotate={canRotate ? { key: `${featured.id}-${rotateToken}-${paused}-${tabVisible}`, durationMs: ROTATE_MS } : null}
             />
           </div>

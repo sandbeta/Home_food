@@ -1,0 +1,101 @@
+## src\components\StoveStage.jsx
+   64 →
+   75 🍲
+   93 🍽️
+   112 ✨
+   118 ✨
+   124 🎉
+   169 🍲
+   177 💤
+## src\components\AddDishModal.jsx
+   6 🍳🥩🥬
+   7 🍚🍲🍢
+   8 🍎🧋🌶️
+   9 🥢🔥🍤
+   10 🪷🐟🦐
+   11 🍲🥟🍖
+   12 🍄🍽️
+   70 🍽️
+## src\components\NightSnackSheet.jsx
+   120 →
+## src\components\ui\AdminShell.jsx
+   22 →
+## src\components\ui\LoadingState.jsx
+   14 🍳
+## src\components\ui\DishRow.jsx
+   48 ⭐🤍
+## src\components\ui\EmptyState.jsx
+   14 🍽️
+## src\components\ui\LuckyDishCard.jsx
+   131 🔔🔕
+   176 🎲
+## src\components\ui\OrderCard.jsx
+   84 💬
+   114 🐱🐑
+## src\components\ui\PayerSelector.jsx
+   5 ✌️
+   6 🙋
+   7 💝
+## src\components\ui\ThemeToggle.jsx
+   25 🌙☀️
+## src\pages\Admin.jsx
+   70 ←
+## src\pages\AdminOrders.jsx
+   11 ✨
+   13 👨‍🍳
+   14 🎉
+   23 🔥
+   27 ✅
+   69 👨‍🍳
+   71 📋
+## src\pages\Profile.jsx
+   38 🐱🐑
+   86 🐱🐑
+   104 🌙☀️
+   127 🌙☀️
+## src\pages\AdminDishes.jsx
+   74 🍽️
+   77 🍽️
+   103 ✓
+## src\pages\Cart.jsx
+   159 🍲
+   209 🐱
+   232 🐑
+   259 💬
+   311 ️
+## src\pages\DishDetail.jsx
+   53 😵
+   84 ⭐🤍
+   152 🔥
+   159 🧺
+   170 🔥
+   190 💡
+## src\pages\HotDishes.jsx
+   160 →
+## src\pages\Menu.jsx
+   28 🐱🐑
+   149 🍜
+   150 ⭐
+   276 📡
+   305 ⭐
+   307 ⭐
+   329 🔍
+## src\pages\MyOrders.jsx
+   16 ✨
+   18 👨‍🍳
+   19 🎉
+## src\pages\OrderDetail.jsx
+   20 👨‍🍳
+   21 🎉
+   84 😵
+   116 →
+   174 📝
+   184 🐱🐑
+   220 💬
+## src\pages\Home.jsx
+   145 📡
+   184 →
+   201 🐱🐑
+## src\pages\NightHome.jsx
+   81 →
+TOTAL files: 23

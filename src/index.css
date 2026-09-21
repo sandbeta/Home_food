@@ -114,6 +114,13 @@
      两个端点分属不同色系）。这里两端都取同族表面色，双主题各自成立。 */
   --plate-bg: radial-gradient(circle at 50% 34%, var(--color-on-dark), var(--color-ink-850) 78%);
 
+  /* —— 订单状态 chip 文字色（语义令牌，夜宵反相块换浅色档）——
+     白天深字压浅底；夜宵若仍用 clay-80/深梅灰会"暗字压暗底"不达 4.5:1，
+     故夜宵覆盖为 clay-30/sage-30/浅梅灰。见 [data-theme="night"] 段。 */
+  --status-pending-text: #5F5259;
+  --status-preparing-text: var(--clay-80);
+  --status-completed-text: var(--sage-60);
+
   /* —— 遮罩 / 背景（夜宵模式反相点：亮暗两档只换这几个令牌） —— */
   --scrim-top: rgba(252, 231, 240, 0.88);          /* PageHeader 吸顶渐隐 */
   --hero-wash-functional: rgba(252, 231, 240, 0.74); /* functional Hero 压暗罩 */
@@ -229,6 +236,9 @@ textarea:focus-visible, select:focus-visible {
   outline: 2px solid var(--color-sage-soft);
   outline-offset: 2px;
 }
+
+/* 触控即时响应：去掉部分移动浏览器对可点的 300ms 双击缩放等待 */
+button, a, [role="button"], label, input[type="submit"] { touch-action: manipulation; }
 
 /* ========== 浏览器自带表面主题化 ==========
    选中高亮与输入光标是"设计过的页面"最廉价的信号：冷蓝选区会瞬间破坏暖纸氛围 */
@@ -509,6 +519,10 @@ input, textarea { caret-color: var(--color-clay); }
   --color-line: color-mix(in srgb, var(--color-bone) 20%, transparent);
   /* 图鉴盘底夜宵档：两端都是暗底同族表面色，不再用 on-dark（它不反相，会泛灰ball） */
   --plate-bg: radial-gradient(circle at 50% 34%, var(--color-ink-800), var(--color-ink-900) 78%);
+  /* 订单状态 chip 文字夜宵档：深字压暗底不达 4.5:1，换浅色档（暗底上 clay-30/sage-30/浅梅灰均 ≥4.5） */
+  --status-pending-text: #C9B6BD;
+  --status-preparing-text: var(--clay-30);
+  --status-completed-text: var(--sage-30);
   /* 遮罩与背景反相 */
   --scrim-top: rgba(36, 27, 33, 0.85);
   --glass-strong: rgba(46, 34, 41, 0.90); /* 停靠药丸：夜宵改为暗玻璃 */

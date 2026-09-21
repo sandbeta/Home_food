@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import KissIcon from './KissIcon'
+import Icon from './ui/Icons'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { EASE, contentEnter, usePrefersReducedMotion } from '../theme/motion'
 
@@ -81,7 +82,7 @@ function Claw({ open, x, cable, grabbing }) {
 
 export default function ClawMachine({
   dish, onOpen, onCatch, onGrab, indexNo = 1,
-  rotate, showClock = true,
+  rotate, showClock = true, autoOn = true, onToggleAuto,
   title = '抓娃娃点餐机', note = '今日主推 · 抓到一个算一个',
 }) {
   const reduced = usePrefersReducedMotion()
@@ -141,7 +142,21 @@ export default function ClawMachine({
                 No.{String(indexNo).padStart(2, '0')}
               </span>
             </div>
-            <BubbleClock visible={showClock} />
+            <div className="flex items-center gap-2 shrink-0">
+              {onToggleAuto && !reduced && (
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => { e.stopPropagation(); onToggleAuto() }}
+                  aria-label={autoOn ? '暂停自动轮换' : '开始自动轮换'}
+                  aria-pressed={autoOn}
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ border: '2px solid var(--color-line)', color: 'var(--color-clay)', background: 'var(--surface)' }}
+                >
+                  <Icon name={autoOn ? 'pause' : 'play'} size={15} strokeWidth={2.4} filled={!autoOn} />
+                </motion.button>
+              )}
+              <BubbleClock visible={showClock} />
+            </div>
           </div>
         </div>
 

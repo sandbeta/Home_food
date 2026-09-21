@@ -8,6 +8,7 @@ import FullBleedHero from '../components/FullBleedHero'
 import KissIcon from '../components/KissIcon'
 import PageContainer from '../components/ui/PageContainer'
 import Stepper from '../components/ui/Stepper'
+import Icon from '../components/ui/Icons'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import { useFavorites } from '../lib/favorites'
@@ -78,10 +79,15 @@ export default function DishDetail() {
             whileTap={{ scale: 0.9 }}
             onClick={() => toggle(dish)}
             aria-label={has(dish.id) ? '取消收藏' : '收藏'}
-            className="w-11 h-11 rounded-full flex items-center justify-center text-lg glass"
+            aria-pressed={has(dish.id)}
+            className="w-11 h-11 rounded-full flex items-center justify-center glass"
           >
-            <motion.span animate={has(dish.id) ? { scale: [1, 1.3, 1] } : { scale: 1 }} transition={{ duration: 0.3 }}>
-              {has(dish.id) ? '⭐' : '🤍'}
+            <motion.span
+              animate={has(dish.id) ? { scale: [1, 1.3, 1] } : { scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className={has(dish.id) ? 'text-[var(--color-love)]' : 'text-[var(--color-mist)]'}
+            >
+              <Icon name="heart" size={22} filled={has(dish.id)} strokeWidth={2} />
             </motion.span>
           </motion.button>
         }

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import KissIcon from '../KissIcon'
+import Icon from './Icons'
 import { getCategoryEmoji, getDishImage } from '../../lib/categoryIcons'
 
 /**
@@ -39,13 +40,15 @@ export default function DishRow({
           whileTap={{ scale: 0.9 }}
           onClick={(e) => { e.stopPropagation(); onToggleFav(dish) }}
           aria-label={favorited ? '取消收藏' : '收藏'}
-          className="absolute top-2 right-[calc(var(--space-card-p)_+_4px)] z-20 w-11 h-11 rounded-full flex items-center justify-center text-base glass"
+          aria-pressed={favorited}
+          className="absolute top-2 right-[calc(var(--space-card-p)_+_4px)] z-20 w-11 h-11 rounded-full flex items-center justify-center glass"
         >
           <motion.span
             animate={favorited ? { scale: [1, 1.3, 1] } : { scale: 1 }}
             transition={{ duration: 0.3 }}
+            className={favorited ? 'text-[var(--color-love)]' : 'text-[var(--color-mist)]'}
           >
-            {favorited ? '⭐' : '🤍'}
+            <Icon name="heart" size={22} filled={favorited} strokeWidth={2} />
           </motion.span>
         </motion.button>
       )}

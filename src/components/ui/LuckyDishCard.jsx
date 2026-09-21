@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 // GlassCard 已撤（2026-09-19 critique）：内容层禁玻璃（DESIGN.md 玻璃退后律），手气签换纸面卡
 import KissIcon from '../KissIcon'
 import LazySheep from './LazySheep'
+import Icon from './Icons'
 import { getCategoryEmoji, getDishImage } from '../../lib/categoryIcons'
 import { usePrefersReducedMotion } from '../../theme/motion'
 import { sfxEnabled, setSfxEnabled, tick, settle, tap, vibrate } from '../../lib/sfx'
@@ -125,10 +126,10 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
             role="switch"
             aria-checked={soundOn}
             aria-label={soundOn ? '关闭音效' : '开启音效'}
-            className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0"
-            style={{ background: 'var(--color-glass)', border: '2px solid var(--color-line)' }}
+            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+            style={{ background: 'var(--color-glass)', border: '2px solid var(--color-line)', color: soundOn ? 'var(--color-clay)' : 'var(--color-mist)' }}
           >
-            {soundOn ? '🔔' : '🔕'}
+            <Icon name={soundOn ? 'bell' : 'bellOff'} size={17} strokeWidth={1.9} />
           </motion.button>
         </div>
       </div>

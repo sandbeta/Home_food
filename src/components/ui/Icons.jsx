@@ -42,6 +42,43 @@ const PATHS = {
   star: (
     <path d="m12 3 2.7 5.8 6.3.8-4.6 4.4 1.2 6.2L12 17.2 6.4 20.2l1.2-6.2L3 9.6l6.3-.8z" />
   ),
+  // 心形（收藏）：outline 用 stroke，filled 用 fill（见 Icon 的 filled 参数）
+  heart: (
+    <path d="M12 20.7l-1.2-1.1C5.4 14.4 2 11.3 2 7.5 2 4.4 4.4 2 7.5 2c1.7 0 3.4.8 4.5 2.1C13.1 2.8 14.8 2 16.5 2 19.6 2 22 4.4 22 7.5c0 3.8-3.4 6.9-8.8 12.1L12 20.7z" />
+  ),
+  // 主题切换：夜宵月亮 / 白天太阳
+  moon: (
+    <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" />
+  ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </>
+  ),
+  // 声音开关：铃（响）/ 铃划掉（静音）
+  bell: (
+    <>
+      <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6z" />
+      <path d="M10 20a2 2 0 0 0 4 0" />
+    </>
+  ),
+  bellOff: (
+    <>
+      <path d="M6 9a6 6 0 0 1 9.5-4.9M18 11c0 3 2 4 2 4H6" />
+      <path d="M10 20a2 2 0 0 0 4 0" />
+      <path d="M3 3l18 18" />
+    </>
+  ),
+  // 自动轮换播放/暂停
+  play: (
+    <path d="M8 5.5v13l11-6.5z" />
+  ),
+  pause: (
+    <>
+      <path d="M9 5v14M15 5v14" />
+    </>
+  ),
   // 齿轮（设置/后台入口）
   gear: (
     <>
@@ -87,7 +124,7 @@ const PATHS = {
   ),
 }
 
-export default function Icon({ name, size = 22, strokeWidth = 2, className = '', style }) {
+export default function Icon({ name, size = 22, strokeWidth = 2, className = '', style, filled = false }) {
   return (
     <svg
       className={className}
@@ -95,8 +132,8 @@ export default function Icon({ name, size = 22, strokeWidth = 2, className = '',
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke={filled ? 'none' : 'currentColor'}
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"

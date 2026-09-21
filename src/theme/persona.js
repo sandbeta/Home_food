@@ -19,11 +19,11 @@ export const PERSONA = {
 }
 export const ORDER_STATUS = {
   pending:   { text: '等着呢', emoji: '⏳', ring: ['#9C8F96', '#9C8F96'],
-               chipBg: 'rgba(156,143,150,0.16)', chipColor: '#5F5259' },
+               chipBg: 'rgba(156,143,150,0.16)', chipColor: 'var(--status-pending-text)' },
   preparing: { text: '在做了', emoji: '👨‍🍳', ring: ['#D8748A', '#EA98AA'],
-               chipBg: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', chipColor: 'var(--clay-80)' },
+               chipBg: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', chipColor: 'var(--status-preparing-text)' },
   completed: { text: '做好啦', emoji: '🎉', ring: ['#A4C39E', '#BBD3B5'],
-               chipBg: 'color-mix(in srgb, var(--sage-40) 16%, transparent)', chipColor: 'var(--sage-60)' },
+               chipBg: 'color-mix(in srgb, var(--sage-40) 16%, transparent)', chipColor: 'var(--status-completed-text)' },
 }
 export const PAYER = {
   aa:       { label: 'AA',   emoji: '✌️', border: 'color-mix(in srgb, var(--color-caramel) 50%, transparent)',  glow: '0 0 0 2px color-mix(in srgb, var(--color-caramel) 12%, transparent)', fill: '#8A4E56' },
