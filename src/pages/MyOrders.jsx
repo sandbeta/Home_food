@@ -56,8 +56,7 @@ export default function MyOrders() {
           <LoadingState />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon="lazySheep"
-            mood="sleep"
+            who="grass"
             title={filter ? '这个状态还没有订单' : '还没有下过单'}
             desc={filter ? '换个筛选看看吧~' : '快去一起选点好吃的吧~'}
             action={
