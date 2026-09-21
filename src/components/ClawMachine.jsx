@@ -26,7 +26,7 @@ const BEAT = { drop: 360, close: 170, lift: 460, carry: 330, release: 320, settl
 const SEQ = ['drop', 'close', 'lift', 'carry', 'release', 'settle']
 
 /* 机内几何（px / %） */
-const GEO = { railY: 16, carH: 12, cableUp: 22, cableDown: 112, clawH: 46, pileTop: 150, slotTop: 246, chuteX: '18%' }
+const GEO = { railY: 16, carH: 12, cableUp: 22, cableDown: 112, clawH: 46, pileTop: 156, slotTop: 246, chuteX: '18%' }
 const clawTop = (cable) => GEO.railY + GEO.carH + cable
 
 /** 泡泡时钟：实时时间糖牌（宵夜档 visible=false 不渲染） */
@@ -127,7 +127,7 @@ export default function ClawMachine({
   const resting = ['idle', 'aim', 'drop'].includes(phase)
   const falling = phase === 'release'
   const mood = phase === 'idle' || phase === 'aim' ? 'doze' : phase === 'drop' ? 'sniff' : 'happy'
-  const plushTop = held ? clawTop(cable) + GEO.clawH - 14 : resting ? GEO.pileTop : clawTop(cable) + GEO.clawH - 14
+  const plushTop = resting ? GEO.pileTop : clawTop(cable) + 16
   const plushX = ['carry', 'release'].includes(phase) ? GEO.chuteX : '50%'
 
   return (
@@ -181,15 +181,15 @@ export default function ClawMachine({
                 <motion.div
                   key={phase === 'release' ? `fall-${shown.id}` : `p-${shown.id}`}
                   className="absolute z-10 pointer-events-none"
-                  style={{ left: plushX, top: plushTop, transform: 'translateX(-50%)' }}
-                  initial={reduced ? { opacity: 0 } : { opacity: 0, y: -26, scale: 0.82 }}
+                  style={{ left: plushX, top: plushTop }}
+                  initial={reduced ? { x: '-50%', opacity: 0 } : { x: '-50%', opacity: 0, y: -26, scale: 0.82 }}
                   animate={
                     falling
-                      ? { left: GEO.chuteX, top: GEO.slotTop, opacity: 0, rotate: [0, -18, 14, 0], transition: { duration: BEAT.release / 1000, ease: [0.5, 0, 0.9, 0.6] } }
-                      : { left: plushX, top: plushTop, opacity: 1, y: 0, scale: 1, rotate: held ? [0, -3, 3, 0] : 0,
+                      ? { x: '-50%', left: GEO.chuteX, top: GEO.slotTop, opacity: 0, rotate: [0, -18, 14, 0], transition: { duration: BEAT.release / 1000, ease: [0.5, 0, 0.9, 0.6] } }
+                      : { x: '-50%', left: plushX, top: plushTop, opacity: 1, y: 0, scale: 1, rotate: held ? [0, -3, 3, 0] : 0,
                           transition: { duration: reduced ? 0.24 : 0.42, ease: EASE } }
                   }
-                  exit={{ opacity: 0, transition: { duration: 0.18 } }}
+                  exit={{ x: '-50%', opacity: 0, transition: { duration: 0.18 } }}
                 >
                   <LazySheep size={78} mood={mood} breathe={!grabbing} />
                 </motion.div>
