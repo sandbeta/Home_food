@@ -110,10 +110,10 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [canRotate, rotateToken, rotSource.length])
 
-  // 手动「换一道」：大卡与网格一起顺移（保留原有手感），并重置自动轮换计时
+  // 抓取后只换主推（从"非常点的"池里取下一道），「常点的」网格保持不动——
+  // 网格是"你家稳定爱吃的那几道"，不该因为抓走一次主推就被顺移打乱。
   const nextDish = () => {
     setRotIdx(i => i + 1)
-    setGridOffset(o => o + 1)
     setRotateToken(t => t + 1)
   }
 
