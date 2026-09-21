@@ -54,14 +54,15 @@ export default function DishRow({
         className="d3-card-face p-3.5 flex items-center gap-3"
         style={{ padding: 'var(--space-card-p)' }}
       >
-        {/* 缩略图：emoji 垫底，图片盖在上面；远程图挂了就露出 emoji（灌库菜多为外链图） */}
+        {/* 缩略图：emoji 垫底，图片盖在上面；远程图挂了就露出 emoji（灌库菜多为外链图）。
+            V3 设计稿：缩略图是"图鉴圆牌"——clay-soft 描边把菜从纸面上摘出来。 */}
         <div
           className="vt-dish-frame relative w-[70px] h-[70px] shrink-0 overflow-hidden flex items-center justify-center"
           style={{
             viewTransitionName: vtName,
-            borderRadius: 'var(--radius-lg)',
-            background:
-              'linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-850) 50%, color-mix(in srgb, var(--clay-50) 6%, transparent) 100%)',
+            borderRadius: 'var(--radius-tile)',
+            border: '2px solid var(--color-clay-soft)',
+            background: 'var(--plate-bg)',
           }}
         >
           <span className="text-3xl drop-shadow-sm">{emoji}</span>
@@ -103,12 +104,12 @@ export default function DishRow({
             {variant === 'default' && onAdd && (
               <motion.button
                 whileTap={{ scale: 0.92 }}
-                whileHover={{ scale: 1.08 }}
                 onClick={(e) => { e.stopPropagation(); onAdd(dish, e) }}
                 aria-label={addLabel || `添加${dish.name}`}
                 className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
                 style={{
                   background: accent,
+                  border: '2px solid var(--clay-deep)',
                   boxShadow: '0 4px 12px rgba(43,36,41,0.18), inset 0 1px 0 rgba(255,255,255,0.25)',
                 }}
               >

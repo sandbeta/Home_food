@@ -149,10 +149,7 @@ export default function DishDetail() {
                 <div className="flex items-center gap-1.5 shrink-0">
                   {dish.recipe.difficulty && <span className="d3-badge">{dish.recipe.difficulty}</span>}
                   {dish.recipe.calories && (
-                    <span className="text-xs font-semibold px-2 py-1 rounded-full text-[var(--color-ash)]"
-                      style={{ background: 'rgba(43,36,41,0.05)', border: '1px solid var(--color-glass-border)' }}>
-                      🔥 {dish.recipe.calories}
-                    </span>
+                    <span className="pill-tag">🔥 {dish.recipe.calories}</span>
                   )}
                 </div>
               </div>
@@ -162,10 +159,7 @@ export default function DishDetail() {
                   <p className="text-sm font-bold text-[var(--color-bone)] mt-4 mb-2">🧺 需要准备</p>
                   <div className="flex flex-wrap gap-1.5">
                     {dish.recipe.ingredients.map((it, i) => (
-                      <span key={i} className="text-xs px-2.5 py-1 rounded-full text-[var(--color-ash)]"
-                        style={{ background: 'rgba(43,36,41,0.05)', border: '1px solid var(--color-glass-border)' }}>
-                        {it}
-                      </span>
+                      <span key={i} className="pill-tag">{it}</span>
                     ))}
                   </div>
                 </>
@@ -192,7 +186,7 @@ export default function DishDetail() {
 
               {dish.recipe.tip && (
                 <p className="text-xs text-[var(--color-ash)] leading-relaxed mt-4 pt-3"
-                  style={{ borderTop: '1px solid var(--color-glass-border)' }}>
+                  style={{ borderTop: '2px dashed var(--color-line)' }}>
                   💡 {dish.recipe.tip}
                 </p>
               )}
