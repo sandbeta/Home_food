@@ -1,0 +1,1 @@
+import{i as e}from"./framer-motion-BVlT9LUN.js";var t=e();function n({children:e,className:n=``,gap:r=`var(--space-section)`}){return(0,t.jsx)(`div`,{className:`relative ${n}`,style:{paddingLeft:`var(--space-page-x)`,paddingRight:`var(--space-page-x)`,display:`flex`,flexDirection:`column`,gap:r},children:e})}export{n as t};
