@@ -45,8 +45,8 @@ export default function D3CartOrb() {
         initial={{ scale: 0.3, rotate: -20 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: 'spring', stiffness: 500, damping: 15 }}
-        className="absolute -top-1 -right-1 min-w-[22px] h-[22px] rounded-full text-white text-xs font-bold flex items-center justify-center px-1 border-2 border-[var(--color-ink-900)]"
-        style={{ background: 'var(--color-love)', boxShadow: '0 2px 8px rgba(217,100,136,0.45)' }}
+        className="absolute -top-1 -right-1 min-w-[22px] h-[22px] rounded-full text-[var(--color-on-dark)] text-xs font-bold flex items-center justify-center px-1 border-2 border-[var(--color-ink-900)]"
+        style={{ background: 'color-mix(in srgb, var(--color-love) 55%, var(--clay-deep))', boxShadow: '0 2px 8px color-mix(in srgb, var(--color-love) 45%, transparent)' }}
       >
         {totalCount}
       </motion.span>

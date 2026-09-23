@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-19T21:37:47+08:00",
+  "generatedAt": "2026-09-22T16:20:00+08:00",
   "title": "Design System: 晨光厨房 Chenguang Kitchen",
   "extensions": {
     "colorMeta": {
@@ -10,21 +10,37 @@
         "canonical": "#BE4E67",
         "tonalRamp": ["#FEF3F6", "#FCE7EC", "#FCE6EB", "#F6C1CD", "#EA98AA", "#D8748A", "#BE4E67", "#AE3C56", "#973148", "#7F2A3D"]
       },
+      "clay-text": {
+        "role": "primary",
+        "displayName": "Rose Clay 深一档·动作文字（clay-70）",
+        "canonical": "#AE3C56",
+        "tonalRamp": ["#AE3C56"],
+        "note": "--color-clay-text=clay-70，纸面 ~4.97:1 达 AA。clay 做小字链接/标签前景时专用；--color-clay(clay-60 ~4.0:1) 仅当填充配白字，不作小字前景。2026-09-22 colorize 新增。"
+      },
       "sage": {
         "role": "secondary",
         "displayName": "Morning Sage 晨雾鼠尾草",
         "canonical": "#A4C39E",
         "tonalRamp": ["#F9FDF8", "#EBF4E8", "#D5E6D1", "#BBD3B5", "#A4C39E", "#90B38A", "#7FA37A", "#6E9269", "#62835D", "#557351"]
       },
+      "on-sage": {
+        "role": "secondary",
+        "displayName": "On Sage 深绿字（TA 实底反色）",
+        "canonical": "#1A2417",
+        "tonalRamp": ["#1A2417"],
+        "note": "--color-on-sage。压在 persona.gradient(sage) 实底上的文字/图标必须用它（白字在 sage 上仅 ~1.9:1）。persona.js 新增 on 字段：me→on-dark、partner→on-sage。"
+      },
       "caramel": { "role": "tertiary", "displayName": "Rosegold 玫瑰金棕（价格专属）", "canonical": "#9A575F" },
       "love": { "role": "tertiary", "displayName": "Rose Blush 玫霞粉（收藏/角标）", "canonical": "#D96488" },
-      "danger": { "role": "tertiary", "displayName": "Danger Magenta 洋红红（已定义未启用）", "canonical": "#C13E4E" },
+      "danger": { "role": "tertiary", "displayName": "Danger Magenta 洋红红（删除与错误唯一色源·已全站启用）", "canonical": "#C13E4E", "note": "2026-09-22 harden 起：Cart 下单失败、AdminDishes 删除/加载/切换、AddDishModal 保存失败、AdminOrders 加载/状态推进 均走内联 danger 错误条（深底用 on-dark 字压 danger 混色底，浅底用 danger 字）。小字警示可吃 color-mix(danger 70%, bone) 达 AA。" },
       "paper": { "role": "neutral", "displayName": "Rosy Paper 浅樱粉", "canonical": "#FCE7F0" },
+      "paper-block": { "role": "neutral", "displayName": "Rose Block 玫瑰粉区块底", "canonical": "#FADCE9" },
       "card-surface": { "role": "neutral", "displayName": "Card Paper 卡面粉纸", "canonical": "#FFF4F8" },
       "on-dark": { "role": "neutral", "displayName": "Dock Paper 粉白（深底白字）", "canonical": "#FFF9FC" },
+      "line": { "role": "neutral", "displayName": "Candy Line 糖果描边（墨 14%）", "canonical": "rgba(43,36,41,0.14)" },
       "ink": { "role": "neutral", "displayName": "Ink 墨（暖棕黑）", "canonical": "#2B2429" },
       "ash": { "role": "neutral", "displayName": "Ash 灰（次文字）", "canonical": "#5F5259" },
-      "mist": { "role": "neutral", "displayName": "Mist 雾（占位，≥5:1）", "canonical": "#5E4F56" },
+      "mist": { "role": "neutral", "displayName": "Mist 雾（占位/三级，各底 ≥4.5:1）", "canonical": "#5E4F56" },
       "night-paper": { "role": "neutral", "displayName": "Night Paper 夜宵深莓紫", "canonical": "#241B21" },
       "night-ink": { "role": "neutral", "displayName": "Night Ink 夜宵暖白字", "canonical": "#F3ECEF" }
     },
@@ -51,7 +67,8 @@
       { "name": "dur-base", "value": "0.25s", "purpose": "常规进退场。" },
       { "name": "dur-slow", "value": "0.45s", "purpose": "页面转场与主题底色过渡。" },
       { "name": "nav-glow-spring", "value": "type:spring stiffness:500 damping:28", "purpose": "导航激活胶囊滑动（framer-motion layoutId）。" },
-      { "name": "press-scale", "value": "tap 0.94–0.98", "purpose": "按压缩感：主按钮 0.98，小件 0.94/0.97。" }
+      { "name": "press-scale", "value": "tap 0.94–0.98", "purpose": "按压缩感：主按钮 0.98，小件 0.94/0.97。" },
+      { "name": "claw-grab-seq", "value": "drop360/close170/lift460/carry330/release320/settle340 ms", "purpose": "娃娃机抓取演出节拍（低频签名，不受 300ms 档约束）；抓到浮标存续 ~4.2s 供点「撤销」。" }
     ],
     "breakpoints": [
       { "name": "shell", "value": "480px" },
@@ -66,6 +83,14 @@
       "description": "唯一动作按钮：clay 实底 + 暖白字 + 顶部高光压痕。",
       "html": "<button class=\"ds-btn-primary\">去点菜</button>",
       "css": ".ds-btn-primary { font-family: system-ui, 'PingFang SC', sans-serif; font-weight: 700; font-size: 15px; background: #BE4E67; color: #FFF9FC; border: none; border-radius: 12px; padding: 12px 20px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.18); cursor: pointer; transition: filter .15s ease, box-shadow .2s ease, transform .15s ease; } .ds-btn-primary:hover { filter: brightness(1.04); box-shadow: 0 2px 6px rgba(118,40,64,0.22), inset 0 1px 0 rgba(255,255,255,0.18); } .ds-btn-primary:active { transform: scale(0.98); filter: brightness(0.97); } .ds-btn-primary:focus-visible { outline: 2px solid #BBD3B5; outline-offset: 2px; }"
+    },
+    {
+      "name": "Persona CTA (me / partner)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "加入购物车主操作：底随人格渐变（我=clay / TA=sage），字/图标取 persona.on 保证 AA（白字压 sage 不达 AA）。",
+      "html": "<button class=\"ds-cta ds-cta-partner\">🐑 加入购物车</button>",
+      "css": ".ds-cta { font-family: system-ui, 'PingFang SC', sans-serif; font-weight: 700; font-size: 16px; border: none; border-radius: 12px; padding: 14px 20px; width: 100%; cursor: pointer; transition: transform .15s ease, filter .15s ease; } .ds-cta-me { background: linear-gradient(180deg, #D8748A 0%, #973148 100%); color: #FFF9FC; } .ds-cta-partner { background: linear-gradient(180deg, #A4C39E 0%, #6E9269 100%); color: #1A2417; } .ds-cta:active { transform: scale(0.97); }"
     },
     {
       "name": "Quiet Button",
@@ -84,10 +109,26 @@
       "css": ".ds-chip-row { display: inline-flex; gap: 8px; } .ds-chip { font-family: system-ui, 'PingFang SC', sans-serif; font-weight: 600; font-size: 14px; min-height: 44px; padding: 10px 16px; border-radius: 9999px; border: 1px solid rgba(43,36,41,0.08); background: #FADCE9; color: #5F5259; cursor: pointer; transition: color .2s, background .2s, transform .15s; } .ds-chip:active { transform: scale(0.94); } .ds-chip-on { background: linear-gradient(180deg, #BE4E67 0%, #973148 100%); color: #FFF9FC; border-color: transparent; box-shadow: 0 4px 12px rgba(216,116,138,0.26); }"
     },
     {
+      "name": "Action Link (clay text)",
+      "kind": "custom",
+      "refersTo": "button-quiet",
+      "description": "纸面上的小字动作链接/标签：走 clay-text（clay-70）达 AA，不用 clay-60。",
+      "html": "<button class=\"ds-link\">全部 →</button>",
+      "css": ".ds-link { font-family: system-ui, 'PingFang SC', sans-serif; font-weight: 700; font-size: 12px; color: #AE3C56; background: none; border: none; cursor: pointer; padding: 4px 2px; } .ds-link:active { opacity: 0.7; }"
+    },
+    {
+      "name": "Inline Error Banner",
+      "kind": "custom",
+      "refersTo": "card-surface",
+      "description": "harden 全站错误反馈范式：内联 danger 条 + role=alert，浅底用 danger 字、深锚卡用 on-dark 字，含「知道了/再试一次」。取代原生 alert/confirm。",
+      "html": "<div class=\"ds-err\" role=\"alert\"><span aria-hidden>⚠️</span><span>提交没成功，网络可能不稳——再点一次就好</span></div>",
+      "css": ".ds-err { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; font-family: system-ui, 'PingFang SC', sans-serif; font-size: 13px; font-weight: 600; color: #C13E4E; background: color-mix(in srgb, #C13E4E 10%, #FFF4F8); border: 2px solid color-mix(in srgb, #C13E4E 40%, transparent); }"
+    },
+    {
       "name": "Input Field",
       "kind": "input",
       "refersTo": "input-field",
-      "description": "墨 3% 浅底 + focus clay 晕环。",
+      "description": "墨 3% 浅底 + focus clay 晕环；占位统一 --color-mist（不再乘 alpha）。",
       "html": "<input class=\"ds-input\" placeholder=\"搜索菜品…\" />",
       "css": ".ds-input { font-family: system-ui, 'PingFang SC', sans-serif; font-size: 15px; color: #2B2429; background: rgba(43,36,41,0.03); border: 1px solid rgba(43,36,41,0.08); border-radius: 12px; padding: 12px 16px; width: 260px; transition: border-color .2s ease, box-shadow .2s ease; } .ds-input::placeholder { color: #5E4F56; } .ds-input:focus { outline: none; border-color: rgba(216,116,138,0.55); box-shadow: 0 0 0 4px rgba(216,116,138,0.14); }"
     },
@@ -110,30 +151,39 @@
       "name": "Cart Orb",
       "kind": "custom",
       "refersTo": "dock-orb",
-      "description": "购物车球：clay 渐变陶瓷纽扣 + love 角标（仅非空时挂载）。",
-      "html": "<button class=\"ds-orb\"><span style=\"font-size:24px\">🛒</span><span class=\"ds-orb-badge\">3</span></button>",
-      "css": ".ds-orb { position: relative; width: 64px; height: 64px; border-radius: 9999px; border: none; background: linear-gradient(180deg, #D8748A 0%, #BE4E67 55%, #973148 100%); box-shadow: 0 6px 20px rgba(216,116,138,0.4), 0 12px 32px rgba(43,36,41,0.22), inset 0 2px 4px rgba(255,255,255,0.45), inset 0 -2px 4px rgba(118,40,64,0.3); cursor: pointer; transition: transform .15s ease; } .ds-orb:hover { transform: scale(1.04); } .ds-orb:active { transform: scale(0.94); } .ds-orb-badge { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; border-radius: 9999px; background: #D96488; color: #fff; border: 2px solid #FCE7F0; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(217,100,136,0.45); }"
+      "description": "购物车球：clay 渐变陶瓷纽扣 + love 角标（角标向 clay-deep 压一档达 AA，字用 on-dark；仅非空时挂载）。",
+      "html": "<button class=\"ds-orb\"><span class=\"ds-orb-face\">🐑</span><span class=\"ds-orb-badge\">3</span></button>",
+      "css": ".ds-orb { position: relative; width: 64px; height: 64px; border-radius: 9999px; border: none; background: linear-gradient(180deg, #D8748A 0%, #BE4E67 55%, #973148 100%); box-shadow: 0 6px 20px rgba(216,116,138,0.4), 0 12px 32px rgba(43,36,41,0.22), inset 0 2px 4px rgba(255,255,255,0.45), inset 0 -2px 4px rgba(118,40,64,0.3); cursor: pointer; transition: transform .15s ease; } .ds-orb:hover { transform: scale(1.04); } .ds-orb:active { transform: scale(0.94); } .ds-orb-face { font-size: 24px; } .ds-orb-badge { position: absolute; top: -4px; right: -4px; min-width: 22px; height: 22px; border-radius: 9999px; background: color-mix(in srgb, #D96488 55%, #7F2A3D); color: #FFF9FC; border: 2px solid #2B2429; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 4px; box-shadow: 0 2px 8px color-mix(in srgb, #D96488 45%, transparent); }"
     },
     {
       "name": "Magazine Page Header",
       "kind": "custom",
-      "description": "页头三件套：眉题 kicker + 衬线大标题 + 贯通发丝线。",
+      "description": "页头三件套：眉题 kicker + 衬线大标题 + 贯通发丝线（最顶常驻羊毛云朵檐）。",
       "html": "<header class=\"ds-hdr\"><p class=\"ds-hdr-kicker\">TODAY'S MENU</p><h1 class=\"ds-hdr-title\">今晚吃啥</h1><div class=\"ds-hdr-rule\"></div></header>",
       "css": ".ds-hdr { font-family: system-ui, 'PingFang SC', sans-serif; padding: 0 24px; background: linear-gradient(180deg, rgba(253,246,248,0.86) 0%, rgba(0,0,0,0) 100%); } .ds-hdr-kicker { margin: 0 0 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #5F5259; } .ds-hdr-title { margin: 0; font-family: 'Playfair Display', 'Songti SC', serif; font-size: 40px; font-weight: 700; line-height: 1.06; letter-spacing: -0.035em; color: #2B2429; } .ds-hdr-rule { border-top: 1px solid rgba(43,36,41,0.08); margin-top: 16px; }"
+    },
+    {
+      "name": "ClawMachine (抓娃娃点餐机)",
+      "kind": "custom",
+      "refersTo": "dock-orb",
+      "description": "首页签名件·自绘抓取机构（轨道+滑车+缆线+三指爪）。抓物=主推菜圆盘；点罩或「抓取」演完整抓取，落槽即 onCatch→加购（「抓一个算一个」），浮标 ~4.2s 内可点「撤销」。2026-09-22 所有者认可自绘为现行真相，官方素材退役位。",
+      "html": "<div class=\"ds-claw\"><div class=\"ds-claw-rail\"></div><div class=\"ds-claw-car\"></div><div class=\"ds-claw-case\"><div class=\"ds-claw-plate\">🍲</div><span class=\"ds-claw-caught\">抓到「红烧牛肉」<button class=\"ds-claw-undo\">撤销</button></span></div></div>",
+      "css": ".ds-claw { position: relative; width: 320px; height: 264px; border: 2px solid #7F2A3D; border-radius: 16px; background: #FFF4F8; overflow: hidden; font-family: system-ui, 'PingFang SC', sans-serif; } .ds-claw-rail { position: absolute; left: 12px; right: 12px; top: 20px; height: 5px; border-radius: 999px; background: color-mix(in srgb, #7F2A3D 45%, transparent); } .ds-claw-car { position: absolute; left: 50%; top: 16px; width: 26px; height: 12px; border-radius: 6px; background: #BE4E67; border: 2px solid #7F2A3D; transform: translateX(-50%); } .ds-claw-case { position: absolute; inset: 0; cursor: pointer; } .ds-claw-plate { position: absolute; left: 50%; top: 120px; width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle at 50% 34%, #FFF9FC, #33242C 78%); border: 2px solid #EA98AA; display: flex; align-items: center; justify-content: center; font-size: 40px; transform: translateX(-50%); } .ds-claw-caught { position: absolute; left: 18%; top: 200px; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 6px 0 10px; border-radius: 9999px; background: #BE4E67; color: #FFF9FC; border: 2px solid #7F2A3D; font-size: 12px; font-weight: 700; box-shadow: 0 8px 24px rgba(43,36,41,0.08); transform: translateX(-50%); } .ds-claw-undo { font-size: 11px; font-weight: 700; height: 20px; padding: 0 8px; border: none; border-radius: 9999px; background: #FFF9FC; color: #7F2A3D; cursor: pointer; }"
     }
   ],
   "narrative": {
     "northStar": "The Kitchen Zine（两人厨房别册）",
-    "overview": "晨光厨房不是一款点餐软件，而是一本只印给两个人看的家庭杂志：粉纸白的版面摊在阳光下的餐桌上，玫瑰粉色是「我🐱」的油墨，薄荷绿是「TA🐰」的油墨，菜是栏目、订单是连载、情话是编者注。整套系统在「编辑杂志质感」的克制框架里运行——纸面实底卡片、发丝级边框、收敛的圆角、衬线大标题；温度不靠花哨装饰，靠双人格色彩的对比与随机抽取的情话文案。气质定性：克制的手作感。夜宵模式下整本别册换成深莓紫夜纸——双人格色与情感色一律不变。",
+    "overview": "晨光厨房不是一款点餐软件，而是一本只印给两个人看的家庭杂志：粉纸白的版面摊在阳光下的餐桌上，玫瑰粉色是「我🐱」的油墨，薄荷绿是「TA🐑」的油墨，菜是栏目、订单是连载、情话是编者注。整套系统在「编辑杂志质感」的克制框架里运行——纸面实底卡片、糖果描边、收敛的圆角、衬线大标题；温度不靠花哨装饰，靠双人格色彩的对比与随机抽取的情话文案。气质定性：克制的手作感。夜宵模式下整本别册换成深莓紫夜纸——双人格色与情感色一律不变。",
     "keyCharacteristics": [
-      "暖纸基底：页底/区块底/卡面三层暖白，从不使用纯白或冷灰",
+      "粉纸基底：页底/区块底/卡面多层吃粉，亮区只剩深色锚点卡与停靠药丸",
       "双人格温度对比：clay（我，暖）× sage（TA，冷），价格永远穿 caramel 玫瑰金棕",
       "一页一锚点：每屏恰好一块 clay 实底白字深色锚卡",
-      "眉题 + 衬线大标题 + 底部贯通发丝线 = 页头三件套",
+      "眉题 + 衬线大标题 + 底部贯通发丝线 = 页头三件套，最顶常驻羊毛云朵檐",
+      "糖果描边：普通卡 2px --color-line，签名件 2px clay-deep",
       "夜宵反相只换表面/文字/遮罩令牌，情感与人格色跨主题恒定"
     ],
     "rules": [
-      { "name": "The One Voice Rule", "body": "clay 只属于动作与激活态。它出现在哪里，哪里就是「可以点」。大面积色块用 clay 装饰 = 稀释了它的指令性。", "section": "colors" },
+      { "name": "The One Voice Rule", "body": "clay 只属于动作与激活态。它出现在哪里，哪里就是「可以点」。大面积色块用 clay 装饰 = 稀释了它的指令性。（.status-seg 进行态、娃娃机 clay 件是显式豁免）", "section": "colors" },
       { "name": "The One Anchor Rule", "body": "每个页面恰好一块 clay 实底白字深色锚卡。第二块锚点出现即版面失衡。", "section": "colors" },
       { "name": "The Same-Lovers Rule", "body": "夜宵模式只反相表面/文字/遮罩令牌；clay、sage、love、caramel 白天黑夜是同一组值。", "section": "colors" },
       { "name": "The Price Wears Caramel Rule", "body": "一切金额/价格 = 衬线 + caramel；字号随场景，颜色与字族不换。", "section": "typography" },
@@ -145,16 +195,21 @@
       "Do 新页面一律 PageHeader + PageContainer + DockLayer（后台三页包 AdminShell）；边距节奏只吃 --space-* 标尺",
       "Do 颜色只写进 src/index.css 与 src/theme/persona.js 两处，页面消费 var(--color-*)；运行时 var() 令牌放 @theme static",
       "Do 人格/情感语义走 persona.js 映射；≥2 真实调用点才建 ui/ 组件",
-      "Do 深色锚点卡白字统一 #FFF9FC；深底与白字组合必须达 WCAG AA",
+      "Do 深色锚点卡白字统一 on-dark 暖白 #FFF9FC；深底与白字组合必须达 WCAG AA",
+      "Do clay 做小字链接/标签前景（写在纸面上）时走 --color-clay-text（clay-70，~5:1 达 AA）；--color-clay(clay-60 ~4.0:1) 只作填充配白字，不作小字前景",
+      "Do 压在人格渐变实底上的文字/图标一律取 persona.on（me→on-dark、partner→on-sage）；白字在 sage 上仅 ~1.9:1，TA 模式主操作必须吃 on-sage",
+      "Do 破坏/终局错误走体系内内联 danger 错误条（role=alert + 可重试），不用原生 alert/confirm；下单失败不清车、写操作失败保留输入",
       "Do 页转场只动 opacity，位移放内层——外层 transform 会杀死 sticky 页头",
       "Do 图标取自 ui/Icons.jsx 细线 SVG；文案进 lib/sweetCopy.js 单源",
       "Do 动效吃 --dur-* + --ease-soft，并为 prefers-reduced-motion 留降级"
     ],
     "donts": [
       "Don't 在 JSX 硬编码白名单外十六进制色（p6_static_gate.py 会拦）",
-      "Don't 给导航/快捷入口新增 emoji 图标；Don't 用纯黑阴影或冷白卡面",
+      "Don't 给导航/快捷入口新增 emoji 图标；Don't 用纯黑阴影或冷白 #FFFFFF 卡面",
       "Don't 把 clay 用作大面积装饰底；Don't 一屏放两块深色锚点卡",
       "Don't 给内容层卡面开 backdrop-blur；Don't 在 --radius-* 标尺外随手写圆角值",
+      "Don't 往娃娃机机腹塞官方抓娃娃玩偶素材（V3 已改自绘机构抓主推菜盘，叠官方玩偶会重影）；Don't 把官方角色素材放进 <30px 槽位（用自绘 LazySheep）",
+      "Don't 自己写图鉴盘底渐变（必须消费 --plate-bg，否则夜宵下变灰球）",
       "Don't 在页面包裹层加 transform；Don't 绕过 mockApi/fetch 直连数据（接口语义改动 mock 与 server 两端同步）",
       "Don't 提议 WeUI/扁平微信风（所有者已实测否决并 revert）"
     ]

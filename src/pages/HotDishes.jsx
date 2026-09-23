@@ -15,7 +15,8 @@ import { tap, vibrate } from '../lib/sfx'
 import { morphTo, heroNameFor, cacheList } from '../lib/vt'
 
 // 排名色：前三金/银铜，其余安静
-const RANK_COLORS = ['var(--color-clay)', 'var(--color-mist)', 'var(--color-caramel)']
+const RANK_COLORS = ['var(--color-clay)', 'var(--color-mist)', 'var(--color-caramel)']  // 名次大数字【前景】：随夜宵提亮（前景该反相）
+const RANK_FILLS = ['var(--color-clay)', 'var(--color-mist-deep)', 'var(--color-caramel-deep)']  // NO.x 徽章【底】：不反相深档，配 on-dark 亮字两主题达 AA
 
 export default function HotDishes() {
   const [dishes, setDishes] = useState([])
@@ -107,7 +108,7 @@ export default function HotDishes() {
                         onError={(e) => { e.currentTarget.style.display = 'none' }} />
                     )}
                     <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full text-[var(--color-on-dark)]"
-                      style={{ background: idx < 3 ? RANK_COLORS[idx] : 'rgba(43,36,41,0.45)' }}>
+                      style={{ background: idx < 3 ? RANK_FILLS[idx] : 'rgba(43,36,41,0.45)' }}>
                       NO.{idx + 1}
                     </span>
                   </div>
@@ -163,7 +164,7 @@ export default function HotDishes() {
                       <motion.button
                         whileTap={{ scale: 0.93 }}
                         onClick={() => navigate(`/dish/${dish.id}`)}
-                        className="d3-btn-sm px-2.5 py-1.5 text-xs font-bold text-[var(--color-ash)]"
+                        className="d3-btn-sm px-2.5 py-1.5 min-h-[44px] text-xs font-bold text-[var(--color-ash)]"
                         style={{ background: 'rgba(43,36,41,0.05)' }}
                       >
                         菜谱
@@ -172,7 +173,7 @@ export default function HotDishes() {
                         whileTap={{ scale: 0.9 }}
                         onClick={() => addDish(dish)}
                         aria-label={`点一份${t.name}`}
-                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        className="w-11 h-11 rounded-full flex items-center justify-center"
                         style={{
                           background: 'var(--color-clay-gradient)',
                           boxShadow: '0 4px 10px color-mix(in srgb, var(--clay-50) 28%, transparent), inset 0 1px 0 rgba(255,255,255,0.3)',
@@ -203,6 +204,7 @@ export default function HotDishes() {
         {toast && (
           <motion.div
             key={toast.id}
+            role="status" aria-live="polite"
             initial={{ opacity: 0, y: 16, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8 }}

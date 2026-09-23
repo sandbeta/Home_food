@@ -86,7 +86,7 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
               <div
                 className="w-24 h-12 rounded-[50%] flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(180deg, #FFF9FC 0%, var(--color-ink-850) 100%)',
+                  background: 'linear-gradient(180deg, var(--color-on-dark) 0%, var(--color-ink-850) 100%)',
                   boxShadow: '0 10px 24px rgba(43,36,41,0.18), inset 0 2px 4px rgba(255,255,255,0.8)',
                 }}
               >

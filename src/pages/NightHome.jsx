@@ -12,12 +12,14 @@ import ClawMachine from '../components/ClawMachine'
 import KissIcon from '../components/KissIcon'
 import PageContainer from '../components/ui/PageContainer'
 import SectionHeader from '../components/ui/SectionHeader'
+import LoadingState from '../components/ui/LoadingState'
+import EmptyState from '../components/ui/EmptyState'
 import ThemeToggle from '../components/ui/ThemeToggle'
 import { useCart } from '../components/CartContext'
 import { nightPick } from '../lib/nightRules'
 import { getCategoryEmoji, getDishImage } from '../lib/categoryIcons'
 import { contentEnter, cardEntrance, usePrefersReducedMotion } from '../theme/motion'
-import { pickOne, NIGHT_HOME_TITLES, NIGHT_HOME_NOTES } from '../lib/sweetCopy'
+import { pickOne, NIGHT_HOME_TITLES, NIGHT_HOME_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { vibrate } from '../lib/sfx'
 import { morphTo, heroNameFor, cacheList } from '../lib/vt'
 
@@ -33,11 +35,21 @@ const shuffle = (arr) => {
 export default function NightHome() {
   const [pool, setPool] = useState([])
   const [rotIdx, setRotIdx] = useState(0)
+  // 三态（对齐 Home）：加载/失败可重试/空池——此前 .catch 吞异常致整页空白，像坏了
+  const [loading, setLoading] = useState(true)
+  const [failed, setFailed] = useState(false)
+  const [reload, setReload] = useState(0)
   const navigate = useNavigate()
-  const { addItem } = useCart()
+  const { addItem, items, whoAmI, updateQuantity } = useCart()
   const reduced = usePrefersReducedMotion()
   const [title] = useState(() => pickOne(NIGHT_HOME_TITLES))
   const [note] = useState(() => pickOne(NIGHT_HOME_NOTES))
+
+  // 撤销一次"抓取即加购"：该菜当前人格数量减一，减到 0 自动移除
+  const undoCatch = (dish) => {
+    const cur = items.find(i => i.dish_id === dish.id && i.added_by === whoAmI)?.quantity ?? 0
+    if (cur > 0) updateQuantity(dish.id, cur - 1, whoAmI)
+  }
 
   // 网格错峰：8 格作为「一排端上桌」整体逐格亮相（cardEntrance + 0.06 步进，
   // 基准 0.1 让区块标题先到、格子随后）；reduced 下去掉位移只留短淡入，反馈仍可读
@@ -46,10 +58,16 @@ export default function NightHome() {
     : cardEntrance(0.1 + idx * 0.06)
 
   useEffect(() => {
-    fetch('/api/dishes?category=全部').then(r => r.json()).then(d => {
-      { const l = shuffle(nightPick(d)); setPool(l); cacheList('night', l) }
-    }).catch(() => {})
-  }, [])
+    fetch('/api/dishes?category=全部')
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
+      .then(d => {
+        const l = shuffle(nightPick(d))
+        setPool(l); cacheList('night', l)
+        setLoading(false)
+        if (!l.length) setFailed(true)
+      })
+      .catch(() => { setLoading(false); setFailed(true) })
+  }, [reload])
 
   const featured = pool.length ? pool[rotIdx % pool.length] : null
   const grid = useMemo(() => pool.filter(d => d.id !== featured?.id).slice(0, 8), [pool, featured])
@@ -59,12 +77,31 @@ export default function NightHome() {
       <PageHeader title={title} subtitle={note} right={<ThemeToggle />} />
 
       <PageContainer>
+        {loading && !pool.length && <LoadingState text="开灯备宵夜…" />}
+        {failed && !loading && (
+          <EmptyState
+            emoji="📡" tone="error"
+            title="宵夜机暂时没通电"
+            desc={pickOne(RETRY_NOTES)}
+            action={
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => { setFailed(false); setLoading(true); setReload(r => r + 1) }}
+                className="d3-btn d3-btn-primary px-6 py-2.5 text-sm font-bold"
+                style={{ borderRadius: 'var(--radius-btn)' }}
+              >
+                再试一次
+              </motion.button>
+            }
+          />
+        )}
         {/* 深夜主推 —— 娃娃机宵夜变体：无泡泡时钟（安静陪吃），手动换一道不自动轮换 */}
         {featured && (
           <ClawMachine
             dish={featured}
             indexNo={(rotIdx % (pool.length || 1)) + 1}
             onCatch={addItem}
+            onUndo={undoCatch}
             onGrab={() => setRotIdx(i => i + 1)}
             onOpen={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
             showClock={false}
@@ -78,7 +115,7 @@ export default function NightHome() {
           <motion.div {...contentEnter(0.1)}>
             <SectionHeader
               title="这些点得多"
-              action={<button onClick={() => navigate('/menu?cat=夜宵')} className="text-xs text-[var(--color-clay)] font-bold">全店夜宵 →</button>}
+              action={<button onClick={() => navigate('/menu?cat=夜宵')} className="text-xs text-[var(--color-clay-text)] font-bold">全店夜宵 →</button>}
             />
             <div className="grid grid-cols-2 gap-3 mt-3">
               {grid.map((dish, idx) => (
@@ -108,7 +145,7 @@ export default function NightHome() {
                       whileTap={{ scale: 0.92 }}
                       onClick={(e) => { e.stopPropagation(); addItem(dish); vibrate(12) }}
                       aria-label={`加购${dish.name}`}
-                      className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-lg font-bold text-[var(--color-on-dark)]"
+                      className="w-11 h-11 rounded-full shrink-0 flex items-center justify-center text-xl font-bold text-[var(--color-on-dark)]"
                       style={{ background: 'var(--color-clay)' }}
                     >
                       +

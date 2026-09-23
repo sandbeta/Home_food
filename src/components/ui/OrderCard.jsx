@@ -39,7 +39,7 @@ export default function OrderCard({
   const body = (
     <div className="d3-card-face">
       {/* 顶部状态条 */}
-      <div className="h-1" style={{ background: `linear-gradient(90deg, ${status.bar}88, ${status.bar}22)` }} />
+      <div className="h-1" style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${status.bar} 53%, transparent), color-mix(in srgb, ${status.bar} 13%, transparent))` }} />
       <div className="flex">
         <div className="w-1 shrink-0" style={{ background: status.bar }} />
         <div className="flex-1" style={{ padding: 'var(--space-card-p)' }}>

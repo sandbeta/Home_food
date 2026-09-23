@@ -122,6 +122,24 @@ const PATHS = {
       <circle cx="16" cy="9" r="0.7" />
     </>
   ),
+  // 星光（筛选「全部」）
+  sparkles: (
+    <>
+      <path d="M11 3.5 12.6 7.4 16.5 9 12.6 10.6 11 14.5 9.4 10.6 5.5 9 9.4 7.4z" />
+      <path d="M18 14.5 18.9 17 21.5 17.9 18.9 18.8 18 21.3 17.1 18.8 14.5 17.9 17.1 17z" opacity="0.85" />
+    </>
+  ),
+  // 时钟（订单等待中）
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
+    </>
+  ),
+  // 对勾（完成 / 做好了）
+  check: (
+    <path d="m5 12.5 4.5 4.5L19 7.5" />
+  ),
 }
 
 export default function Icon({ name, size = 22, strokeWidth = 2, className = '', style, filled = false }) {

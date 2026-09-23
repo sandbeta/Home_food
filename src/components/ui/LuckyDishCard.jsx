@@ -106,7 +106,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
             <LazySheep size={28} mood={drawing ? 'sniff' : 'doze'} bib={false} />
           </motion.div>
           <span className="badge-soft text-xs font-bold px-2.5 py-1 rounded-full truncate"
-            style={{ background: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', color: 'var(--color-clay)' }}>
+            style={{ background: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', color: 'var(--color-clay-text)' }}>
             手气签 · 今日灵感
           </span>
         </div>
@@ -126,7 +126,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
             role="switch"
             aria-checked={soundOn}
             aria-label={soundOn ? '关闭音效' : '开启音效'}
-            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+            className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
             style={{ background: 'var(--color-glass)', border: '2px solid var(--color-line)', color: soundOn ? 'var(--color-clay)' : 'var(--color-mist)' }}
           >
             <Icon name={soundOn ? 'bell' : 'bellOff'} size={17} strokeWidth={1.9} />
@@ -168,7 +168,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
             onClick={draw}
             whileTap={{ scale: 0.88 }}
             aria-label="摇签"
-            className="d3-btn d3-btn-primary flex items-center justify-center gap-1 px-3 py-2 text-xs font-bold"
+            className="d3-btn d3-btn-primary flex items-center justify-center gap-1 px-3 py-2 min-h-[44px] text-xs font-bold"
           >
             <motion.span
               className="text-sm inline-block"
@@ -188,7 +188,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
                 spawnParticle(rect.left + rect.width / 2, rect.top)
                 onAdd(dish)
               }}
-              className="d3-btn-sm px-3.5 py-2 rounded-2xl text-xs font-bold text-[var(--color-clay)] border border-[var(--color-clay)]/30"
+              className="d3-btn-sm px-3.5 py-2 min-h-[44px] rounded-2xl text-xs font-bold text-[var(--color-clay-text)] border border-[var(--color-clay)]/30"
             >
               加一份
             </motion.button>

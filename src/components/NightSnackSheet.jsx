@@ -15,6 +15,7 @@ import { getCategoryEmoji } from '../lib/categoryIcons'
 import LazySheep from './ui/LazySheep'
 import { pickOne, NIGHT_SNACK_NOTES } from '../lib/sweetCopy'
 import { sheetUp, cardEntrance, glowPulse, tapScale, usePrefersReducedMotion } from '../theme/motion'
+import useDialogA11y from '../lib/useDialogA11y'
 
 /** Fisher-Yates 无偏洗牌取前 n 道 */
 const shuffleTake = (arr, n) => {
@@ -55,6 +56,8 @@ export default function NightSnackSheet() {
     ? { initial: { opacity: 0 }, animate: { opacity: 1 }, transition: { duration: 0.2, delay: 0.15 + idx * 0.06 } }
     : cardEntrance(0.22 + idx * 0.06)
 
+  const panelRef = useDialogA11y(open, close)
+
   if (!dishes.length) return null
 
   return createPortal(
@@ -67,8 +70,10 @@ export default function NightSnackSheet() {
             style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,36,41,0.35)' }}
           />
           <motion.div
+            ref={panelRef}
+            role="dialog" aria-modal="true" aria-label="深夜食堂宵夜推荐" tabIndex={-1}
             {...(reduced ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
-            className="fixed bottom-0 left-0 right-0 mx-auto z-50"
+            className="fixed bottom-0 left-0 right-0 mx-auto z-50 focus:outline-none"
             style={{ maxWidth: 'var(--shell-w)' }}
           >
             <div className="d3-card-face rounded-t-3xl overflow-hidden" style={{ borderRadius: 'var(--radius-sheet) var(--radius-sheet) 0 0' }}>
@@ -90,7 +95,7 @@ export default function NightSnackSheet() {
                   </div>
                 </div>
                 <button onClick={close} aria-label="关闭夜宵推荐"
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform border-2 border-[var(--color-line)] bg-[var(--color-glass)]">
+                  className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform border-2 border-[var(--color-line)] bg-[var(--color-glass)]">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                 </button>
               </div>
@@ -106,7 +111,7 @@ export default function NightSnackSheet() {
                       <p className="text-xs font-serif font-bold text-[var(--color-caramel)]"><span className="text-[0.75em]">¥</span>{d.price}</p>
                     </div>
                     <motion.button whileTap={{ scale: 0.9 }} onClick={() => addItem(d)} aria-label={`加购${d.name}`}
-                      className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-base font-bold text-[var(--color-on-dark)]"
+                      className="w-11 h-11 rounded-full shrink-0 flex items-center justify-center text-lg font-bold text-[var(--color-on-dark)]"
                       style={{ background: 'var(--color-clay)' }}>
                       +
                     </motion.button>

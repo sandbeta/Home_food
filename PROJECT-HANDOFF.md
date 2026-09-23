@@ -41,7 +41,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 | `--color-ink-900` | `#FDF6F8` | 页面底（粉纸白，2026-09-17 提亮后） |
 | `--color-bone` | `#2B2429` | 主文字 |
 | `--color-clay` / `-soft` | `var(--clay-60)`=`#B84569` / `#E585A5` | 我(🐱) 玫瑰粉暖（2026-09-17 提亮后回退 clay-60 折中档；soft 仍 clay-40） |
-| `--color-sage` / `-soft` | `#A4C39E` / `#BBD3B5` | TA(🐰) 薄荷绿冷（2026-09-17 提亮 = sage-40/30） |
+| `--color-sage` / `-soft` | `#A4C39E` / `#BBD3B5` | TA(🐑) 薄荷绿冷（2026-09-17 提亮 = sage-40/30） |
 | `--color-caramel` / `love` / `danger` | `#9E5B63` / `#D96488` / `#C13E4E` | 价格数字 / 喜爱 / 删除 |
 | `--color-ash` / `mist` | `#6E6069` / `#9C8F96` | 次文字 / 占位 |
 
@@ -213,6 +213,55 @@ scripts/
 | ui-ux-pro-max 界面体检整改（本轮） | 用 ui-ux-pro-max 技能对照 Pre-Delivery 清单全站审，按优先级修 6 项：**①[高·无障碍]** `index.html` viewport 去掉 `maximum-scale=1.0,user-scalable=no`（WCAG 1.4.4 反模式）+ `viewport-fit=cover`；**②[高·动效]** 首页主推每 5s 自动轮换但触屏无暂停（只有 hover 暂停）——机顶加 SVG 播放/暂停切换钮（`ClawMachine` 新 `autoOn/onToggleAuto`，Home `autoOn` 进 canRotate），补 `onFocus/onBlur` 暂停 + `onTouchStart` 重置倒计时；**③[高·一致性]** 收藏钮 `⭐/🤍`（星↔心形状都变 + emoji 违禁）统一为心形 SVG（`Icons` 新增 `heart` + `filled` 参数），DishRow/DishDetail 接入，`filled` 随状态、love/mist 换色、补 `aria-pressed`；**④[中·触控]** 全局 `button,a,[role=button]{touch-action:manipulation}` 去 300ms 点延迟；**⑤[中·暗色对比]** 订单状态 chip 文字改语义令牌 `--status-{pending,preparing,completed}-text`（白天深字 / 夜宵覆盖 clay-30/sage-30/浅梅灰，修夜宵"暗字压暗底"不达 4.5:1 旧账，persona.js 改引令牌）；**⑥[低·图标纪律]** ThemeToggle 🌙☀️→moon/sun SVG（热区 40→44）、LuckyDishCard 音效 🔔🔕→bell/bellOff SVG（28→36）。`Icons.jsx` 一次性补 heart/moon/sun/bell/bellOff/play/pause 七枚 + `filled` 变体。**有意保留**（所有者既定，非 bug）：菜品分类/缩略图占位 emoji（数据非图标）、🐱 人格标识、后台/状态装饰 emoji。四件套全绿（build/lint 仅 CartContext 历史 warning/test 8 项/p6 门禁 0·0·0）。观感仍未经无头截图核验，交所有者 live 目检 | 本轮 |
 | 修首页抓取逻辑 bug（本轮） | 所有者指出：点「抓取」时下方「常点的」网格也跟着顺移，逻辑不对。根因=`Home.nextDish` 里 `setGridOffset(o=>o+1)`（沿用旧"换一道"大卡+网格一起翻的手感）。抓取语义已变（抓走主推=加购），网格是"你家稳定爱吃的那几道"不该被打乱。**改法**：`nextDish` 只 `setRotIdx+1`（从"非常点的"池取下一道主推）+ 重置轮换计时，删掉 `setGridOffset` 顺移；网格保持固定。主推池本就排除网格 6 格（`rotPool`），解耦后无重复。四件套全绿 | 本轮 |
 | **懒羊羊抓娃娃主题 V3 落地** | 所有者给《懒羊羊抓娃娃主题设计稿 V3·粉色基调》，要求「按设计稿重构 UI，保留原有功能」。上一轮已落一半（ClawMachine/characters.js/lazy-assets/Home+NightHome 换装，未提交），本轮补齐并修缺陷：**修重影**——官方挂点素材自带横梁+缆线+带爱心的爪钩，组件又自绘一套 ClawHook/rail/bar/rop，叠起来双爪（删自绘机构，改为整幅素材 150×150 contain 顶对齐，四张纵横比都 <1 故挂点天然对齐；抓取演出改为"提走旧的→放下新的"两拍 ≈0.95s）；**修灰球**——图鉴盘底 `radial-gradient(on-dark → surface)` 两端分属反相/不反相色系，夜宵下渲染成灰球（新增 `--plate-bg` 双主题同族令牌，娃娃机圆盘 + DishRow 缩略图接入）；**修吞色**——PayerSelector 三档曾统一 `d3-btn-primary`（全 clay），把 TA 的 sage 身份色吞了（恢复设计稿三色：AA 金棕描边／我请 clay 实底／TA请 sage 实底），并清掉该文件残留的已废弃过冲曲线。**世界层**：`--color-line` 描边两档（普通卡 2px 可见糖果轮廓／签名件 2px clay-deep；原 1px 发丝边退位为"纸的接缝"），页头最顶常驻羊毛云朵檐，页尾草地收边；**材质层 12 个组件**（PageHeader 官方角色徽记+羊毛檐、Chip、Stepper、DishRow 图鉴圆牌、Character 新建、EmptyState 空态改官方素材、GlassCard、FloatingPillNav/D3CartOrb/ThemeToggle 描边、OrderCard 芯片、PayerSelector）；**页面层**（详情 pill-tag 原料 + 虚线小贴士、购物车糖果清单行 + 分类圆牌 + 步进器 36px 档、订单三段跑灯 `.status-seg`、点菜/热门搜索改糖果胶囊）。`CartContext` 加 `category` 字段（1 行，购物车圆牌用；旧本地购物车无此字段 → `getCategoryEmoji` 回退 🍽️，无需迁移）。四件套全绿（build/lint 1 条 CartContext 历史警告/test 8 项/p6 门禁 0·0·0），Edge 实测截图 8 张逐屏目检（白天首页/点菜/详情/购物车/订单详情 + 夜宵首页弹窗与静态；夜宵盘底修复前后对比确认）。**与设计稿唯一有意偏离**：六屏设计稿无 Hero 大图，本项目 Menu/DishDetail/Cart/Orders/Profile/Hot 六页仍保留 FullBleedHero（既有编辑杂志语言），未擅自摘除，列为 §8 待办请所有者拍板 | 本轮 |
+
+## 7.9 impeccable 全站审查 + colorize + audit + harden（2026-09-22，本轮）
+
+用 impeccable `critique` 做双评估审查（设计评审 + 检测器，dual-agent），综合 27/40；据所有者拍板逐项整改：
+
+- **colorize（对比度 + 单源）**：修 TA 模式主操作近乎不可见（白字压 sage ~1.9:1）——`theme/persona.js` 新增语义字段 `on`（me→on-dark、partner→on-sage），`DishDetail` CTA 与 `DishRow` 加购「+」改吃 `persona.on`（`DishRow` 加 `onAccent` prop，`Menu` 传 `partner.on`）。新增前景令牌 `--color-clay-text`(=clay-70，纸面 ~5:1)，全站 clay 小字链接/标签（Home/NightHome/Menu/OrderDetail/LuckyDishCard）从 clay-60 收编过去。占位符去掉稀释 alpha（AddDishModal ash/40、Cart mist/70 → 回落 `--color-mist`）。`Profile` 人格标题去渐变字（浅 sage 端 ~1.3:1 且违 editorial 系统）改实色 `--color-bone`。冷白 `#FFF9FC`/`text-white` 收进 `--color-on-dark`（`FloatingPillNav`/`StoveStage`/`D3CartOrb` 角标/`AddDishModal`），`D3CartOrb` 角标底向 clay-deep 压一档达 AA。DESIGN.md 补 `clay-text`/`persona.on` 两条 Do。
+- **audit（娃娃机 spec↔code 对齐）**：所有者**认可自绘**——DESIGN.md 娃娃机段落 + Don't 条目 + `index.css:687` 注释全部改写为承认自绘机构（轨道/滑车/缆线/三指爪 + 抓主推菜盘 + 落槽即加购），解除"不要画爪钩"红线，标注 `CLAW_POOL`/`.claw-sprite` 已从 hero 退役（官方素材现仅 PageHeader 徽记 + EmptyState）。
+- **抓取加撤销兜底**：保留"抓一个算一个"核心机制（**未动 `CartContext`**）——`ClawMachine` 的「抓到「X」」浮标升级为可点「撤销」（新 `onUndo` prop，Home/NightHome 用现有 `updateQuantity` 把该菜当前人格数量减一实现，零不可变文件改动）；顺带修该浮标的 framer 居中 bug（动画 y/scale 覆盖了 style translateX(-50%)，改用 framer `x:'-50%'`），并把浮标存续从 0.7s 延长到 ~4.2s 以便点到撤销。
+- **harden（去原生对话框 + 补静默失败）**：`Cart` 下单失败 `alert()` → 锚点卡内联 danger 错误条（含 `res.ok` 校验，失败不清车）；`AdminDishes` 删除 `confirm()` → 两段式「确认删除？」，load/toggle/delete/save 全补 `res.ok`+catch→内联 `listErr` 横幅；`AddDishModal.handleSubmit` 改 await `onSave`+try/catch→弹窗内联 `saveErr`（失败保留输入不关闭）+ 保存中禁用；`AdminOrders` loadOrders 补 catch（不再无限转圈）+ 状态推进错误→内联横幅。
+- **门禁**：每批改动后 build✓ / lint（仅 `CartContext` 历史 warning）/ test 8 项✓ / p6 门禁 0·0·0；impeccable detect 改动文件零新增 finding。观感仍待所有者 live dev 目检（本机无头截图不稳）。
+
+## 7.10 impeccable 复评（Round2）+ 修自引入回归 + distill（2026-09-22）
+
+第二轮 impeccable `critique`（双评估，读当前码复核）：**27 → 33/40**。确认上轮整改到位（on-sage CTA 8.31→4.57:1、clay-text 10 站点 5.46:1、占位 mist、角标压深、#FFF9FC 全站令牌化——并纠出子代理误报：index.css 无 #FFF9FC 残留，仅第 75 行定义处）。同时诚实认领本轮 harden **自引入的 2 个 P1 回归并当场修复**：
+
+- **P1-1 错误条文字不达 AA**：上一步我写的三处 banner 用了裸 `var(--color-danger)` 作小字（白天 ~4.19/夜宵 ~2.72:1）。改回 `color-mix(danger 70%, bone)`（对齐 `EmptyState:61` 既有写法，bone 随主题反相双档达 AA）——AdminDishes/AdminOrders/AddDishModal。
+- **P1-2 撤销浮标键盘态**：撤销 `<button>` 曾嵌在 `role="button"` 可点机壳内（非法 ARIA 嵌套 + Enter/Space 冒泡到 case.onKeyDown→runGrab = 撤销变再加购）。**把浮标移出机壳做成合法 sibling**（`ClawMachine` mx-3 wrapper 加 relative），既消除冒泡又去掉嵌套；补 onKeyDown stopPropagation 兜底；热区 pill h-11/撤销 h-9 抬到 ~44。
+- **distill NightHome 三态**：补 loading/failed/reload（对齐 Home），去掉 `.catch` 吞异常致整页空白；失败/空池 → EmptyState error + 再试一次。
+- **distill Menu 首屏减负**：主类目行默认 10 chip 收敛到 5（其余仍走「更多菜系」渐进披露），且当前选中类目即使在 5 之外也强制可见。
+- **P2 顺手**：Cart 我/TA 小计金额 clay/sage→caramel（sage 曾 1.84:1 近乎隐形，且违反 Price-Wears-Caramel）；ClawMachine 彩纸 `var(--sage)` 死令牌→`var(--color-sage)`。
+- **未做（留 owner 定夺）**：LuckyDishCard 是否下移、admin/筛选 emoji→Icons、sub-44 触摸区批量、persona.js 裸 hex/#8A4E56 收编。**已做（同日追加）**：🐰→🐑 活文档纠（PRODUCT/DESIGN/HANDOFF 色表；docs/ 归档与 2026-08 历史计划留原样）、AddDishModal/NightSnackSheet 焦点陷阱 + `role=dialog`/`aria-modal` + Esc（新 `src/lib/useDialogA11y.js`）。
+
+## 7.11 polish：筛选/推进图标化 + sub-44 抬升（2026-09-22）
+
+- **emoji→Icons（功能性图标）**：`Icons.jsx` 补 `sparkles`（全部）/`clock`（等着呢）/`check`（做好啦·做好了）三枚细线图标；`MyOrders`、`AdminOrders` 状态筛选 chip 与 `AdminOrders` 推进按钮（开始做→`flame`、做好了→`check`）从 emoji 改 `<Icon>`；`Chip` 基类补 `gap-1.5`（图标+文字间距）。有意保留：`🐱/🐑` 人格标识、EmptyState/LoadingState 装饰 emoji（非导航/快捷入口）。
+- **sub-44 触摸区**：夜宵首页网格加购、夜宵开屏六宫格加购（28→44）、热榜加购（32→44）、购物车移除钮（32→44）、购物车 Stepper（36→44）统一抬到 44px 触控底线，对齐 `DishRow`。
+- 门禁：build✓ / lint（2 条历史：CartContext + 根 `_an.mjs`）/ test✓ / p6 0·0·0；detect 改动文件仅既有字号建议，零新增。
+- **仍未做（留 owner）**：LuckyDishCard 下移、`persona.js` 裸 hex/#8A4E56 收编、Menu 更多/收起等二级 chip 的 44 抬升、`docs/`(architecture/prd) 历史 emoji 文档纠（归档不动）；观感待 live 目检（尤其夜宵网格 44 圆钮是否显拥挤）。
+
+## 7.12 persona.js 裸 hex 收编（2026-09-22）
+
+- `theme/persona.js` 内所有裸 hex/rgba 改为引用 `@theme` 令牌：`ORDER_STATUS.ring` pending→`var(--color-ember)`、preparing→`var(--clay-50)/var(--clay-40)`、completed→`var(--sage-40)/var(--sage-30)`；pending `chipBg` `rgba(156,143,150,.16)`→`color-mix(var(--color-ember) 16%)`；`PAYER.fill` me→`var(--clay-70)`、partner→`var(--sage-60)`（均等值），孤儿第 15 色 `aa fill #8A4E56`（无任何令牌匹配、被 detect 点名的唯一 persona 越界色）归入 `var(--color-caramel)`（AA 语义本就是焦糖，border/glow 早已用 caramel，顺带纠偏）。此后 persona.js 零裸 hex，随令牌再调自动传导。
+- **联动**：`OrderCard.jsx:42` 顶部状态条原用 `${bar}88 / ${bar}22` 十六进制拼接（要求 bar 是裸 hex），bar 变 var() 后失效 → 改 `color-mix(in srgb, ${bar} 53%/13%, transparent)`（#88≈53%、#22≈13%，hex/var 两种入参都吃）。已全仓扫 `${bar}xx`/`stopColor` 无其它裸色拼接依赖。
+- 门禁：build✓ / lint（2 历史）/ test✓ / p6 0·0·0。
+
+## 7.13 第三轮 critique：修 §7.12 引入的夜宵 AA 回归（2026-09-22）
+
+- 第三轮 impeccable `critique`（双评估，读当前码）：**34/40（27→33→34，趋缓）**。抓到 §7.12 把 `PAYER.aa.fill` 并进 `--color-caramel` 是**回归**——caramel 是会随夜宵提亮的**文本色**（#9A575F→#C08492），作徽章实底时其上 on-dark 亮字掉到 ~2.9:1 不达标（原孤儿 #8A4E56 恰是不反相的深底，是对的，只是没令牌化）。
+- **修**：新增不反相填充令牌 `--color-caramel-deep: #8A4E56`（@theme static，无夜宵覆盖），`PAYER.aa.fill` 指向它；DESIGN.md 补该色 + "徽章 fill 用深档、勿用会提亮的文本 caramel" 说明。顺带把 `index.css` 两处裸 `#FFF9FC`（`.d3-btn-primary`/`.avatar-me`）收进 `var(--color-on-dark)`。检测器随附验证：persona.js 那条 #8A4E56 已消失（color 10→9，总 34→33）。
+- **同根因未修（留待办）**：`HotDishes.RANK_COLORS` 把 `--color-mist`/`--color-caramel`（均会反相）同时当**徽章底(行110)**和**名次数字前景(行143)**用 → NO.2 银/NO.3 铜夜宵同样 ~2.9–3.0:1。需拆 fill/text 两套色才能干净修，未顺手做。另：sub-44 只做完加购圈（弹窗关闭/娃娃机 auto 钮/Menu pill/后台行按钮/LuckyDishCard 仍 <44）；`adminGate` 密码层无 `role=dialog`/Esc/焦点陷阱；热榜 toast 与购物车庆祝层无 live region。→ 建议 `/无障碍检查` + `/optimize`。
+- **教训**：连续两轮"修 A 引入 B"。立规矩——凡把裸色并进令牌，改完必扫该令牌所有 background/fill 消费者在两主题下的 on-dark 对比；若令牌 text/fill 双职，必须拆出非反相 fill 变体。检测器看不见 var() 作 fill 的越界，只能靠读消费者 + 算比值。
+
+## 7.14 第三轮 P2 收尾：徽章夜宵 AA + sub-44 二波 + adminGate dialog（2026-09-22）
+
+- **热榜 NO.2/NO.3 夜宵 AA（§7.13 遗留同根因）**：`HotDishes` 的 `RANK_COLORS` 一数组两用（徽章底 110 + 名次大数字前景 143）。拆成 `RANK_FILLS`（`--color-clay/--color-mist-deep/--color-caramel-deep`，不反相，配 on-dark 亮字两主题 AA）供徽章底，`RANK_COLORS` 仍供前景数字（该随夜宵提亮）。新增 `--color-mist-deep: #5E4F56`（@theme static，无夜宵覆盖）+ DESIGN 收录。
+- **sub-44 二波**：AddDishModal/NightSnackSheet 关闭钮 `w-8→w-11`、娃娃机 auto 钮 `w-8→w-11` + 抓取钮 `min-h-[44px]`、Menu 更多/收起 pill `min-h-[44px]`、AdminDishes 行三钮/AdminOrders 推进钮/LuckyDishCard 音效·摇签·加一份/HotDishes 菜谱/OrderDetail 全部订单 统一 `min-h-[44px]` 或 `w-11 h-11`。按新规矩扫过：装饰性小圆（confetti/角标/头像徽记）非交互不动。
+- **adminGate 对话框化**：`lib/adminGate.js` 密码层补 `role=dialog`/`aria-modal`/`aria-label` + Esc 取消 + Tab 焦点陷阱 + 点遮罩空白关闭 + 焦点归还；`.cg-gate-err` 加 `role=alert aria-live=assertive`（密码错误可播报）。
+- **成功反馈 live region**：热榜"已加入"toast、购物车"锅已上灶"庆祝层、娃娃机"抓到「X」"浮标 各加 `role=status aria-live=polite`，读屏用户能听到成功。
+- 门禁：build✓ / lint（2 历史）/ test✓ / p6 0·0·0；detect 改动文件仅既有字号建议零新增。观感待 live 目检（关闭钮/抓取 pill 抬到 44 后弹窗与机腹是否协调）。
 
 ## 8. 已知待办 / 候选项
 

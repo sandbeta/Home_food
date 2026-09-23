@@ -13,46 +13,50 @@ export default function AdminDishes() {
   const [editingDish, setEditingDish] = useState(null)
 
   const [visibleCount, setVisibleCount] = useState(30)
+  const [listErr, setListErr] = useState('')
+  const [pendingDel, setPendingDel] = useState(null)   // 两段式删除：记住当前待确认的行
   const loadDishes = () => {
     fetch('/api/dishes/all')
-      .then((r) => r.json())
-      .then((d) => { setDishes(d); setLoading(false) })
+      .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
+      .then((d) => { setDishes(d); setLoading(false); setListErr('') })
+      .catch(() => { setLoading(false); setListErr('菜品列表没加载出来，看看服务端开好了没') })
   }
   useEffect(() => { loadDishes() }, [])
   const visibleDishes = dishes.slice(0, visibleCount)
 
   const handleSave = async (form) => {
-    if (editingDish) {
-      await fetch(`/api/dishes/${editingDish.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-    } else {
-      await fetch('/api/dishes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-    }
+    const res = await fetch(editingDish ? `/api/dishes/${editingDish.id}` : '/api/dishes', {
+      method: editingDish ? 'PUT' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
+    if (!res.ok) throw new Error('HTTP ' + res.status)   // 抛给弹窗处理：失败保留输入、不关闭
     setShowModal(false)
     setEditingDish(null)
     loadDishes()
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('确定不要这道菜了？')) return
-    await fetch(`/api/dishes/${id}`, { method: 'DELETE' })
-    loadDishes()
+    if (pendingDel !== id) { setPendingDel(id); return }   // 第一次=进入确认，再点才真删
+    setPendingDel(null)
+    try {
+      const res = await fetch(`/api/dishes/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('HTTP ' + res.status)
+      loadDishes()
+    } catch { setListErr('这道菜没删掉，再试一次') }
   }
 
   const handleToggle = async (d) => {
-    await fetch(`/api/dishes/${d.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ available: d.available ? 0 : 1 }),
-    })
-    loadDishes()
+    setPendingDel(null)
+    try {
+      const res = await fetch(`/api/dishes/${d.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ available: d.available ? 0 : 1 }),
+      })
+      if (!res.ok) throw new Error('HTTP ' + res.status)
+      loadDishes()
+    } catch { setListErr('上架状态没改过来，再试一次') }
   }
 
   return (
@@ -62,7 +66,7 @@ export default function AdminDishes() {
       right={
         <motion.button
           whileTap={{ scale: 0.95 }}
-          onClick={() => { setEditingDish(null); setShowModal(true) }}
+          onClick={() => { setPendingDel(null); setEditingDish(null); setShowModal(true) }}
           className="d3-btn d3-btn-primary px-4 py-2 text-xs font-bold"
           style={{ borderRadius: 'var(--radius-ctl)' }}
         >
@@ -70,6 +74,18 @@ export default function AdminDishes() {
         </motion.button>
       }
     >
+      {listErr && (
+        <div role="alert"
+          className="flex items-center justify-between gap-3 px-3.5 py-2.5 mb-3"
+          style={{
+            borderRadius: 'var(--radius-ctl)',
+            background: 'color-mix(in srgb, var(--color-danger) 10%, var(--surface))',
+            border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
+          }}>
+          <span className="text-sm font-semibold" style={{ color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' }}>⚠️ {listErr}</span>
+          <button onClick={() => setListErr('')} aria-label="关闭提示" className="text-xs font-bold shrink-0" style={{ color: 'var(--color-ash)' }}>知道了</button>
+        </div>
+      )}
       {loading ? (
         <LoadingState emoji="🍽️" />
       ) : dishes.length === 0 ? (
@@ -92,7 +108,7 @@ export default function AdminDishes() {
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleToggle(dish)}
-                      className="flex-1 py-2 text-xs font-bold"
+                      className="flex-1 min-h-[44px] px-2 text-xs font-bold"
                       style={{
                         borderRadius: 'var(--radius-ctl)',
                         background: 'var(--surface)',
@@ -105,8 +121,8 @@ export default function AdminDishes() {
 
                     <motion.button
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => { setEditingDish(dish); setShowModal(true) }}
-                      className="flex-1 py-2 text-xs font-bold"
+                      onClick={() => { setPendingDel(null); setEditingDish(dish); setShowModal(true) }}
+                      className="flex-1 min-h-[44px] px-2 text-xs font-bold"
                       style={{
                         borderRadius: 'var(--radius-ctl)',
                         background: 'var(--surface)',
@@ -120,15 +136,15 @@ export default function AdminDishes() {
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => handleDelete(dish.id)}
-                      className="flex-1 py-2 text-xs font-bold"
+                      className="flex-1 min-h-[44px] px-2 text-xs font-bold"
                       style={{
                         borderRadius: 'var(--radius-ctl)',
-                        background: 'var(--surface)',
-                        color: 'var(--color-danger)',
+                        background: pendingDel === dish.id ? 'var(--color-danger)' : 'var(--surface)',
+                        color: pendingDel === dish.id ? 'var(--color-on-dark)' : 'var(--color-danger)',
                         border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
                       }}
                     >
-                      删除
+                      {pendingDel === dish.id ? '确认删除？' : '删除'}
                     </motion.button>
                   </>
                 }

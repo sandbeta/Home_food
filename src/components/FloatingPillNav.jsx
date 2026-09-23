@@ -63,7 +63,7 @@ export default function FloatingPillNav() {
             )}
             <span
               className="relative transition-colors"
-              style={{ color: active ? '#FFF9FC' : 'var(--color-ash)' }}
+              style={{ color: active ? 'var(--color-on-dark)' : 'var(--color-ash)' }}
             >
               {/* 激活态压在 clay 渐变药丸上，图标必须转白，否则同色隐形 */}
               <Icon name={tab.icon} size={22} strokeWidth={active ? 2.2 : 2} />

@@ -57,7 +57,7 @@ export default function Home() {
   const [sweetNote] = useState(() => pickOne(HOME_NOTES))
   const navigate = useNavigate()
   const reduced = usePrefersReducedMotion()
-  const { addItem } = useCart()
+  const { addItem, items, whoAmI, updateQuantity } = useCart()
 
   useEffect(() => {
     fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3))).catch(() => {})
@@ -117,6 +117,12 @@ export default function Home() {
     setRotateToken(t => t + 1)
   }
 
+  // 撤销一次"抓取即加购"：把该菜在当前人格下的数量减一（减到 0 自动移除该行）
+  const undoCatch = (dish) => {
+    const cur = items.find(i => i.dish_id === dish.id && i.added_by === whoAmI)?.quantity ?? 0
+    if (cur > 0) updateQuantity(dish.id, cur - 1, whoAmI)
+  }
+
   return (
     <div className="relative flex flex-col" style={{ minHeight: 'calc(100dvh - var(--bottom-inset))' }}>
       <PageHeader title={`${getGreeting()}，${NICKNAME}`} subtitle={sweetNote} right={<ThemeToggle />} />
@@ -137,6 +143,7 @@ export default function Home() {
               dish={featured}
               indexNo={(rotIdx % rotSource.length) + 1}
               onCatch={addItem}
+              onUndo={undoCatch}
               onGrab={nextDish}
               onOpen={() => navigate(`/dish/${featured.id}`)}
               autoOn={autoOn}
@@ -187,7 +194,7 @@ export default function Home() {
             <SectionHeader
               index={1}
               title="常点的"
-              action={<button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-clay)] font-bold">全部 →</button>}
+              action={<button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-clay-text)] font-bold">全部 →</button>}
             />
             <div className="grid grid-cols-2 gap-3 mt-3">
               {popular.map((dish) => {
@@ -241,7 +248,7 @@ export default function Home() {
             <SectionHeader
               index={2}
               title="最近订单"
-              action={<button onClick={() => navigate('/orders')} className="text-xs text-[var(--color-clay)] font-bold">全部</button>}
+              action={<button onClick={() => navigate('/orders')} className="text-xs text-[var(--color-clay-text)] font-bold">全部</button>}
             />
             <div className="space-y-2.5 mt-3">
               {recentOrders.map((order) => (

@@ -106,7 +106,7 @@ export default function OrderDetail() {
       <PageHeader
         title={pageTitle}
         back
-        right={<Link to="/orders" className="text-xs text-[var(--color-clay)] font-semibold bg-[var(--color-clay)]/10 px-3 py-1.5 rounded-full">全部订单</Link>}
+        right={<Link to="/orders" className="inline-flex items-center min-h-[44px] text-xs text-[var(--color-clay-text)] font-semibold bg-[var(--color-clay)]/10 px-3 rounded-full">全部订单</Link>}
       />
 
       <PageContainer>
@@ -177,7 +177,7 @@ export default function OrderDetail() {
               {order.items.map((item, idx) => (
                 <motion.div key={item.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.15 + idx * 0.04 }}
-                  className="flex items-center justify-between rounded-lg px-2 py-1.5 -mx-2 hover:bg-white/5 transition-colors duration-150 relative group">
+                  className="flex items-center justify-between rounded-lg px-2 py-1.5 -mx-2 transition-colors duration-150 relative group">
                   <div className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full group-hover:bg-[var(--color-clay)]/40 transition-colors duration-150" />
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 ${item.added_by === 'me' ? 'avatar-me' : 'avatar-partner'}`}>

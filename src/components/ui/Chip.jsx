@@ -10,7 +10,7 @@ export default function Chip({ active = false, onClick, children, className = ''
       whileTap={{ scale: 0.94 }}
       onClick={onClick}
       aria-pressed={active}
-      className={`shrink-0 min-h-[44px] px-4 py-2.5 rounded-full text-sm font-semibold inline-flex items-center transition-colors duration-200 ${className}`}
+      className={`shrink-0 min-h-[44px] px-4 py-2.5 rounded-full text-sm font-semibold inline-flex items-center gap-1.5 transition-colors duration-200 ${className}`}
       style={
         active
           ? {

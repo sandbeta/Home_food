@@ -57,13 +57,7 @@ export default function Profile() {
             {persona.emoji}
           </motion.div>
           <h2
-            className="text-3xl font-bold font-serif leading-tight"
-            style={{
-              backgroundImage: persona.gradient,
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              color: 'transparent',
-            }}
+            className="text-3xl font-bold font-serif leading-tight text-[var(--color-bone)]"
           >
             {whoAmI === 'me' ? '美食家（我）' : '另一半（TA）'}
           </h2>

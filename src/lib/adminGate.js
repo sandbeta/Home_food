@@ -19,12 +19,12 @@ function askPassword() {
       'display:flex;align-items:center;justify-content:center',
     ].join(';'))
     overlay.innerHTML = `
-      <form class="cg-gate-card" style="background:var(--color-ink-900);border:2px solid var(--color-line);border-radius:var(--radius-card);padding:28px;width:min(88vw,320px);box-shadow:var(--shadow-4)">
+      <form role="dialog" aria-modal="true" aria-label="管理验证" class="cg-gate-card" style="background:var(--color-ink-900);border:2px solid var(--color-line);border-radius:var(--radius-card);padding:28px;width:min(88vw,320px);box-shadow:var(--shadow-4)">
         <h2 style="font-size:1.125rem;margin:0 0 6px;color:var(--color-bone)">🔐 管理验证</h2>
         <p style="font-size:13px;margin:0 0 16px;color:var(--color-ash)">当前经公网访问管理功能，请输入家庭管理密码</p>
         <input name="password" type="password" placeholder="家庭管理密码" autofocus
           style="width:100%;box-sizing:border-box;padding:10px 12px;border:2px solid var(--color-line);border-radius:var(--radius-btn);font-size:15px;background:transparent;color:var(--color-bone)">
-        <div class="cg-gate-err" style="min-height:18px;font-size:12px;color:color-mix(in srgb, var(--color-danger) 70%, var(--color-bone));margin-top:8px"></div>
+        <div class="cg-gate-err" role="alert" aria-live="assertive" style="min-height:18px;font-size:12px;color:color-mix(in srgb, var(--color-danger) 70%, var(--color-bone));margin-top:8px"></div>
         <button type="submit" style="margin-top:6px;width:100%;padding:10px;border:0;border-radius:var(--radius-btn);background:var(--color-clay);color:var(--color-on-dark);font-size:15px;font-weight:700">验证并继续</button>
         <button type="button" name="cancel" style="margin-top:10px;width:100%;padding:8px;border:0;border-radius:var(--radius-btn);background:transparent;color:var(--color-ash);font-size:13px">取消</button>
       </form>`
@@ -32,9 +32,26 @@ function askPassword() {
     const card = overlay.querySelector('form')
     const input = card.querySelector('input[name=password]')
     const err = card.querySelector('.cg-gate-err')
+    const prevFocus = document.activeElement
+    const focusables = () => Array.from(card.querySelectorAll('input, button'))
     setTimeout(() => input.focus(), 50)
 
-    const close = (ok) => { overlay.remove(); gatePromise = null; resolve(ok) }
+    function close (ok) {
+      document.removeEventListener('keydown', onKey)
+      overlay.remove(); gatePromise = null
+      if (prevFocus && document.contains(prevFocus)) prevFocus.focus?.()
+      resolve(ok)
+    }
+    function onKey (e) {
+      if (e.key === 'Escape') { e.preventDefault(); close(false); return }
+      if (e.key !== 'Tab') return
+      const items = focusables(); if (!items.length) return
+      const first = items[0], last = items[items.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', onKey)
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(false) })
     card.addEventListener('submit', async (ev) => {
       ev.preventDefault()
       err.textContent = ''

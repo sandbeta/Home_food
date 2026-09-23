@@ -8,15 +8,16 @@ import OrderCard from '../components/ui/OrderCard'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import Chip from '../components/ui/Chip'
+import Icon from '../components/ui/Icons'
 import { HERO_IMAGES } from '../theme/images'
 import { orderStatusOf } from '../theme/persona'
 import { pickOne, ORDERS_TITLES, ORDERS_NOTES } from '../lib/sweetCopy'
 
 const STATUS_FILTERS = [
-  { value: '', label: '全部', emoji: '✨' },
-  { value: 'pending', label: '等着呢', emoji: '⏳' },
-  { value: 'preparing', label: '在做了', emoji: '👨‍🍳' },
-  { value: 'completed', label: '做好啦', emoji: '🎉' },
+  { value: '', label: '全部', icon: 'sparkles' },
+  { value: 'pending', label: '等着呢', icon: 'clock' },
+  { value: 'preparing', label: '在做了', icon: 'potBoil' },
+  { value: 'completed', label: '做好啦', icon: 'check' },
 ]
 
 /**
@@ -46,7 +47,7 @@ export default function MyOrders() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
           {STATUS_FILTERS.map((f) => (
             <Chip key={f.value} active={filter === f.value} onClick={() => setFilter(f.value)}>
-              <span className="mr-1">{f.emoji}</span>
+              <Icon name={f.icon} size={16} strokeWidth={2.2} />
               {f.label}
             </Chip>
           ))}

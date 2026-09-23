@@ -139,7 +139,7 @@ export default function DishDetail() {
               whileHover={{ y: -1 }}
               onClick={handleAdd}
               className="d3-btn w-full py-4 text-center font-bold text-base"
-              style={{ background: persona.gradient, color: 'var(--color-on-dark)' }}
+              style={{ background: persona.gradient, color: persona.on }}
             >
               <span className="relative z-10">{persona.emoji} 加入购物车</span>
             </motion.button>

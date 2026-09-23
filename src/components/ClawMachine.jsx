@@ -81,7 +81,7 @@ function Claw({ open, x, cable, grabbing }) {
 }
 
 export default function ClawMachine({
-  dish, onOpen, onCatch, onGrab, indexNo = 1,
+  dish, onOpen, onCatch, onUndo, onGrab, indexNo = 1,
   rotate, showClock = true, autoOn = true, onToggleAuto,
   title = '抓娃娃点餐机', note = '今日主推 · 抓到一个算一个',
 }) {
@@ -103,6 +103,7 @@ export default function ClawMachine({
   const runGrab = useCallback(() => {
     if (grabbing || !dish) return
     if (reduced) {                       // 降级：不演行程，淡入换新 + 立即结算
+      setLabel({ name: dish.name, dish, key: Date.now() })
       onCatch?.(dish); onGrab?.()
       return
     }
@@ -112,7 +113,7 @@ export default function ClawMachine({
     after(BEAT.drop, () => setBurst((b) => b + 1))                 // 合钳瞬间星芒
     after(BEAT.drop + BEAT.close + BEAT.lift + BEAT.carry, () => { // 落槽：彩纸 + 震动 + 结算
       setPhase('release'); setConfetti((c) => c + 1); setShake((s) => s + 1)
-      setLabel({ name: dish.name, key: Date.now() })
+      setLabel({ name: dish.name, dish, key: Date.now() })
       onCatch?.(dish)
     })
     after(t, () => { setPhase('idle'); onGrab?.() })               // 收尾换新玩偶
@@ -149,7 +150,7 @@ export default function ClawMachine({
                   onClick={(e) => { e.stopPropagation(); onToggleAuto() }}
                   aria-label={autoOn ? '暂停自动轮换' : '开始自动轮换'}
                   aria-pressed={autoOn}
-                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  className="w-11 h-11 rounded-full flex items-center justify-center"
                   style={{ border: '2px solid var(--color-line)', color: 'var(--color-clay)', background: 'var(--surface)' }}
                 >
                   <Icon name={autoOn ? 'pause' : 'play'} size={15} strokeWidth={2.4} filled={!autoOn} />
@@ -161,7 +162,7 @@ export default function ClawMachine({
         </div>
 
         {/* 玻璃罩：可交互抓取舞台（点任意处即演一遍抓取） */}
-        <div className="mx-3">
+        <div className="relative mx-3">
           <motion.div
             className="claw-case relative overflow-hidden cursor-pointer"
             style={{ height: 264, border: '2px solid var(--color-line)', borderRadius: 'var(--radius-tile)' }}
@@ -235,7 +236,7 @@ export default function ClawMachine({
                 <motion.div key={confetti} className="absolute z-30 pointer-events-none" style={{ left: GEO.chuteX, top: GEO.slotTop - 30, transform: 'translateX(-50%)' }}>
                   {[0, 1, 2, 3, 4, 5, 6].map((k) => (
                     <motion.span key={k} className="absolute block"
-                      style={{ width: 6, height: 9, borderRadius: 2, background: ['var(--color-clay)', 'var(--color-love)', 'var(--sage)', 'var(--color-caramel)'][k % 4] }}
+                      style={{ width: 6, height: 9, borderRadius: 2, background: ['var(--color-clay)', 'var(--color-love)', 'var(--color-sage)', 'var(--color-caramel)'][k % 4] }}
                       initial={{ x: 0, y: 0, opacity: 1, rotate: 0 }}
                       animate={{ x: (k - 3) * 13, y: [0, -26, 10], opacity: [1, 1, 0], rotate: 240 }}
                       transition={{ duration: 0.7, ease: EASE }} />
@@ -244,22 +245,37 @@ export default function ClawMachine({
               )}
             </AnimatePresence>
 
-            {/* 抓到浮标 */}
-            <AnimatePresence>
-              {label && (
-                <motion.div key={label.key} className="absolute z-40 pointer-events-none"
-                  style={{ left: GEO.chuteX, top: GEO.slotTop - 44, transform: 'translateX(-50%)' }}
-                  initial={{ opacity: 0, y: 8, scale: 0.9 }} animate={{ opacity: 1, y: -8, scale: 1 }}
-                  exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.3, ease: EASE }}
-                  onAnimationComplete={() => setTimeout(() => setLabel((l) => (l && l.key === label.key ? null : l)), 700)}>
-                  <span className="inline-flex items-center gap-1 px-2.5 h-7 rounded-full font-bold text-xs whitespace-nowrap"
-                    style={{ background: 'var(--color-clay)', color: 'var(--color-on-dark)', border: '2px solid var(--clay-deep)', boxShadow: 'var(--shadow-3)' }}>
+          </motion.div>
+          {/* 抓到浮标（可撤销）——移到可点机壳【外】做成合法 sibling：
+              既免键盘 Enter/Space 冒泡误触发抓取，又免真按钮嵌进 role=button 被读屏扁平化；热区抬到 44。 */}
+          <AnimatePresence>
+            {label && (
+              <motion.div key={label.key} className="absolute z-40"
+                style={{ left: GEO.chuteX, top: GEO.slotTop - 52 }}
+                initial={{ x: '-50%', opacity: 0, y: 8, scale: 0.9 }}
+                animate={{ x: '-50%', opacity: 1, y: -8, scale: 1 }}
+                exit={{ x: '-50%', opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: EASE }}
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => e.stopPropagation()}
+                onAnimationComplete={() => setTimeout(() => setLabel((l) => (l && l.key === label.key ? null : l)), 4200)}>
+                <div role="status" aria-live="polite" className="inline-flex items-center gap-2 h-11 pl-3 pr-1.5 rounded-full whitespace-nowrap"
+                  style={{ background: 'var(--color-clay)', color: 'var(--color-on-dark)', border: '2px solid var(--clay-deep)', boxShadow: 'var(--shadow-3)' }}>
+                  <span className="inline-flex items-center gap-1 font-bold text-xs">
                     <KissIcon className="w-3.5 h-3.5" /> 抓到「{label.name}」
                   </span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
+                  {onUndo && label.dish && (
+                    <button type="button" aria-label={`撤销加入的「${label.name}」`}
+                      onClick={(e) => { e.stopPropagation(); const d = label.dish; setLabel(null); onUndo(d) }}
+                      className="text-xs font-bold px-3 h-9 rounded-full shrink-0"
+                      style={{ background: 'var(--color-on-dark)', color: 'var(--clay-deep)' }}>
+                      撤销
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* 出菜面板：菜名（点看做法）+ 价格 + 抓取按钮 */}
@@ -278,7 +294,7 @@ export default function ClawMachine({
               </span>
             </div>
             <motion.button whileTap={{ scale: 0.93 }} onClick={(e) => { e.stopPropagation(); runGrab() }} disabled={grabbing}
-              aria-label="抓取这一只" className="font-serif text-sm font-bold px-4 py-2.5 rounded-full"
+              aria-label="抓取这一只" className="font-serif text-sm font-bold px-4 py-2.5 rounded-full inline-flex items-center justify-center min-h-[44px]"
               style={{ background: 'var(--color-clay)', color: 'var(--color-on-dark)', border: '2px solid var(--clay-deep)',
                 boxShadow: '0 4px 12px color-mix(in srgb, var(--color-clay) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.25)', opacity: grabbing ? 0.6 : 1 }}>
               {grabbing ? '抓取中…' : '抓取'}

@@ -54,7 +54,7 @@ function CartRow({ item, onUpdate, onRemove }) {
       <Stepper
         value={item.quantity}
         min={1}
-        size={36}
+        size={44}
         onChange={(v) => onUpdate(item.dish_id, v, item.added_by)}
       />
 
@@ -62,7 +62,7 @@ function CartRow({ item, onUpdate, onRemove }) {
         whileTap={{ scale: 0.94 }}
         onClick={() => onRemove(item.dish_id, item.added_by)}
         aria-label={`移除${item.name}`}
-        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[var(--color-ash)] active:text-[var(--color-danger)]"
+        className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 text-[var(--color-ash)] active:text-[var(--color-danger)]"
         style={{ border: '2px solid var(--color-line)' }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -88,6 +88,7 @@ export default function Cart() {
   const [note, setNote] = useState('')
   const [payer, setPayer] = useState('aa')
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
   const skipRef = useRef(null)
   const reduce = usePrefersReducedMotion()
@@ -103,6 +104,7 @@ export default function Cart() {
   const handleSubmit = async () => {
     if (items.length === 0) return
     setSubmitting(true)
+    setSubmitError(false)
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -113,6 +115,7 @@ export default function Cart() {
           payer,
         }),
       })
+      if (!res.ok) throw new Error('HTTP ' + res.status)
       const order = await res.json()
       clearCart()
       setCelebrating(true)
@@ -127,7 +130,7 @@ export default function Cart() {
       setCelebrating(false)
       navigate(`/orders/${order.id}`)
     } catch {
-      alert('提交失败，再试一次嘛~')
+      setSubmitError(true)
       setSubmitting(false)
     }
   }
@@ -137,6 +140,7 @@ export default function Cart() {
   if (celebrating) {
     return (
       <div
+        role="status" aria-live="polite"
         className="fixed inset-0 z-[60] flex flex-col items-center justify-center backdrop-blur-sm cursor-pointer"
         style={{ background: 'color-mix(in srgb, var(--color-ink-900) 96%, transparent)' }}
         onClick={() => skipRef.current?.()}
@@ -208,7 +212,7 @@ export default function Cart() {
               <div className="flex items-center gap-2 mb-3">
                 <div className="avatar-me w-7 h-7 rounded-full flex items-center justify-center text-xs">🐱</div>
                 <span className="font-bold text-[var(--color-bone)]">我点的</span>
-                <span className="ml-auto text-sm font-bold text-[var(--color-clay)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{meTotal}</span>
+                <span className="ml-auto text-sm font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{meTotal}</span>
               </div>
               <div className="space-y-2">
                 <AnimatePresence>
@@ -231,7 +235,7 @@ export default function Cart() {
               <div className="flex items-center gap-2 mb-3">
                 <div className="avatar-partner w-7 h-7 rounded-full flex items-center justify-center text-xs">🐑</div>
                 <span className="font-bold text-[var(--color-bone)]">TA 点的</span>
-                <span className="ml-auto text-sm font-bold text-[var(--color-sage)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{partnerTotal}</span>
+                <span className="ml-auto text-sm font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{partnerTotal}</span>
               </div>
               <div className="space-y-2">
                 <AnimatePresence>
@@ -266,7 +270,7 @@ export default function Cart() {
               id="cart-note"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="d3-input w-full px-3.5 py-2.5 text-sm resize-none text-[var(--color-bone)] placeholder:text-[var(--color-mist)]/70 font-medium"
+              className="d3-input w-full px-3.5 py-2.5 text-sm resize-none text-[var(--color-bone)] font-medium"
               style={{ borderRadius: 'var(--radius-btn)' }}
               rows={2}
               placeholder="少盐、不要香菜、多放蒜..."
@@ -311,6 +315,15 @@ export default function Cart() {
               <span className="text-xs">⏱️</span>
               <span className="text-xs text-[var(--color-on-dark)]/85">预估等待约 20-30 分钟</span>
             </div>
+
+            {submitError && (
+              <div role="alert"
+                className="flex items-start gap-1.5 mb-2.5 px-2.5 py-2 rounded-xl"
+                style={{ background: 'color-mix(in srgb, var(--color-danger) 26%, transparent)', border: '1px solid color-mix(in srgb, var(--color-danger) 45%, transparent)' }}>
+                <span aria-hidden className="text-sm leading-5">⚠️</span>
+                <span className="text-xs font-semibold leading-5 text-[var(--color-on-dark)]">提交没成功，网络可能不稳——菜还给你留着呢，再点一次就好</span>
+              </div>
+            )}
 
             <motion.button
               whileTap={{ scale: 0.97 }}

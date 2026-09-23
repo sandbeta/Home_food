@@ -23,6 +23,7 @@ export default function DishRow({
   actions,
   onClick,
   accent = 'var(--color-clay-gradient)',
+  onAccent = 'var(--color-on-dark)',
   showFav = false,
   className = '',
   vtName,
@@ -116,7 +117,7 @@ export default function DishRow({
                   boxShadow: '0 4px 12px rgba(43,36,41,0.18), inset 0 1px 0 rgba(255,255,255,0.25)',
                 }}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.8" strokeLinecap="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={onAccent} strokeWidth="2.8" strokeLinecap="round">
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>

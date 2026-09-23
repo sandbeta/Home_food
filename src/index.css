@@ -29,6 +29,7 @@
 
   /* —— 双人格强调（温度对比） —— */
   --color-clay: var(--clay-60); /* 我(me) 玫瑰粉(clay-60，白字 ≥4.5:1 达 AA) */
+  --color-clay-text: var(--clay-70); /* 小字动作链接/标签专用：clay-60 在纸面仅 ~4.0:1，提到 clay-70 达 AA(~5:1)；仅作前景文字，不作填充 */
   --color-clay-soft: var(--clay-40); /* 玫瑰高光(clay-40) */
   --color-sage: var(--sage-40);      /* TA(partner) 薄荷绿(冷·提亮=sage-40) */
   --color-sage-soft: var(--sage-30); /* 薄荷高光(sage-30) */
@@ -74,6 +75,8 @@
   --color-on-dark: #FFF9FC;   /* 深色锚卡/实底上的粉白字（第六轮归粉） */
   --color-on-sage: #1A2417;   /* sage 实底上的深绿字（TA 侧反色唯一值） */
   --color-ember: #9C8F96;     /* 熄火余温梅灰（=ORDER_STATUS.pending.ring，StoveStage 待机柔光） */
+  --color-caramel-deep: #8A4E56;  /* 焦糖实底专用（AA 徽章/排名徽章的底）：刻意不随夜宵反相，保证徽章上 on-dark 亮字达标；勿与会提亮的文本色 --color-caramel 混用 */
+  --color-mist-deep: #5E4F56;     /* 银灰实底专用（热榜 NO.2 徽章底）：--color-mist 的不反相填充档；mist 作文本会随夜宵提亮，作徽章底配亮字时须用本档保 AA */
 
   /* —— 糖果描边（V3 设计稿 --line，2026-09-21 娃娃机世界层）——
      发丝边（--color-glass-border，8%）是"纸的接缝"，只够暗示分层；
@@ -297,7 +300,7 @@ input, textarea { caret-color: var(--color-clay); }
 }
 .d3-btn-primary {
   background: var(--color-clay);
-  color: #FFF9FC;
+  color: var(--color-on-dark);
   border: 2px solid var(--clay-deep);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
@@ -351,7 +354,7 @@ input, textarea { caret-color: var(--color-clay); }
 /* ========== Avatar & Backgrounds ========== */
 .avatar-me {
   background: linear-gradient(180deg, var(--clay-50) 0%, var(--clay-70) 100%);
-  color: #FFF9FC;
+  color: var(--color-on-dark);
 }
 .avatar-partner {
   background: linear-gradient(180deg, var(--sage-40) 0%, var(--sage-60) 100%);
@@ -684,10 +687,10 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
   background: linear-gradient(180deg, var(--color-ink-800) 0%, var(--surface) 62%);
 }
 
-/* 悬挂轨道/横梁/缆线：**不画**。
-   官方角色素材（lazy-apple / meimei-lolli / hui-cupcake / lazy-medal）本身就是
-   完整的抓娃娃场景——画面内已含横梁 + 缆线 + 带爱心的爪钩 + 被夹住的角色。
-   再叠一层自绘机构会重影，故机构交给素材自带，组件只负责"提走旧的、放下新的"。 */
+/* 悬挂轨道/横梁/缆线：**自绘**（V3 · 2026-09-22 所有者认可）。
+   爪钩机构由组件自绘（轨道 + 滑车 + 缆线 + 三指爪），抓取物 = 当前主推菜圆盘，
+   落槽即 onCatch→加购（"抓一个算一个"）。旧版交给官方素材悬吊的做法与
+   CLAW_POOL / .claw-sprite 资源已从 hero 退役，官方角色素材现仅用于 PageHeader 徽记与 EmptyState。 */
 
 /* 出菜口面板：区块底 + 内高光线（奶油立体感）+ 糖果描边上唇 */
 .claw-tray {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { sheetUp, usePrefersReducedMotion } from '../theme/motion'
+import useDialogA11y from '../lib/useDialogA11y'
 
 const CATEGORY_OPTIONS = [
   { value: '家常菜', emoji: '🍳' }, { value: '硬菜', emoji: '🥩' }, { value: '素菜', emoji: '🥬' },
@@ -21,13 +22,28 @@ const FIELDS = [
 
 export default function AddDishModal({ dish, onClose, onSave }) {
   const [form, setForm] = useState({ name: '', price: '', category: '家常菜', image_url: '', description: '' })
+  const [saving, setSaving] = useState(false)
+  const [saveErr, setSaveErr] = useState('')
   const reduce = usePrefersReducedMotion()
+  const panelRef = useDialogA11y(true, onClose)
 
   useEffect(() => {
     if (dish) setForm({ name: dish.name || '', price: dish.price || '', category: dish.category || '家常菜', image_url: dish.image_url || '', description: dish.description || '' })
   }, [dish])
 
-  const handleSubmit = (e) => { e.preventDefault(); if (!form.name || !form.price) return; onSave({ ...form, price: Number(form.price) }) }
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (saving) return
+    if (!form.name || !form.price) { setSaveErr('菜名和"亲亲数量"得填上呀'); return }
+    setSaving(true); setSaveErr('')
+    try {
+      await onSave({ ...form, price: Number(form.price) })
+    } catch {
+      setSaveErr('没保存上——检查下服务端还开着没，再点一次「好啦」')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <>
@@ -35,8 +51,10 @@ export default function AddDishModal({ dish, onClose, onSave }) {
         onClick={onClose} className="fixed inset-0 z-50"
         style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,36,41,0.35)' }} />
       <motion.div
+        ref={panelRef}
+        role="dialog" aria-modal="true" aria-label={dish ? '编辑菜品' : '添加菜品'} tabIndex={-1}
         {...(reduce ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
-        className="fixed bottom-0 left-0 right-0 mx-auto z-50"
+        className="fixed bottom-0 left-0 right-0 mx-auto z-50 focus:outline-none"
         style={{ maxWidth: 'var(--shell-w)' }}>
         {/* 管理端 quieter：拖拽把手/徽标/彩点等赤陶装饰全部退为中性，彩只留底部唯一主操作；
             输入框左侧 emoji 图标为纯装饰（label 已有文字），随降温移除 */}
@@ -46,7 +64,7 @@ export default function AddDishModal({ dish, onClose, onSave }) {
           </div>
           <div className="px-5 pb-3 flex items-center justify-between">
             <h2 className="text-lg font-bold text-[var(--color-bone)]">{dish ? '改改这道菜' : '加一道新菜'}</h2>
-            <button onClick={onClose} aria-label="关闭" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform border-2 border-[var(--color-line)] bg-[var(--color-glass)]">
+            <button onClick={onClose} aria-label="关闭" className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform border-2 border-[var(--color-line)] bg-[var(--color-glass)]">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
             </button>
           </div>
@@ -58,7 +76,7 @@ export default function AddDishModal({ dish, onClose, onSave }) {
                     {f.label}
                   </label>
                   <input type={f.type} value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                    className="d3-input w-full px-3.5 py-2.5 text-sm placeholder:text-[var(--color-ash)]/40"
+                    className="d3-input w-full px-3.5 py-2.5 text-sm"
                     placeholder={f.placeholder} min={f.min} step={f.step} required={f.required} inputMode={f.inputMode} />
                 </div>
               ))}
@@ -82,12 +100,23 @@ export default function AddDishModal({ dish, onClose, onSave }) {
               </div>
             </div>
 
+            {saveErr && (
+              <div role="alert"
+                className="flex items-start gap-1.5 px-3 py-2 mb-1 rounded-xl"
+                style={{
+                  background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)',
+                }}>
+                <span aria-hidden className="text-xs leading-5">⚠️</span>
+                <span className="text-xs font-semibold leading-5" style={{ color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' }}>{saveErr}</span>
+              </div>
+            )}
             <div className="flex gap-3 pt-6">
               <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onClose}
                 className="d3-btn-sm flex-1 py-3 rounded-2xl font-bold text-sm border transition-colors duration-150"
                 style={{ borderColor: 'var(--color-glass-border)', color: 'var(--color-ash)', background: 'transparent' }}>算了</motion.button>
-              <motion.button type="submit" whileTap={{ scale: 0.97 }}
-                className="d3-btn d3-btn-primary flex-1 py-3 rounded-2xl text-white font-bold text-sm">好啦</motion.button>
+              <motion.button type="submit" whileTap={{ scale: 0.97 }} disabled={saving}
+                className="d3-btn d3-btn-primary flex-1 py-3 rounded-2xl font-bold text-sm disabled:opacity-60">{saving ? '保存中…' : '好啦'}</motion.button>
             </div>
           </form>
         </div>

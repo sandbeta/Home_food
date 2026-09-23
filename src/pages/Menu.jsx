@@ -29,10 +29,11 @@ function WhoSelector({ whoAmI, setWhoAmI }) {
         const active = whoAmI === opt.value
         return (
           <motion.button key={opt.value} whileTap={{ scale: 0.95 }} onClick={() => setWhoAmI(opt.value)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-colors duration-300 ${active ? (opt.value === 'me' ? 'avatar-me glow-clay' : 'avatar-partner glow-sage') : 'text-[var(--color-ash)] hover:bg-white/5'}`}
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-colors duration-300 ${active ? (opt.value === 'me' ? 'avatar-me glow-clay' : 'avatar-partner glow-sage') : 'text-[var(--color-ash)]'}`}
             style={{ borderRadius: 'var(--radius-ctl)' }}
             animate={active ? { scale: 1.02 } : { scale: 1 }}>
-            <motion.span className="w-5 h-5 rounded-full bg-white/25 flex items-center justify-center text-xs"
+            <motion.span className="w-5 h-5 rounded-full flex items-center justify-center text-xs"
+              style={{ background: 'color-mix(in srgb, var(--color-on-dark) 22%, transparent)' }}
               animate={active ? { rotate: [0, -8, 8, 0] } : { rotate: 0 }}
               transition={{ duration: 0.5 }}>{opt.icon}</motion.span>
             {opt.label}
@@ -196,7 +197,7 @@ export default function Menu() {
                 animate={{ opacity: 1, scale: 1, width: 'auto' }}
                 exit={{ opacity: 0, scale: 0.8, width: 0 }}
                 transition={{ duration: 0.22, ease: EASE }}
-                className="text-xs text-[var(--color-clay)] font-bold px-1 whitespace-nowrap overflow-hidden shrink-0">清空</motion.button>
+                className="text-xs text-[var(--color-clay-text)] font-bold px-1 whitespace-nowrap overflow-hidden shrink-0">清空</motion.button>
             )}
           </AnimatePresence>
         </div>
@@ -216,15 +217,20 @@ export default function Menu() {
         {/* 分类标签 - 可折叠分组网格布局（2026-09-19 收敛到共享 Chip：去 emoji、44px 触达、active clay 渐变） */}
         <div className="mb-3">
           <div className="flex flex-wrap gap-2 items-center">
-            {visibleCats(CATEGORY_GROUPS[0].items).map(cat => (
-              <Chip key={cat} active={activeCategory === cat} onClick={() => setActiveCategory(cat)}>{cat}</Chip>
-            ))}
+            {(() => {
+              const cats = visibleCats(CATEGORY_GROUPS[0].items)
+              const shown = showAllCategories ? cats : cats.slice(0, 5)
+              const withActive = !showAllCategories && activeCategory && !shown.includes(activeCategory) ? [...shown, activeCategory] : shown
+              return withActive.map(cat => (
+                <Chip key={cat} active={activeCategory === cat} onClick={() => setActiveCategory(cat)}>{cat}</Chip>
+              ))
+            })()}
             {!showAllCategories && (
               <motion.button
                 key="toggle-btn"
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowAllCategories(true)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold border border-[var(--color-clay)]/30 text-[var(--color-clay)] hover:bg-[var(--color-clay)]/5 transition-colors duration-300">
+                className="flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs font-bold border border-[var(--color-clay)]/30 text-[var(--color-clay-text)] hover:bg-[var(--color-clay)]/5 transition-colors duration-300">
                 更多菜系
                 <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 4.5L6 7.5L9 4.5" />
@@ -248,7 +254,7 @@ export default function Menu() {
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setShowAllCategories(false)}
-                      className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold text-[var(--color-ash)] hover:text-[var(--color-clay)] transition-colors duration-200">
+                      className="flex items-center gap-1 px-2 min-h-[44px] rounded-full text-xs font-bold text-[var(--color-ash)] hover:text-[var(--color-clay-text)] transition-colors duration-200">
                       收起
                       <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 7.5L6 4.5L9 7.5" />
@@ -345,6 +351,7 @@ export default function Menu() {
                 vtName={heroNameFor(dish.id)}
                 addLabel={`添加${dish.name}`}
                 accent={partner.gradient}
+                onAccent={partner.on}
                 onAdd={(d, e) => {
                   const rect = e.currentTarget.getBoundingClientRect()
                   spawnParticle(rect.left + rect.width / 2, rect.top)
@@ -359,7 +366,7 @@ export default function Menu() {
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={() => setVisibleCount(c => c + 30)}
-            className="d3-btn-sm py-2.5 text-sm font-bold text-[var(--color-clay)] border border-[var(--color-clay)]/30 self-center px-6"
+            className="d3-btn-sm py-2.5 text-sm font-bold text-[var(--color-clay-text)] border border-[var(--color-clay)]/30 self-center px-6"
             style={{ borderRadius: 'var(--radius-btn)' }}
           >
             加载更多（还有 {filteredDishes.length - visibleDishes.length} 道）
