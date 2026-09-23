@@ -393,6 +393,47 @@ build ✓ 3.03s / lint 4 warnings 0 errors / test 8/8 ✓（"状态推进 pendin
 - 每档细分时长（cutting/cooking/plating 各自预期耗时）未做，`COOK_MS=25 分钟` 仍是"从下单起总耗时"，与真实"下锅才 25 分"有偏差；下一批可以把焖煮进度改成"按当前档推算"
 - 采购清单数量合并（"3 片 + 2 片 = 5 片"）需 ingredient 结构化，暂不做
 
+## 7.18 功能扩展批 3：厨房日历 + 口味雷达 + 今日菜卡分享（2026-09-23）
+
+"这本别册"能翻页 + 能带出门。三小批合并落地。四件套全绿。
+
+### 3a · 厨房日历（月历视图回看每天吃了啥）
+- 新页 `src/pages/KitchenCalendar.jsx`（挂 `/calendar` 路由，lazy 分包，从 Profile 入口进）
+- 数据源：`/api/orders` 全表本地按 `YYYY-MM-DD` 分桶（家庭订单量 <百级）
+- 视图：月历网格 7 列 × 42 格（6 周），顶部月份 ← → 切换；每格日号 + 圆点（那天有单则显，最多 3 个）+ 数字角标（当日多单）
+- 今日格 clay 描边突出；非本月淡 28% 透明；无单日不可点
+- 点某日 → 底部 sheet 展示当日所有 OrderCard（复用 `ui/OrderCard`，同 MyOrders 同源）；safe-area 底衬、焦点陷阱由外层 sheetUp 保证
+- 顶部文案池 `CAL_TITLES` 内联（不进 sweetCopy，属功能命名一致 Admin 三页例外规矩）
+
+### 3b · 口味雷达（五维画像 + TOP5 最爱）
+- 新页 `src/pages/TasteProfile.jsx`（挂 `/taste` 路由，lazy，从 Profile 入口进）
+- 五维聚合：**荤**（硬菜 + 川/粤/湘/鲁/苏/浙/闽/徽 + 东北/西北/云贵） · **素**（素菜 + 汤类） · **主食** · **小食**（小吃 + 水果 + 饮品） · **深夜**（走 isNightSnack 关键词判定，与"荤/素/主食"正交 —— 一菜若是夜宵优先归夜宵）
+- **手绘 SVG 雷达**（不引外部图表库）：中心 100/100、半径 74、三层同心网格 + 五条轴线 + 数据多边形（clay-50 半透明填 + clay-deep 描边）+ 顶点小圆 + 维度标签；归一化到"最大维度 = 满格"
+- 卡片下方 **翻牌 TOP 5**：按 dish_name 计数，NO.1 clay、NO.2 mist-deep、NO.3 caramel-deep、NO.4/5 ash（沿用热榜拆 fill 令牌的路子，不反相）
+- 空态引导"去点菜"；err 走 EmptyState error + 再试一次
+
+### 3c · 今日菜卡分享（canvas 手绘海报，长按保存到相册）
+- 新组件 `src/components/DishShareCard.jsx`：底部 sheet + useDialogA11y 焦点陷阱 + safe-area 底衬
+- 手绘 **800×1000 PNG**：顶部羊毛云朵檐（三段弧形连排）+ 品牌"晨光厨房 · Sunlit Kitchen"+ No.xx 编号 + 大标题"{NICKNAME}，今天想吃" + 菜名（wrapText 换行，最多两行）+ 中央圆形图鉴盘（有图 clip+cover 画入，失败降级 emoji 大字）+ clay-deep 描边一圈 + ¥价格（caramel 大字）+ 底部 slogan + 日期
+- **图片跨域兜底**：走 `<img crossOrigin="anonymous">` 加载；`onerror` 或 `toDataURL` 抛 tainted → fallback 到 emoji 版本（仍能分享）
+- 输出 dataURL 挂 `<img>` + `<a download>` "下载图片"按钮 + 长按保存提示（移动端浏览器通用）
+- 集成到 Home：娃娃机之后加"📸 分享今日菜卡给 TA 看"入口（min-h-[44px] 虚线圆角按钮），点开通 sheet
+
+### 集成
+- **App.jsx**：`/calendar` `/taste` 两条 lazy 路由
+- **Profile**：在「我们的日子」卡下方串两张入口卡（📅 我们的日历 · 数 N 单记录 / 🍲 口味画像 · 五维雷达），保持 sage/love 色调区分（日历走 TA 侧，画像走 love 情感侧）
+- **Home**：娃娃机之后加"分享今日菜卡"入口 + 挂 `<DishShareCard>` 组件
+
+### 门禁
+build ✓ 3.38s / lint 6 warnings 0 errors（历史 4 条 + KitchenCalendar/TasteProfile/DishShareCard 各 react-refresh only-export-components 属既有模式）/ test 8/8 ✓ / **p6 0 · 0 · 0**（雷达 fill 色与 TOP5 fill 色全走 @theme 令牌，无泄露）
+
+### 观感待 live 目检
+- 日历格小屏 480 宽下 aspect-square 的挤压
+- 雷达图 dim 数标签（荤/素/主食/小食/深夜）在极小半径下的可读性
+- TOP5 前三名金/银/铜色阶是否被理解
+- 分享菜卡的圆形图鉴盘：有实拍图（231/432）时的 crop 精度 / 无图 emoji 版是否好看
+- 长按保存提示的引导强度（"长按上方保存"文案是否有效）
+
 ## 8. 已知待办 / 候选项
 
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。

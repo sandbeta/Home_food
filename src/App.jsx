@@ -22,6 +22,8 @@ const OrderDetail = lazy(() => import('./pages/OrderDetail'))
 const MyOrders = lazy(() => import('./pages/MyOrders'))
 const Profile = lazy(() => import('./pages/Profile'))
 const HotDishes = lazy(() => import('./pages/HotDishes'))
+const KitchenCalendar = lazy(() => import('./pages/KitchenCalendar'))
+const TasteProfile = lazy(() => import('./pages/TasteProfile'))
 const Admin = lazy(() => import('./pages/Admin'))
 const AdminDishes = lazy(() => import('./pages/AdminDishes'))
 const AdminOrders = lazy(() => import('./pages/AdminOrders'))
@@ -152,6 +154,10 @@ function App() {
                     <Route path="/favorites" element={<Navigate to="/menu?fav=1" replace />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/hot" element={<HotDishes />} />
+                    {/* 批 3a · 厨房日历（月历回看每天吃了啥，从 Profile 入口进） */}
+                    <Route path="/calendar" element={<KitchenCalendar />} />
+                    {/* 批 3b · 口味画像（雷达图 + TOP5，从 Profile 入口进） */}
+                    <Route path="/taste" element={<TasteProfile />} />
                     <Route path="/admin" element={<Admin />} />
                     <Route path="/admin/dishes" element={<AdminDishes />} />
                     <Route path="/admin/orders" element={<AdminOrders />} />

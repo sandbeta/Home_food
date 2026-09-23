@@ -158,6 +158,42 @@ export default function Profile() {
           <span aria-hidden className="text-lg text-[var(--color-ash)]">›</span>
         </Link>
 
+        {/* 批 3a 新增 · 厨房日历入口（月历视图回看每天吃了啥） */}
+        <Link to="/calendar"
+          className="d3-card-face flex items-center gap-3 no-underline mt-3"
+          style={{ padding: 'var(--space-card-p)', color: 'inherit' }}>
+          <span aria-hidden
+            className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
+            style={{
+              background: 'color-mix(in srgb, var(--sage-40) 14%, var(--surface))',
+              color: 'var(--color-sage)',
+              border: '2px solid var(--color-line)',
+            }}>📅</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[var(--color-bone)]">我们的日历</p>
+            <p className="text-xs text-[var(--color-ash)] mt-0.5">翻这本别册 · {stats.orders} 单记录</p>
+          </div>
+          <span aria-hidden className="text-lg text-[var(--color-ash)]">›</span>
+        </Link>
+
+        {/* 批 3b 新增 · 口味画像入口（五维雷达 + TOP5 最爱） */}
+        <Link to="/taste"
+          className="d3-card-face flex items-center gap-3 no-underline mt-3"
+          style={{ padding: 'var(--space-card-p)', color: 'inherit' }}>
+          <span aria-hidden
+            className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
+            style={{
+              background: 'color-mix(in srgb, var(--color-love) 14%, var(--surface))',
+              color: 'var(--color-love)',
+              border: '2px solid var(--color-line)',
+            }}>🍲</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[var(--color-bone)]">口味画像</p>
+            <p className="text-xs text-[var(--color-ash)] mt-0.5">你最近爱吃什么 · 五维雷达</p>
+          </div>
+          <span aria-hidden className="text-lg text-[var(--color-ash)]">›</span>
+        </Link>
+
         {/* 入口列表 —— 收藏已并入点菜页，空壳项已删 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

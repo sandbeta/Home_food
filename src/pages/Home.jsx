@@ -11,6 +11,7 @@ import ThemeToggle from '../components/ui/ThemeToggle'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import AnniversaryBanner from '../components/AnniversaryBanner'
+import DishShareCard from '../components/DishShareCard'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter, usePrefersReducedMotion } from '../theme/motion'
 import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES, ANNIVERSARY_TITLES, ANNIVERSARY_NOTES } from '../lib/sweetCopy'
@@ -79,6 +80,8 @@ export default function Home() {
   /* M-s2 修：抓取时人格 ≠ 撤销时人格 → 撤销按【当前】whoAmI 减会失效或错减 TA。
      useRef 记「抓取那一刻」的人格快照，撤销按快照走（浮标 4.2s 窗口内切人格不再误伤）。 */
   const lastCatchPersonaRef = useRef(whoAmI)
+  /* 批 3c · 今日菜卡分享 */
+  const [shareOpen, setShareOpen] = useState(false)
 
   const onCatch = (dish) => {
     lastCatchPersonaRef.current = whoAmI
@@ -195,6 +198,15 @@ export default function Home() {
               onToggleAuto={() => setAutoOn((v) => !v)}
               rotate={canRotate ? { key: `${featured.id}-${rotateToken}-${paused}-${tabVisible}`, durationMs: ROTATE_MS } : null}
             />
+            {/* 批 3c · 今日菜卡分享入口：抓娃娃机之下小字按钮，点开弹生成海报 sheet */}
+            <button
+              onClick={() => setShareOpen(true)}
+              aria-label={`分享今日菜卡：${featured.name}`}
+              className="w-full mt-3 min-h-[44px] py-2 text-xs font-bold text-[var(--color-clay-text)] flex items-center justify-center gap-1 rounded-full"
+              style={{ border: '2px dashed var(--color-line)' }}
+            >
+              <span aria-hidden>📸</span> 分享今日菜卡给 TA 看
+            </button>
           </div>
         )}
 
@@ -339,6 +351,14 @@ export default function Home() {
       <div aria-hidden="true" style={{ flex: '1 1 auto', minHeight: 'var(--space-section)' }} />
       {/* 牧场草地收边：页面在草皮上落幕（夜宵自动压暗） */}
       <div aria-hidden="true" className="grass-hem relative z-[2]" />
+
+      {/* 批 3c · 今日菜卡分享 sheet */}
+      <DishShareCard
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        dish={featured}
+        indexNo={rotSource.length ? (rotIdx % rotSource.length) + 1 : 1}
+      />
     </div>
   )
 }
