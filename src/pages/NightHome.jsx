@@ -140,7 +140,7 @@ export default function NightHome() {
             indexNo={(rotIdx % (pool.length || 1)) + 1}
             onCatch={onCatch}
             onUndo={undoCatch}
-            onGrab={() => setRotIdx(i => i + 1)}
+            onGrab={() => setRotIdx(Math.floor(Math.random() * (pool.length || 1)))}
             onOpen={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
             pool={pool}
             showClock={false}

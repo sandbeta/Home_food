@@ -153,14 +153,15 @@ export default function Home() {
 
   useEffect(() => {
     if (!canRotate) return undefined
-    const timer = setInterval(() => setRotIdx(i => i + 1), ROTATE_MS)
+    // 批 7c · 自动轮换随机选池里一道（与手动抓取一致的"随机抓一个物品"手感）
+    const timer = setInterval(() => setRotIdx(Math.floor(Math.random() * (rotSource.length || 1))), ROTATE_MS)
     return () => clearInterval(timer)
   }, [canRotate, rotateToken, rotSource.length])
 
-  // 抓取后只换主推（从"非常点的"池里取下一道），「常点的」网格保持不动——
-  // 网格是"你家稳定爱吃的那几道"，不该因为抓走一次主推就被顺移打乱。
+  // 抓取后换主推：批 7c 改为「从池里随机抓任意一道」，不再顺序 rotIdx+1——
+  // 模拟真娃娃机"每次抓上来的是堆里随机一个物品"。网格仍保持不动（那是"你家稳定爱吃的那几道"）。
   const nextDish = () => {
-    setRotIdx(i => i + 1)
+    setRotIdx(Math.floor(Math.random() * (rotSource.length || 1)))
     setRotateToken(t => t + 1)
   }
 
