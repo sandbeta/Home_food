@@ -59,12 +59,56 @@ export function CartProvider({ children }) {
   }, [])
 
   const clearCart = useCallback(() => setItems([]), [])
+
+  /* —— 批 5 新增 · 跨设备分享购物车（家庭场景"手动分享 + 拉取合并"） ——
+     语义：她点几份"分享给 TA" → 服务端存 sharedCart → 他打开 Cart 看到"TA 分享了 N 件"
+     → 点合并 = 把 sharedCart.items 逐个并入本地（保留每条原 added_by 归属，不重贴当前人格）。
+     只做增量：items/whoAmI 主 reducer 语义不变，仅加三个方法。 */
+  const shareCart = useCallback(async () => {
+    const res = await fetch('/api/cart/share', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, by: whoAmI }),
+    })
+    if (!res.ok) throw new Error('HTTP ' + res.status)
+    const data = await res.json()
+    try { window.__cgAnnounce?.(`购物车已分享给${whoAmI === 'me' ? 'TA' : '你'}，共 ${items.length} 件`) } catch {}
+    return data
+  }, [items, whoAmI])
+
+  const fetchSharedCart = useCallback(async () => {
+    const res = await fetch('/api/cart/shared')
+    if (!res.ok) throw new Error('HTTP ' + res.status)
+    return res.json()
+  }, [])
+
+  const mergeSharedCart = useCallback((sharedItems) => {
+    if (!Array.isArray(sharedItems) || sharedItems.length === 0) return 0
+    let merged = 0
+    setItems(prev => {
+      let next = [...prev]
+      for (const s of sharedItems) {
+        const by = s.added_by === 'partner' ? 'partner' : 'me'
+        const idx = next.findIndex(i => i.dish_id === s.dish_id && i.added_by === by)
+        if (idx >= 0) {
+          next[idx] = { ...next[idx], quantity: next[idx].quantity + (Number(s.quantity) || 1) }
+        } else {
+          next.push({ dish_id: Number(s.dish_id), name: s.name, price: Number(s.price) || 0, category: s.category || '', quantity: Number(s.quantity) || 1, added_by: by })
+        }
+        merged++
+      }
+      return next
+    })
+    try { window.__cgAnnounce?.(`已合并 ${sharedItems.length} 件到购物车`) } catch {}
+    return merged
+  }, [])
+
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
   const totalCount = items.reduce((sum, i) => sum + i.quantity, 0)
   const split = items.reduce((acc, i) => ({ ...acc, [i.added_by]: (acc[i.added_by] || 0) + i.price * i.quantity }), { me: 0, partner: 0 })
 
   return (
-    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, totalPrice, totalCount, split, whoAmI, setWhoAmI }}>
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, clearCart, totalPrice, totalCount, split, whoAmI, setWhoAmI, shareCart, fetchSharedCart, mergeSharedCart }}>
       {children}
     </CartContext.Provider>
   )

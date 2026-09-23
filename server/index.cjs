@@ -77,7 +77,7 @@ function initState() {
   }
   if (!state || !Array.isArray(state.dishes)) {
     /* 批 1 新增：fresh state 一并给 anniversaries / wishes 空表 + 序列号（与 mockApi 一比一复刻） */
-    state = { dishes: [...dishes], orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1 }
+    state = { dishes: [...dishes], orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, sharedCart: { items: [], sharedBy: null, sharedAt: null } }
     saveState()
     console.log('[init] 已从种子创建 state.json（%d 道菜）', state.dishes.length)
   } else {
@@ -96,6 +96,8 @@ function initState() {
     if (!Array.isArray(state.wishes)) state.wishes = []
     if (!Number.isFinite(state.nextAnniversaryId)) state.nextAnniversaryId = 1
     if (!Number.isFinite(state.nextWishId)) state.nextWishId = 1
+    /* 批 5 新增 · sharedCart（跨设备分享购物车，家庭"手动分享+拉取合并"） */
+    if (!state.sharedCart || typeof state.sharedCart !== 'object') state.sharedCart = { items: [], sharedBy: null, sharedAt: null }
   }
 }
 
@@ -323,6 +325,22 @@ async function handleApi(req, res, url) {
       owed_partner: Math.round(owedPartner * 100) / 100,
       by_payer: { aa: byPayer.aa || 0, me: byPayer.me || 0, partner: byPayer.partner || 0 },
     })
+  }
+
+  /* —— 批 5 · 跨设备分享购物车（与 mockApi 一比一） —— */
+  if (pathname === '/api/cart/share' && method === 'POST') {
+    const body = await readJsonBody(req)
+    const items = Array.isArray(body.items) ? body.items.map(i => ({
+      dish_id: Number(i.dish_id), name: String(i.name || ''), price: Number(i.price) || 0,
+      category: String(i.category || ''), quantity: Number(i.quantity) || 1,
+      added_by: i.added_by === 'partner' ? 'partner' : 'me',
+    })) : []
+    state.sharedCart = { items, sharedBy: body.by === 'partner' ? 'partner' : 'me', sharedAt: new Date().toISOString() }
+    saveState()
+    return sendJson(res, state.sharedCart)
+  }
+  if (pathname === '/api/cart/shared' && method === 'GET') {
+    return sendJson(res, state.sharedCart || { items: [], sharedBy: null, sharedAt: null })
   }
 
   return sendJson(res, { message: `No route: ${method} ${pathname}` }, 404)

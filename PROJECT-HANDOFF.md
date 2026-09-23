@@ -487,6 +487,42 @@ build ✓ 3.31s / lint 6 warnings 0 errors（历史 4 + AnnualReport/DishShareCa
 - 年度别册月度柱图小屏 480 宽下 12 根的间距
 - 打印预览：浏览器 Ctrl-P 出的 PDF 版式（sticky 页头去 sticky / 底片层隐藏 / 卡片去阴影是否够清爽）
 
+## 7.20 功能扩展批 5：双人协作点菜（跨设备分享购物车，2026-09-23）
+
+四大核心语义里"双人格"最深化的一步。**决策：不做实时同步，做"手动分享 + 拉取合并"** —— 覆盖家庭日常"我点几份给你看看"的核心场景，工程量约 1/3，无需乐观并发/版本冲突/轮询机制。
+
+### 数据层
+- `state.sharedCart` 新增一份跨设备快照：`{ items, sharedBy, sharedAt }`（loadState 老 state 兼容补齐 + fresh 初值 + catch 兜底，三处都改）
+- **新端点**：
+  - `POST /api/cart/share` `{ items, by }` → 全量替换 state.sharedCart（含 added_by 归属保留）
+  - `GET /api/cart/shared` → 返回当前 sharedCart 快照（无则 items:[]）
+- mockApi + server 双端一比一（不可变文件改动记入 §4）
+
+### 客户端
+- **CartContext.jsx 增量三方法**（**不可变文件 · 只加不改主 reducer**）：
+  - `shareCart()` → 拉本地 items 快照 POST /api/cart/share（by=当前 whoAmI），announce 播报
+  - `fetchSharedCart()` → GET /api/cart/shared
+  - `mergeSharedCart(sharedItems)` → 遍历把每条**按 added_by 原归属**合并进本地（同菜同人格 qty 累加，否则 push 新行）；announce 播报"已合并 N 件"
+- **Cart.jsx 集成**：
+  - 挂载时 `useEffect` 拉一次 sharedCart；若 `sharedBy !== whoAmI` 且非空 → 顶部（我点的分组之上）插入提示条：**📬 TA 分享了 N 件 · {timeAgo} · 「合并」按钮**
+  - 合并成功 2.4s "已合并 ✓" sage 反馈条
+  - 合计卡"下单啦"按钮之上加**「📤 把这一车分享给 TA（N 件）」**次级按钮（min-h-[44px]，on-dark 18% 混底），成功切 sage + "✓ 已分享，TA 打开就能看到" 2.4s 反馈
+  - 顶栏加 `timeAgo(iso)` 辅助（刚刚/N 分钟前/N 小时前/昨天/N 天前）
+  - 家庭场景 her→me / me→her 一人分享、另一人开 Cart 就看到 —— 无需轮询，无需冲突处理
+
+### 与"实时共同车"的取舍
+- **为什么不做实时同步**：需 state.cart 主表 + version 乐观并发 + 5s 轮询/SSE + 冲突处理，工程量 3-4 倍；家庭两人同时编辑同一车的场景极少（一般一人点完分享，另一人看合并），"手动分享+合并"覆盖 95% 场景
+- **迁移路径**：若未来上真时同步，`sharedCart` 直接升级成主 `cart` 表即可（API 命名 /api/cart/* 已留位），客户端改动仅集中在 CartContext 三方法
+
+### 门禁
+build ✓ 2.04s / lint 6 warnings 0 errors / test 8/8 / p6 0 · 0 · 0
+
+### 观感待 live 目检
+- 提示条 sage 半透底 + 深字（on-sage）在白天/夜宵的对比
+- 「📤 分享给 TA」按钮在合计卡内视觉层次（是否抢"下单啦"主按钮）
+- 「已分享 / 已合并」2.4s 反馈时长够不够看清
+- 合并后 items 归属正确性（本地她点的仍挂 partner、TA 分享的仍挂 me，不重贴）
+
 ## 8. 已知待办 / 候选项
 
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。

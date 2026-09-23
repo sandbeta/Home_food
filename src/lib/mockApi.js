@@ -120,6 +120,8 @@ function loadState() {
       if (!Array.isArray(state.wishes)) state.wishes = []
       if (!Number.isFinite(state.nextAnniversaryId)) state.nextAnniversaryId = 1
       if (!Number.isFinite(state.nextWishId)) state.nextWishId = 1
+      /* 批 5 新增 · sharedCart（跨设备分享购物车，家庭"手动分享+拉取合并"，非实时同步） */
+      if (!state.sharedCart || typeof state.sharedCart !== 'object') state.sharedCart = { items: [], sharedBy: null, sharedAt: null }
     } else {
       /* M-d1 修（不可变文件 · 同 §4 台账）：
          fresh 态 nextDishId 原为魔法数 66（按早期 65 道种子写就，灌库扩充后未回改），
@@ -127,10 +129,10 @@ function loadState() {
          改为与 server 字面一致 10000（当前 seed 段位 1-65/500-841/900-924 均 <10000 无冲突；
          未来 seed 逼近该值需两端同调，写进 §4 提醒）。
        批 1 新增：anniversaries / wishes 空表 + 序列号（与 server 端一比一复刻） */
-      state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1 }
+      state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, sharedCart: { items: [], sharedBy: null, sharedAt: null } }
     }
   } catch {
-    state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1 }
+    state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, sharedCart: { items: [], sharedBy: null, sharedAt: null } }
   }
   stateCache = state
   return state
@@ -497,6 +499,23 @@ export function installMockApi() {
           partner: byPayer.partner || 0,
         },
       })
+    }
+
+    /* —— 批 5 · 跨设备分享购物车（家庭场景"手动分享 + 拉取合并"，非实时同步） ——
+       sharedBy 记哪个人格分享的，对方看到"TA 分享了 N 件"再决定合并 —— */
+    if (pathname === '/api/cart/share' && method === 'POST') {
+      const body = await readBody(init)
+      const items = Array.isArray(body.items) ? body.items.map(i => ({
+        dish_id: Number(i.dish_id), name: String(i.name || ''), price: Number(i.price) || 0,
+        category: String(i.category || ''), quantity: Number(i.quantity) || 1,
+        added_by: i.added_by === 'partner' ? 'partner' : 'me',
+      })) : []
+      state.sharedCart = { items, sharedBy: body.by === 'partner' ? 'partner' : 'me', sharedAt: new Date().toISOString() }
+      saveState(state)
+      return json(state.sharedCart)
+    }
+    if (pathname === '/api/cart/shared' && method === 'GET') {
+      return json(state.sharedCart || { items: [], sharedBy: null, sharedAt: null })
     }
 
     return json({ message: `Mock API route not found: ${method} ${pathname}` }, 404)

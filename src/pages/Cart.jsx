@@ -23,6 +23,20 @@ import { tap, vibrate } from '../lib/sfx'
 import { requestJson } from '../lib/request'
 import { readAvoids, scanDishes } from '../lib/avoid'
 
+/** 相对时间：ISO 字符串 → "刚刚 / N 分钟前 / N 小时前 / 昨天 / N 天前" */
+function timeAgo(iso) {
+  try {
+    const diff = Date.now() - new Date(iso).getTime()
+    const m = Math.floor(diff / 60000)
+    if (m < 1) return '刚刚'
+    if (m < 60) return `${m} 分钟前`
+    const h = Math.floor(m / 60)
+    if (h < 24) return `${h} 小时前`
+    const d = Math.floor(h / 24)
+    return d === 1 ? '昨天' : `${d} 天前`
+  } catch { return '' }
+}
+
 /**
  * 购物车条目 —— V3 设计稿的"糖果清单行"：
  * 分类图鉴圆牌 + 菜名 + caramel 单价 + 步进器 + 移除。
@@ -89,12 +103,18 @@ function CartRow({ item, onUpdate, onRemove }) {
  *  - 少一次跳转
  */
 export default function Cart() {
-  const { items, totalPrice, totalCount, updateQuantity, removeItem, clearCart } = useCart()
+  const { items, totalPrice, totalCount, updateQuantity, removeItem, clearCart, whoAmI, shareCart, fetchSharedCart, mergeSharedCart } = useCart()
   const [note, setNote] = useState('')
   const [sticker, setSticker] = useState(null) // 批 1 · 便签留言条 {bg,pin,msg}
   const [payer, setPayer] = useState('aa')
   /* 批 2b · 采购清单底部 sheet */
   const [purchaseOpen, setPurchaseOpen] = useState(false)
+  /* 批 5 · 跨设备分享 */
+  const [shared, setShared] = useState(null)
+  const [sharing, setSharing] = useState(false)
+  const [shareDone, setShareDone] = useState(false)
+  const [mergeDone, setMergeDone] = useState(false)
+  const [shareErr, setShareErr] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(false)
   /* 批 4b · 忌口扫描：命中时先拦一次让用户看，再点即放行（家庭场景"提示不阻断"） */
@@ -112,6 +132,32 @@ export default function Cart() {
     mountedRef.current = true
     return () => { mountedRef.current = false }
   }, [])
+
+  /* 批 5 · 挂载时拉一次服务端 sharedCart；若别人分享的（sharedBy !== whoAmI）且非空，提示合并 */
+  useEffect(() => {
+    let alive = true
+    fetchSharedCart().then(d => { if (alive && d && Array.isArray(d.items) && d.items.length && d.sharedBy && d.sharedBy !== whoAmI) setShared(d) }).catch(() => {})
+    return () => { alive = false }
+  }, [fetchSharedCart, whoAmI])
+
+  const handleShare = async () => {
+    if (items.length === 0 || sharing) return
+    setSharing(true); setShareErr(''); setShareDone(false)
+    try {
+      await shareCart()
+      setShareDone(true)
+      setTimeout(() => setShareDone(false), 2400)
+    } catch { setShareErr('分享没成功，看看服务端还在不') }
+    setSharing(false)
+  }
+
+  const handleMerge = () => {
+    if (!shared) return
+    mergeSharedCart(shared.items)
+    setShared(null)
+    setMergeDone(true)
+    setTimeout(() => setMergeDone(false), 2400)
+  }
 
   const meItems = items.filter((i) => i.added_by === 'me')
   const partnerItems = items.filter((i) => i.added_by === 'partner')
@@ -260,6 +306,35 @@ export default function Cart() {
         />
       ) : (
         <PageContainer>
+          {/* 批 5 · 跨设备分享提示条：TA 在另一台设备分享过 → 显"TA xx 分钟前分享了 N 件 · 一键合并" */}
+          {shared && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+              className="mb-3 px-4 py-3 flex items-center gap-3"
+              style={{
+                background: 'color-mix(in srgb, var(--color-sage) 16%, var(--surface))',
+                border: '2px solid color-mix(in srgb, var(--color-sage) 55%, transparent)',
+                borderRadius: 'var(--radius-card)',
+                color: 'var(--color-bone)',
+              }}
+              role="status"
+            >
+              <span aria-hidden className="text-2xl shrink-0">📬</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold truncate">TA 分享了 {shared.items.length} 件</p>
+                <p className="text-[11px] text-[var(--color-ash)] mt-0.5">{shared.sharedAt ? timeAgo(shared.sharedAt) : '刚刚'} · 合并进来一起下单？</p>
+              </div>
+              <button onClick={handleMerge}
+                className="d3-btn-sm px-3 py-1.5 text-xs font-bold min-h-[44px] shrink-0"
+                style={{ background: 'var(--color-sage)', color: 'var(--color-on-sage)', border: '2px solid var(--sage-60)' }}>
+                合并
+              </button>
+            </motion.div>
+          )}
+          {mergeDone && (
+            <div role="status" className="mb-3 px-4 py-2 text-xs font-bold text-[var(--color-on-sage)]"
+              style={{ background: 'var(--color-sage)', borderRadius: 'var(--radius-ctl)' }}>已合并 ✓</div>
+          )}
           {/* 我点的 */}
           {meItems.length > 0 && (
             <GlassCard className="glass-me" glow={PERSONA.me.glow} style={{ padding: 'var(--space-card-p)' }}>
@@ -436,6 +511,26 @@ export default function Cart() {
                 <span className="text-xs font-semibold leading-5 text-[var(--color-on-dark)]">提交没成功，网络可能不稳——菜还给你留着呢，再点一次就好</span>
               </div>
             )}
+
+            {/* 批 5 · 分享给 TA（跨设备传购物车）：手动推一份快照到服务端，对方开 Cart 就能看到并合并 */}
+            <div className="mb-2">
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                type="button"
+                onClick={handleShare}
+                disabled={sharing || items.length === 0}
+                className="w-full py-2 text-xs font-bold min-h-[44px] rounded-lg flex items-center justify-center gap-1.5"
+                style={{
+                  background: shareDone ? 'var(--color-sage)' : 'color-mix(in srgb, var(--color-on-dark) 18%, transparent)',
+                  color: shareDone ? 'var(--color-on-sage)' : 'var(--color-on-dark)',
+                  border: '2px solid color-mix(in srgb, var(--color-on-dark) 30%, transparent)',
+                  opacity: (sharing || items.length === 0) ? 0.6 : 1,
+                }}
+              >
+                {shareDone ? '✓ 已分享，TA 打开就能看到' : sharing ? '分享中…' : `📤 把这一车分享给 TA（${items.length} 件）`}
+              </motion.button>
+              {shareErr && <p className="text-[11px] mt-1" style={{ color: 'var(--color-on-dark)', opacity: 0.92 }}>⚠️ {shareErr}</p>}
+            </div>
 
             <motion.button
               whileTap={{ scale: 0.97 }}
