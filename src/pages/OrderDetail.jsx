@@ -16,10 +16,14 @@ import { pickOne, DETAIL_TITLES, ORDER_STATUS_DESC } from '../lib/sweetCopy'
 import { settle, vibrate } from '../lib/sfx'
 import { requestJson } from '../lib/request'
 
-/* m-5 修：三条状态口吻文案内联 → 迁至 sweetCopy.ORDER_STATUS_DESC 单源 */
+/* m-5 修：三条状态口吻文案内联 → 迁至 sweetCopy.ORDER_STATUS_DESC 单源
+   批 2a · 从三档扩到六档：pending / cutting / cooking / plating / completed + 旧 preparing 别名（走 cooking 视觉） */
 const STATUS_MAP = {
   pending: { ...ORDER_STATUS.pending, emoji: '⏳', desc: ORDER_STATUS_DESC.pending },
   preparing: { ...ORDER_STATUS.preparing, emoji: '👨‍🍳', desc: ORDER_STATUS_DESC.preparing },
+  cutting: { ...ORDER_STATUS.cutting, emoji: '🔪', desc: ORDER_STATUS_DESC.cutting },
+  cooking: { ...ORDER_STATUS.cooking, emoji: '🍳', desc: ORDER_STATUS_DESC.cooking },
+  plating: { ...ORDER_STATUS.plating, emoji: '🍽️', desc: ORDER_STATUS_DESC.plating },
   completed: { ...ORDER_STATUS.completed, emoji: '🎉', desc: ORDER_STATUS_DESC.completed },
 }
 
@@ -27,7 +31,10 @@ const STATUS_MAP = {
 // 真实流转（后台点菜推进）到达的那一秒，才给"火点着了/起锅了"的即时反馈。
 const POLL_MS = 12000
 const BUMP_MS = 1300
-const STATUS_FLOW = ['pending', 'preparing', 'completed']
+/* 批 2a · 跑灯扩到五段（preparing 不列入 flow，历史订单归一化到 cooking 后进同一路径） */
+const STATUS_FLOW = ['pending', 'cutting', 'cooking', 'plating', 'completed']
+// 归一化：历史 status='preparing' 视为 cooking，让"当前段"高亮能落在 flow 里
+const normalize = (s) => s === 'preparing' ? 'cooking' : s
 
 export default function OrderDetail() {
   const { id } = useParams()
@@ -77,11 +84,13 @@ export default function OrderDetail() {
       if (!statusRef.current || statusRef.current === 'completed') return
       requestJson(`/api/orders/${id}`).then(r => r.json()).then(next => {
         if (dead || !next || !next.status) return
-        const prev = statusRef.current
+        const prev = normalize(statusRef.current)
+        const now = normalize(next.status)
         statusRef.current = next.status
-        if (next.status !== prev) {
-          if (STATUS_FLOW.indexOf(next.status) > STATUS_FLOW.indexOf(prev)) {
-            fireBump(next.status === 'preparing' ? 'ignite' : 'serve')
+        if (now !== prev) {
+          // 只在真实前进流转时报喜（五档 flow 里索引前进：pending→cutting 亮火、plating→completed 起锅）
+          if (STATUS_FLOW.indexOf(now) > STATUS_FLOW.indexOf(prev)) {
+            fireBump(now === 'cutting' || now === 'cooking' ? 'ignite' : 'serve')
           }
         }
         setOrder(next)
@@ -154,7 +163,7 @@ export default function OrderDetail() {
               <div className="flex gap-2 mb-4">
                 {STATUS_FLOW.map((key, idx) => {
                   const s = STATUS_MAP[key]
-                  const cur = STATUS_FLOW.indexOf(order.status)
+                  const cur = STATUS_FLOW.indexOf(normalize(order.status))
                   const isNow = idx === cur
                   const isDone = idx < cur
                   return (

@@ -22,7 +22,16 @@ export const PERSONA = {
 export const ORDER_STATUS = {
   pending:   { text: '等着呢', emoji: '⏳', ring: ['var(--color-ember)', 'var(--color-ember)'],
                chipBg: 'color-mix(in srgb, var(--color-ember) 16%, transparent)', chipColor: 'var(--status-pending-text)' },
+  /* 批 2a · 细分进度：cutting（切配中）/ cooking（下锅）/ plating（装盘）三档新状态，
+     视觉色共用原 preparing 的 clay 系（都是"在做"）；文案与跑灯标签区分。
+     preparing 保留作向后兼容别名（历史订单读取时归一化到 cooking）。 */
   preparing: { text: '在做了', emoji: '👨‍🍳', ring: ['var(--clay-50)', 'var(--clay-40)'],
+               chipBg: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', chipColor: 'var(--status-preparing-text)' },
+  cutting:   { text: '切配中', emoji: '🔪', ring: ['var(--clay-50)', 'var(--clay-40)'],
+               chipBg: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', chipColor: 'var(--status-preparing-text)' },
+  cooking:   { text: '下锅了', emoji: '🍳', ring: ['var(--clay-50)', 'var(--clay-40)'],
+               chipBg: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', chipColor: 'var(--status-preparing-text)' },
+  plating:   { text: '装盘中', emoji: '🍽️', ring: ['var(--clay-50)', 'var(--clay-40)'],
                chipBg: 'color-mix(in srgb, var(--clay-50) 14%, transparent)', chipColor: 'var(--status-preparing-text)' },
   completed: { text: '做好啦', emoji: '🎉', ring: ['var(--sage-40)', 'var(--sage-30)'],
                chipBg: 'color-mix(in srgb, var(--sage-40) 16%, transparent)', chipColor: 'var(--status-completed-text)' },

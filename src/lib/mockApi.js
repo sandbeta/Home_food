@@ -362,7 +362,13 @@ export function installMockApi() {
     if (orderStatusMatch && method === 'PUT') {
       const id = Number(orderStatusMatch[1])
       const body = await readBody(init)
-      state.orders = state.orders.map(o => o.id === id ? { ...o, status: body.status || o.status } : o)
+      /* 批 2a · 状态白名单校验：pending / preparing(旧) / cutting / cooking / plating / completed 六值合法。
+         非法 status 返回 400 而非静默收下脏数据（服务端与 mockApi 一比一，两端同规则）。
+         方向校验（禁回退）留给 m-32 下一轮做，本批只挡"错拼/错值"。 */
+      const NEXT = body.status
+      const VALID = ['pending', 'preparing', 'cutting', 'cooking', 'plating', 'completed']
+      if (!NEXT || VALID.indexOf(NEXT) === -1) return json({ message: 'invalid status', allowed: VALID }, 400)
+      state.orders = state.orders.map(o => o.id === id ? { ...o, status: NEXT } : o)
       saveState(state)
       return json(state.orders.find(o => o.id === id) || null)
     }

@@ -37,8 +37,11 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
     return () => clearInterval(timer)
   }, [statusKey])
 
+  /* 批 2a · 三态视觉兼容六值 statusKey：
+     pending → 熄火陪等；completed → 起锅叙事；其它（preparing 旧 / cutting / cooking / plating 新）
+     统一走"进行中"视觉（灶膛点火 + 蒸汽 + 焖煮进度）——灶火本身就是"在做了"的语义，细分档在跑灯与文案里区分。 */
   const pending = statusKey === 'pending'
-  const preparing = statusKey === 'preparing'
+  const preparing = !pending && statusKey !== 'completed'
   const completed = statusKey === 'completed'
 
   return (

@@ -346,6 +346,53 @@ scripts/
 
 **已知小 gap（留下轮）**：AdminWishes "变出来"目前先 PUT status='added' 再跳 /admin/dishes?state.prefill=xxx；AddDishModal 未接住 prefill 参数（下一批把 AddDishModal 支持从 location.state 读预填 name/description 就闭环）。
 
+## 7.17 功能扩展批 2：细分进度 + 备菜清单 + 做菜看板（2026-09-23）
+
+三小批合并落地。他侧最急的三个（"我做到哪一步了"、"要买啥"、"今天总共做几单"），从"两按钮 + 一个订单页"升级到"完整厨房看板"。四件套全绿。
+
+### 2a · 细分进度（三档 → 六档）
+- 状态从 `pending / preparing / completed` 扩到 `pending / cutting / cooking / plating / completed`，`preparing` 保留作**向后兼容别名**（读取时归一化到 cooking，UI 上不再显），不破坏历史订单渲染
+- `src/theme/persona.js` `ORDER_STATUS` 加三档，chipBg/chipColor/ring 都共用 preparing 的 clay 系（都是"在做"，视觉同族，跑灯标签与文案区分档）
+- `src/lib/sweetCopy.js` `ORDER_STATUS_DESC` 加 cutting/cooking/plating 三条男朋友口吻文案
+- **推进链** `src/pages/AdminOrders.jsx` 从"两按钮固定映射"改成 `NEXT_STEP[order.status] → 下一档`：pending→cutting→cooking→plating→completed（旧 preparing 走 cooking 分支）
+- **跑灯** `src/pages/OrderDetail.jsx` `STATUS_FLOW` 从三档扩到五档；`normalize(s)` 让 status='preparing' 归入 cooking，`STATUS_FLOW.indexOf(normalize(order.status))` 定位当前段；轮询"前进才播庆祝"用归一化后的索引比较（避免旧订单 preparing→plating 被误判为回退不播）
+- **灶台视觉** `StoveStage.jsx` 保持三态（熄火/进行中/起锅）不变，只是 `preparing = !pending && statusKey !== 'completed'`，六值 statusKey 都能正确映射到三态视觉，不需要拆更多动画档
+- **双端 API 白名单** `mockApi.js` + `server/index.cjs` PUT `/api/orders/:id/status` 加 `VALID = ['pending','preparing','cutting','cooking','plating','completed']`，非法 status 返 400（禁脏数据）；**方向校验留给 m-32 下一轮做**
+
+### 2b · 备菜清单（Cart 底部 Sheet + 一键复制去超市）
+- **新工具** `src/lib/purchaseList.js`：`buildPurchaseList(items)` 走 `/api/dishes/:id`（懒加载 recipe）→ ingredients 归一化到「第一个空格前 = 名字」→ 同名合并 → 返回 `{list: [{name, from: [dishName]}], noRecipe: [dishName]}`；`toPlainText()` 输出可复制到剪贴板的纯文本
+- **简化决策**：不解析数量（"3 片 / 100 g / 适量"混合难合并），家庭自用够用心智；不分类（用户买菜的分类比菜谱更粗，交给用户）；无菜谱的老 65 道菜单列 noRecipe 提示"凭印象准备"
+- **新组件** `src/components/PurchaseListSheet.jsx`：底部 sheet + 焦点陷阱（复用 `useDialogA11y`）+ safe-area 底衬 + 每项原料一行 + 括号里"用在：X、Y"显示来源菜；底部一键复制按钮走 `navigator.clipboard.writeText()` + 全局 live region 播报"采购清单已复制"
+- **Cart 集成**：TA 点的分组卡之后、备注卡之前加"🛒 要买这些东西"入口（GlassCard 内 motion.button，min-h-[44px]），点击 open sheet
+
+### 2c · 做菜看板（AdminOrders 今日待做视图）
+- 首位加筛选档 `{value: '__today', label: '今日待做'}`；**默认 filter 从 `''` 改成 `'__today'`**（他打开后台第一眼就是想看的"今天要做的所有单"）
+- 特殊值 `__today` 前端本地过滤（当天 created_at + status !== 'completed'）；不给两端加 `?status_in` / `?unfinished` 参数，家庭订单量 <百级成本可忽略
+- 顶部（filter='__today' 且有单时）插**今日采购清单卡**：clay 锚点卡样式，"N 单 · 共 M 道菜要备 · 点复制去超市"，点击展开 `PurchaseListSheet`（复用 2b 组件），items 从当前过滤后所有单的 items 扁平合并
+- 空态文案随筛选切换："__today" 时显"今天没单要忙 · 茶先泡上，等她点单再来"（🍵），其它保留"暂时没有订单"
+
+## §6 文件地图同步
+- `src/components/` 加 `PurchaseListSheet.jsx`（批 2b）
+- `src/lib/` 加 `purchaseList.js`（批 2b）
+- `pages/AdminOrders.jsx` 与 `OrderDetail.jsx` 消费扩档
+- `theme/persona.js` ORDER_STATUS 从 3 档扩到 6 档
+- `lib/sweetCopy.js` ORDER_STATUS_DESC 加 cutting/cooking/plating
+
+## 门禁
+build ✓ 3.03s / lint 4 warnings 0 errors / test 8/8 ✓（"状态推进 pending→preparing" 冒烟用例仍走合法六值通过）/ **p6 0·0·0**。
+
+## 观感待 live 目检
+- AdminOrders 默认打开就是"今日待做"看板视图（顶部采购锚点卡 + 下面单据）
+- OrderDetail 五段跑灯在小屏 480 宽的挤压表现
+- StoveStage 三态在 cutting/cooking/plating 都归为 preparing 视觉是否合理（细分档差异靠跑灯与文案承载，灶火本身不逐档变化）
+- PurchaseListSheet 长清单滚动 + 一键复制反馈
+- AdminOrders `NEXT_STEP` 四段按钮的文案是否精准（"下锅" / "装盘" / "做好了"，从"开始做"到"做好了"叙事链是否自然）
+
+## 已知小 gap（留下轮）
+- 状态方向校验（禁回退）留 m-32 一起做
+- 每档细分时长（cutting/cooking/plating 各自预期耗时）未做，`COOK_MS=25 分钟` 仍是"从下单起总耗时"，与真实"下锅才 25 分"有偏差；下一批可以把焖煮进度改成"按当前档推算"
+- 采购清单数量合并（"3 片 + 2 片 = 5 片"）需 ingredient 结构化，暂不做
+
 ## 8. 已知待办 / 候选项
 
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。

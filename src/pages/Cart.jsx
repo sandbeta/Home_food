@@ -13,6 +13,7 @@ import Stepper from '../components/ui/Stepper'
 import EmptyState from '../components/ui/EmptyState'
 import LazySheep from '../components/ui/LazySheep'
 import StickerEditor from '../components/ui/StickerEditor'
+import PurchaseListSheet from '../components/PurchaseListSheet'
 import { getCategoryEmoji } from '../lib/categoryIcons'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
@@ -91,6 +92,8 @@ export default function Cart() {
   const [note, setNote] = useState('')
   const [sticker, setSticker] = useState(null) // 批 1 · 便签留言条 {bg,pin,msg}
   const [payer, setPayer] = useState('aa')
+  /* 批 2b · 采购清单底部 sheet */
+  const [purchaseOpen, setPurchaseOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
@@ -277,6 +280,24 @@ export default function Cart() {
             </GlassCard>
           )}
 
+          {/* 批 2b 新增 · 采购清单入口：一单菜合并原料，去超市/菜场一键复制 */}
+          <GlassCard style={{ padding: 'var(--space-card-p)' }}>
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setPurchaseOpen(true)}
+              className="w-full flex items-center gap-3 min-h-[44px] text-left"
+              aria-label="生成采购清单"
+            >
+              <span aria-hidden className="w-9 h-9 rounded-full flex items-center justify-center text-lg shrink-0"
+                style={{ background: 'color-mix(in srgb, var(--clay-50) 12%, var(--surface))', border: '2px solid var(--color-line)' }}>🛒</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-[var(--color-bone)]">要买这些东西</p>
+                <p className="text-xs text-[var(--color-ash)] mt-0.5 truncate">合并所有菜的原料，去超市一键复制</p>
+              </div>
+              <span aria-hidden className="text-lg text-[var(--color-ash)] shrink-0">›</span>
+            </motion.button>
+          </GlassCard>
+
           {/* 备注 */}
           <GlassCard style={{ padding: 'var(--space-card-p)' }}>
             <div className="flex items-center gap-2 mb-2.5">
@@ -375,6 +396,9 @@ export default function Cart() {
           </motion.div>
         </PageContainer>
       )}
+
+      {/* 批 2b · 采购清单 sheet */}
+      <PurchaseListSheet open={purchaseOpen} onClose={() => setPurchaseOpen(false)} items={items} />
     </div>
   )
 }

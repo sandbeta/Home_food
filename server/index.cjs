@@ -199,7 +199,11 @@ async function handleApi(req, res, url) {
   if (osM && method === 'PUT') {
     const id = Number(osM[1])
     const body = await readJsonBody(req)
-    state.orders = state.orders.map((o) => o.id === id ? { ...o, status: body.status || o.status } : o)
+    /* 批 2a · 状态白名单（与 mockApi 一比一）：pending / preparing(旧) / cutting / cooking / plating / completed */
+    const NEXT = body.status
+    const VALID = ['pending', 'preparing', 'cutting', 'cooking', 'plating', 'completed']
+    if (!NEXT || VALID.indexOf(NEXT) === -1) return sendJson(res, { message: 'invalid status', allowed: VALID }, 400)
+    state.orders = state.orders.map((o) => o.id === id ? { ...o, status: NEXT } : o)
     saveState()
     return sendJson(res, state.orders.find((o) => o.id === id) || null)
   }

@@ -147,9 +147,13 @@ export const HOT_NOTES = [
 export const NIGHT_SNACK_TITLE = '深夜食堂开张了'
 
 // 订单详情页 状态口吻文案（m-5：从 STATUS_MAP 内联迁到单源）
+// 批 2a · 扩三档细分进度：切配 → 下锅 → 装盘 → 起锅；preparing 保留兼容旧订单
 export const ORDER_STATUS_DESC = {
   pending: '交给厨房啦，等着就好~',
   preparing: '正在努力做呢，快好了~',
+  cutting: '洗洗切切中，砧板已经开工',
+  cooking: '下锅了，油烟要起来啦',
+  plating: '开始装盘，就差端上桌',
   completed: '快来吃吧，趁热~',
 }
 
