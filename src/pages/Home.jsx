@@ -227,6 +227,7 @@ export default function Home() {
               onOpen={() => navigate(`/dish/${featured.id}`)}
               autoOn={autoOn}
               onToggleAuto={() => setAutoOn((v) => !v)}
+              pool={rotSource}
               rotate={canRotate ? { key: `${featured.id}-${rotateToken}-${paused}-${tabVisible}`, durationMs: ROTATE_MS } : null}
             />
             {/* 批 3c · 今日菜卡分享入口：抓娃娃机之下小字按钮，点开弹生成海报 sheet */}

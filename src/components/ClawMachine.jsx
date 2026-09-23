@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import KissIcon from './KissIcon'
 import Icon from './ui/Icons'
@@ -27,6 +27,19 @@ const SEQ = ['drop', 'close', 'lift', 'carry', 'release', 'settle']
 /* 机内几何（px / %） */
 const GEO = { railY: 16, carH: 12, cableUp: 22, cableDown: 112, clawH: 46, pileTop: 156, slotTop: 246, chuteX: '18%' }
 const clawTop = (cable) => GEO.railY + GEO.carH + cable
+
+/* 批 7 · 底部"待抓菜堆"布局：8 个小圆盘错落堆在罩底（避开左侧出菜口 chuteX=18%），
+   x=left%、y=top(px)、r=轻微 rotate 制造随意堆叠感、s=直径 px。营造"娃娃机里堆了一堆娃娃"的饱满感。 */
+const PILE_SLOTS = [
+  { x: '30%', y: 208, r: -10, s: 52 },
+  { x: '46%', y: 224, r: 6,  s: 46 },
+  { x: '62%', y: 210, r: -4, s: 50 },
+  { x: '78%', y: 226, r: 9,  s: 44 },
+  { x: '37%', y: 238, r: 4,  s: 42 },
+  { x: '54%', y: 244, r: -8, s: 44 },
+  { x: '70%', y: 240, r: 5,  s: 40 },
+  { x: '88%', y: 214, r: -6, s: 40 },
+]
 
 /** 泡泡时钟：实时时间糖牌（宵夜档 visible=false 不渲染） */
 function BubbleClock({ visible = true }) {
@@ -85,7 +98,7 @@ function Claw({ open, x, cable, grabbing }) {
 
 export default function ClawMachine({
   dish, onOpen, onCatch, onUndo, onGrab, indexNo = 1,
-  rotate, showClock = true, autoOn = true, onToggleAuto,
+  rotate, showClock = true, autoOn = true, onToggleAuto, pool = [],
   title = '抓娃娃点餐机', note = '今日主推 · 抓到一个算一个',
 }) {
   const reduced = usePrefersReducedMotion()
@@ -99,6 +112,12 @@ export default function ClawMachine({
   const grabbing = phase !== 'idle'
   const shown = grabbing ? frozen : dish
   const image = shown ? getDishImage(shown) : null
+  /* 批 7 · 底部菜堆：从候选池取前 8 道（排除当前 featured，避免同菜出现两次），
+     错落堆在罩底营造"一堆等待抓取"的饱满感；抓取中/落槽时 featured 被举起，堆仍在下方。 */
+  const pileDishes = useMemo(
+    () => (pool || []).filter(d => d && d.id !== shown?.id).slice(0, PILE_SLOTS.length),
+    [pool, shown?.id]
+  )
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
   const after = (ms, fn) => { timers.current.push(setTimeout(fn, ms)) }
@@ -190,6 +209,25 @@ export default function ClawMachine({
             {/* 出菜口（落槽） */}
             <div className="absolute" style={{ left: GEO.chuteX, bottom: 8, transform: 'translateX(-50%)', width: 74, height: 26, borderRadius: '0 0 12px 12px', background: 'var(--color-ink-800)', border: '2px solid var(--color-line)', borderTop: 'none' }}>
               <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold" style={{ color: 'var(--color-ash)', letterSpacing: '0.1em' }}>出菜口</span>
+            </div>
+
+            {/* 批 7 · 底部待抓菜堆：一堆小圆盘错落堆在罩底（featured 是堆顶被爪子瞄准的那个）。
+                纯装饰层 aria-hidden，读屏只念可抓的 featured；z-5 低于 featured(z-10) 与爪(z-20)。 */}
+            <div aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
+              {pileDishes.map((p, i) => {
+                const lay = PILE_SLOTS[i]
+                const pimg = getDishImage(p)
+                return (
+                  <div key={p.id} className="absolute flex items-center justify-center overflow-hidden"
+                    style={{ width: lay.s, height: lay.s, left: lay.x, top: lay.y, borderRadius: '50%',
+                      background: 'var(--plate-bg)', border: '2px solid var(--color-clay-soft)',
+                      transform: `translateX(-50%) rotate(${lay.r}deg)`,
+                      boxShadow: '0 3px 8px rgba(43,36,41,0.10), inset 0 1px 0 rgba(255,255,255,0.5)', opacity: 0.95 }}>
+                    <span style={{ fontSize: lay.s * 0.52, filter: 'var(--tile-img-filter)' }}>{getCategoryEmoji(p.category)}</span>
+                    {pimg && <img src={pimg} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+                  </div>
+                )
+              })}
             </div>
 
             {/* 爪钩机构 */}

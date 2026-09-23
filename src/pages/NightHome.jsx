@@ -142,6 +142,7 @@ export default function NightHome() {
             onUndo={undoCatch}
             onGrab={() => setRotIdx(i => i + 1)}
             onOpen={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
+            pool={pool}
             showClock={false}
             title="深夜宵夜机"
             note="深夜主推 · 安静陪吃"
