@@ -21,6 +21,7 @@ import { PERSONA } from '../theme/persona'
 import { pickOne, MENU_TITLES, MENU_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { tap, vibrate } from '../lib/sfx'
 import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
+import { requestJson } from '../lib/request'
 import { EASE, usePrefersReducedMotion } from '../theme/motion'
 
 /* M-k3 修：读屏用户完全听不出当前谁在点菜——这是全站加购归属人格的关键状态。
