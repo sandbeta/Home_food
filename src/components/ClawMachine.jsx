@@ -294,7 +294,7 @@ export default function ClawMachine({
                   style={{ left: grabX, top: grabY }}
                   initial={{ x: '-50%', opacity: 1, scale: 1 }}
                   animate={
-                    falling
+                    falling || grabIdx < 0
                       ? { x: '-50%', left: GEO.chuteX, top: GEO.slotTop, opacity: 0, rotate: [0, -18, 14, 0], transition: { duration: BEAT.release / 1000, ease: [0.5, 0, 0.9, 0.6] } }
                       : { x: '-50%', left: grabX, top: grabY, opacity: 1, scale: 1, rotate: held ? [0, -4, 4, 0] : 0, transition: { duration: 0.4, ease: EASE } }
                   }
