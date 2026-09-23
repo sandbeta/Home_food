@@ -632,6 +632,24 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 **门禁**：build ✓ 2.27s / lint 9 warnings 0 errors / test 8/8 / p6 0·0·0 / 扫描 v3 主类回归清零。
 
+## 7.24 三轮深度扫描：双端漂移 / 树摇 / ARIA / z-index / 安全（2026-09-23）
+
+第三轮往最深挖（v4 扫描器），五个前两轮没覆盖的维度。**结论：无新真 bug，前两轮修复全部经住深度验证。**
+
+| 维度 | 结果 |
+| :-- | :-- |
+| **A. mockApi ↔ server 双端漂移** | 路由集合两端一致；order 对象字段两端完全一致（`id/status/created_at/note/sticker/payer/total_price/owed_me/owed_partner/items`）。扫描器一度报"字段差异"是把 sticker 内嵌的 `bg/msg/pin` 与变量 `PAYER` 误当顶层 key —— 人工核对为误报 |
+| **B. @theme 树摇风险** | 17 个"只被 JSX 内联 style 消费"的 var 逐一在 dist CSS 产物里验证 —— **全部已输出**，无一被摇掉。原因：Tailwind v4 会为 @theme 颜色令牌自动生成 utility class，项目里大量 `text-ash`/`bg-clay` 用法保住了变量。属"侥幸安全"，见 §8 技术债 |
+| **C. ARIA 配对** | **0 问题** —— role=button 都有 tabIndex、aria-checked 都有对应 role、img 都有 alt/aria-hidden。前两轮 §7.15/§7.16 的 a11y 修复经住了配对检查 |
+| **D. z-index 层次** | 分布合理：40(PageHeader sticky / AdminDishes 批量条) → 50(modals/sheets/DockLayer) → 60(庆祝) → 90(toast) → 95(debug 角标) → 100(+1 粒子)。admin 路由不渲染 DockLayer，故批量条 z-40 无冲突 |
+| **E. 安全** | 无 dangerouslySetInnerHTML / eval / new Function / target=_blank 缺 noopener。`.gitignore` 已覆盖 admin-password.txt / public-mode.txt / state.json；本轮补 `.env` / `.env.*` 防御 |
+
+**唯一改动**：`.gitignore` 加 `.env`（家庭项目当前无 .env，纯防御）。
+
+**技术债入 §8**：B 类"侥幸安全"——若未来某令牌只被内联 style 消费且恰好没人写对应 utility class，会被 Tailwind 摇掉导致运行时静默失效。稳妥做法是把纯内联消费的令牌显式放 `@theme static`（§4.10 已有此规矩，但当前 17 个令牌都在非 static 段靠 utility 消费侥幸存活）。低优先级，等真出问题再迁。
+
+**教训**：三轮扫描（identifier 定义 → 语义/回归/资源 → 双端/树摇/ARIA/z-index/安全）逐层深入，第二轮发现的 8 处真 bug 到第三轮已归零，说明修复稳定。扫描器 v1→v4 每轮补新的交叉验证维度，`scripts/runtime_audit.py`（v2 落地版）覆盖 identifier 类，语义/深度类靠人工核对（正则跨行/嵌套有误报，需 AST 才精准，家庭项目不值得上 AST 工具链）。
+
 ## 8. 已知待办 / 候选项
 
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。

@@ -20,6 +20,8 @@ dev.log
 # 公网部署凭据与开关（密码绝不入库；模式开关也属本机部署态）
 server/admin-password.txt
 server/public-mode.txt
+.env
+.env.*
 
 # SEA 打包产物与中间物（exe 可随时 npm run pack:exe 重打，88MB 不入库）
 server/晨光厨房服务端.exe
