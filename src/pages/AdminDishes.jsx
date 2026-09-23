@@ -15,6 +15,10 @@ export default function AdminDishes() {
   const [visibleCount, setVisibleCount] = useState(30)
   const [listErr, setListErr] = useState('')
   const [pendingDel, setPendingDel] = useState(null)   // 两段式删除：记住当前待确认的行
+  /* 批 6c · 批量上下架模式 */
+  const [batchMode, setBatchMode] = useState(false)
+  const [selected, setSelected] = useState(() => new Set())
+  const [batchBusy, setBatchBusy] = useState(false)
 
   /* m-30 修：两段式删除 pendingDel 一旦置位无自动收起——若管理员走神/切到别处，
      该按钮长期停在待确认高亮，回头随手一点即真删，误删风险随停留时间累积。
@@ -43,6 +47,7 @@ export default function AdminDishes() {
     if (!res.ok) throw new Error('HTTP ' + res.status)   // 抛给弹窗处理：失败保留输入、不关闭
     setShowModal(false)
     setEditingDish(null)
+    setSelected(new Set())
     loadDishes()
   }
 
@@ -69,19 +74,57 @@ export default function AdminDishes() {
     } catch { setListErr('上架状态没改过来，再试一次') }
   }
 
+  /* 批 6c · 批量模式：勾选切换 + 批量上/下架（每道菜 PUT 一次；家庭 <千道量级） */
+  const batchToggle = (id) => {
+    setSelected(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+  const batchApply = async (wantAvailable) => {
+    if (selected.size === 0 || batchBusy) return
+    setBatchBusy(true); setListErr('')
+    let ok = 0, fail = 0
+    for (const id of selected) {
+      try {
+        const res = await fetch(`/api/dishes/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ available: wantAvailable }),
+        })
+        if (!res.ok) fail++; else ok++
+      } catch { fail++ }
+    }
+    setBatchBusy(false)
+    setSelected(new Set())
+    setBatchMode(false)
+    loadDishes()
+    try { window.__cgAnnounce?.(`批量${wantAvailable ? '上架' : '下架'}完成：成功 ${ok}${fail ? `，失败 ${fail}` : ''}`) } catch {}
+    if (fail) setListErr(`批量操作有 ${fail} 道失败，其余 ${ok} 道已生效`)
+  }
+
   return (
     <AdminShell
       title="菜品管理"
       subtitle={`共 ${dishes.length} 道菜`}
       right={
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => { setPendingDel(null); setEditingDish(null); setShowModal(true) }}
-          className="d3-btn d3-btn-primary px-4 py-2 min-h-[44px] text-xs font-bold"
-          style={{ borderRadius: 'var(--radius-ctl)' }}
-        >
-          + 添加
-        </motion.button>
+        <div className="flex gap-2">
+          <button onClick={() => { setBatchMode(v => !v); setSelected(new Set()) }}
+            aria-pressed={batchMode} aria-label="切换批量模式"
+            className="d3-btn-sm px-3 py-2 min-h-[44px] text-xs font-bold"
+            style={{ background: batchMode ? 'var(--color-clay)' : 'var(--surface)', color: batchMode ? 'var(--color-on-dark)' : 'var(--color-ash)', border: `2px solid ${batchMode ? 'var(--clay-deep)' : 'var(--color-line)'}` }}>
+            ☑️ 批量
+          </button>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => { setPendingDel(null); setEditingDish(null); setShowModal(true) }}
+            className="d3-btn d3-btn-primary px-4 py-2 min-h-[44px] text-xs font-bold"
+            style={{ borderRadius: 'var(--radius-ctl)' }}
+          >
+            + 添加
+          </motion.button>
+        </div>
       }
     >
       {listErr && (
@@ -107,7 +150,14 @@ export default function AdminDishes() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-card-p)' }}>
           {visibleDishes.map((dish) => (
-            <div key={dish.id} className={dish.available ? '' : 'opacity-50'}>
+            <div key={dish.id} className={dish.available ? '' : 'opacity-50'} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {batchMode && (
+                <label className="shrink-0 w-11 h-11 flex items-center justify-center" aria-label={`选择 ${dish.name}`}>
+                  <input type="checkbox" checked={selected.has(dish.id)} onChange={() => batchToggle(dish.id)}
+                    style={{ width: 22, height: 22, accentColor: 'var(--color-clay)' }} />
+                </label>
+              )}
+              <div className="flex-1 min-w-0">
               <DishRow
                 dish={dish}
                 variant="manage"
@@ -159,6 +209,7 @@ export default function AdminDishes() {
                   </>
                 }
               />
+              </div>
             </div>
           ))}
         </div>
@@ -182,6 +233,34 @@ export default function AdminDishes() {
             onClose={() => { setShowModal(false); setEditingDish(null) }}
             onSave={handleSave}
           />
+        )}
+      </AnimatePresence>
+
+      {/* 批 6c · 底部固定批量操作条 */}
+      <AnimatePresence>
+        {batchMode && selected.size > 0 && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
+            className="fixed left-0 right-0 mx-auto z-40 flex items-center gap-2 px-3 py-2"
+            style={{ bottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 8px)', maxWidth: 'var(--shell-w)', background: 'var(--color-bone)', color: 'var(--color-on-dark)', borderRadius: 'var(--radius-card)', boxShadow: 'var(--shadow-4)' }}
+            role="toolbar" aria-label="批量操作"
+          >
+            <span className="text-sm font-bold px-2 shrink-0">选 {selected.size} 道</span>
+            <div className="flex-1" />
+            <button onClick={() => batchApply(1)} disabled={batchBusy}
+              className="px-3 py-2 min-h-[44px] rounded-full text-xs font-bold disabled:opacity-50"
+              style={{ background: 'var(--color-sage)', color: 'var(--color-on-sage)', border: '2px solid var(--sage-60)' }}>
+              {batchBusy ? '处理中…' : '上架'}
+            </button>
+            <button onClick={() => batchApply(0)} disabled={batchBusy}
+              className="px-3 py-2 min-h-[44px] rounded-full text-xs font-bold disabled:opacity-50"
+              style={{ background: 'color-mix(in srgb, var(--color-ash) 24%, transparent)', color: 'var(--color-on-dark)', border: '2px solid color-mix(in srgb, var(--color-ash) 40%, transparent)' }}>
+              下架
+            </button>
+            <button onClick={() => { setSelected(new Set()); setBatchMode(false) }}
+              className="px-3 py-2 min-h-[44px] rounded-full text-xs font-bold"
+              style={{ color: 'var(--color-on-dark)', opacity: 0.8 }}>取消</button>
+          </motion.div>
         )}
       </AnimatePresence>
     </AdminShell>

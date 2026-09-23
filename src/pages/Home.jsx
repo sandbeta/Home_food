@@ -14,8 +14,9 @@ import AnniversaryBanner from '../components/AnniversaryBanner'
 import DishShareCard from '../components/DishShareCard'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter, usePrefersReducedMotion } from '../theme/motion'
-import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES, ANNIVERSARY_TITLES, ANNIVERSARY_NOTES } from '../lib/sweetCopy'
+import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES, ANNIVERSARY_TITLES, ANNIVERSARY_NOTES, MOOD_HOME_NOTES } from '../lib/sweetCopy'
 import { anniversariesToday } from '../lib/anniversary'
+import { MOODS, readMood, writeMood } from '../lib/mood'
 import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 import { useCart } from '../components/CartContext'
 
@@ -74,6 +75,14 @@ export default function Home() {
       setSweetNote(pickOne(ANNIVERSARY_NOTES))
     }
   }, [todayHit])
+  /* 批 6d · 今日心情（仅切 HOME_NOTES 池，不改主题色） */
+  const [mood, setMood] = useState(() => readMood())
+  const handleMood = (k) => {
+    const next = mood === k ? null : k
+    setMood(next); writeMood(next)
+    if (!anniversaryAppliedRef.current) setSweetNote(next ? pickOne(MOOD_HOME_NOTES[next] || HOME_NOTES) : pickOne(HOME_NOTES))
+    try { window.__cgAnnounce?.(next ? `今日心情：${MOODS.find(m => m.key === next)?.label}` : '已取消心情标记') } catch {}
+  }
   const navigate = useNavigate()
   const reduced = usePrefersReducedMotion()
   const { addItem, items, whoAmI, updateQuantity } = useCart()
@@ -168,6 +177,28 @@ export default function Home() {
       <PageHeader title={pageTitle} subtitle={sweetNote} right={<ThemeToggle />} />
 
       <PageContainer>
+        {/* 批 6d · 今日心情 chips（只影响副标题池，不动主题色）*/}
+        <div className="flex items-center gap-1.5 mb-2 -mt-1 overflow-x-auto no-scrollbar" role="radiogroup" aria-label="今日心情">
+          <span className="text-[11px] text-[var(--color-ash)] font-bold shrink-0 mr-0.5">今日心情</span>
+          {MOODS.map(m => {
+            const active = mood === m.key
+            return (
+              <button key={m.key} onClick={() => handleMood(m.key)} role="radio" aria-checked={active}
+                className="shrink-0 px-2.5 py-1 min-h-[44px] rounded-full text-xs font-bold flex items-center gap-1 transition-colors"
+                style={{
+                  background: active ? 'var(--color-clay)' : 'var(--surface)',
+                  color: active ? 'var(--color-on-dark)' : 'var(--color-ash)',
+                  border: `2px solid ${active ? 'var(--clay-deep)' : 'var(--color-line)'}`,
+                }}>
+                <span aria-hidden>{m.emoji}</span>{m.label}
+              </button>
+            )
+          })}
+          {mood && (
+            <button onClick={() => handleMood(mood)} aria-label="取消心情"
+              className="shrink-0 px-2 py-1 min-h-[44px] text-[11px] text-[var(--color-ash)] font-bold">清除</button>
+          )}
+        </div>
         {/* 批 1 · 纪念日横幅：仅命中时插入，未命中不占位；绑定了 dish 时给一个跳详情的入口 */}
         {todayHit && (
           <AnniversaryBanner

@@ -523,6 +523,58 @@ build ✓ 2.04s / lint 6 warnings 0 errors / test 8/8 / p6 0 · 0 · 0
 - 「已分享 / 已合并」2.4s 反馈时长够不够看清
 - 合并后 items 归属正确性（本地她点的仍挂 partner、TA 分享的仍挂 me，不重贴）
 
+## 7.21 功能扩展批 6：冰箱 + 成就徽章 + 批量上下架 + 今日心情（2026-09-23）
+
+18 项候选的最后一批。做完即"六批全部落地、语音留下轮"。四件套全绿。
+
+### 6a · 厨房冰箱（家庭"我们家有啥菜"，采购清单自动划掉）
+- 新工具 `src/lib/fridge.js`：`readFridge/writeFridge/upsertItem/removeItem/adjustQty/hasInFridge`；localStorage 设备级 `couple_order_fridge_v1`，形如 `{ [name]: { qty, unit, updatedAt } }`；qty 归 0 自动删除
+- 新页 `src/pages/Fridge.jsx`（`/fridge`，从 Profile 入口进）：添加条（名/量/单位）+ 搜索 + 按更新时间倒序列表 + 每项 ± 与移除（min-h-[44px]）+ 空态引导
+- PurchaseListSheet 集成：`buildPurchaseList` 完成后遍历与 `readFridge()` 做子串匹配（"生姜" ↔ fridge key "姜"）→ 每项 `hasAtHome` 标记 → 顶部三档 tab（**要买 N 件 / 家里有 M 件 / 全部**）+ 列表按 tab 过滤 → "家里有"打绿 + 划线降 opacity、"要买"打 clay-text；复制按钮文案跟 tab 变（复制要买的 vs 全部）
+
+### 6b · 成就徽章墙（12 枚懒洋洋干饭进阶）
+- 新工具 `src/lib/achievements.js`：`ACHIEVEMENTS` 常量（12 枚）+ `computeAchievements(orders)` 遍历纯前端算解锁与首次达成时间
+- 12 枚：**开张之喜** 🎉（首单）· **深夜食客** 🌙（首点夜宵）· **请客大方** 💝（payer≠aa）· **一桌老饕** 🍽️（一单 10+ 份）· **十单 / 半百 / 百单** 🔟🥘👨‍🍳 · **吃遍八系** 🗺️（一单 5 种菜系）· **一周不断火** 🔥（连 7 天有单）· **双人共事** 🐱🐑（同单两人都有）· **四季同吃** 🍂（跨 4 个月）· **一周年了** 💍（首单满 365 天）
+- Profile 加「🏆 我的成就」卡（忌口之后、入口列表之前）：2 列 grid 12 枚；解锁 sage 半透底 + clay-text 计数「N/12」；未解锁灰底 opacity 0.55 + `filter: grayscale(1)`
+- **无服务端改动**：全从 `/api/orders` 拉本地算，家庭 <千级订单量成本可忽略；未来若要持久化"首次达成时间"可挪到 `state.achievements`
+
+### 6c · 批量上下架（AdminDishes 表格视图的轻量替代）
+- 决策：单元格编辑（价格/卡路里/时长）需要 form state 与变化 diff，工程量与家庭价值不匹配 —— 只做**批量上下架**（最刚需），编辑仍走单条 AddDishModal
+- 顶部右侧"+ 添加"按钮左侧加"☑️ 批量"toggle；每行左侧加 checkbox（min-h-[44px] 触摸区）
+- 选中 >0 时底部 fixed 操作条（bone 底 + on-dark 字，浮在 safe-area 上）：**选 N 道 · [上架] [下架] [取消]** 三按钮，全 min-h-[44px]
+- 循环 PUT `/api/dishes/:id` `{ available }`，家庭 <千道量级；失败内联 listErr；announce 播报"批量上下架完成：成功 N，失败 M"
+
+### 6d · 今日心情（简化版：只切 HOME_NOTES 池，不改主题色）
+- 决策：**不改氛围色** —— 会破坏"clay/sage 跨主题恒定"的同款人格色律；改主题色需新增一整套 mood 令牌 + 双档对比度验证，边际成本不值。简化到**只切副标题情话池**，覆盖"我今天心情不一样，说点不一样的"的核心情感需求
+- 新工具 `src/lib/mood.js`：MOODS 常量 4 项（happy 😊 / hungry 🤤 / tired 😪 / emo 🥺）+ read/write（localStorage 设备级）
+- `sweetCopy.MOOD_HOME_NOTES` 4 池 × 各 4 条男朋友口吻文案
+- Home 顶部（PageContainer 首行、纪念日 Banner 之上）一行心情 chips（role=radiogroup + role=radio + aria-checked），选中切 clay 实底；已选时"清除"按钮
+- Home 内 `handleMood(k)`：再点同 key 视为取消；未命中纪念日时才让 sweetNote 走 mood 池
+
+### 6e · 语音备注（明确留下轮）
+- 需要：MediaRecorder API + 二进制存储（state.orders.notesAudio base64 or 服务端 uploads 目录）+ Cart 与 OrderDetail 播放器 + mockApi/server 双端 uploads 语义
+- 家庭场景"她懒得打字"实际发生率与工程量不成比例；先做**"忌口/采购/分享"这类日常高频**，语音作为下一次扩展
+- 记入 §8 已知待办
+
+### §4.6 不可变文件改动清单
+- 无（本批 4 项都走本地或已有 API 端点）
+
+### 集成
+- **App.jsx**：+1 条 lazy 路由 `/fridge`（+ 之前累计新增：/admin/anniversaries /admin/wishes /calendar /taste /report /fridge 共 6 条）
+- **Profile**：+3 张入口卡（冰箱 / 成就 / 年度别册），+忌口折叠卡
+- **Home**：+心情 chips（PageContainer 首行）
+- **AdminDishes**：+批量模式（顶部按钮 + 行 checkbox + 底部操作条）
+- **PurchaseListSheet**：+冰箱对比 tab（三档 + 每项 ✓/要买标签）
+
+### 门禁
+build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件的 react-refresh/only-export-components 属既有模式）/ test 8/8 ✓ / p6 色值泄露 0 · 暗色残留 0 · 断头路 0
+
+### 观感待 live 目检
+- 冰箱卡顶部三档 tab 与列表"要买 vs 家里有"分组的视觉对比
+- 成就 12 枚在 480 宽下的两列 grid 是否拥挤、grayscale(1) 未解锁态是否够"灰灰的等待感"
+- AdminDishes 批量操作条 z-index 与 DockLayer / AddDishModal 的层次（当前 z-40 应低于 modal z-50）
+- Home 心情 chips 溢出滚动是否顺滑（4 枚 + 清除按钮在 480 宽度可能勉强）
+
 ## 8. 已知待办 / 候选项
 
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。

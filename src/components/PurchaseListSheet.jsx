@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import useDialogA11y from '../lib/useDialogA11y'
 import { sheetUp, usePrefersReducedMotion, tapScale } from '../theme/motion'
 import { buildPurchaseList, toPlainText } from '../lib/purchaseList'
+import { readFridge, hasInFridge } from '../lib/fridge'
 import Icon from './ui/Icons'
 import LoadingState from './ui/LoadingState'
 import { tap, vibrate } from '../lib/sfx'
@@ -20,16 +21,29 @@ export default function PurchaseListSheet({ open, onClose, items }) {
   const panelRef = useDialogA11y(open, onClose)
   const [state, setState] = useState({ loading: true, list: [], noRecipe: [], err: '' })
   const [copied, setCopied] = useState(false)
+  const [tab, setTab] = useState('all') // 批 6a：'all' | 'need'（要买）| 'home'（家里有）
+  const [fridgeMap, setFridgeMap] = useState(() => readFridge())
 
   useEffect(() => {
     if (!open) return undefined
     let alive = true
     setState({ loading: true, list: [], noRecipe: [], err: '' })
+    setFridgeMap(readFridge())
     buildPurchaseList(items)
-      .then(r => { if (alive) setState({ loading: false, ...r, err: '' }) })
+      .then(r => {
+        if (!alive) return
+        const fridge = readFridge()
+        const keys = Object.keys(fridge)
+        const list = r.list.map(e => ({ ...e, hasAtHome: !!keys.find(k => k && (e.name === k || e.name.includes(k))) }))
+        setState({ loading: false, list, noRecipe: r.noRecipe, err: '' })
+      })
       .catch(() => { if (alive) setState({ loading: false, list: [], noRecipe: [], err: '拉不到菜谱数据，看看服务端还在不？' }) })
     return () => { alive = false }
   }, [open, items])
+
+  const shownList = tab === 'need' ? state.list.filter(e => !e.hasAtHome)
+    : tab === 'home' ? state.list.filter(e => e.hasAtHome)
+    : state.list
 
   const copy = async () => {
     try {
@@ -59,7 +73,11 @@ export default function PurchaseListSheet({ open, onClose, items }) {
           <div className="px-5 pb-2 flex items-center justify-between shrink-0">
             <div>
               <h2 className="text-base font-bold font-serif text-[var(--color-bone)] leading-tight">🛒 要买这些东西</h2>
-              <p className="text-[11px] text-[var(--color-ash)] mt-0.5">按当前购物车合并，去超市照着买</p>
+              <p className="text-[11px] text-[var(--color-ash)] mt-0.5">
+                {Object.keys(fridgeMap).length > 0
+                  ? <>冰箱对过了 · 要买 <span className="font-bold text-[var(--color-clay-text)]">{state.list.filter(e => !e.hasAtHome).length}</span> · 家里有 <span className="font-bold" style={{ color: 'var(--color-sage)' }}>{state.list.filter(e => e.hasAtHome).length}</span></>
+                  : '打开冰箱会自动划掉家里有的'}
+              </p>
             </div>
             <button onClick={onClose} aria-label="关闭采购清单"
               className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] border-2 border-[var(--color-line)] bg-[var(--color-glass)]">
@@ -67,26 +85,52 @@ export default function PurchaseListSheet({ open, onClose, items }) {
             </button>
           </div>
 
+          {/* 批 6a · 三档 tab（要买/家里有/全部）：仅在有冰箱数据时给 */}
+          {state.list.length > 0 && Object.keys(fridgeMap).length > 0 && (
+            <div className="px-5 pb-2 flex gap-2 shrink-0">
+              {[['need', '要买'], ['home', '家里有'], ['all', '全部']].map(([k, l]) => {
+                const count = k === 'need' ? state.list.filter(e => !e.hasAtHome).length : k === 'home' ? state.list.filter(e => e.hasAtHome).length : state.list.length
+                return (
+                  <button key={k} onClick={() => setTab(k)} aria-pressed={tab === k}
+                    className="px-3 py-1.5 min-h-[44px] rounded-full text-xs font-bold flex-1"
+                    style={{
+                      background: tab === k ? 'var(--color-clay)' : 'transparent',
+                      color: tab === k ? 'var(--color-on-dark)' : 'var(--color-ash)',
+                      border: `2px solid ${tab === k ? 'var(--clay-deep)' : 'var(--color-line)'}`,
+                    }}>
+                    {l} {count}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
           <div className="px-5 flex-1 overflow-y-auto min-h-0" style={{ paddingBottom: 8 }}>
             {state.loading ? (
               <LoadingState text="在合每道菜的原料…" />
             ) : state.err ? (
               <p className="text-sm text-center py-8" style={{ color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' }}>⚠️ {state.err}</p>
-            ) : state.list.length === 0 ? (
-              <p className="text-sm text-center py-8 text-[var(--color-ash)]">这些菜都还没录菜谱原料清单，凭印象买吧~</p>
+            ) : shownList.length === 0 ? (
+              <p className="text-sm text-center py-8 text-[var(--color-ash)]">
+                {tab === 'need' ? '家里都有，不用买啦 ✓' : tab === 'home' ? '冰箱里一样都没有' : '这些菜都还没录菜谱原料清单，凭印象买吧~'}
+              </p>
             ) : (
               <>
                 <ul className="space-y-1.5 mt-1" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                  {state.list.map(e => (
+                  {shownList.map(e => (
                     <li key={e.name} className="flex items-baseline gap-2 py-1.5 px-2.5 rounded-lg"
-                      style={{ background: 'color-mix(in srgb, var(--clay-50) 6%, transparent)' }}>
+                      style={{ background: e.hasAtHome ? 'color-mix(in srgb, var(--color-sage) 12%, transparent)' : 'color-mix(in srgb, var(--clay-50) 6%, transparent)' }}>
                       <span aria-hidden className="text-[var(--color-clay-text)] text-sm leading-5">·</span>
                       <div className="min-w-0 flex-1">
-                        <span className="text-sm font-bold text-[var(--color-bone)]">{e.name}</span>
+                        <span className="text-sm font-bold text-[var(--color-bone)]"
+                          style={{ textDecoration: e.hasAtHome ? 'line-through' : 'none', opacity: e.hasAtHome ? 0.6 : 1 }}>{e.name}</span>
                         {e.from.length > 1 && (
                           <p className="text-[11px] text-[var(--color-ash)] mt-0.5">用在：{e.from.join('、')}</p>
                         )}
                       </div>
+                      {e.hasAtHome
+                        ? <span className="text-[11px] font-bold shrink-0" style={{ color: 'var(--color-sage)' }}>✓ 家里有</span>
+                        : <span className="text-[11px] font-bold shrink-0" style={{ color: 'var(--color-clay-text)' }}>要买</span>}
                     </li>
                   ))}
                 </ul>
@@ -100,10 +144,10 @@ export default function PurchaseListSheet({ open, onClose, items }) {
           </div>
 
           <div className="px-5 pt-2 shrink-0" style={{ paddingBottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 8px)' }}>
-            <motion.button whileTap={tapScale} onClick={copy} disabled={state.loading || !state.list.length}
+            <motion.button whileTap={tapScale} onClick={copy} disabled={state.loading || !shownList.length}
               className="d3-btn d3-btn-primary w-full py-3 text-sm font-bold min-h-[44px] disabled:opacity-50 flex items-center justify-center gap-1.5"
               aria-label="复制采购清单到剪贴板">
-              {copied ? (<><Icon name="check" size={16} strokeWidth={2.4} /> 已复制，去超市吧</>) : '一键复制清单 📋'}
+              {copied ? (<><Icon name="check" size={16} strokeWidth={2.4} /> 已复制，去超市吧</>) : `一键复制清单 · ${shownList.length} 件 📋`}
             </motion.button>
           </div>
         </div>

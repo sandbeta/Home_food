@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
@@ -16,6 +16,8 @@ import LazySheep from '../components/ui/LazySheep'
 import { requestJson } from '../lib/request'
 import { nextAnniversary, anniversariesToday, formatAnniDate } from '../lib/anniversary'
 import { PRESET_AVOIDS, readAvoids, writeAvoids } from '../lib/avoid'
+import { readFridge } from '../lib/fridge'
+import { computeAchievements, ACHIEVEMENTS } from '../lib/achievements'
 import Chip from '../components/ui/Chip'
 
 export default function Profile() {
@@ -33,6 +35,7 @@ export default function Profile() {
     setStatsErr('')
     requestJson('/api/orders').then(r => r.json()).then(d => {
       if (!Array.isArray(d)) { setStatsErr('订单数据格式不对，再试一次'); return }
+      setAllOrders(d)
       setStats({ orders: d.length, total: d.reduce((s, o) => s + (Number(o.total_price) || 0), 0) })
     }).catch(() => setStatsErr('订单没加载出来，看看服务端开好了没'))
   }, [reload])
@@ -60,6 +63,11 @@ export default function Profile() {
     if (!v || avoids.includes(v)) { setCustomAvoid(''); return }
     saveAvoids([...avoids, v]); setCustomAvoid('')
   }
+
+  /* 批 6b · 成就：拉一次全表算徽章（与 stats 共用一份数据） */
+  const [allOrders, setAllOrders] = useState([])
+  const achievements = useMemo(() => computeAchievements(allOrders), [allOrders])
+  const unlockedCount = ACHIEVEMENTS.filter(a => achievements[a.key]?.unlocked).length
 
   return (
     <div className="relative">
@@ -230,6 +238,24 @@ export default function Profile() {
           <span aria-hidden className="text-lg text-[var(--color-ash)]">›</span>
         </Link>
 
+        {/* 批 6a 新增 · 厨房冰箱入口（家庭"我们家有啥菜"） */}
+        <Link to="/fridge"
+          className="d3-card-face flex items-center gap-3 no-underline mt-3"
+          style={{ padding: 'var(--space-card-p)', color: 'inherit' }}>
+          <span aria-hidden
+            className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
+            style={{
+              background: 'color-mix(in srgb, var(--color-sage) 16%, var(--surface))',
+              color: 'var(--color-sage)',
+              border: '2px solid var(--color-line)',
+            }}>🧊</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[var(--color-bone)]">厨房冰箱</p>
+            <p className="text-xs text-[var(--color-ash)] mt-0.5">采购清单自动划掉家里有的</p>
+          </div>
+          <span aria-hidden className="text-lg text-[var(--color-ash)]">›</span>
+        </Link>
+
         {/* 批 4b 新增 · 忌口清单：预设 chips 多选 + 自定义输入；命中时 Cart 提交前温柔提示（不阻断） */}
         <div className="d3-card-face mt-3" style={{ padding: 'var(--space-card-p)' }}>
           <motion.button
@@ -298,6 +324,38 @@ export default function Profile() {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+
+        {/* 批 6b 新增 · 我的成就（12 枚徽章墙，从 orders 前端算） */}
+        <div className="d3-card-face mt-3" style={{ padding: 'var(--space-card-p)' }}>
+          <div className="flex items-baseline justify-between mb-2.5">
+            <p className="text-sm font-bold text-[var(--color-bone)]">🏆 我的成就</p>
+            <span className="font-serif font-bold tabular-nums" style={{ color: 'var(--color-clay-text)' }}>
+              {unlockedCount}<span className="text-[var(--color-ash)] text-xs">/{ACHIEVEMENTS.length}</span>
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {ACHIEVEMENTS.map(a => {
+              const st = achievements[a.key]
+              const unlocked = !!st?.unlocked
+              return (
+                <div key={a.key} title={unlocked ? `达成于 ${new Date(st.at).toLocaleDateString('zh-CN')}` : a.desc}
+                  className="flex items-center gap-2 px-2.5 py-2 rounded-lg"
+                  style={{
+                    background: unlocked ? 'color-mix(in srgb, var(--color-sage) 14%, var(--surface))' : 'color-mix(in srgb, var(--color-ash) 6%, transparent)',
+                    border: `2px solid ${unlocked ? 'color-mix(in srgb, var(--color-sage) 50%, transparent)' : 'var(--color-line)'}`,
+                    opacity: unlocked ? 1 : 0.55,
+                  }}
+                >
+                  <span aria-hidden className="text-2xl shrink-0" style={{ filter: unlocked ? 'none' : 'grayscale(1)' }}>{a.icon}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold truncate" style={{ color: unlocked ? 'var(--color-bone)' : 'var(--color-ash)' }}>{a.title}</p>
+                    <p className="text-[10px] truncate opacity-75" style={{ color: 'var(--color-ash)' }}>{a.desc}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         {/* 入口列表 —— 收藏已并入点菜页，空壳项已删 */}
