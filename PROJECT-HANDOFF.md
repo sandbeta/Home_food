@@ -81,6 +81,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 11. **sub-44 逐消费者验证（2026-09-23 §7.15 立）**：热区抬到 44 类整改必须逐个消费者验（**按钮本体**、内层 icon、伪元素覆盖区），不能只看外层容器（M-t2 上一轮声称"抬到 44"只抬了 pill、真正 button 仍 h-9=36 就是此漏洞）。台账规矩：sub-44 整改条目要写"具体抬了哪些消费者"。
 12. **mockApi ↔ server 自动 diff（2026-09-23 §7.15 立）**：`scripts/p6_static_gate.py` 或 CI 加字段级 diff（id / name / price / category / available / image_url），漂移即 fail；`nextDishId` 段位、seed 同名冲突属同类根因，靠人工容易漏（见 §7.15 M-d1/M-d2）。
 13. **PRODUCT.md 承诺的自动核查（2026-09-23 §7.15 立）**：reduced-motion（M-k1 已加 `<MotionConfig reducedMotion="user">`）、44 触摸区（M-t 系列）、AA 对比（M-c 系列）三大承诺，应有一道自动核查（impeccable detect 或自建规则），别靠每轮 critique 才发现。
+14. **运行时 identifier 扫描（2026-09-23 §7.22 立）**：`python scripts/runtime_audit.py` 扫五类 build 通过但运行时 ReferenceError 的问题 —— A 未 import 的 JSX 组件 / B 客户端调用但 mockApi/server 未定义的 API 端点 / C 未挂路由的 Link/navigate / D 未定义的 CSS 变量（var(--x) 但 @theme 里没 x）/ E 未定义的 Icon name（`<Icon name="x"` 但 Icons.jsx 里没 x）。**教训**：§7.15 里把 fetch 批量换成 requestJson 时 Menu.jsx 漏 import，vite build 通过但运行时炸被 ErrorBoundary 兜住才发现（commit 8d22c277）；同类拼错 `var(--clay-soft)`（应为 `--color-clay-soft`）build 也不报，运行时 CSS 拿不到值静默透明。**规矩**：改一处 API/引用/import 后必跑一次 runtime_audit（成本 <1s）；未来加到 CI 或 pre-commit hook。
 
 ## 5. 数据层（菜品 432 道 + 菜谱 342 份）
 
@@ -574,6 +575,29 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 - 成就 12 枚在 480 宽下的两列 grid 是否拥挤、grayscale(1) 未解锁态是否够"灰灰的等待感"
 - AdminDishes 批量操作条 z-index 与 DockLayer / AddDishModal 的层次（当前 z-40 应低于 modal z-50）
 - Home 心情 chips 溢出滚动是否顺滑（4 枚 + 清除按钮在 480 宽度可能勉强）
+
+## 7.22 运行时 identifier 全项目扫描 + 修 2 类真 bug（2026-09-23）
+
+用户反馈 5174 预览时 ErrorBoundary 兜住"requestJson is not defined"（Menu.jsx 缺 import）→ 触发全项目扫同类问题。**build 通过 ≠ 运行时通过**：Vite/Rollup 只查 export 存在性、不查 identifier 定义。
+
+**新工具** `scripts/runtime_audit.py`（约 130 行 Python，无外部依赖）扫五类：
+- **A. 未 import 的 JSX 组件**：正则抓 `<XxxYyy` 大写 tag，比对 import 子句（含 default + named 混合）与本地 function/const 定义
+- **B. 客户端调用但 mockApi/server 未定义的 API 端点**：抓 `fetch/requestJson('/api/*')` 与模板字符串，比对双端 pathname 路由
+- **C. 未挂路由的 Link/navigate**：抓 `<Link to="/x"` 与 `navigate('/x')`（剥 query），比对 App.jsx `<Route path="/x"`
+- **D. 未定义的 CSS 变量**：抓 `var(--x-y)`，比对 index.css @theme 里 `--x-y:` 定义
+- **E. 未定义的 Icon name**：抓 `<Icon name="x"`，比对 Icons.jsx PATHS 对象 key
+
+**扫描结果**：
+- **真 bug 修 2 处**：
+  1. `src/pages/Menu.jsx` 缺 `import { requestJson } from '../lib/request'`（§7.15 批 E 里 fetch→requestJson 改造漏 import）→ commit `8d22c277`
+  2. `src/components/ClawMachine.jsx` 两处 `var(--clay-soft)` 拼错（应为 `var(--color-clay-soft)`）→ 罩内彩点与合钳星芒粒子 CSS 拿不到值静默透明 → 本批修
+- **误报（扫描器正则不够宽，非项目 bug）**：
+  - `/api/admin/login` mockApi 缺 —— PROJECT-HANDOFF §10.5 明写"mock 场景不装密码门"，有意为之
+  - `/api/orders/:id/status` 双端"缺" —— 实际 mockApi:372 + server:206 都有 `pathname.match(/^\/api\/orders\/(\d+)\/status$/)`，扫描器 `server_paths` 正则只抓一层路径段，两层未匹配
+
+**规矩**：§4 追加第 14 条 —— 改一处 API/引用/import 后必跑 `python scripts/runtime_audit.py`（成本 <1s），未来加到 CI 或 pre-commit hook。
+
+**门禁**：build ✓ / lint 9 warnings 0 errors / test 8/8 / p6 0·0·0 / **runtime_audit A/C/D/E 全 ✓，B 已核对为扫描器误报**。
 
 ## 8. 已知待办 / 候选项
 

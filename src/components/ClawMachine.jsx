@@ -183,7 +183,7 @@ export default function ClawMachine({
             {/* 顶部轨道 */}
             <div className="absolute" style={{ left: 12, right: 12, top: GEO.railY + 4, height: 5, borderRadius: 999, background: 'color-mix(in srgb, var(--clay-deep) 45%, transparent)' }} />
             {/* 罩内彩点 */}
-            <span aria-hidden className="absolute w-2.5 h-2.5 rounded-full" style={{ left: '9%', top: '30%', background: 'var(--clay-soft)' }} />
+            <span aria-hidden className="absolute w-2.5 h-2.5 rounded-full" style={{ left: '9%', top: '30%', background: 'var(--color-clay-soft)' }} />
             <span aria-hidden className="absolute w-2 h-2 rounded-full" style={{ right: '10%', top: '22%', background: 'var(--sage-30)' }} />
             <span aria-hidden className="absolute w-2 h-2 rounded-full" style={{ left: '13%', bottom: '26%', background: 'var(--color-love)', opacity: 0.5 }} />
 
@@ -228,7 +228,7 @@ export default function ClawMachine({
                   {[0, 1, 2, 3, 4, 5].map((k) => {
                     const a = (k / 6) * Math.PI * 2
                     return <motion.span key={k} className="absolute block rounded-full"
-                      style={{ width: 6, height: 6, background: k % 2 ? 'var(--color-love)' : 'var(--clay-soft)' }}
+                      style={{ width: 6, height: 6, background: k % 2 ? 'var(--color-love)' : 'var(--color-clay-soft)' }}
                       initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
                       animate={{ x: Math.cos(a) * 34, y: Math.sin(a) * 34, opacity: 0, scale: 0.3 }}
                       transition={{ duration: 0.5, ease: EASE }} />
