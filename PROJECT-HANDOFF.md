@@ -82,6 +82,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 12. **mockApi ↔ server 自动 diff（2026-09-23 §7.15 立）**：`scripts/p6_static_gate.py` 或 CI 加字段级 diff（id / name / price / category / available / image_url），漂移即 fail；`nextDishId` 段位、seed 同名冲突属同类根因，靠人工容易漏（见 §7.15 M-d1/M-d2）。
 13. **PRODUCT.md 承诺的自动核查（2026-09-23 §7.15 立）**：reduced-motion（M-k1 已加 `<MotionConfig reducedMotion="user">`）、44 触摸区（M-t 系列）、AA 对比（M-c 系列）三大承诺，应有一道自动核查（impeccable detect 或自建规则），别靠每轮 critique 才发现。
 14. **运行时 identifier 扫描（2026-09-23 §7.22 立）**：`python scripts/runtime_audit.py` 扫五类 build 通过但运行时 ReferenceError 的问题 —— A 未 import 的 JSX 组件 / B 客户端调用但 mockApi/server 未定义的 API 端点 / C 未挂路由的 Link/navigate / D 未定义的 CSS 变量（var(--x) 但 @theme 里没 x）/ E 未定义的 Icon name（`<Icon name="x"` 但 Icons.jsx 里没 x）。**教训**：§7.15 里把 fetch 批量换成 requestJson 时 Menu.jsx 漏 import，vite build 通过但运行时炸被 ErrorBoundary 兜住才发现（commit 8d22c277）；同类拼错 `var(--clay-soft)`（应为 `--color-clay-soft`）build 也不报，运行时 CSS 拿不到值静默透明。**规矩**：改一处 API/引用/import 后必跑一次 runtime_audit（成本 <1s）；未来加到 CI 或 pre-commit hook。
+15. **禁用原生 alert/confirm/prompt（2026-09-23 §7.23 立，防 §7.15 清完又回归）**：新代码里**任何**危险操作确认（删除、下架、清空、覆盖）都用**两段式确认**（第一次点变"确认?"红底 + 5s 自动收起 + 二次点击即执行）或弹窗组件；不再用 `window.confirm/alert/prompt`。标准模板：AdminDishes / AdminAnniversaries / Fridge 三处已是范例。原因：§7.15 harden 一次性清完 6 处原生对话框，但功能扩展批 1（AdminAnniversaries）与批 6（Fridge）又用回来 2 处 —— "清完"是一次性状态，新代码要防复发。扫描：`grep -rnE "(^|[^.\w])(alert|confirm|prompt)\s*\(" src/` 每次改动跑一次。
 
 ## 5. 数据层（菜品 432 道 + 菜谱 342 份）
 
@@ -598,6 +599,38 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 **规矩**：§4 追加第 14 条 —— 改一处 API/引用/import 后必跑 `python scripts/runtime_audit.py`（成本 <1s），未来加到 CI 或 pre-commit hook。
 
 **门禁**：build ✓ / lint 9 warnings 0 errors / test 8/8 / p6 0·0·0 / **runtime_audit A/C/D/E 全 ✓，B 已核对为扫描器误报**。
+
+## 7.23 二次深度扫描：语义/回归/资源清理（2026-09-23）
+
+用户"再检查一遍"→ 上一轮扫描偏 identifier 定义，本轮扫**语义/回归/资源清理**类（10 类）：原生对话框回归 · JSON.parse 无兜底 · setInterval 无清理 · addEventListener 无 remove · 数组无 Array.isArray · TODO/FIXME · 硬编码外链/IP · 空 catch · console.* 遗留 · 列表 key 缺失 · 空 href · `<a href="#">` 反模式 · React style kebab-case。
+
+**发现并修真 bug 4 处**：
+
+1. **§7.15 原生对话框回归 · 2 处**（上轮 harden 明确"原生 alert/confirm/prompt 全清"，本批功能扩展又用回来了）：
+   - `src/pages/AdminAnniversaries.jsx:108` 删纪念日用 `window.confirm` → 改**两段式确认**（pendingDelId state + 5s 自动收起 + 二次点击即删，与 AdminDishes 同模式）
+   - `src/pages/Fridge.jsx:35` 移除冰箱食材用 `window.confirm` → 同上改两段式（pendingRemove state + 5s 自动收起 + 按钮文案 × → 确认?）
+
+2. **数组 .map/.forEach 无兜底 · 2 处**（若某订单 items 字段缺失会抛，与 B2 类同根）：
+   - `src/pages/HotDishes.jsx:55` `orders.forEach(o => o.items.forEach(...))` → `(o.items || []).forEach(...)`
+   - `src/pages/Home.jsx:366` 最近订单摘要 `order.items.map(...)` → `(order.items || []).map(...)`
+
+**扫描器误报（已核对，非项目 bug）**：
+- `useTheme.js:86` setInterval 无 clearInterval —— **模块顶层** setInterval（非 React 组件），生命周期与页面一致，无需清理
+- `useTheme.js:88` document.visibilitychange 无 remove —— 同上，模块顶层
+- `DishDetail.jsx:199/210` `dish.recipe.ingredients.map` / `dish.recipe.steps.map` —— 实际外层有 `dish.recipe.ingredients?.length > 0 &&` 保护，扫描器只查同一行未识别跨行
+- `OrderDetail.jsx:203` `order.items.map` —— B2 修时加了 `!Array.isArray(order.items)` 早退到 EmptyState，扫描器跨行未识别
+- `AddDishModal.jsx:19` `'https://...'` —— 是 placeholder 里的**示例文字**（"图片链接"字段），不是真外链
+- `ErrorBoundary.jsx:17` `console.error` —— **有意为之**（家庭自用不做远程上报，只 console 留一份便于开发定位）
+- `PurchaseListSheet.jsx:120` kebab-case —— `'line-through'` 是 **value** 不是 key（`textDecoration: 'line-through'` 是对的），扫描器正则抓错位置
+- 空 catch 31→32 处 —— 绝大多数是 `try { announce / localStorage } catch {}` 兜底，家庭场景合理静默
+
+**扫描器 v3 未纳入项目**（一次性用即弃）：v3 扫描器有较多跨行误报，需 AST 才能精准；本轮先人工核对结果，工具留在 workspace 未落地到 scripts/。若未来 CI 化，需换用 ESLint plugin（如 `eslint-plugin-react-hooks` 已能覆盖大部分）。
+
+**教训**：
+- **§7.15 声称清完的原生对话框，功能扩展批 1/批 6 又用回来了** —— 说明"清完"是**一次性状态**，新代码要防复发。§4 追加第 15 条规矩：**新代码禁用原生 alert/confirm/prompt，用两段式确认或弹窗组件**（AdminDishes/AdminAnniversaries/Fridge 三处已是标准模板）。
+- **数组 .map 前无兜底是 B2 类同根问题** —— 数据源字段可能缺，前端渲染层要 `|| []` 或 `?.length > 0 &&` 保护。
+
+**门禁**：build ✓ 2.27s / lint 9 warnings 0 errors / test 8/8 / p6 0·0·0 / 扫描 v3 主类回归清零。
 
 ## 8. 已知待办 / 候选项
 

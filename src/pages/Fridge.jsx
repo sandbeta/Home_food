@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
@@ -24,6 +24,13 @@ export default function Fridge() {
   const [qty, setQty] = useState('1')
   const [unit, setUnit] = useState('')
   const [search, setSearch] = useState('')
+  /* §7.22 修：§7.15 已全清原生 confirm，本批回归；改两段式（5s 内再点即删） */
+  const [pendingRemove, setPendingRemove] = useState(null)
+  useEffect(() => {
+    if (!pendingRemove) return undefined
+    const t = setTimeout(() => setPendingRemove(null), 5000)
+    return () => clearTimeout(t)
+  }, [pendingRemove])
 
   const items = Object.entries(map)
     .filter(([k]) => !search || k.includes(search.trim()))
@@ -39,7 +46,12 @@ export default function Fridge() {
     tap(); vibrate(10)
     try { window.__cgAnnounce?.(`冰箱加了 ${n}`) } catch {}
   }
-  const remove = (k) => { if (!window.confirm(`把「${k}」从冰箱移除？`)) return; setMap({ ...removeItem(k) }) }
+  const remove = (k) => {
+    if (pendingRemove !== k) { setPendingRemove(k); return }
+    setMap({ ...removeItem(k) })
+    setPendingRemove(null)
+    try { window.__cgAnnounce?.(`从冰箱移除 ${k}`) } catch {}
+  }
   const bump = (k, delta) => setMap({ ...adjustQty(k, delta) })
 
   return (
@@ -117,9 +129,15 @@ export default function Fridge() {
                       style={{ background: 'var(--color-clay)', border: '2px solid var(--clay-deep)' }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                     </button>
-                    <button onClick={() => remove(k)} aria-label={`移除 ${k}`}
-                      className="w-11 h-11 rounded-full flex items-center justify-center ml-1 text-[var(--color-danger)] text-lg font-bold"
-                      style={{ border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>×</button>
+                    <button onClick={() => remove(k)} aria-label={pendingRemove === k ? `再次点击确认移除 ${k}` : `移除 ${k}`}
+                      className="w-11 h-11 rounded-full flex items-center justify-center ml-1 text-xs font-bold shrink-0 px-1"
+                      style={{
+                        background: pendingRemove === k ? 'var(--color-danger)' : 'transparent',
+                        color: pendingRemove === k ? 'var(--color-on-dark)' : 'var(--color-danger)',
+                        border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
+                      }}>
+                      {pendingRemove === k ? '确认?' : '×'}
+                    </button>
                   </div>
                 </motion.div>
               ))}

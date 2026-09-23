@@ -53,7 +53,7 @@ export default function HotDishes() {
   // 你们的"最近热门"：按点单份数聚合（与外部趋势榜分开，一个是权威口径、一个是自家数据）
   const ownHot = useMemo(() => {
     const count = {}
-    orders.forEach(o => o.items.forEach(i => {
+    orders.forEach(o => (o.items || []).forEach(i => {
       count[i.dish_id] = (count[i.dish_id] || 0) + i.quantity
     }))
     return Object.entries(count)

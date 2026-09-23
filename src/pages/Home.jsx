@@ -363,7 +363,7 @@ export default function Home() {
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-[var(--color-bone)]">订单 #{order.id}</p>
                       <p className="text-xs text-[var(--color-ash)] mt-0.5 truncate">
-                        {order.items.map(i => `${i.dish_name}×${i.quantity}`).join('、')}
+                        {(order.items || []).map(i => `${i.dish_name}×${i.quantity}`).join('、')}
                       </p>
                     </div>
                   </div>

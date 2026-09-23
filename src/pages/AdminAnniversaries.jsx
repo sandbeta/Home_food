@@ -22,6 +22,13 @@ export default function AdminAnniversaries() {
   const [editingId, setEditingId] = useState(null)  // null=收起 / 'new'=新增 / 数字=编辑
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  /* §7.22 修：§7.15 已全清原生 confirm，本批回归；改两段式（与 AdminDishes 同模式） */
+  const [pendingDelId, setPendingDelId] = useState(null)
+  useEffect(() => {
+    if (pendingDelId === null) return undefined
+    const t = setTimeout(() => setPendingDelId(null), 5000)
+    return () => clearTimeout(t)
+  }, [pendingDelId])
 
   const load = () => {
     setLoading(true); setErr('')
@@ -110,10 +117,14 @@ export default function AdminAnniversaries() {
                   style={{ border: '2px solid var(--color-line)' }}>
                   <Icon name="gear" size={16} strokeWidth={2} />
                 </button>
-                <button onClick={() => { if (window.confirm(`删掉「${a.name}」？`)) remove(a.id) }} aria-label={`删除 ${a.name}`}
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-danger)]"
-                  style={{ border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                <button onClick={() => { if (pendingDelId === a.id) { remove(a.id); setPendingDelId(null) } else setPendingDelId(a.id) }} aria-label={pendingDelId === a.id ? `再次点击确认删除 ${a.name}` : `删除 ${a.name}`}
+                  className="w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold shrink-0 px-1"
+                  style={{
+                    background: pendingDelId === a.id ? 'var(--color-danger)' : 'var(--surface)',
+                    color: pendingDelId === a.id ? 'var(--color-on-dark)' : 'var(--color-danger)',
+                    border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
+                  }}>
+                  {pendingDelId === a.id ? '确认?' : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>}
                 </button>
               </div>
               <AnimatePresence>
