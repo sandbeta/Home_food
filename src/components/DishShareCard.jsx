@@ -143,7 +143,7 @@ function wrapText(ctx, text, maxW) {
   return out
 }
 
-export default function DishShareCard({ open, onClose, dish, indexNo }) {
+export default function DishShareCard({ open, onClose, dish, indexNo = 1 }) {
   const reduce = usePrefersReducedMotion()
   const panelRef = useDialogA11y(open, onClose)
   const [url, setUrl] = useState(null)

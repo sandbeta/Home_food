@@ -36,7 +36,8 @@ export default function NightHome() {
   /* m-22 修：pool useState 初值从 getCachedList('night') 回填，让从夜宵网格 morphTo 详情再 morphBack
      时首帧就有 dish-hero 命名元素，共享元素形变不再静默退化。 */
   const [pool, setPool] = useState(() => getCachedList('night') || [])
-  const [rotIdx, setRotIdx] = useState(0)
+  /* 批 8 · 娃娃机内部随机抓取，抓到的菜回传给 Home 供网格排除 + 后续扩展 */
+  const [activeDish, setActiveDish] = useState(null)
   // 三态（对齐 Home）：加载/失败可重试/空池——此前 .catch 吞异常致整页空白，像坏了
   /* m-27 修：以前"取到数据但池为空"也 setFailed(true) → 渲染成"宵夜机暂时没通电 + 再试一次"，
      用户反复点重试永远空、误以为是网络故障。改成 empty/fallback 两态分离：
@@ -89,8 +90,7 @@ export default function NightHome() {
       .catch(() => { setLoading(false); setFailed(true) })
   }, [reload])
 
-  const featured = pool.length ? pool[rotIdx % pool.length] : null
-  const grid = useMemo(() => pool.filter(d => d.id !== featured?.id).slice(0, 8), [pool, featured])
+  const grid = useMemo(() => pool.filter(d => d.id !== activeDish?.id).slice(0, 8), [pool, activeDish])
 
   return (
     <div className="relative flex flex-col" style={{ minHeight: 'calc(100dvh - var(--bottom-inset))' }}>
@@ -133,16 +133,14 @@ export default function NightHome() {
             }
           />
         )}
-        {/* 深夜主推 —— 娃娃机宵夜变体：无泡泡时钟（安静陪吃），手动换一道不自动轮换 */}
-        {featured && (
+        {/* 深夜主推 —— 娃娃机宵夜变体：无泡泡时钟（安静陪吃），堆里随机抓、抓走的补货 */}
+        {pool.length > 0 && (
           <ClawMachine
-            dish={featured}
-            indexNo={(rotIdx % (pool.length || 1)) + 1}
+            pool={pool}
             onCatch={onCatch}
             onUndo={undoCatch}
-            onGrab={() => setRotIdx(Math.floor(Math.random() * (pool.length || 1)))}
-            onOpen={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
-            pool={pool}
+            onOpen={activeDish ? () => navigate(`/dish/${activeDish.id}`) : undefined}
+            onActiveChange={setActiveDish}
             showClock={false}
             title="深夜宵夜机"
             note="深夜主推 · 安静陪吃"
