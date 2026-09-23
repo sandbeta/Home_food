@@ -206,16 +206,23 @@ export default function ClawMachine({
   const undoCatch = (dish) => { onUndo?.(dish) }
 
   /* 几何 */
-  const cable = ['drop', 'close'].includes(phase) ? GEO.cableDown : GEO.cableUp
-  const jawOpen = !['close', 'lift', 'carry'].includes(phase)
   const targetSpot = grabIdx >= 0 ? PILE_SLOTS[grabIdx] : null
+  // 下探深度按被抓槽位动态算：让爪尖（绝对 Y≈57+cable）够到盘子顶再 +10px 咬合，
+  // 消除旧版固定 cableDown=112（爪尖停在≈169）对 y=200~240 的盘子「隔空取物」。上限收在 200 防戳出罩底。
+  const dropCable = targetSpot
+    ? Math.min(Math.max(targetSpot.y - 47, GEO.cableUp), 200)
+    : GEO.cableDown
+  const cable = (phase === 'drop' || phase === 'close') ? dropCable : GEO.cableUp
+  const jawOpen = !['close', 'lift', 'carry'].includes(phase)
   const held = ['close', 'lift', 'carry'].includes(phase)
-  const falling = phase === 'release'
-  // 爪子：carry/release 移到出菜口，否则对准被抓槽位（drop 前也滑到该槽上方）
-  const carX = ['carry', 'release'].includes(phase) ? GEO.chuteX : (targetSpot ? targetSpot.x : '50%')
-  // 被夹盘：drop 在原槽位、close/lift/carry 跟随爪、release 落槽下坠
-  const grabX = ['carry', 'release'].includes(phase) ? GEO.chuteX : (targetSpot ? targetSpot.x : '50%')
-  const grabY = phase === 'drop' ? (targetSpot ? targetSpot.y : GEO.pileTop)
+  // release 与 settle 都属「已释放/落槽」侧：盘锁终态隐藏、钩子留在出菜口，避免 settle 帧重算回槽位造成回弹
+  const falling = phase === 'release' || phase === 'settle'
+  // 爪子：carry/release/settle 移到出菜口，否则对准被抓槽位（drop 前也滑到该槽上方）
+  const carX = ['carry', 'release', 'settle'].includes(phase) ? GEO.chuteX : (targetSpot ? targetSpot.x : '50%')
+  // 被夹盘：drop/close 留在原槽位（等钳子咬合）、lift/carry 随爪升起、release/settle 落槽下坠
+  const grabX = ['carry', 'release', 'settle'].includes(phase) ? GEO.chuteX : (targetSpot ? targetSpot.x : '50%')
+  const grabY = (phase === 'drop' || phase === 'close')
+    ? (targetSpot ? targetSpot.y : GEO.pileTop)
     : falling ? GEO.slotTop
     : clawTop(cable) + 16
   const jig = !reduced && (phase === 'drop' || phase === 'close')
@@ -308,7 +315,7 @@ export default function ClawMachine({
             {/* 合钳星芒 */}
             <AnimatePresence>
               {burst > 0 && !reduced && ['close', 'lift'].includes(phase) && targetSpot && (
-                <motion.div key={burst} className="absolute z-30 pointer-events-none" style={{ left: targetSpot.x, top: clawTop(GEO.cableDown) + 10, transform: 'translateX(-50%)' }}>
+                <motion.div key={burst} className="absolute z-30 pointer-events-none" style={{ left: targetSpot.x, top: targetSpot.y + targetSpot.s / 2, transform: 'translateX(-50%)' }}>
                   {[0, 1, 2, 3, 4, 5].map((k) => {
                     const a = (k / 6) * Math.PI * 2
                     return <motion.span key={k} className="absolute block rounded-full"

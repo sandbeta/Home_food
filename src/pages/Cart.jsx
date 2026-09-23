@@ -114,6 +114,8 @@ export default function Cart() {
   const [sharing, setSharing] = useState(false)
   const [shareDone, setShareDone] = useState(false)
   const [mergeDone, setMergeDone] = useState(false)
+  /* 一键清空 · 两段式确认（清空会一次抹掉双方全部条目、不可逆 → 点一下先变「确认清空?」，4s 内再点才执行） */
+  const [confirmClear, setConfirmClear] = useState(false)
   const [shareErr, setShareErr] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(false)
@@ -122,6 +124,7 @@ export default function Cart() {
   const [avoidConfirmed, setAvoidConfirmed] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
   const skipRef = useRef(null)
+  const clearTimerRef = useRef(null)
   const mountedRef = useRef(true)
   const reduce = usePrefersReducedMotion()
   const [pageTitle] = useState(() => pickOne(CART_TITLES))
@@ -130,7 +133,10 @@ export default function Cart() {
 
   useEffect(() => {
     mountedRef.current = true
-    return () => { mountedRef.current = false }
+    return () => {
+      mountedRef.current = false
+      if (clearTimerRef.current) clearTimeout(clearTimerRef.current)
+    }
   }, [])
 
   /* 批 5 · 挂载时拉一次服务端 sharedCart；若别人分享的（sharedBy !== whoAmI）且非空，提示合并 */
@@ -157,6 +163,21 @@ export default function Cart() {
     setShared(null)
     setMergeDone(true)
     setTimeout(() => setMergeDone(false), 2400)
+  }
+
+  // 一键清空 · 两段式确认：首点进确认态（4s 自动取消），再点才真清
+  const handleClear = () => {
+    if (!confirmClear) {
+      setConfirmClear(true)
+      try { window.__cgAnnounce?.(`再点一次「确认清空」将清空购物车全部 ${totalCount} 件`) } catch {}
+      if (clearTimerRef.current) clearTimeout(clearTimerRef.current)
+      clearTimerRef.current = setTimeout(() => setConfirmClear(false), 4000)
+      return
+    }
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current)
+    setConfirmClear(false)
+    clearCart()
+    try { window.__cgAnnounce?.('购物车已清空') } catch {}
   }
 
   const meItems = items.filter((i) => i.added_by === 'me')
@@ -335,6 +356,25 @@ export default function Cart() {
             <div role="status" className="mb-3 px-4 py-2 text-xs font-bold text-[var(--color-on-sage)]"
               style={{ background: 'var(--color-sage)', borderRadius: 'var(--radius-ctl)' }}>已合并 ✓</div>
           )}
+
+          {/* 一键清空（购物车级操作 · 两段式确认） */}
+          <div className="flex justify-end mb-2">
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              type="button"
+              onClick={handleClear}
+              aria-label={confirmClear ? `确认清空购物车全部 ${totalCount} 件` : '清空购物车'}
+              className="inline-flex items-center gap-1 px-3 py-1.5 min-h-[44px] text-xs font-bold rounded-full"
+              style={{
+                background: confirmClear ? 'color-mix(in srgb, var(--color-danger) 16%, var(--surface))' : 'transparent',
+                color: confirmClear ? 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' : 'var(--color-ash)',
+                border: `2px solid ${confirmClear ? 'color-mix(in srgb, var(--color-danger) 55%, transparent)' : 'var(--color-line)'}`,
+              }}
+            >
+              <span aria-hidden>🗑</span> {confirmClear ? '确认清空？' : '一键清空'}
+            </motion.button>
+          </div>
+
           {/* 我点的 */}
           {meItems.length > 0 && (
             <GlassCard className="glass-me" glow={PERSONA.me.glow} style={{ padding: 'var(--space-card-p)' }}>

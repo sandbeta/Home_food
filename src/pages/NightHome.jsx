@@ -15,11 +15,13 @@ import SectionHeader from '../components/ui/SectionHeader'
 import LoadingState from '../components/ui/LoadingState'
 import EmptyState from '../components/ui/EmptyState'
 import ThemeToggle from '../components/ui/ThemeToggle'
+import DishShareCard from '../components/DishShareCard'
 import { useCart } from '../components/CartContext'
 import { nightPickInfo } from '../lib/nightRules'
 import { getCategoryEmoji, getDishImage } from '../lib/categoryIcons'
 import { contentEnter, cardEntrance, usePrefersReducedMotion } from '../theme/motion'
-import { pickOne, NIGHT_HOME_TITLES, NIGHT_HOME_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
+import { pickOne, NIGHT_HOME_TITLES, NIGHT_HOME_NOTES, RETRY_NOTES, MOOD_NIGHT_NOTES } from '../lib/sweetCopy'
+import { MOODS, readMood, writeMood } from '../lib/mood'
 import { vibrate } from '../lib/sfx'
 import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 
@@ -53,7 +55,16 @@ export default function NightHome() {
   const { addItem, items, whoAmI, updateQuantity } = useCart()
   const reduced = usePrefersReducedMotion()
   const [title] = useState(() => pickOne(NIGHT_HOME_TITLES))
-  const [note] = useState(() => pickOne(NIGHT_HOME_NOTES))
+  const [note, setNote] = useState(() => pickOne(NIGHT_HOME_NOTES))
+  /* 批 6d · 今日心情（与白天 Home 对齐：只切页头副标题池，不改主题色） */
+  const [mood, setMood] = useState(() => readMood())
+  const [shareOpen, setShareOpen] = useState(false)
+  const handleMood = (k) => {
+    const next = mood === k ? null : k
+    setMood(next); writeMood(next)
+    setNote(next ? pickOne(MOOD_NIGHT_NOTES[next] || NIGHT_HOME_NOTES) : pickOne(NIGHT_HOME_NOTES))
+    try { window.__cgAnnounce?.(next ? `今日心情：${MOODS.find(m => m.key === next)?.label}` : '已取消心情标记') } catch {}
+  }
   /* M-s2 修：撤销按【当前】whoAmI 会错人格；useRef 记抓取时快照，撤销按快照走 */
   const lastCatchPersonaRef = useRef(whoAmI)
 
@@ -97,6 +108,28 @@ export default function NightHome() {
       <PageHeader title={title} subtitle={note} right={<ThemeToggle />} />
 
       <PageContainer>
+        {/* 批 6d · 今日心情 chips（与白天 Home 对齐） */}
+        <div className="flex items-center gap-1.5 mb-2 -mt-1 overflow-x-auto no-scrollbar" role="radiogroup" aria-label="今日心情">
+          <span className="text-[11px] text-[var(--color-ash)] font-bold shrink-0 mr-0.5">今日心情</span>
+          {MOODS.map(m => {
+            const active = mood === m.key
+            return (
+              <button key={m.key} onClick={() => handleMood(m.key)} role="radio" aria-checked={active}
+                className="shrink-0 px-2.5 py-1 min-h-[44px] rounded-full text-xs font-bold flex items-center gap-1 transition-colors"
+                style={{
+                  background: active ? 'var(--color-clay)' : 'var(--surface)',
+                  color: active ? 'var(--color-on-dark)' : 'var(--color-ash)',
+                  border: `2px solid ${active ? 'var(--clay-deep)' : 'var(--color-line)'}`,
+                }}>
+                <span aria-hidden>{m.emoji}</span>{m.label}
+              </button>
+            )
+          })}
+          {mood && (
+            <button onClick={() => handleMood(mood)} aria-label="取消心情"
+              className="shrink-0 px-2 py-1 min-h-[44px] text-[11px] text-[var(--color-ash)] font-bold">清除</button>
+          )}
+        </div>
         {loading && !pool.length && <LoadingState text="开灯备宵夜…" />}
         {failed && !loading && (
           <EmptyState
@@ -135,16 +168,29 @@ export default function NightHome() {
         )}
         {/* 深夜主推 —— 娃娃机宵夜变体：无泡泡时钟（安静陪吃），堆里随机抓、抓走的补货 */}
         {pool.length > 0 && (
-          <ClawMachine
-            pool={pool}
-            onCatch={onCatch}
-            onUndo={undoCatch}
-            onOpen={activeDish ? () => navigate(`/dish/${activeDish.id}`) : undefined}
-            onActiveChange={setActiveDish}
-            showClock={false}
-            title="深夜宵夜机"
-            note="深夜主推 · 安静陪吃"
-          />
+          <div>
+            <ClawMachine
+              pool={pool}
+              onCatch={onCatch}
+              onUndo={undoCatch}
+              onOpen={activeDish ? () => navigate(`/dish/${activeDish.id}`) : undefined}
+              onActiveChange={setActiveDish}
+              showClock={false}
+              title="深夜宵夜机"
+              note="深夜主推 · 安静陪吃"
+            />
+            {/* 批 3c · 分享"上一个抓到的菜"（与白天 Home 对齐） */}
+            {activeDish && (
+              <button
+                onClick={() => setShareOpen(true)}
+                aria-label={`分享菜卡：${activeDish.name}`}
+                className="w-full mt-3 min-h-[44px] py-2 text-xs font-bold text-[var(--color-clay-text)] flex items-center justify-center gap-1 rounded-full"
+                style={{ border: '2px dashed var(--color-line)' }}
+              >
+                <span aria-hidden>📸</span> 分享这张菜卡给 TA 看
+              </button>
+            )}
+          </div>
         )}
 
         {/* 宵夜网格：每格一键加购，不用进详情 */}
@@ -208,6 +254,13 @@ export default function NightHome() {
       <div aria-hidden="true" style={{ flex: '1 1 auto', minHeight: 'var(--space-section)' }} />
       {/* 牧场草地收边（夜宵自动压暗） */}
       <div aria-hidden="true" className="grass-hem relative z-[2]" />
+
+      {/* 批 3c · 今日菜卡分享（分享"上一个抓到的菜"，与白天 Home 对齐） */}
+      <DishShareCard
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        dish={activeDish}
+      />
     </div>
   )
 }
