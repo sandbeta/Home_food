@@ -118,6 +118,15 @@ export default function ClawMachine({
     () => (pool || []).filter(d => d && d.id !== shown?.id).slice(0, PILE_SLOTS.length),
     [pool, shown?.id]
   )
+  /* 批 7b · featured 落点随机：换菜（dish.id 变）时在堆顶若干候选位里随机挑一个（含轻微旋转），
+     爪子闲置/降落都对准这个随机点 → "抓取目标不再固定在正中央"，更像真娃娃机里娃娃的随机分布。
+     useMemo 依赖 dish.id，同菜闲置期间位置稳定不抖动（避免 re-render 乱跳）。 */
+  const featuredSpot = useMemo(() => {
+    const xs = ['30%', '44%', '58%', '70%', '37%', '52%', '64%']
+    const ys = [150, 158, 152, 160, 154, 148, 156]
+    const i = Math.floor(Math.random() * xs.length)
+    return { x: xs[i], y: ys[i], r: Math.round(Math.random() * 16 - 8) }
+  }, [dish?.id])
 
   useEffect(() => () => timers.current.forEach(clearTimeout), [])
   const after = (ms, fn) => { timers.current.push(setTimeout(fn, ms)) }
@@ -148,12 +157,14 @@ export default function ClawMachine({
   /* 各相位下爪钩 / 玩偶的目标几何 */
   const cable = ['drop', 'close'].includes(phase) ? GEO.cableDown : GEO.cableUp
   const jawOpen = !['close', 'lift', 'carry'].includes(phase)
-  const carX = ['carry', 'release'].includes(phase) ? GEO.chuteX : '50%'
+  // 爪子：闲置/降落都对准 featured 的随机落点，carry/release 才移到出菜口
+  const carX = ['carry', 'release'].includes(phase) ? GEO.chuteX : featuredSpot.x
   const held = ['close', 'lift', 'carry'].includes(phase)
   const resting = ['idle', 'aim', 'drop'].includes(phase)
   const falling = phase === 'release'
-  const plushTop = resting ? GEO.pileTop : clawTop(cable) + 16
-  const plushX = ['carry', 'release'].includes(phase) ? GEO.chuteX : '50%'
+  // featured 盘：闲置坐在随机落点，被夹起后跟随爪头，落槽滑向出菜口
+  const plushTop = resting ? featuredSpot.y : clawTop(cable) + 16
+  const plushX = ['carry', 'release'].includes(phase) ? GEO.chuteX : featuredSpot.x
 
   return (
     <motion.div {...contentEnter(0.05)}>
@@ -212,19 +223,27 @@ export default function ClawMachine({
             </div>
 
             {/* 批 7 · 底部待抓菜堆：一堆小圆盘错落堆在罩底（featured 是堆顶被爪子瞄准的那个）。
-                纯装饰层 aria-hidden，读屏只念可抓的 featured；z-5 低于 featured(z-10) 与爪(z-20)。 */}
+                纯装饰层 aria-hidden，读屏只念可抓的 featured；z-5 低于 featured(z-10) 与爪(z-20)。
+                批 7b · 爪子降落(drop/close)时周围堆盘被挤得弹跳一下（外层静态定位、内层 motion 只动 y，
+                避免 framer 接管 transform 覆盖 translateX）。 */}
             <div aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
               {pileDishes.map((p, i) => {
                 const lay = PILE_SLOTS[i]
                 const pimg = getDishImage(p)
+                const amp = 5 + (i % 3) * 3
+                const jig = !reduced && (phase === 'drop' || phase === 'close')
                 return (
-                  <div key={p.id} className="absolute flex items-center justify-center overflow-hidden"
-                    style={{ width: lay.s, height: lay.s, left: lay.x, top: lay.y, borderRadius: '50%',
-                      background: 'var(--plate-bg)', border: '2px solid var(--color-clay-soft)',
-                      transform: `translateX(-50%) rotate(${lay.r}deg)`,
-                      boxShadow: '0 3px 8px rgba(43,36,41,0.10), inset 0 1px 0 rgba(255,255,255,0.5)', opacity: 0.95 }}>
-                    <span style={{ fontSize: lay.s * 0.52, filter: 'var(--tile-img-filter)' }}>{getCategoryEmoji(p.category)}</span>
-                    {pimg && <img src={pimg} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+                  <div key={p.id} className="absolute" style={{ left: lay.x, top: lay.y, transform: `translateX(-50%) rotate(${lay.r}deg)` }}>
+                    <motion.div
+                      animate={jig ? { y: [0, -amp, 0] } : { y: 0 }}
+                      transition={{ duration: 0.45, ease: 'easeOut' }}
+                      className="relative flex items-center justify-center overflow-hidden"
+                      style={{ width: lay.s, height: lay.s, borderRadius: '50%',
+                        background: 'var(--plate-bg)', border: '2px solid var(--color-clay-soft)',
+                        boxShadow: '0 3px 8px rgba(43,36,41,0.10), inset 0 1px 0 rgba(255,255,255,0.5)', opacity: 0.95 }}>
+                      <span style={{ fontSize: lay.s * 0.52, filter: 'var(--tile-img-filter)' }}>{getCategoryEmoji(p.category)}</span>
+                      {pimg && <img src={pimg} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+                    </motion.div>
                   </div>
                 )
               })}
@@ -244,7 +263,7 @@ export default function ClawMachine({
                   animate={
                     falling
                       ? { x: '-50%', left: GEO.chuteX, top: GEO.slotTop, opacity: 0, rotate: [0, -18, 14, 0], transition: { duration: BEAT.release / 1000, ease: [0.5, 0, 0.9, 0.6] } }
-                      : { x: '-50%', left: plushX, top: plushTop, opacity: 1, y: 0, scale: 1, rotate: held ? [0, -3, 3, 0] : 0,
+                      : { x: '-50%', left: plushX, top: plushTop, opacity: 1, y: 0, scale: 1, rotate: held ? [0, -3, 3, 0] : featuredSpot.r,
                           transition: { duration: reduced ? 0.24 : 0.42, ease: EASE } }
                   }
                   exit={{ x: '-50%', opacity: 0, transition: { duration: 0.18 } }}
