@@ -799,3 +799,19 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
     scroll-behavior: auto !important;
   }
 }
+
+/* ========== 打印样式（批 4c · 年度别册一键存 PDF） ==========
+   隐藏 no-print / 底部导航 / 页头/页尾装饰；卡片去阴影与玻璃底；
+   body 走白底黑字（打印墨水友好），保留 clay/caramel/sage 三档专色做数据点。 */
+@media print {
+  .no-print,
+  nav, footer, .dock-layer, .d3-cart-orb { display: none !important; }
+  body { background: #FFFFFF !important; color: #000000 !important; }
+  .d3-card-face, .glass { background: #FFFFFF !important; box-shadow: none !important; border: 1px solid #C9B6BD !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  /* 打印时 sticky 页头无意义，让它回滚到流内 */
+  .sticky { position: static !important; }
+  /* FullBleedHero 底片层不参与打印 */
+  .fixed { position: static !important; display: none; }
+  /* 主色令牌保留可辨识度 */
+  [data-theme] { --color-bone: #000000; --color-ash: #3A2B33; }
+}

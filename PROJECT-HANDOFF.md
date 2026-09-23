@@ -434,6 +434,59 @@ build ✓ 3.38s / lint 6 warnings 0 errors（历史 4 条 + KitchenCalendar/Tast
 - 分享菜卡的圆形图鉴盘：有实拍图（231/432）时的 crop 精度 / 无图 emoji 版是否好看
 - 长按保存提示的引导强度（"长按上方保存"文案是否有效）
 
+## 7.19 功能扩展批 4：AA 结算 + 忌口提醒 + 年度别册（2026-09-23）
+
+数据与回顾三条。四件套全绿。
+
+### 4a · AA 结算单（家庭语义 = 各付各的）
+- **数据层新增两字段**：`order.owed_me` / `order.owed_partner`（结算快照，落库后不随事后菜价漂）；payer 归一化：`me` → 全归 🐱 / `partner` → 全归 🐑 / `aa` → 按 items.added_by 分账（**家庭场景 AA 语义 = 各付各的**，不是均摊）
+- **新增 GET /api/settlements?month=YYYY-MM**：按月聚合 { orders_count, total, owed_me, owed_partner, by_payer }；历史订单缺 owed_* 时按 items+payer 现算兜底（家庭老数据兼容）
+- 双端一比一（mockApi + server/index.cjs 均加，**不可变文件**改动记入 §4）
+- OrderDetail 合计区 payer='aa' 时下方展开「🐱 ¥X · 🐑 ¥Y」一行小字（caramel 衬线数字）；无 owed_* 从 items 现算
+
+### 4b · 忌口清单（提交前温柔提示 · 不阻断）
+- **新工具** `src/lib/avoid.js`：`readAvoids/writeAvoids`（localStorage 设备级，家庭自用不共享）· `matchAvoid(ingredients, list)` 子串匹配（**预设 alias 展开**：如"海鲜" → 虾/蟹/贝/蛤/蛏/鲍；"酒精" → 料酒/啤酒/白酒/红酒/米酒/醪糟）· `scanDishes(dishesWithRecipe, list)` 批量扫
+- **8 项预设**：香菜 / 葱 / 姜 / 蒜 / 辣（辣椒） / 麻（花椒） / 海鲜 / 酒（酒精），+ 自定义关键词（≤8 字）
+- Profile 加「🌿 忌口清单」折叠卡（在口味画像入口之后、后台入口之前）：Chip 多选 + 自定义输入 + 一键清空；命中项前 4 个显示在副标题
+- Cart 提交前扫描：**首次拦、再点即放行**（"提示不阻断"的家庭场景规则）· 拉每道菜 recipe → scanDishes → 命中 setAvoidHit + 显内联 warning 卡（暖墨色 ember 底 + 深字）· 「知道啦，仍然下单」→ setAvoidConfirmed(true) 再 handleSubmit · 「先返回改改」→ 收提示
+- announce 播报「有 N 道菜含忌口，请看一眼」
+
+### 4c · 年度别册（可打印的年终总结）
+- **新页** `src/pages/AnnualReport.jsx`（挂 `/report`，从 Profile 入口进）
+- 数据源：/api/orders 全表本地按年分桶（家庭订单量 <百级）
+- 视图：
+  - 年份切换（横向 tab + ‹ › 按可用年）
+  - 四大关键指标：总单数 / 总花费 / 🐱 出了 / 🐑 出了（caramel / clay / sage 分色）
+  - 手绘 SVG 月度柱图（12 根）
+  - 深夜比例（🌙 vs 白天，走 isNightSnack 判定）
+  - TOP 10 最爱（前三金/银/铜走 fill 令牌）
+  - 最常开伙的一天（日期 + 周几）
+  - 谁在买单：AA / 🐱 请 / 🐑 请 三档柱条
+  - 🖨️ 打印按钮 → window.print()
+- **新增 @media print 样式**（index.css 尾）：隐藏 .no-print/nav/footer/停靠层/购物车球；body 白底黑字；.d3-card-face 去阴影/去玻璃，保留发丝边；sticky 回滚到流内；主色令牌保留可辨识度（--color-bone→#000）
+- Profile 底部加「📖 年度别册」入口卡（clay 锚点色，与"我们的日子"同层分量）
+
+### 集成
+- Profile：入口卡新增「🌿 忌口」+「📖 年度别册」共两张
+- Cart：忌口扫描 + 命中拦截 UI（合计卡内、submitError 之上）
+- OrderDetail：AA 结算分账展示（合计区下方一行小字）
+- App.jsx：/report 一条 lazy 路由
+- mockApi + server：order.owed_me/owed_partner + /api/settlements 双端同步
+
+### §4.6 不可变文件改动清单
+- `mockApi.js` + `server/index.cjs`（POST /api/orders 落 owed_me/owed_partner + GET /api/settlements 新端点）
+- 语义增量、不破坏既有订单读接口；历史订单缺 owed_* 读取时现算兜底
+- **未动 CartContext.jsx 与 favorites.js**
+
+### 门禁
+build ✓ 3.31s / lint 6 warnings 0 errors（历史 4 + AnnualReport/DishShareCard 等 react-refresh 属既有）/ test 8/8 ✓ / p6 0 · 0 · 0（忌口卡用 ember/on-dark 混色、年报柱图用 var 令牌，无泄露）
+
+### 观感待 live 目检
+- Cart 忌口内联卡的暖墨色 ember 底与深字对比（白天/夜宵）
+- OrderDetail 合计区 payer=aa 时的两行小字布局
+- 年度别册月度柱图小屏 480 宽下 12 根的间距
+- 打印预览：浏览器 Ctrl-P 出的 PDF 版式（sticky 页头去 sticky / 底片层隐藏 / 卡片去阴影是否够清爽）
+
 ## 8. 已知待办 / 候选项
 
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。

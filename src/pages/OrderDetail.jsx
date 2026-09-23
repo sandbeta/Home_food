@@ -235,6 +235,24 @@ export default function OrderDetail() {
                   <span className="font-serif text-3xl font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.7em] mr-0.5">¥</span>{order.total_price}</span>
                 </div>
               </div>
+              {/* 批 4a · AA 结算快照（家庭语义=各付各的）：payer=aa 时展开两人应付；历史订单从 items 现算兜底 */}
+              {order.payer === 'aa' && (() => {
+                const meOwed = Number.isFinite(order.owed_me) ? order.owed_me
+                  : (order.items || []).filter(i => i.added_by === 'me').reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0)
+                const pOwed = Number.isFinite(order.owed_partner) ? order.owed_partner
+                  : (order.items || []).filter(i => i.added_by === 'partner').reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0)
+                return (
+                  <div className="flex justify-end items-center gap-3 mt-1.5 text-xs">
+                    <span className="text-[var(--color-ash)]">
+                      🐱 <span className="font-serif font-bold text-[var(--color-caramel)] tabular-nums">¥{meOwed}</span>
+                    </span>
+                    <span aria-hidden className="opacity-40">·</span>
+                    <span className="text-[var(--color-ash)]">
+                      🐑 <span className="font-serif font-bold text-[var(--color-caramel)] tabular-nums">¥{pOwed}</span>
+                    </span>
+                  </div>
+                )
+              })()}
             </div>
           </div>
         </GlassCard>

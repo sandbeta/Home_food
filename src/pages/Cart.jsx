@@ -21,6 +21,7 @@ import { cardEntrance, EASE, usePrefersReducedMotion } from '../theme/motion'
 import { pickOne, CART_TITLES, CART_NOTES, ORDER_PLACED_NOTE } from '../lib/sweetCopy'
 import { tap, vibrate } from '../lib/sfx'
 import { requestJson } from '../lib/request'
+import { readAvoids, scanDishes } from '../lib/avoid'
 
 /**
  * 购物车条目 —— V3 设计稿的"糖果清单行"：
@@ -96,6 +97,9 @@ export default function Cart() {
   const [purchaseOpen, setPurchaseOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(false)
+  /* 批 4b · 忌口扫描：命中时先拦一次让用户看，再点即放行（家庭场景"提示不阻断"） */
+  const [avoidHit, setAvoidHit] = useState(null) // [{ dishName, hits:[{keyword, ingredient}] }]
+  const [avoidConfirmed, setAvoidConfirmed] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
   const skipRef = useRef(null)
   const mountedRef = useRef(true)
@@ -116,6 +120,28 @@ export default function Cart() {
 
   const handleSubmit = async () => {
     if (items.length === 0 || submitting) return
+    /* 批 4b · 提交前忌口扫描（首次拦，用户看后再点即放行） */
+    const avoids = readAvoids()
+    if (!avoidConfirmed && avoids.length > 0 && !avoidHit) {
+      setSubmitting(true)
+      try {
+        const withRecipe = await Promise.all(items.map(async (i) => {
+          try {
+            const r = await requestJson(`/api/dishes/${i.dish_id}`)
+            const d = await r.json()
+            return { name: i.name, recipe: d && d.recipe }
+          } catch { return { name: i.name, recipe: null } }
+        }))
+        const hits = scanDishes(withRecipe, avoids)
+        if (hits.length > 0) {
+          setAvoidHit(hits)
+          setSubmitting(false)
+          try { window.__cgAnnounce?.(`有 ${hits.length} 道菜含忌口，请看一眼`) } catch {}
+          return
+        }
+      } catch { /* 扫不动不拦，让下单继续走 */ }
+      setSubmitting(false)
+    }
     setSubmitting(true)
     setSubmitError(false)
     try {
@@ -367,6 +393,40 @@ export default function Cart() {
               <span className="text-xs" aria-hidden>⏱️</span>
               <span className="text-xs text-[var(--color-on-dark)]">预估等待约 20-30 分钟</span>
             </div>
+
+            {avoidHit && (
+              <div role="alert"
+                className="mb-2.5 px-3 py-2.5 rounded-xl"
+                style={{
+                  background: 'color-mix(in srgb, var(--color-ember) 22%, var(--color-on-dark))',
+                  border: '2px solid color-mix(in srgb, var(--color-ember) 60%, transparent)',
+                  color: '#2B2429',
+                }}>
+                <p className="text-xs font-bold mb-1.5 flex items-center gap-1"><span aria-hidden>🌿</span> 这几道里有忌口，看看要不要换</p>
+                <ul className="text-[11px] leading-relaxed space-y-0.5" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {avoidHit.map(h => (
+                    <li key={h.dishName}>
+                      <span className="font-bold">{h.dishName}</span>
+                      <span className="opacity-70"> · {h.hits.map(x => x.keyword).join('、')}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex gap-2 mt-2">
+                  <button type="button"
+                    onClick={() => { setAvoidConfirmed(true); handleSubmit() }}
+                    className="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold min-h-[44px]"
+                    style={{ background: 'var(--color-bone)', color: 'var(--color-on-dark)' }}>
+                    知道啦，仍然下单
+                  </button>
+                  <button type="button"
+                    onClick={() => setAvoidHit(null)}
+                    className="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold min-h-[44px]"
+                    style={{ background: 'transparent', border: '2px solid var(--color-line)', color: 'var(--color-bone)' }}>
+                    先返回改改
+                  </button>
+                </div>
+              </div>
+            )}
 
             {submitError && (
               <div role="alert"

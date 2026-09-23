@@ -186,11 +186,17 @@ async function handleApi(req, res, url) {
       }
     })
     const total_price = items.reduce((s, i) => s + i.price * i.quantity, 0)
+    /* 批 4a · AA 结算快照（家庭语义 AA = 各付各的）：payer=me 全归 🐱 / partner 全归 🐑 / aa 按 added_by 分账 */
+    const PAYER = body.payer || 'aa'
+    const meSub = items.filter(i => i.added_by === 'me').reduce((s, i) => s + i.price * i.quantity, 0)
+    const partnerSub = items.filter(i => i.added_by === 'partner').reduce((s, i) => s + i.price * i.quantity, 0)
+    const owed_me = PAYER === 'me' ? total_price : PAYER === 'partner' ? 0 : meSub
+    const owed_partner = PAYER === 'me' ? 0 : PAYER === 'partner' ? total_price : partnerSub
     /* 批 1 新增：sticker 便签留言条（选底色 + 图钉 emoji + 可选手写消息），OrderDetail 呈现为贴在灶台上的纸片 */
     const sticker = body.sticker && typeof body.sticker === 'object'
       ? { bg: String(body.sticker.bg || ''), pin: String(body.sticker.pin || ''), msg: String(body.sticker.msg || '') }
       : null
-    const order = { id: state.nextOrderId++, status: 'pending', created_at: new Date().toISOString(), note: body.note || '', sticker, payer: body.payer || 'aa', total_price, items }
+    const order = { id: state.nextOrderId++, status: 'pending', created_at: new Date().toISOString(), note: body.note || '', sticker, payer: PAYER, total_price, owed_me, owed_partner, items }
     state.orders.unshift(order)
     saveState()
     return sendJson(res, order, 201)
@@ -282,6 +288,41 @@ async function handleApi(req, res, url) {
     state.wishes = state.wishes.filter((w) => w.id !== id)
     saveState()
     return sendJson(res, { ok: true })
+  }
+
+  /* —— 批 4a · 结算单（与 mockApi 一比一） —— */
+  if (pathname === '/api/settlements' && method === 'GET') {
+    const month = url.searchParams.get('month')
+    const mm = month && /^\d{4}-\d{2}$/.test(month) ? month : new Date().toISOString().slice(0, 7)
+    const inMonth = state.orders.filter(o => (o.created_at || '').slice(0, 7) === mm)
+    const calc = (o) => {
+      if (Number.isFinite(o.owed_me) || Number.isFinite(o.owed_partner)) {
+        return { me: Number(o.owed_me || 0), partner: Number(o.owed_partner || 0) }
+      }
+      const items = Array.isArray(o.items) ? o.items : []
+      const total = items.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0)
+      const meSub = items.filter(i => i.added_by === 'me').reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0)
+      const pSub = items.filter(i => i.added_by === 'partner').reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0)
+      const p = o.payer || 'aa'
+      return p === 'me' ? { me: total, partner: 0 } : p === 'partner' ? { me: 0, partner: total } : { me: meSub, partner: pSub }
+    }
+    let owedMe = 0, owedPartner = 0, total = 0
+    const byPayer = { aa: 0, me: 0, partner: 0 }
+    for (const o of inMonth) {
+      const t = Number(o.total_price) || 0
+      total += t
+      const { me, partner } = calc(o)
+      owedMe += me; owedPartner += partner
+      byPayer[o.payer] = (byPayer[o.payer] || 0) + t
+    }
+    return sendJson(res, {
+      month: mm,
+      orders_count: inMonth.length,
+      total,
+      owed_me: Math.round(owedMe * 100) / 100,
+      owed_partner: Math.round(owedPartner * 100) / 100,
+      by_payer: { aa: byPayer.aa || 0, me: byPayer.me || 0, partner: byPayer.partner || 0 },
+    })
   }
 
   return sendJson(res, { message: `No route: ${method} ${pathname}` }, 404)

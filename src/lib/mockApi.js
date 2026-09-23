@@ -340,6 +340,13 @@ export function installMockApi() {
         }
       })
       const total_price = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+      /* 批 4a · AA 结算快照（家庭语义 AA = 各付各的）：payer=me 全归 🐱 / partner 全归 🐑 / aa 按 added_by 分账。
+         落库到订单，避免"事后 admin 改菜价历史订单金额漂"问题（同 §7.15 m-21 快照价缝隙的补丁）。 */
+      const PAYER = body.payer || 'aa'
+      const meSub = items.filter(i => i.added_by === 'me').reduce((s, i) => s + i.price * i.quantity, 0)
+      const partnerSub = items.filter(i => i.added_by === 'partner').reduce((s, i) => s + i.price * i.quantity, 0)
+      const owed_me = PAYER === 'me' ? total_price : PAYER === 'partner' ? 0 : meSub
+      const owed_partner = PAYER === 'me' ? 0 : PAYER === 'partner' ? total_price : partnerSub
       const order = {
         id: state.nextOrderId++,
         status: 'pending',
@@ -349,8 +356,10 @@ export function installMockApi() {
         sticker: body.sticker && typeof body.sticker === 'object'
           ? { bg: String(body.sticker.bg || ''), pin: String(body.sticker.pin || ''), msg: String(body.sticker.msg || '') }
           : null,
-        payer: body.payer || 'aa',
+        payer: PAYER,
         total_price,
+        /* 批 4a 新增：结算快照 */
+        owed_me, owed_partner,
         items,
       }
       state.orders.unshift(order)
@@ -448,6 +457,46 @@ export function installMockApi() {
       state.wishes = state.wishes.filter(w => w.id !== id)
       saveState(state)
       return json({ ok: true })
+    }
+
+    /* —— 批 4a · 结算单：按月聚合订单 owed_me/owed_partner（历史订单无 owed_* 时按 items+payer 现算兜底） —— */
+    if (pathname === '/api/settlements' && method === 'GET') {
+      const month = searchParams.get('month') // 'YYYY-MM'，缺省=当月
+      const mm = month && /^\d{4}-\d{2}$/.test(month) ? month : new Date().toISOString().slice(0, 7)
+      const inMonth = state.orders.filter(o => (o.created_at || '').slice(0, 7) === mm)
+      const calc = (o) => {
+        if (Number.isFinite(o.owed_me) || Number.isFinite(o.owed_partner)) {
+          return { me: Number(o.owed_me || 0), partner: Number(o.owed_partner || 0) }
+        }
+        // 历史订单兜底：按 items.added_by + payer 现算（与 POST 时同规则）
+        const items = Array.isArray(o.items) ? o.items : []
+        const total = items.reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0)
+        const meSub = items.filter(i => i.added_by === 'me').reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0)
+        const pSub = items.filter(i => i.added_by === 'partner').reduce((s, i) => s + (Number(i.price) || 0) * (Number(i.quantity) || 0), 0)
+        const p = o.payer || 'aa'
+        return p === 'me' ? { me: total, partner: 0 } : p === 'partner' ? { me: 0, partner: total } : { me: meSub, partner: pSub }
+      }
+      let owedMe = 0, owedPartner = 0, total = 0
+      const byPayer = { aa: 0, me: 0, partner: 0 }
+      for (const o of inMonth) {
+        const t = Number(o.total_price) || 0
+        total += t
+        const { me, partner } = calc(o)
+        owedMe += me; owedPartner += partner
+        byPayer[o.payer] = (byPayer[o.payer] || 0) + t
+      }
+      return json({
+        month: mm,
+        orders_count: inMonth.length,
+        total,
+        owed_me: Math.round(owedMe * 100) / 100,
+        owed_partner: Math.round(owedPartner * 100) / 100,
+        by_payer: {
+          aa: byPayer.aa || 0,
+          me: byPayer.me || 0,
+          partner: byPayer.partner || 0,
+        },
+      })
     }
 
     return json({ message: `Mock API route not found: ${method} ${pathname}` }, 404)

@@ -24,6 +24,7 @@ const Profile = lazy(() => import('./pages/Profile'))
 const HotDishes = lazy(() => import('./pages/HotDishes'))
 const KitchenCalendar = lazy(() => import('./pages/KitchenCalendar'))
 const TasteProfile = lazy(() => import('./pages/TasteProfile'))
+const AnnualReport = lazy(() => import('./pages/AnnualReport'))
 const Admin = lazy(() => import('./pages/Admin'))
 const AdminDishes = lazy(() => import('./pages/AdminDishes'))
 const AdminOrders = lazy(() => import('./pages/AdminOrders'))
@@ -158,6 +159,8 @@ function App() {
                     <Route path="/calendar" element={<KitchenCalendar />} />
                     {/* 批 3b · 口味画像（雷达图 + TOP5，从 Profile 入口进） */}
                     <Route path="/taste" element={<TasteProfile />} />
+                    {/* 批 4c · 年度别册（可打印的年终总结，从 Profile 入口进） */}
+                    <Route path="/report" element={<AnnualReport />} />
                     <Route path="/admin" element={<Admin />} />
                     <Route path="/admin/dishes" element={<AdminDishes />} />
                     <Route path="/admin/orders" element={<AdminOrders />} />

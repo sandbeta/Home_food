@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
 import ThemeToggle from '../components/ui/ThemeToggle'
 import FullBleedHero from '../components/FullBleedHero'
@@ -15,6 +15,8 @@ import Icon from '../components/ui/Icons'
 import LazySheep from '../components/ui/LazySheep'
 import { requestJson } from '../lib/request'
 import { nextAnniversary, anniversariesToday, formatAnniDate } from '../lib/anniversary'
+import { PRESET_AVOIDS, readAvoids, writeAvoids } from '../lib/avoid'
+import Chip from '../components/ui/Chip'
 
 export default function Profile() {
   const [stats, setStats] = useState({ orders: 0, total: 0 })
@@ -42,6 +44,22 @@ export default function Profile() {
   }, [])
   const todayHit = anniversariesToday(anniversaries)[0] || null
   const nextHit = nextAnniversary(anniversaries)
+
+  /* 批 4b 新增 · 忌口清单：设备级存 localStorage（家庭自用），Cart 提交前会扫一次 recipe.ingredients */
+  const [avoids, setAvoids] = useState(() => readAvoids())
+  const [avoidsOpen, setAvoidsOpen] = useState(false)
+  const [customAvoid, setCustomAvoid] = useState('')
+  const saveAvoids = (next) => { setAvoids(next); writeAvoids(next) }
+  const toggleAvoid = (k) => {
+    const next = avoids.includes(k) ? avoids.filter(x => x !== k) : [...avoids, k]
+    saveAvoids(next)
+    try { window.__cgAnnounce?.(`${avoids.includes(k) ? '取消' : '添加'}忌口：${k}`) } catch {}
+  }
+  const addCustom = () => {
+    const v = customAvoid.trim()
+    if (!v || avoids.includes(v)) { setCustomAvoid(''); return }
+    saveAvoids([...avoids, v]); setCustomAvoid('')
+  }
 
   return (
     <div className="relative">
@@ -193,6 +211,94 @@ export default function Profile() {
           </div>
           <span aria-hidden className="text-lg text-[var(--color-ash)]">›</span>
         </Link>
+
+        {/* 批 4c 新增 · 年度别册入口（可打印的年终总结） */}
+        <Link to="/report"
+          className="d3-card-face flex items-center gap-3 no-underline mt-3"
+          style={{ padding: 'var(--space-card-p)', color: 'inherit' }}>
+          <span aria-hidden
+            className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
+            style={{
+              background: 'var(--anchor-ink)',
+              color: 'var(--color-on-dark)',
+              border: '2px solid var(--clay-deep)',
+            }}>📖</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-[var(--color-bone)]">年度别册</p>
+            <p className="text-xs text-[var(--color-ash)] mt-0.5">{new Date().getFullYear()} 年终总结 · 一键存 PDF</p>
+          </div>
+          <span aria-hidden className="text-lg text-[var(--color-ash)]">›</span>
+        </Link>
+
+        {/* 批 4b 新增 · 忌口清单：预设 chips 多选 + 自定义输入；命中时 Cart 提交前温柔提示（不阻断） */}
+        <div className="d3-card-face mt-3" style={{ padding: 'var(--space-card-p)' }}>
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setAvoidsOpen(v => !v)}
+            className="w-full flex items-center gap-3 min-h-[44px] text-left"
+            aria-expanded={avoidsOpen}
+            aria-controls="avoid-panel"
+          >
+            <span aria-hidden
+              className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
+              style={{
+                background: 'color-mix(in srgb, var(--color-ember) 18%, var(--surface))',
+                color: 'var(--color-ash)',
+                border: '2px solid var(--color-line)',
+              }}>🌿</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-[var(--color-bone)]">忌口清单</p>
+              <p className="text-xs text-[var(--color-ash)] mt-0.5 truncate">
+                {avoids.length === 0 ? '没设置 · 点这里勾选不吃的' : `${avoids.length} 项忌口：${avoids.slice(0, 4).join('、')}${avoids.length > 4 ? '…' : ''}`}
+              </p>
+            </div>
+            <motion.span aria-hidden animate={{ rotate: avoidsOpen ? 90 : 0 }} transition={{ duration: 0.2 }}
+              className="text-lg text-[var(--color-ash)]">›</motion.span>
+          </motion.button>
+          <AnimatePresence initial={false}>
+            {avoidsOpen && (
+              <motion.div key="avoid-panel" id="avoid-panel"
+                initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.28 }}
+                className="overflow-hidden">
+                <div className="pt-3 mt-3" style={{ borderTop: '1px solid var(--color-glass-border)' }}>
+                  <p className="text-xs text-[var(--color-ash)] mb-2">点选不吃什么 · Cart 提交前会温柔提示（不阻断）</p>
+                  <div className="flex flex-wrap gap-2">
+                    {PRESET_AVOIDS.map(p => (
+                      <Chip key={p.key} active={avoids.includes(p.key)} onClick={() => toggleAvoid(p.key)}>
+                        {p.label}
+                      </Chip>
+                    ))}
+                  </div>
+                  {avoids.filter(k => !PRESET_AVOIDS.some(p => p.key === k)).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {avoids.filter(k => !PRESET_AVOIDS.some(p => p.key === k)).map(k => (
+                        <Chip key={k} active onClick={() => toggleAvoid(k)}>
+                          {k} ×
+                        </Chip>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-2 mt-3">
+                    <label htmlFor="avoid-custom" className="sr-only">自定义忌口</label>
+                    <input id="avoid-custom" value={customAvoid} onChange={e => setCustomAvoid(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustom() } }}
+                      placeholder="加一个自定义…" maxLength={8}
+                      className="d3-input flex-1 px-3 py-2 text-sm min-h-[44px]"
+                      style={{ borderRadius: 'var(--radius-btn)' }} />
+                    <button onClick={addCustom} aria-label="添加自定义忌口"
+                      className="d3-btn-sm px-3 py-2 text-xs font-bold min-h-[44px]">加</button>
+                  </div>
+                  {avoids.length > 0 && (
+                    <button onClick={() => { saveAvoids([]); try { window.__cgAnnounce?.('忌口清单已清空') } catch {} }}
+                      className="mt-3 text-xs font-bold text-[var(--color-ash)] min-h-[44px] px-2 -mx-2">清空全部</button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         {/* 入口列表 —— 收藏已并入点菜页，空壳项已删 */}
         <motion.div
