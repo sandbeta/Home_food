@@ -230,19 +230,59 @@ export default function OrderDetail() {
           </div>
         </GlassCard>
 
-        {/* 备注 */}
-        {order.note && (
+        {/* 备注 / 批 1 · 便签纸：有 sticker 优先展示便签（贴灶台上的小纸条），否则回落到纯文字备注 */}
+        {order.sticker && order.sticker.msg ? (
+          <GlassCard delay={0.2}>
+            <div className="relative overflow-visible p-4 flex items-start justify-center">
+              <div
+                className="relative w-full"
+                style={{
+                  background: (() => {
+                    /* 与 StickerEditor 共 4 色，走 @theme 令牌单源（批 1 便签世界件）*/
+                    const map = {
+                      rose: 'linear-gradient(180deg, var(--sticker-rose-a), var(--sticker-rose-b))',
+                      sage: 'linear-gradient(180deg, var(--sticker-sage-a), var(--sticker-sage-b))',
+                      apricot: 'linear-gradient(180deg, var(--sticker-apricot-a), var(--sticker-apricot-b))',
+                      sky: 'linear-gradient(180deg, var(--sticker-sky-a), var(--sticker-sky-b))',
+                    }
+                    return map[order.sticker.bg] || map.rose
+                  })(),
+                  color: 'var(--color-bone)',
+                  borderRadius: 4,
+                  transform: 'rotate(-1.2deg)',
+                  boxShadow: '0 6px 18px rgba(43,36,41,0.14), inset 0 1px 0 rgba(255,255,255,0.5)',
+                  padding: '22px 18px 16px',
+                }}
+              >
+                <span
+                  className="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl select-none"
+                  style={{ filter: 'drop-shadow(0 2px 2px rgba(43,36,41,0.28))' }}
+                  aria-hidden="true"
+                >{order.sticker.pin || '💕'}</span>
+                <p
+                  className="text-[15px] leading-relaxed whitespace-pre-wrap"
+                  style={{ fontStyle: 'italic', fontFamily: '"Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif' }}
+                >{order.sticker.msg}</p>
+                {order.note && (
+                  <p className="text-xs mt-2 pt-2 opacity-70" style={{ borderTop: '1px dashed rgba(43,36,41,0.16)' }}>
+                    给厨房：{order.note}
+                  </p>
+                )}
+              </div>
+            </div>
+          </GlassCard>
+        ) : order.note ? (
           <GlassCard delay={0.2}>
             <div className="p-3.5 relative overflow-hidden">
               <div className="absolute left-0 top-0 bottom-0 w-1" style={{ background: 'linear-gradient(to bottom, var(--color-clay), var(--color-sage))' }} />
               <div className="flex items-center gap-1.5 mb-1 pl-1">
-                <span className="text-sm">💬</span>
+                <span className="text-sm" aria-hidden="true">💬</span>
                 <span className="text-xs text-[var(--color-ash)] font-semibold">备注</span>
               </div>
               <p className="text-sm text-[var(--color-bone)] pl-1">{order.note}</p>
             </div>
           </GlassCard>
-        )}
+        ) : null}
 
         {/* 时间戳 */}
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}

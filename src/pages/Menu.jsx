@@ -12,6 +12,7 @@ import PageContainer from '../components/ui/PageContainer'
 import EmptyState from '../components/ui/EmptyState'
 import LuckyDishCard from '../components/ui/LuckyDishCard'
 import Icon from '../components/ui/Icons'
+import WishFormModal from '../components/WishFormModal'
 import { useFavorites } from '../lib/favorites'
 import { isNightSnack } from '../lib/nightRules'
 import { SCENES, scenePick } from '../lib/sceneRules'
@@ -74,6 +75,8 @@ export default function Menu() {
   const [searchFocused, setSearchFocused] = useState(false)
   const [showAllCategories, setShowAllCategories] = useState(false)
   const [particles, setParticles] = useState([])
+  /* 批 1 新增 · 愿望池入口（不管当前是否空态，末尾都给一个"菜单里没有？说给他"） */
+  const [wishOpen, setWishOpen] = useState(false)
   const { addItem, whoAmI, setWhoAmI } = useCart()
   const { favorites, has, toggle } = useFavorites()
   const navigate = useNavigate()
@@ -410,7 +413,22 @@ export default function Menu() {
             加载更多（还有 {filteredDishes.length - visibleDishes.length} 道）
           </motion.button>
         )}
+
+        {/* 批 1 新增 · 愿望池入口：菜单里没找到想吃的？说给他，他补进菜单里 */}
+        <div className="mt-6 pt-4 text-center" style={{ borderTop: '1px solid var(--color-glass-border)' }}>
+          <p className="text-xs text-[var(--color-ash)] mb-1.5">菜单里没有想吃的那一道？</p>
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setWishOpen(true)}
+            className="text-sm font-bold text-[var(--color-clay-text)] min-h-[44px] px-4 rounded-full"
+            aria-label="告诉他想吃什么"
+          >
+            许个愿，让他变出来 🌠
+          </motion.button>
+        </div>
       </PageContainer>
+
+      <WishFormModal open={wishOpen} onClose={() => setWishOpen(false)} />
 
       {/* +1 飘升粒子 */}
       <AnimatePresence>

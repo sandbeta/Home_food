@@ -12,6 +12,7 @@ import PayerSelector from '../components/ui/PayerSelector'
 import Stepper from '../components/ui/Stepper'
 import EmptyState from '../components/ui/EmptyState'
 import LazySheep from '../components/ui/LazySheep'
+import StickerEditor from '../components/ui/StickerEditor'
 import { getCategoryEmoji } from '../lib/categoryIcons'
 import { HERO_IMAGES } from '../theme/images'
 import { PERSONA } from '../theme/persona'
@@ -88,6 +89,7 @@ function CartRow({ item, onUpdate, onRemove }) {
 export default function Cart() {
   const { items, totalPrice, totalCount, updateQuantity, removeItem, clearCart } = useCart()
   const [note, setNote] = useState('')
+  const [sticker, setSticker] = useState(null) // 批 1 · 便签留言条 {bg,pin,msg}
   const [payer, setPayer] = useState('aa')
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState(false)
@@ -121,6 +123,8 @@ export default function Cart() {
         body: JSON.stringify({
           items: items.map((i) => ({ dish_id: i.dish_id, quantity: i.quantity, added_by: i.added_by })),
           note,
+          // 批 1 · 便签：msg 空则传 null（数据层不做二次判断，前端就把空态收敛掉）
+          sticker: sticker && sticker.msg && sticker.msg.trim() ? sticker : null,
           payer,
         }),
       })
@@ -280,6 +284,7 @@ export default function Cart() {
                 className="text-base"
                 animate={{ y: [0, -3, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                aria-hidden="true"
               >
                 💬
               </motion.span>
@@ -296,6 +301,11 @@ export default function Cart() {
               rows={2}
               placeholder="少盐、不要香菜、多放蒜..."
             />
+          </GlassCard>
+
+          {/* 批 1 新增 · 便签纸：给TA的小纸条（贴在灶台上的那种），与"给厨房的操作指令"备注互补 */}
+          <GlassCard style={{ padding: 'var(--space-card-p)' }}>
+            <StickerEditor value={sticker} onChange={setSticker} collapsedLabel="贴张便签给他/她（会显示在订单里）" />
           </GlassCard>
 
           {/* 谁买单 */}

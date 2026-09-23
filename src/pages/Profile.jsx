@@ -14,6 +14,7 @@ import { pickOne, PROFILE_TITLES, partnerBadge } from '../lib/sweetCopy'
 import Icon from '../components/ui/Icons'
 import LazySheep from '../components/ui/LazySheep'
 import { requestJson } from '../lib/request'
+import { nextAnniversary, anniversariesToday, formatAnniDate } from '../lib/anniversary'
 
 export default function Profile() {
   const [stats, setStats] = useState({ orders: 0, total: 0 })
@@ -33,6 +34,14 @@ export default function Profile() {
       setStats({ orders: d.length, total: d.reduce((s, o) => s + (Number(o.total_price) || 0), 0) })
     }).catch(() => setStatsErr('订单没加载出来，看看服务端开好了没'))
   }, [reload])
+
+  /* 批 1 新增 · 纪念日预览：拉列表 → 今日命中优先显示，否则显示下一个倒计时；无数据时引导去 Admin 添加 */
+  const [anniversaries, setAnniversaries] = useState([])
+  useEffect(() => {
+    requestJson('/api/anniversaries').then(r => r.json()).then(d => setAnniversaries(Array.isArray(d) ? d : [])).catch(() => {})
+  }, [])
+  const todayHit = anniversariesToday(anniversaries)[0] || null
+  const nextHit = nextAnniversary(anniversaries)
 
   return (
     <div className="relative">
@@ -109,6 +118,45 @@ export default function Profile() {
             <button onClick={() => setReload(r => r + 1)} aria-label="重新加载统计" className="text-xs font-bold shrink-0 min-h-[44px] px-3 rounded-full" style={{ color: 'var(--color-ash)' }}>再试一次</button>
           </div>
         )}
+
+        {/* 批 1 新增 · 我们的日子（纪念日预览卡，管理入口走 Admin） */}
+        <Link to="/admin/anniversaries"
+          className="d3-card-face flex items-center gap-3 no-underline mt-3"
+          style={{ padding: 'var(--space-card-p)', color: 'inherit' }}>
+          <span aria-hidden
+            className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
+            style={{
+              background: todayHit
+                ? 'var(--anchor-ink)'
+                : 'color-mix(in srgb, var(--clay-50) 12%, var(--surface))',
+              color: todayHit ? 'var(--color-on-dark)' : 'var(--color-clay-text)',
+              border: '2px solid var(--color-line)',
+            }}>🎂</span>
+          <div className="flex-1 min-w-0">
+            {todayHit ? (
+              <>
+                <p className="text-sm font-bold text-[var(--color-bone)] truncate">今天是 · {todayHit.name}</p>
+                <p className="text-xs text-[var(--color-ash)] mt-0.5">第 {todayHit.years + 1} 年 · {formatAnniDate(todayHit.date)}</p>
+              </>
+            ) : nextHit ? (
+              <>
+                <p className="text-sm font-bold text-[var(--color-bone)] truncate">下一个 · {nextHit.anniversary.name}</p>
+                <p className="text-xs text-[var(--color-ash)] mt-0.5">还有 {nextHit.days} 天 · {formatAnniDate(nextHit.anniversary.date)}</p>
+              </>
+            ) : anniversaries.length === 0 ? (
+              <>
+                <p className="text-sm font-bold text-[var(--color-bone)]">还没记下我们的日子</p>
+                <p className="text-xs text-[var(--color-ash)] mt-0.5">点这里，从今天开始数</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-bold text-[var(--color-bone)]">我们的日子</p>
+                <p className="text-xs text-[var(--color-ash)] mt-0.5">点管理</p>
+              </>
+            )}
+          </div>
+          <span aria-hidden className="text-lg text-[var(--color-ash)]">›</span>
+        </Link>
 
         {/* 入口列表 —— 收藏已并入点菜页，空壳项已删 */}
         <motion.div

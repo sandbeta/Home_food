@@ -107,28 +107,36 @@ src/
 ├── lib/
 │   ├── mockApi.js           模拟后端（不可变*，改动须逐处说明）
 │   ├── favorites.js         收藏 hook（不可变）
+│   ├── request.js           ★§7.15 M-s5 新增：全站 fetch 走 requestJson（默认 12s 超时 + AbortController）
+│   ├── announce.js          ★§7.15 m-12 新增：全局 sr-only live region 桥（App 顶部挂 #cg-live-region，各处 window.__cgAnnounce 播报）
+│   ├── anniversary.js       ★批 1 新增：anniversariesToday / nextAnniversary / formatAnniDate 三个纯函数
 │   ├── categoryIcons.js     品类 emoji 与菜品图
 │   ├── seedMenuExtra.js     HowToCook 灌库菜品 342 道（生成，勿手改）
-│   ├── seedNightExtra.js    夜宵手写种子 25 道（id 900-924，emoji 占位）
-│   ├── nightRules.js        ★夜宵判定规则库（isNightSnack/nightPick，首页选品+点菜筛选共用）
+│   ├── seedNightExtra.js    夜宵手写种子 25 道（id 900-924，emoji 占位；§7.15 M-d2 后 905/907/915 已加"深夜"前缀消歧）
+│   ├── nightRules.js        ★夜宵判定规则库（isNightSnack/nightPick + §7.15 m-26 新增 nightPickInfo 返回 isFallback）
 │   ├── sceneRules.js        ★场景快选规则（SCENES 吃辣/清淡/快手/仪式感 + scenePick，Menu 前端过滤）
 │   ├── adminGate.js         ★公网 Admin 密码门（包装 fetch 捕获 401→弹层输密→换 cookie 重放；见 §10.5）
 │   ├── seedRecipes.js       菜谱数据 342 份（生成，懒加载，勿手改）
-│   └── sweetCopy.js         ★ 全站个性化文案池（懒洋洋昵称 + 各页标题/情话，随机抽取）
+│   └── sweetCopy.js         ★ 全站个性化文案池（懒洋洋昵称 + 各页标题/情话，随机抽取；§7.15/批 1 补 HOT_*/NIGHT_SNACK_TITLE/ORDER_STATUS_DESC/ANNIVERSARY_*）
 ├── components/
 │   ├── DockLayer.jsx        ★唯一常驻底部固定层（空车药丸居中，球槽随购物车挂载）
 │   ├── PageHeader.jsx       ★统一页头（back/backTo/right）
 │   ├── FloatingPillNav.jsx  4 tab 导航（SVG 图标，激活态白）
 │   ├── D3CartOrb.jsx        购物车球（入场/退场由 DockLayer 编排）
 │   ├── NightSnackSheet.jsx  ★夜宵开屏弹窗（进入夜宵即弹六宫格宵夜，一键加购；App 外壳常驻）
+│   ├── ErrorBoundary.jsx    ★§7.15 B2 新增·顶层错误兜底（任何组件抛错走 EmptyState 而非整站白屏）
+│   ├── AnniversaryBanner.jsx ★批 1 新增·纪念日命中日 Home 顶部横幅（clay 实底 + 🎉 图钉 + 可选跳绑定 dish）
+│   ├── WishFormModal.jsx    ★批 1 新增·愿望提交弹窗（走 useDialogA11y 焦点陷阱 + safe-area 底衬）
 │   ├── GlassCard / FullBleedHero(name=VT形变名) / KissIcon / AddDishModal（D3StatusRing 已删，见台账"机械债清零"）
 │   ├── ClawMachine.jsx      ★签名组件·抓娃娃点餐机（羊毛檐+泡泡时钟+玻璃罩吊角色+主推圆盘+出菜口；Home/NightHome 共用，夜宵变体 showClock=false）
 │   ├── AmbientLightCanvas.jsx  ★overdrive WebGL 晨光（渐进增强，失败即静默退场回 CSS 光斑）
 │   └── ui/                  共享组件：Icons(细线图标集)/Character(官方角色素材壳)/LazySheep(自绘四表情小羊)/
 │                            DishRow/OrderCard/EmptyState/LoadingState/PayerSelector/Stepper/StatCard/
-│                            SectionHeader/Chip/LuckyDishCard/PageContainer/AdminShell/ThemeToggle(页头夜宵快捷钮)
-├── pages/                   11 页：Home/NightHome(夜宵专属首页)/Menu/DishDetail/Cart/MyOrders/OrderDetail/
-│                            Profile/Admin/AdminDishes/AdminOrders
+│                            SectionHeader/Chip/LuckyDishCard/PageContainer/AdminShell/ThemeToggle(页头夜宵快捷钮)/
+│                            StickerEditor(★批 1 新增·便签留言条编辑器，4 底色 6 图钉，走 @theme 令牌)
+├── pages/                   13 页：Home/NightHome(夜宵专属首页)/Menu/DishDetail/Cart/MyOrders/OrderDetail/
+│                            Profile/Admin/AdminDishes/AdminOrders/HotDishes +
+│                            ★批 1 新增：AdminAnniversaries(纪念日管理)/AdminWishes(愿望池管理)
 │                            （Checkout、Favorites 已删，路由保留重定向）
 public/dish-images/         菜品预览图：htc/ 169 张（生成 153 + 真实化轮补 16）、real/ 37 张（Wikimedia CC）、dish-*.webp 仅存 11 张（均已被 HowToCook 实拍覆盖，其余 AI 图已删）
 public/lazy-assets/         官方角色抠图 12 张（V3 娃娃机主题）：4 张抓娃娃场景挂点池 + 3 张页头打卡徽记 + 5 张场景点缀；映射见 theme/characters.js
@@ -299,6 +307,44 @@ scripts/
 **不可变文件改动清单**（§4.6 铁律）：`CartContext.jsx`（M-s4 类型守卫）· `mockApi.js`（M-d1 nextDishId 10000 + M-d2 (id|name) 双键去重）· `favorites.js`（未改）。所有改动均在源码里注释了 "M-sX/M-dX 修" 标记，便于逐处追溯。
 
 **门禁**：build✓ / lint 仅 2 历史 warnings（`_an.mjs` 根脚本 + CartContext 只导出 hook 触发 react-refresh 属既有）/ test 8 项✓ / p6 静态门禁 色值泄露 0·暗色残留 0·断头路 0；四路 agent 交叉印证的高置信度 3 项（B1 视觉+a11y / B2 逻辑+边界 / B4 键盘不可达簇）+ 逻辑 agent 独立脚本 diff 确认的 B3 全部落地。观感待 live 目检（撤销按钮 h-11、Menu 分段 SVG 化、ClawMachine 起手即加购手感、focus 环双层 bone+halo 两主题、PayerSelector 「🐱 请 / 🐑 请」新文案）。
+
+## 7.16 功能扩展批 1：纪念日 + 便签留言 + 愿望池（2026-09-23）
+
+第四轮审查全量整改落地后，所有者同意扩功能。18 项候选分 6 批实施，本批为 S 级三条（情感增量最高、工程量最低）。
+
+**新增数据层**（mockApi ↔ server 一比一，两端**不可变文件**改动记入 §4）：
+- `state.anniversaries`（id / name / date:YYYY-MM-DD / annual:bool / dish_id / note） + `nextAnniversaryId`
+- `state.wishes`（id / name / note / by:'me'|'partner' / status:'pending'|'added'|'rejected' / created_at / added_dish_id） + `nextWishId`
+- `order.sticker`（{ bg, pin, msg } · msg ≤60 字，为 null 视为无便签）
+- 两组 CRUD 端点：`/api/anniversaries` 与 `/api/wishes`（GET/POST + /:id PUT/DELETE）
+- 老 state 兼容：loadState 里 `!Array.isArray(state.anniversaries)` 等四道兜底补齐
+
+**顺路修双端漂移一处**：`server/index.cjs` initState 里 `missingSeed` 判定仍是 `name` 单键（§7.15 M-d2 只改了 mockApi 忘同步 server）→ 一并改成 `(id|name)` 双键，兑现本轮 §4.12「两端自动 diff」立的第一条规矩。
+
+**新增组件与页**：
+- `src/lib/anniversary.js`（anniversariesToday / nextAnniversary / formatAnniDate 三个纯函数）
+- `src/components/AnniversaryBanner.jsx`（命中日 Home 顶部横幅，clay 实底 + 🎉 图钉 + 可选跳绑定 dish）
+- `src/components/ui/StickerEditor.jsx`（Cart 里的便签编辑器：4 底色 + 6 图钉 emoji + 手写文案，折叠式，未编辑时仅一行"贴张便签"入口）
+- `src/components/WishFormModal.jsx`（许愿弹窗，走 useDialogA11y 焦点陷阱 + safe-area 底衬）
+- `src/pages/AdminAnniversaries.jsx`（Admin 管理页，行内展开式表单，顶部"下一个倒计时"锚点卡）
+- `src/pages/AdminWishes.jsx`（Admin 管理页，pending/added/rejected/全部 四档 tab + 补齐跳 /admin/dishes 预填）
+
+**新增令牌**（§4.10 令牌变更 checklist 兑现）：`--sticker-{rose,sage,apricot,sky}-{a,b}` 八个 @theme static（世界件、跨主题恒定不反相，与灶体/火苗同层）；StickerEditor 与 OrderDetail 便签呈现都从 @theme 消费 var()，**p6 门禁 0 泄露**。
+
+**功能集成点**：
+- Home：拉 anniversaries → useMemo 命中 → useEffect 一次性切 pageTitle/sweetNote 到 ANNIVERSARY_TITLES/NOTES 池 + 顶部挂 Banner + 娃娃机 rotIdx===0 首轮锁定 hitDish（用户点换一道/抓取后正常轮换）
+- Cart：新增便签卡（在备注与买单之间）+ handleSubmit POST body 加 sticker 字段（msg 空则 null）
+- OrderDetail：有 sticker.msg 时"备注卡"换成"贴在灶台上的便签纸"（rotate -1.2° + 图钉 + 手写字体），无 sticker 保留原样；两个都有 → 便签里嵌"给厨房：xxx"一行
+- Menu：列表末尾（不管空态/满态）"没找到想吃的那一道？→ 许个愿，让他变出来 🌠"入口 + 挂 WishFormModal
+- Profile：新增「我们的日子」卡（今日命中显示"今天是·N 年"，否则"下一个·N 天后"，无数据引导点管理），跳 /admin/anniversaries
+- Admin：新增两入口（纪念日 / 愿望池），愿望池 pending>0 时右上角 love 色数字角标；stats 拉取从 Promise.all 升级为 Promise.allSettled 让单点失败不拖全表
+- App.jsx：两条 lazy 路由 + Routes
+
+**sweetCopy 池新增**：`ANNIVERSARY_TITLES`（5 条命中日大标题）+ `ANNIVERSARY_NOTES`（5 条命中日副标题），延续男朋友口吻 + 懒洋洋昵称人设。
+
+**四件套门禁**：build ✓ 2.55s / lint 4 warnings 0 errors（2 处历史 CartContext/`_an.mjs` + 2 处新组件的 react-refresh/only-export-components 属既有模式）/ test 8/8 ✓ / **p6 色值泄露 0 · 暗色残留 0 · 断头路 0**。
+
+**已知小 gap（留下轮）**：AdminWishes "变出来"目前先 PUT status='added' 再跳 /admin/dishes?state.prefill=xxx；AddDishModal 未接住 prefill 参数（下一批把 AddDishModal 支持从 location.state 读预填 name/description 就闭环）。
 
 ## 8. 已知待办 / 候选项
 

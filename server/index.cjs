@@ -76,19 +76,26 @@ function initState() {
     try { state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) } catch { state = null }
   }
   if (!state || !Array.isArray(state.dishes)) {
-    state = { dishes: [...dishes], orders: [], nextDishId: 10000, nextOrderId: 1001 }
+    /* 批 1 新增：fresh state 一并给 anniversaries / wishes 空表 + 序列号（与 mockApi 一比一复刻） */
+    state = { dishes: [...dishes], orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1 }
     saveState()
     console.log('[init] 已从种子创建 state.json（%d 道菜）', state.dishes.length)
   } else {
-    // 老 state 补齐：种子里有、state 里没有的菜按名并入（同 mockApi 的 missingSeed 语义）
-    const names = new Set(state.dishes.map((d) => d.name))
-    const missing = dishes.filter((d) => !names.has(d.name))
+    /* 修（§7.15 M-d2 双端同步）：mockApi 端已改成 (id|name) 双键去重，server 端曾漏同步 —— 本轮
+       「两端自动 diff」教训第一次兑现。改成同规则，夜宵版 905/907/915 与灌库版 735/767/713 各自补齐。 */
+    const existing = new Set(state.dishes.map((d) => `${d.id}|${d.name}`))
+    const missing = dishes.filter((d) => !existing.has(`${d.id}|${d.name}`))
     if (missing.length) {
       state.dishes.push(...missing)
       state.nextDishId = Math.max(state.nextDishId || 1, ...state.dishes.map((d) => Number(d.id) || 0)) + 1
       saveState()
       console.log('[init] 补齐新增种子菜品 %d 道', missing.length)
     }
+    /* 批 1 新增 · 老 state.json 兼容补齐 anniversaries / wishes 两表 */
+    if (!Array.isArray(state.anniversaries)) state.anniversaries = []
+    if (!Array.isArray(state.wishes)) state.wishes = []
+    if (!Number.isFinite(state.nextAnniversaryId)) state.nextAnniversaryId = 1
+    if (!Number.isFinite(state.nextWishId)) state.nextWishId = 1
   }
 }
 
@@ -179,7 +186,11 @@ async function handleApi(req, res, url) {
       }
     })
     const total_price = items.reduce((s, i) => s + i.price * i.quantity, 0)
-    const order = { id: state.nextOrderId++, status: 'pending', created_at: new Date().toISOString(), note: body.note || '', payer: body.payer || 'aa', total_price, items }
+    /* 批 1 新增：sticker 便签留言条（选底色 + 图钉 emoji + 可选手写消息），OrderDetail 呈现为贴在灶台上的纸片 */
+    const sticker = body.sticker && typeof body.sticker === 'object'
+      ? { bg: String(body.sticker.bg || ''), pin: String(body.sticker.pin || ''), msg: String(body.sticker.msg || '') }
+      : null
+    const order = { id: state.nextOrderId++, status: 'pending', created_at: new Date().toISOString(), note: body.note || '', sticker, payer: body.payer || 'aa', total_price, items }
     state.orders.unshift(order)
     saveState()
     return sendJson(res, order, 201)
@@ -197,6 +208,76 @@ async function handleApi(req, res, url) {
     const id = Number(oM[1])
     const order = state.orders.find((o) => o.id === id)
     return order ? sendJson(res, order) : sendJson(res, { message: 'Not found' }, 404)
+  }
+
+  /* —— 批 1 新增 · 纪念日 anniversaries（与 mockApi 一比一） —— */
+  if (pathname === '/api/anniversaries' && method === 'GET') {
+    return sendJson(res, [...state.anniversaries].sort((a, b) => (a.date || '').localeCompare(b.date || '')))
+  }
+  if (pathname === '/api/anniversaries' && method === 'POST') {
+    const body = await readJsonBody(req)
+    const item = {
+      id: state.nextAnniversaryId++,
+      name: String(body.name || '纪念日'),
+      date: String(body.date || ''),
+      annual: body.annual !== false,
+      dish_id: Number(body.dish_id) || null,
+      note: String(body.note || ''),
+    }
+    state.anniversaries.push(item)
+    saveState()
+    return sendJson(res, item, 201)
+  }
+  const anniM = pathname.match(/^\/api\/anniversaries\/(\d+)$/)
+  if (anniM && method === 'PUT') {
+    const id = Number(anniM[1])
+    const body = await readJsonBody(req)
+    state.anniversaries = state.anniversaries.map((a) => a.id === id ? { ...a, ...body, id } : a)
+    saveState()
+    return sendJson(res, state.anniversaries.find((a) => a.id === id) || null)
+  }
+  if (anniM && method === 'DELETE') {
+    const id = Number(anniM[1])
+    state.anniversaries = state.anniversaries.filter((a) => a.id !== id)
+    saveState()
+    return sendJson(res, { ok: true })
+  }
+
+  /* —— 批 1 新增 · 愿望池 wishes（与 mockApi 一比一） —— */
+  if (pathname === '/api/wishes' && method === 'GET') {
+    const status = url.searchParams.get('status')
+    const list = [...state.wishes].filter((w) => !status || w.status === status)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    return sendJson(res, list)
+  }
+  if (pathname === '/api/wishes' && method === 'POST') {
+    const body = await readJsonBody(req)
+    const item = {
+      id: state.nextWishId++,
+      name: String(body.name || ''),
+      note: String(body.note || ''),
+      by: body.by === 'partner' ? 'partner' : 'me',
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      added_dish_id: null,
+    }
+    state.wishes.unshift(item)
+    saveState()
+    return sendJson(res, item, 201)
+  }
+  const wishM = pathname.match(/^\/api\/wishes\/(\d+)$/)
+  if (wishM && method === 'PUT') {
+    const id = Number(wishM[1])
+    const body = await readJsonBody(req)
+    state.wishes = state.wishes.map((w) => w.id === id ? { ...w, ...body, id } : w)
+    saveState()
+    return sendJson(res, state.wishes.find((w) => w.id === id) || null)
+  }
+  if (wishM && method === 'DELETE') {
+    const id = Number(wishM[1])
+    state.wishes = state.wishes.filter((w) => w.id !== id)
+    saveState()
+    return sendJson(res, { ok: true })
   }
 
   return sendJson(res, { message: `No route: ${method} ${pathname}` }, 404)

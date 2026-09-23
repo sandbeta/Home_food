@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
@@ -10,9 +10,11 @@ import Icon from '../components/ui/Icons'
 import ThemeToggle from '../components/ui/ThemeToggle'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
+import AnniversaryBanner from '../components/AnniversaryBanner'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter, usePrefersReducedMotion } from '../theme/motion'
-import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
+import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES, ANNIVERSARY_TITLES, ANNIVERSARY_NOTES } from '../lib/sweetCopy'
+import { anniversariesToday } from '../lib/anniversary'
 import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 import { useCart } from '../components/CartContext'
 
@@ -57,7 +59,20 @@ export default function Home() {
   const [paused, setPaused] = useState(false)
   const [autoOn, setAutoOn] = useState(true)   // 自动轮换开关（机顶播放/暂停钮；触屏可关）
   const [tabVisible, setTabVisible] = useState(true)
-  const [sweetNote] = useState(() => pickOne(HOME_NOTES))
+  /* 批 1 新增 · 纪念日：异步拉 anniversaries 后判定今日命中；命中即一次性把 pageTitle/sweetNote 从常规池切到纪念日池
+     （anniversaryAppliedRef 防重复抽；未命中保持原问候） */
+  const [anniversaries, setAnniversaries] = useState([])
+  const todayHit = useMemo(() => anniversariesToday(anniversaries)[0] || null, [anniversaries])
+  const anniversaryAppliedRef = useRef(false)
+  const [pageTitle, setPageTitle] = useState(() => `${getGreeting()}，${NICKNAME}`)
+  const [sweetNote, setSweetNote] = useState(() => pickOne(HOME_NOTES))
+  useEffect(() => {
+    if (todayHit && !anniversaryAppliedRef.current) {
+      anniversaryAppliedRef.current = true
+      setPageTitle(pickOne(ANNIVERSARY_TITLES))
+      setSweetNote(pickOne(ANNIVERSARY_NOTES))
+    }
+  }, [todayHit])
   const navigate = useNavigate()
   const reduced = usePrefersReducedMotion()
   const { addItem, items, whoAmI, updateQuantity } = useCart()
@@ -91,6 +106,8 @@ export default function Home() {
       setHomeLoading(false)
       })
       .catch(() => { setHomeLoading(false); setHomeFailed(true) })
+    // 批 1：拉纪念日列表（命中判在 useMemo 里做）
+    fetch('/api/anniversaries').then(r => r.ok ? r.json() : []).then(setAnniversaries).catch(() => {})
   }, [reloadToken])
 
   // 标签页切到后台时停摆：既省电，也避免用户切回来时大卡已经翻到陌生的菜
@@ -109,7 +126,14 @@ export default function Home() {
   const rotPool = len ? dishes.filter((_, i) => !gridIdx.includes(i)) : []
   const rotSource = rotPool.length ? rotPool : dishes
 
-  const featured = rotSource.length ? rotSource[rotIdx % rotSource.length] : null
+  /* 批 1 · 命中日首轮锁定：todayHit 且绑定了 dish_id 且 rotIdx===0（用户一进首页还没换过）
+     → featured = hitDish；一旦点换一道/抓取（rotIdx>0）恢复正常轮换，不再锁死。 */
+  const hitDish = useMemo(() => {
+    if (!todayHit || !todayHit.dish_id || rotIdx !== 0) return null
+    return dishes.find(d => d.id === Number(todayHit.dish_id)) || null
+  }, [todayHit, dishes, rotIdx])
+  const normalFeatured = rotSource.length ? rotSource[rotIdx % rotSource.length] : null
+  const featured = hitDish || normalFeatured
   const popular = gridIdx.map(i => dishes[i])
 
   // reduced-motion / 关闭自动轮换 / 手指按住卡片 / 标签页隐藏 / 池子不足两道时都不自动轮换
@@ -138,9 +162,17 @@ export default function Home() {
 
   return (
     <div className="relative flex flex-col" style={{ minHeight: 'calc(100dvh - var(--bottom-inset))' }}>
-      <PageHeader title={`${getGreeting()}，${NICKNAME}`} subtitle={sweetNote} right={<ThemeToggle />} />
+      <PageHeader title={pageTitle} subtitle={sweetNote} right={<ThemeToggle />} />
 
       <PageContainer>
+        {/* 批 1 · 纪念日横幅：仅命中时插入，未命中不占位；绑定了 dish 时给一个跳详情的入口 */}
+        {todayHit && (
+          <AnniversaryBanner
+            hit={todayHit}
+            dishName={hitDish ? hitDish.name : ''}
+            onOpenDish={hitDish ? () => navigate(`/dish/${hitDish.id}`) : undefined}
+          />
+        )}
         {/* —— 抓娃娃点餐机（V3 设计稿签名交互）：主页第一焦点 ——
             主推菜住玻璃罩，"抓取"=爪子垂下夹菜；泡泡时钟 + 自动轮换播放/暂停常驻机顶。
             悬停/键盘聚焦暂停轮换，触屏起手重置倒计时，避免用户正看时被换走。 */}

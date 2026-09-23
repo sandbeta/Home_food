@@ -129,6 +129,15 @@
   --flame-mid: #E87198;      /* 火苗中段玫霞 */
   --claw-case-hi: #FDEFF4;   /* 娃娃机玻璃罩顶（白天樱粉渐白） */
 
+  /* —— 便签留言条 4 色（批 1 新增 · 世界件，与灶体/火苗同层：跨主题恒定不反相）——
+     StickerEditor 让用户挑色 → 存 sticker.bg='rose'|'sage'|'apricot'|'sky' →
+     OrderDetail 消费同一组渐变。4 色两档 a→b 从上到下的柔和渐变，配墨色 #2B2429 文字，
+     白天/夜宵下纸面都是"从抽屉里摸出一张便签"的暖度；夜宵下贴纸依然明亮（是"她贴的"，不是"屏幕的"）。 */
+  --sticker-rose-a: #FFE8F1;    --sticker-rose-b: #FBD3E1;
+  --sticker-sage-a: #E9F2E5;    --sticker-sage-b: #CFE2C9;
+  --sticker-apricot-a: #FFEFD6; --sticker-apricot-b: #F7DBB0;
+  --sticker-sky-a: #E8F0F7;     --sticker-sky-b: #CFDFEE;
+
   /* —— 订单状态 chip 文字色（语义令牌，夜宵反相块换浅色档）——
      白天深字压浅底；夜宵若仍用 clay-80/深梅灰会"暗字压暗底"不达 4.5:1，
      故夜宵覆盖为 clay-30/sage-30/浅梅灰。见 [data-theme="night"] 段。 */

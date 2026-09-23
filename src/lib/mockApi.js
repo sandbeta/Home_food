@@ -115,16 +115,22 @@ function loadState() {
         state.nextDishId = Math.max(Number(state.nextDishId || 1), ...state.dishes.map(d => Number(d.id || 0))) + 1
         saveState(state)
       }
+      /* 批 1 新增 · 老 state 兼容补齐（anniversaries / wishes 两表 + 序列号） */
+      if (!Array.isArray(state.anniversaries)) state.anniversaries = []
+      if (!Array.isArray(state.wishes)) state.wishes = []
+      if (!Number.isFinite(state.nextAnniversaryId)) state.nextAnniversaryId = 1
+      if (!Number.isFinite(state.nextWishId)) state.nextWishId = 1
     } else {
       /* M-d1 修（不可变文件 · 同 §4 台账）：
          fresh 态 nextDishId 原为魔法数 66（按早期 65 道种子写就，灌库扩充后未回改），
          与 server/index.cjs 的 10000 漂移 → 双端新建菜 id 段位不可互认。
          改为与 server 字面一致 10000（当前 seed 段位 1-65/500-841/900-924 均 <10000 无冲突；
-         未来 seed 逼近该值需两端同调，写进 §4 提醒）。 */
-      state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001 }
+         未来 seed 逼近该值需两端同调，写进 §4 提醒）。
+       批 1 新增：anniversaries / wishes 空表 + 序列号（与 server 端一比一复刻） */
+      state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1 }
     }
   } catch {
-    state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001 }
+    state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1 }
   }
   stateCache = state
   return state
@@ -339,6 +345,10 @@ export function installMockApi() {
         status: 'pending',
         created_at: new Date().toISOString(),
         note: body.note || '',
+        /* 批 1 新增：便签留言条（选底色 + 图钉 emoji + 可选手写字体）→ OrderDetail 呈现为贴在灶台上的纸片 */
+        sticker: body.sticker && typeof body.sticker === 'object'
+          ? { bg: String(body.sticker.bg || ''), pin: String(body.sticker.pin || ''), msg: String(body.sticker.msg || '') }
+          : null,
         payer: body.payer || 'aa',
         total_price,
         items,
@@ -362,6 +372,76 @@ export function installMockApi() {
       const id = Number(orderMatch[1])
       const order = state.orders.find(o => o.id === id)
       return order ? json(order) : json({ message: 'Not found' }, 404)
+    }
+
+    /* —— 批 1 新增 · 纪念日 anniversaries（她/他共同的日子，Home 检测命中即切主题） —— */
+    if (pathname === '/api/anniversaries' && method === 'GET') {
+      return json([...state.anniversaries].sort((a, b) => (a.date || '').localeCompare(b.date || '')))
+    }
+    if (pathname === '/api/anniversaries' && method === 'POST') {
+      const body = await readBody(init)
+      const item = {
+        id: state.nextAnniversaryId++,
+        name: String(body.name || '纪念日'),
+        date: String(body.date || ''),          // YYYY-MM-DD 首次日期
+        annual: body.annual !== false,           // 是否每年重复（默认 true）
+        dish_id: Number(body.dish_id) || null,   // 可选绑定的「回忆里那道菜」
+        note: String(body.note || ''),
+      }
+      state.anniversaries.push(item)
+      saveState(state)
+      return json(item, 201)
+    }
+    const anniMatch = pathname.match(/^\/api\/anniversaries\/(\d+)$/)
+    if (anniMatch && method === 'PUT') {
+      const id = Number(anniMatch[1])
+      const body = await readBody(init)
+      state.anniversaries = state.anniversaries.map(a => a.id === id ? { ...a, ...body, id } : a)
+      saveState(state)
+      return json(state.anniversaries.find(a => a.id === id) || null)
+    }
+    if (anniMatch && method === 'DELETE') {
+      const id = Number(anniMatch[1])
+      state.anniversaries = state.anniversaries.filter(a => a.id !== id)
+      saveState(state)
+      return json({ ok: true })
+    }
+
+    /* —— 批 1 新增 · 愿望池 wishes（她提想吃什么菜单没有 → 他补齐/拒绝） —— */
+    if (pathname === '/api/wishes' && method === 'GET') {
+      const status = searchParams.get('status')
+      const list = [...state.wishes].filter(w => !status || w.status === status)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      return json(list)
+    }
+    if (pathname === '/api/wishes' && method === 'POST') {
+      const body = await readBody(init)
+      const item = {
+        id: state.nextWishId++,
+        name: String(body.name || ''),
+        note: String(body.note || ''),
+        by: body.by === 'partner' ? 'partner' : 'me',
+        status: 'pending',                     // pending | added | rejected
+        created_at: new Date().toISOString(),
+        added_dish_id: null,                    // 他补齐后关联的 dish id
+      }
+      state.wishes.unshift(item)
+      saveState(state)
+      return json(item, 201)
+    }
+    const wishMatch = pathname.match(/^\/api\/wishes\/(\d+)$/)
+    if (wishMatch && method === 'PUT') {
+      const id = Number(wishMatch[1])
+      const body = await readBody(init)
+      state.wishes = state.wishes.map(w => w.id === id ? { ...w, ...body, id } : w)
+      saveState(state)
+      return json(state.wishes.find(w => w.id === id) || null)
+    }
+    if (wishMatch && method === 'DELETE') {
+      const id = Number(wishMatch[1])
+      state.wishes = state.wishes.filter(w => w.id !== id)
+      saveState(state)
+      return json({ ok: true })
     }
 
     return json({ message: `Mock API route not found: ${method} ${pathname}` }, 404)

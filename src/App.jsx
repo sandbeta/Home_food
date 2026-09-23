@@ -25,6 +25,8 @@ const HotDishes = lazy(() => import('./pages/HotDishes'))
 const Admin = lazy(() => import('./pages/Admin'))
 const AdminDishes = lazy(() => import('./pages/AdminDishes'))
 const AdminOrders = lazy(() => import('./pages/AdminOrders'))
+const AdminAnniversaries = lazy(() => import('./pages/AdminAnniversaries'))
+const AdminWishes = lazy(() => import('./pages/AdminWishes'))
 
 // 页面加载骨架屏
 function PageLoader() {
@@ -153,6 +155,9 @@ function App() {
                     <Route path="/admin" element={<Admin />} />
                     <Route path="/admin/dishes" element={<AdminDishes />} />
                     <Route path="/admin/orders" element={<AdminOrders />} />
+                    {/* 批 1 新增 · 纪念日与愿望池 */}
+                    <Route path="/admin/anniversaries" element={<AdminAnniversaries />} />
+                    <Route path="/admin/wishes" element={<AdminWishes />} />
                   </Routes>
                 </ErrorBoundary>
               </Suspense>

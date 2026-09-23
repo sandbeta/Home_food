@@ -10,28 +10,38 @@ import { requestJson } from '../lib/request'
 const QUICK_LINKS = [
   { label: '菜品管理', icon: 'menu', color: 'var(--color-ash)', path: '/admin/dishes' },
   { label: '厨房看板', icon: 'orders', color: 'var(--color-ash)', path: '/admin/orders' },
+  { label: '纪念日', icon: 'heart', color: 'var(--color-ash)', path: '/admin/anniversaries' },
+  { label: '愿望池', icon: 'sparkles', color: 'var(--color-ash)', path: '/admin/wishes' },
 ]
 
 export default function Admin() {
-  const [stats, setStats] = useState({ dishes: 0, orders: 0, today: 0 })
+  const [stats, setStats] = useState({ dishes: 0, orders: 0, today: 0, wishes: 0 })
   const [err, setErr] = useState('')
   const navigate = useNavigate()
 
   /* M-s3 修：以前 Promise.all 无 catch → 服务端挂时 unhandled rejection 且停在 0/0/0 看起来像真没数据。
-     补 catch → 顶部内联错误横幅 + 再试一次。 */
+     补 catch → 顶部内联错误横幅 + 再试一次。
+     批 1 新增：拉 pending 愿望数（不阻塞主 stats，用 allSettled 让单点失败不拖全表） */
   const load = () => {
     setErr('')
-    Promise.all([
+    Promise.allSettled([
       requestJson('/api/dishes/all').then((r) => r.json()),
       requestJson('/api/orders').then((r) => r.json()),
-    ]).then(([dishes, orders]) => {
-      const today = orders.filter((o) => {
+      requestJson('/api/wishes?status=pending').then((r) => r.json()),
+    ]).then(([dishes, orders, wishes]) => {
+      const dList = dishes.status === 'fulfilled' ? dishes.value : []
+      const oList = orders.status === 'fulfilled' ? orders.value : []
+      const wList = wishes.status === 'fulfilled' && Array.isArray(wishes.value) ? wishes.value : []
+      if (dishes.status !== 'fulfilled' && orders.status !== 'fulfilled') {
+        setErr('统计没加载出来，看看服务端开好了没'); return
+      }
+      const today = oList.filter((o) => {
         const d = new Date(o.created_at)
         const now = new Date()
         return d.toDateString() === now.toDateString()
       }).length
-      setStats({ dishes: dishes.length, orders: orders.length, today })
-    }).catch(() => setErr('统计没加载出来，看看服务端开好了没'))
+      setStats({ dishes: dList.length, orders: oList.length, today, wishes: wList.length })
+    })
   }
   useEffect(() => { load() }, [])
 
@@ -69,11 +79,19 @@ export default function Admin() {
             key={link.label}
             whileTap={{ scale: 0.97 }}
             onClick={() => navigate(link.path)}
-            className="d3-card-face flex-1 text-center flex flex-col items-center gap-2.5 min-h-[44px]"
+            className="d3-card-face flex-1 text-center flex flex-col items-center gap-2.5 min-h-[44px] relative"
             style={{ padding: 'var(--space-card-p)' }}
           >
             <Icon name={link.icon} size={26} style={{ color: link.color }} />
             <span className="text-sm font-bold text-[var(--color-bone)]">{link.label}</span>
+            {/* 批 1 新增：愿望池 pending 角标（有等兑现的愿望才显） */}
+            {link.path === '/admin/wishes' && stats.wishes > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1.5 rounded-full text-[11px] font-bold flex items-center justify-center"
+                style={{ background: 'var(--color-love)', color: 'var(--color-on-dark)', boxShadow: 'var(--shadow-2)' }}
+                aria-label={`${stats.wishes} 个愿望等你变出来`}>
+                {stats.wishes}
+              </span>
+            )}
           </motion.button>
         ))}
       </div>
