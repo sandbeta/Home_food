@@ -97,8 +97,16 @@ function subscribe(listener) {
   return () => listeners.delete(listener)
 }
 
+/* m-31 修：暴露 ?theme= 调试锁定状态，App 顶部给可关闭角标提示，
+   避免用户挂着参数过夜误以为夜宵自动切换坏了。 */
+export function isThemeDebugLocked() {
+  const url = readThemeParam()
+  return url === 'night' || url === 'light'
+}
+
 /** React 钩子：任意组件读取/切换主题，全站同步 */
 export function useTheme() {
   const theme = useSyncExternalStore(subscribe, () => current)
-  return { theme, toggle: toggleTheme, isNight: theme === 'night' }
+  const locked = useSyncExternalStore(subscribe, isThemeDebugLocked, isThemeDebugLocked)
+  return { theme, toggle: toggleTheme, isNight: theme === 'night', debugLocked: locked }
 }

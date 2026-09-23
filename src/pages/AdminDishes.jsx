@@ -15,6 +15,16 @@ export default function AdminDishes() {
   const [visibleCount, setVisibleCount] = useState(30)
   const [listErr, setListErr] = useState('')
   const [pendingDel, setPendingDel] = useState(null)   // 两段式删除：记住当前待确认的行
+
+  /* m-30 修：两段式删除 pendingDel 一旦置位无自动收起——若管理员走神/切到别处，
+     该按钮长期停在待确认高亮，回头随手一点即真删，误删风险随停留时间累积。
+     起 5s 定时器自动复位（用户仍在这行二次点击就即时删除，不冲突）。 */
+  useEffect(() => {
+    if (pendingDel === null) return undefined
+    const t = setTimeout(() => setPendingDel(null), 5000)
+    return () => clearTimeout(t)
+  }, [pendingDel])
+
   const loadDishes = () => {
     fetch('/api/dishes/all')
       .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
@@ -67,7 +77,7 @@ export default function AdminDishes() {
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => { setPendingDel(null); setEditingDish(null); setShowModal(true) }}
-          className="d3-btn d3-btn-primary px-4 py-2 text-xs font-bold"
+          className="d3-btn d3-btn-primary px-4 py-2 min-h-[44px] text-xs font-bold"
           style={{ borderRadius: 'var(--radius-ctl)' }}
         >
           + 添加
@@ -83,7 +93,7 @@ export default function AdminDishes() {
             border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
           }}>
           <span className="text-sm font-semibold" style={{ color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' }}>⚠️ {listErr}</span>
-          <button onClick={() => setListErr('')} aria-label="关闭提示" className="text-xs font-bold shrink-0" style={{ color: 'var(--color-ash)' }}>知道了</button>
+          <button onClick={() => setListErr('')} aria-label="关闭提示" className="text-xs font-bold shrink-0 min-h-[44px] px-3 rounded-full" style={{ color: 'var(--color-ash)' }}>知道了</button>
         </div>
       )}
       {loading ? (

@@ -12,24 +12,43 @@ import { contentEnter } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
 import { HOT_TRENDS, matchTrendDish } from '../lib/hotRecipes'
 import { tap, vibrate } from '../lib/sfx'
-import { morphTo, heroNameFor, cacheList } from '../lib/vt'
+import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
+import { pickOne, HOT_TITLES, HOT_NOTES } from '../lib/sweetCopy'
+import { requestJson } from '../lib/request'
 
 // 排名色：前三金/银铜，其余安静
 const RANK_COLORS = ['var(--color-clay)', 'var(--color-mist)', 'var(--color-caramel)']  // 名次大数字【前景】：随夜宵提亮（前景该反相）
 const RANK_FILLS = ['var(--color-clay)', 'var(--color-mist-deep)', 'var(--color-caramel-deep)']  // NO.x 徽章【底】：不反相深档，配 on-dark 亮字两主题达 AA
 
 export default function HotDishes() {
-  const [dishes, setDishes] = useState([])
+  /* m-22 修：以前 cacheList('hot', ...) 只写不读，从首页/热榜进详情再 morphBack 时首帧无
+     dish-hero 元素 → 形变退化为普通淡入。useState 初值从 getCachedList('hot') 回填。 */
+  const [dishes, setDishes] = useState(() => getCachedList('hot') || [])
   const [orders, setOrders] = useState([])
   const [keyword, setKeyword] = useState('')
   const [toast, setToast] = useState(null)
+  // M-s3 修：以前两 fetch 无 catch → 服务端挂时静默空榜。补 catch → 顶部内联失败条。
+  const [err, setErr] = useState('')
+  const [reload, setReload] = useState(0)
   const { addItem } = useCart()
   const navigate = useNavigate()
+  // M-v4 修：HotDishes 曾是全站唯一不走 sweetCopy 单源的用户页，补齐文案池
+  const [pageTitle] = useState(() => pickOne(HOT_TITLES))
+  const [pageNote] = useState(() => pickOne(HOT_NOTES))
 
   useEffect(() => {
-    fetch('/api/dishes?category=全部').then(r => r.json()).then(d => { setDishes(d); cacheList('hot', d) })
-    fetch('/api/orders').then(r => r.json()).then(setOrders)
-  }, [])
+    setErr('')
+    let alive = true
+    Promise.all([
+      requestJson('/api/dishes?category=全部').then(r => r.json()),
+      requestJson('/api/orders').then(r => r.json()),
+    ]).then(([dList, oList]) => {
+      if (!alive) return
+      setDishes(Array.isArray(dList) ? dList : []); cacheList('hot', Array.isArray(dList) ? dList : [])
+      setOrders(Array.isArray(oList) ? oList : [])
+    }).catch(() => { if (alive) setErr('榜单没加载出来，看看服务端开好了没') })
+    return () => { alive = false }
+  }, [reload])
 
   // 你们的"最近热门"：按点单份数聚合（与外部趋势榜分开，一个是权威口径、一个是自家数据）
   const ownHot = useMemo(() => {
@@ -64,7 +83,7 @@ export default function HotDishes() {
     <div className="relative">
       <FullBleedHero src={HERO_IMAGES.menu} variant="immersive" alt="热门菜谱" />
 
-      <PageHeader title="热门菜谱" subtitle="大家都在做什么菜" />
+      <PageHeader title={pageTitle} subtitle={pageNote} />
 
       <PageContainer>
         {/* 搜索 —— 与点菜页同一枚糖果胶囊语言 */}
@@ -79,6 +98,19 @@ export default function HotDishes() {
             className="flex-1 min-w-0 bg-transparent border-0 outline-none text-sm text-[var(--color-bone)] placeholder:text-[var(--color-mist)]"
           />
         </div>
+
+        {err && (
+          <div role="alert"
+            className="flex items-center justify-between gap-3 px-3.5 py-2.5 mt-3"
+            style={{
+              borderRadius: 'var(--radius-ctl)',
+              background: 'color-mix(in srgb, var(--color-danger) 10%, var(--surface))',
+              border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
+            }}>
+            <span className="text-sm font-semibold" style={{ color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' }}>⚠️ {err}</span>
+            <button onClick={() => setReload(r => r + 1)} aria-label="重新加载热榜" className="text-xs font-bold shrink-0 min-h-[44px] px-3 rounded-full" style={{ color: 'var(--color-ash)' }}>再试一次</button>
+          </div>
+        )}
 
         {/* 你们最近点最多的 */}
         <motion.div {...contentEnter(0.05)}>
@@ -96,19 +128,24 @@ export default function HotDishes() {
                   key={dish.id}
                   whileTap={{ scale: 0.97 }}
                   onClick={(e) => morphTo(navigate, `/dish/${dish.id}`, e, dish, '/hot')}
+                  /* B4：热榜横向卡键盘可达（进详情） */
+                  role="button" tabIndex={0} aria-label={`查看${dish.name}详情`}
+                  onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(`/dish/${dish.id}`) } }}
                   className="vt-dish-host d3-card-face shrink-0 cursor-pointer overflow-hidden"
                   style={{ width: 132 }}
                 >
                   <div className="vt-dish-frame relative h-20 overflow-hidden flex items-center justify-center"
-                    style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))', viewTransitionName: heroNameFor(dish.id) }}>
-                    <span className="text-4xl">{getCategoryEmoji(dish.category)}</span>
+                    style={{ background: 'var(--plate-bg)', viewTransitionName: heroNameFor(dish.id) }}>
+                    <span className="text-4xl" aria-hidden="true">{getCategoryEmoji(dish.category)}</span>
                     {getDishImage(dish) && (
                       <img src={getDishImage(dish)} alt={dish.name} loading="lazy"
                         className="absolute inset-0 w-full h-full object-cover"
                         onError={(e) => { e.currentTarget.style.display = 'none' }} />
                     )}
+                    {/* M-c7 修：第 4 名起 NO.x 用 rgba(43,36,41,0.45) 半透明底压任意菜品照片，浅图（白汤、米饭特写）上配白字对比不可控。
+                        改用不反相深档 --color-mist-deep 与前三同族（#5E4F56，配 on-dark 亮字 ≥5:1 双主题达标），也让 NO.4+ 视觉与前三拉齐。 */}
                     <span className="absolute top-1.5 left-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full text-[var(--color-on-dark)]"
-                      style={{ background: idx < 3 ? RANK_FILLS[idx] : 'rgba(43,36,41,0.45)' }}>
+                      style={{ background: idx < 3 ? RANK_FILLS[idx] : 'var(--color-mist-deep)' }}>
                       NO.{idx + 1}
                     </span>
                   </div>

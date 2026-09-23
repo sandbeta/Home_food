@@ -39,11 +39,14 @@ function BubbleClock({ visible = true }) {
   if (!visible) return null
   const hh = String(now.getHours()).padStart(2, '0')
   const mm = String(now.getMinutes()).padStart(2, '0')
+  /* m-8 修：原 aria-label 挂在无 role 的 div 上，读屏不暴露 → 日期时间等于不存在（每 30s 静默改文本也没播报）。
+     改成语义 <time datetime=...> + aria-label 挂到有 semantic 元素的容器上；文本本身可读。 */
+  const iso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${hh}:${mm}`
   return (
-    <div className="claw-clock shrink-0" aria-label={`${now.getMonth() + 1}月${now.getDate()}日 ${hh}:${mm}`}>
+    <time className="claw-clock shrink-0" dateTime={iso} aria-label={`${now.getMonth() + 1}月${now.getDate()}日 ${hh}:${mm}`}>
       <span className="time">{hh}:{mm}</span>
       <span className="date">{now.getMonth() + 1}-{String(now.getDate()).padStart(2, '0')}<br />周{'日一二三四五六'[now.getDay()]}</span>
-    </div>
+    </time>
   )
 }
 
@@ -108,13 +111,17 @@ export default function ClawMachine({
       return
     }
     setFrozen(dish)
+    /* M-s7 修：原 onCatch 只在落槽 setTimeout 到点后调用；SEQ 期间用户切路由/点机壳菜名进详情/
+       跨 21:00 使 Home→NightHome 卸载都会 clearTimeout 掉待执行的落槽 → 加购静默丢失，
+       彩纸/星芒已半播看着"抓到了"其实车是空的。改成起手即乐观加购，落槽只负责视觉浮标。
+       撤销走 onUndo → updateQuantity-1 也天然匹配（此时购物车已有该 dish，撤销能真减）。 */
+    onCatch?.(dish)
     let t = 0
     SEQ.forEach((p) => { after(t, () => setPhase(p)); t += BEAT[p] })
     after(BEAT.drop, () => setBurst((b) => b + 1))                 // 合钳瞬间星芒
-    after(BEAT.drop + BEAT.close + BEAT.lift + BEAT.carry, () => { // 落槽：彩纸 + 震动 + 结算
+    after(BEAT.drop + BEAT.close + BEAT.lift + BEAT.carry, () => { // 落槽：彩纸 + 震动 + 浮标
       setPhase('release'); setConfetti((c) => c + 1); setShake((s) => s + 1)
       setLabel({ name: dish.name, dish, key: Date.now() })
-      onCatch?.(dish)
     })
     after(t, () => { setPhase('idle'); onGrab?.() })               // 收尾换新玩偶
   }, [grabbing, dish, reduced, onCatch, onGrab])
@@ -267,7 +274,9 @@ export default function ClawMachine({
                   {onUndo && label.dish && (
                     <button type="button" aria-label={`撤销加入的「${label.name}」`}
                       onClick={(e) => { e.stopPropagation(); const d = label.dish; setLabel(null); onUndo(d) }}
-                      className="text-xs font-bold px-3 h-9 rounded-full shrink-0"
+                      /* M-t2 修（回归验证漏洞）：§7.14 台账声称「热区抬到 44」只抬了外层 pill（h-11），
+                         真正的按钮本体仍是 h-9=36。改本体 h-11=44 达标。 */
+                      className="text-xs font-bold px-3 h-11 rounded-full shrink-0"
                       style={{ background: 'var(--color-on-dark)', color: 'var(--clay-deep)' }}>
                       撤销
                     </button>
@@ -282,7 +291,7 @@ export default function ClawMachine({
         <div className="claw-tray flex items-end justify-between gap-3 px-5 pt-3 pb-4">
           <div className="min-w-0">
             <p className="text-[11px] font-bold truncate" style={{ letterSpacing: '0.05em', color: 'var(--color-ash)' }}>{note}</p>
-            <button onClick={onOpen} className="font-serif text-2xl font-bold text-[var(--color-bone)] truncate mt-0.5 max-w-full" style={{ textUnderlineOffset: 3 }}>
+            <button onClick={onOpen} className="font-serif text-2xl font-bold text-[var(--color-bone)] truncate mt-0.5 max-w-full min-h-[44px]" style={{ textUnderlineOffset: 3 }}>
               {shown?.name}
             </button>
           </div>

@@ -13,9 +13,10 @@ import { useTheme } from '../theme/useTheme'
 import { nightPick } from '../lib/nightRules'
 import { getCategoryEmoji } from '../lib/categoryIcons'
 import LazySheep from './ui/LazySheep'
-import { pickOne, NIGHT_SNACK_NOTES } from '../lib/sweetCopy'
+import { pickOne, NIGHT_SNACK_NOTES, NIGHT_SNACK_TITLE } from '../lib/sweetCopy'
 import { sheetUp, cardEntrance, glowPulse, tapScale, usePrefersReducedMotion } from '../theme/motion'
 import useDialogA11y from '../lib/useDialogA11y'
+import { requestJson } from '../lib/request'
 
 /** Fisher-Yates 无偏洗牌取前 n 道 */
 const shuffleTake = (arr, n) => {
@@ -36,14 +37,20 @@ export default function NightSnackSheet() {
   const [open, setOpen] = useState(false)
   const [note] = useState(() => pickOne(NIGHT_SNACK_NOTES))
 
-  // 每次「进入夜宵」都弹：light→night 切换、夜宵态下刷新/首挂载。
-  // 组件常驻 App 外壳不随路由重挂载，关一次后切页不会重弹。
+  /* M-s1 修：以前 effect 无 alive 校验，isNight true→false 快速切时旧 fetch resolve 仍会 setOpen(true)
+     在白天界面弹出深夜模态并触发焦点锁。加 alive flag + isNight=false 时兜底关窗。
+     M-s8 修：/api/dishes/all 不过滤 available，后台把夜宵菜下架后弹窗仍能一键加购 → 语义失效。
+     修：先 filter available !==0 再 nightPick。 */
   useEffect(() => {
-    if (!isNight) return
-    fetch('/api/dishes/all').then(r => r.json()).then(all => {
-      const pool = nightPick(all)
+    let alive = true
+    if (!isNight) { setOpen(false); return undefined }
+    requestJson('/api/dishes/all').then(r => r.json()).then(all => {
+      if (!alive) return
+      const available = Array.isArray(all) ? all.filter(d => Number(d.available) !== 0) : []
+      const pool = nightPick(available)
       if (pool.length) { setDishes(shuffleTake(pool, 6)); setOpen(true) }
-    }).catch(() => {})
+    }).catch(() => { /* 拉不到不弹，不打扰用户 */ })
+    return () => { alive = false }
   }, [isNight])
 
   // 「看全店」：跳点菜页并预选 🌙夜宵 筛选
@@ -90,7 +97,7 @@ export default function NightSnackSheet() {
                     <LazySheep size={30} mood="sniff" />
                   </motion.div>
                   <div>
-                    <h2 className="text-base font-bold font-serif text-[var(--color-bone)] leading-tight">深夜食堂开张了</h2>
+                    <h2 className="text-base font-bold font-serif text-[var(--color-bone)] leading-tight">{NIGHT_SNACK_TITLE}</h2>
                     <p className="text-[11px] text-[var(--color-ash)]">{note}</p>
                   </div>
                 </div>

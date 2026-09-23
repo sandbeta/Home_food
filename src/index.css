@@ -117,6 +117,18 @@
      两个端点分属不同色系）。这里两端都取同族表面色，双主题各自成立。 */
   --plate-bg: radial-gradient(circle at 50% 34%, var(--color-on-dark), var(--color-ink-850) 78%);
 
+  /* —— 签名拟物装饰色（StoveStage / ClawMachine · 走 @theme static 落实单源纪律）——
+     这五组是 DESIGN.md「签名件」的拟物世界色（灶台/火苗/玻璃罩顶），刻意不随夜宵反相：
+     StoveStage 是"起锅白盘 + 灶膛暗底 + 玫瑰粉火"三件套，反相后白盘变黑、玫瑰火变暗绿即毁设。
+     与 clay-NN / sage-NN 人格色「跨主题恒定」同源，属 One Anchor / Same-Lovers 显式豁免。 */
+  --stove-body-1: #5E4F58;   /* 灶体顶（梅灰） */
+  --stove-body-2: #463B44;   /* 灶体底（深梅灰） */
+  --stove-mouth: #241B21;    /* 灶膛暗口（夜梅） */
+  --stove-live: #F5ADC5;     /* 炉口透红（熄火/起锅无、燃火有） */
+  --flame-hi: #FBDCE8;       /* 火苗顶部高光 */
+  --flame-mid: #E87198;      /* 火苗中段玫霞 */
+  --claw-case-hi: #FDEFF4;   /* 娃娃机玻璃罩顶（白天樱粉渐白） */
+
   /* —— 订单状态 chip 文字色（语义令牌，夜宵反相块换浅色档）——
      白天深字压浅底；夜宵若仍用 clay-80/深梅灰会"暗字压暗底"不达 4.5:1，
      故夜宵覆盖为 clay-30/sage-30/浅梅灰。见 [data-theme="night"] 段。 */
@@ -171,6 +183,9 @@
   --shadow-3: 0 8px 24px rgba(43, 36, 41, 0.08);
   --shadow-4: 0 16px 44px rgba(43, 36, 41, 0.12);
   --shadow-5: 0 30px 70px rgba(43, 36, 41, 0.16);
+  /* 暖墨 inset（M-v6 修：Profile 夜宵开关轨道原用 rgba(0,0,0,0.12) 违反 The Warm Shadow Rule；
+     提供墨系 inset 令牌，供组件内联 shadow 引用。夜宵反相时纯黑可见性更强，故 [data-theme="night"] 段专门覆盖） */
+  --inset-warm-1: inset 0 1px 3px rgba(43, 36, 41, 0.12);
   /* 双人格辉光 */
   --shadow-glow-clay: 0 0 0 3px color-mix(in srgb, var(--clay-50) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--clay-50) 22%, transparent);
   --shadow-glow-sage: 0 0 0 3px color-mix(in srgb, var(--sage-40) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--sage-40) 22%, transparent);
@@ -233,11 +248,16 @@ h1, h2, h3, h4, h5, h6 {
 .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
 .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-/* ========== 焦点可见性 (无障碍) ========== */
+/* ========== 焦点可见性 (无障碍 · WCAG 1.4.11) ==========
+   上一轮 sage-soft #BBD3B5 不反相，白天压纸面 1.36:1 远低于 3:1 → 键盘用户白天找不到焦点。
+   改用「主环随主题反相 + 副环 on-dark 兜底」双层：
+     · 白天：深墨 outline + 白 halo → 对纸面 ≥12:1
+     · 夜宵：浅骨 outline + 白 halo 变暗环（on-dark 不反相，暗底上仍亮） → 对暗底 ≥9:1 */
 button:focus-visible, a:focus-visible, input:focus-visible,
 textarea:focus-visible, select:focus-visible {
-  outline: 2px solid var(--color-sage-soft);
+  outline: 2px solid var(--color-bone);
   outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--color-on-dark);
 }
 
 /* 触控即时响应：去掉部分移动浏览器对可点的 300ms 双击缩放等待 */
@@ -331,13 +351,17 @@ input, textarea { caret-color: var(--color-clay); }
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft);
 }
 .d3-input::placeholder { color: var(--color-mist); }
+/* m-14 修：原 `outline: none` 特异度 0-2-0 压过全局 :focus-visible，弱视用户输入框失焦位置无解。
+   现只加 border-color + box-shadow 做视觉聚焦反馈，把键盘焦点环让给全局 :focus-visible（双层 bone+halo，两主题 ≥9:1）。 */
 .d3-input:focus {
-  outline: none;
   border-color: color-mix(in srgb, var(--clay-50) 55%, transparent);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--clay-50) 14%, transparent);
 }
 
-/* ========== Badge ========== */
+/* ========== Badge ==========
+   M-c2 修：原底 color-mix(clay-50 8%)+文字 clay-80 在夜宵 surface 反相后 → 深字压暗底 1.8~2.1:1
+   （DishDetail 分类徽标 / 菜谱难度徽标夜宵读不出）。改用「不反相浅底 clay-10 + 深字 clay-80」，
+   与 No.01 眉题徽章同款配方，两主题 ≥6:1；边框同步 clay-30 让夜宵下 badge 边缘从暗 surface 中浮出。 */
 .d3-badge {
   display: inline-flex;
   align-items: center;
@@ -346,9 +370,9 @@ input, textarea { caret-color: var(--color-clay); }
   font-size: 0.6875rem;
   font-weight: 700;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--clay-50) 8%, transparent);
+  background: var(--clay-10);
   color: var(--clay-80);
-  border: 1px solid color-mix(in srgb, var(--clay-50) 16%, transparent);
+  border: 1px solid var(--clay-30);
 }
 
 /* ========== Avatar & Backgrounds ========== */
@@ -436,7 +460,7 @@ input, textarea { caret-color: var(--color-clay); }
   width: 28px;
   height: 8px;
   border-radius: 50%;
-  background: radial-gradient(closest-side, #F5ADC5, var(--clay-70) 70%, transparent);
+  background: radial-gradient(closest-side, var(--stove-live), var(--clay-70) 70%, transparent);
   animation: live-mouth 1.4s ease-in-out infinite;
 }
 @keyframes live-mouth {
@@ -453,7 +477,7 @@ input, textarea { caret-color: var(--color-clay); }
   width: 96px;
   height: 30px;
   border-radius: 10px 10px 14px 14px;
-  background: linear-gradient(180deg, #5E4F58 0%, #463B44 100%);
+  background: linear-gradient(180deg, var(--stove-body-1) 0%, var(--stove-body-2) 100%);
   box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.18), 0 6px 14px rgba(43, 36, 41, 0.25);
 }
 /* 灶膛口 */
@@ -466,13 +490,13 @@ input, textarea { caret-color: var(--color-clay); }
   width: 34px;
   height: 12px;
   border-radius: 6px 6px 8px 8px;
-  background: #241B21;
+  background: var(--stove-mouth);
 }
 .stove-flame {
   display: block;
   width: 7px;
   border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  background: linear-gradient(180deg, #FBDCE8 0%, #E87198 45%, var(--clay-70) 100%);
+  background: linear-gradient(180deg, var(--flame-hi) 0%, var(--flame-mid) 45%, var(--clay-70) 100%);
   transform-origin: bottom center;
   animation: flame-flicker 0.7s ease-in-out infinite;
   filter: blur(0.3px);
@@ -522,10 +546,14 @@ input, textarea { caret-color: var(--color-clay); }
   --color-line: color-mix(in srgb, var(--color-bone) 20%, transparent);
   /* 图鉴盘底夜宵档：两端都是暗底同族表面色，不再用 on-dark（它不反相，会泛灰ball） */
   --plate-bg: radial-gradient(circle at 50% 34%, var(--color-ink-800), var(--color-ink-900) 78%);
-  /* 订单状态 chip 文字夜宵档：深字压暗底不达 4.5:1，换浅色档（暗底上 clay-30/sage-30/浅梅灰均 ≥4.5） */
+  /* —— 订单状态 chip 文字夜宵档：深字压暗底不达 4.5:1，换浅色档（暗底上 clay-30/sage-30/浅梅灰均 ≥4.5） */
   --status-pending-text: #C9B6BD;
   --status-preparing-text: var(--clay-30);
   --status-completed-text: var(--sage-30);
+  /* —— 小字动作链接前景夜宵档（M-c1 上轮遗漏整改）：--color-clay-text=clay-70 在夜宵暗底仅 2.30~2.86:1；
+     与 status-preparing-text 同档换 clay-30（暗底 ~8:1），影响 10 处消费者（Home/NightHome/Menu/OrderDetail/LuckyDishCard 全部 → / 收起 / 清空 / 更多 / 全部订单 / 手气签加一份）——
+     正向纪律：@theme 里任何"小字前景档"令牌若白天用深档，夜宵必配套提亮档，防「建令牌忘扫夜宵」复发（教训见 §7.13→本轮） */
+  --color-clay-text: var(--clay-30);
   /* 遮罩与背景反相 */
   --scrim-top: rgba(36, 27, 33, 0.85);
   --glass-strong: rgba(46, 34, 41, 0.90); /* 停靠药丸：夜宵改为暗玻璃 */
@@ -544,6 +572,8 @@ input, textarea { caret-color: var(--color-clay); }
   --hero-filter-functional: blur(14px) brightness(0.62);
   /* 网格菜品图夜宵档：轻压暗去饱和，图"溶"进夜纸不抢文字（2026-09-20 bolder） */
   --tile-img-filter: brightness(0.86) saturate(0.9);
+  /* M-v6：夜宵 inset 阴影需比白天更浓（暗底 rgba(43,36,41,0.12) 几乎不可见） */
+  --inset-warm-1: inset 0 1px 3px rgba(43, 36, 41, 0.42);
 }
 
 /* 玻璃底不支持 backdrop-blur 时的实底回退也要跟着反相 */
@@ -681,7 +711,7 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
 
 /* 玻璃罩：机内天空（白天樱粉渐白 / 夜宵夜纸渐深） */
 .claw-case {
-  background: linear-gradient(180deg, #FDEFF4 0%, var(--surface) 62%);
+  background: linear-gradient(180deg, var(--claw-case-hi) 0%, var(--surface) 62%);
 }
 [data-theme="night"] .claw-case {
   background: linear-gradient(180deg, var(--color-ink-800) 0%, var(--surface) 62%);

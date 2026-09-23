@@ -104,18 +104,27 @@ function loadState() {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       state = JSON.parse(saved)
-      const existingNames = new Set((state.dishes || []).map(d => d.name))
-      const missingSeed = seedDishes.filter(d => !existingNames.has(d.name))
+      /* M-d2 修（不可变文件 · 改动记入 PROJECT-HANDOFF §4 台账）：
+         原按 name 去重导致夜宵版 905/907/915 与灌库版 735/767/713 同名时被跳过，
+         老设备夜宵池永远少 3 道定向种子。改成 (id,name) 双键判等 —— 灌库版在场不影响夜宵版补齐，
+         夜宵版也不会因名同灌库版被误去重。 */
+      const existing = new Set((state.dishes || []).map(d => `${d.id}|${d.name}`))
+      const missingSeed = seedDishes.filter(d => !existing.has(`${d.id}|${d.name}`))
       if (missingSeed.length) {
         state.dishes = [...(state.dishes || []), ...missingSeed]
         state.nextDishId = Math.max(Number(state.nextDishId || 1), ...state.dishes.map(d => Number(d.id || 0))) + 1
         saveState(state)
       }
     } else {
-      state = { dishes: seedDishes, orders: [], nextDishId: 66, nextOrderId: 1001 }
+      /* M-d1 修（不可变文件 · 同 §4 台账）：
+         fresh 态 nextDishId 原为魔法数 66（按早期 65 道种子写就，灌库扩充后未回改），
+         与 server/index.cjs 的 10000 漂移 → 双端新建菜 id 段位不可互认。
+         改为与 server 字面一致 10000（当前 seed 段位 1-65/500-841/900-924 均 <10000 无冲突；
+         未来 seed 逼近该值需两端同调，写进 §4 提醒）。 */
+      state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001 }
     }
   } catch {
-    state = { dishes: seedDishes, orders: [], nextDishId: 66, nextOrderId: 1001 }
+    state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001 }
   }
   stateCache = state
   return state

@@ -35,6 +35,15 @@ export default function DishRow({
     <div
       className={`d3-card overflow-hidden ${onClick ? 'cursor-pointer' : ''} ${className}`}
       onClick={onClick}
+      /* B4 修：Menu 页菜品进详情唯一入口，原为纯 <div onClick> 键盘用户完全不可达。
+         补 role=button + tabIndex + Enter/Space 键盘路径；内部收藏/加购按钮已是真 <button> 保留 stopPropagation。 */
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => {
+        if (e.target !== e.currentTarget) return
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e) }
+      } : undefined}
+      aria-label={onClick && dish ? `查看${dish.name}详情` : undefined}
     >
       {showFav && onToggleFav && (
         <motion.button
@@ -69,7 +78,7 @@ export default function DishRow({
             background: 'var(--plate-bg)',
           }}
         >
-          <span className="text-3xl drop-shadow-sm">{emoji}</span>
+          <span className="text-3xl drop-shadow-sm" aria-hidden="true">{emoji}</span>
           {image && (
             <img
               src={image}
@@ -83,9 +92,10 @@ export default function DishRow({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <h3 className="font-sans font-bold text-base text-[var(--color-bone)] truncate">
+            {/* m-10 修：h3 会与 h1 之间缺 h2 中间层（读屏按标题导航丢层级）→ 菜品名是数据条目而非版面主角，改 <p> */}
+            <p className="font-sans font-bold text-base text-[var(--color-bone)] truncate m-0">
               {dish.name}
-            </h3>
+            </p>
             <span className="badge-soft text-xs px-1.5 py-0.5 rounded-full font-bold text-[var(--color-ash)]">
               {dish.category}
             </span>

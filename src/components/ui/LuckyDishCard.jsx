@@ -58,7 +58,9 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
       setCurrent(pickRandom(dishes))
       tick(n) // 滚动 tick：音高随档位爬升
       if (n < SPIN_STEPS) {
-        timerRef.current = setTimeout(step, 65 + n * 11) // 先快后慢，模拟滚轮落定
+        /* m-17 修：原 `65 + n*11` 起始 ≈15Hz 内容闪变，对光敏用户不友好（reduced 分支已跳过，但未 reduced 的敏感用户仍暴露）。
+           提到 130 起步 ≈8Hz（避开 WCAG 2.3.1 三段闪光阈值），n*11 保留滚轮落定的先快后慢手感。 */
+        timerRef.current = setTimeout(step, 130 + n * 11)
       } else {
         setDrawing(false)
         settle()  // 落定：清脆三音收尾
@@ -142,9 +144,9 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
           animate={{ scale: drawing ? [1, 1.04, 1] : 1 }}
           transition={drawing ? { duration: 0.42, repeat: Infinity, ease: 'easeInOut' } : { type: 'spring', stiffness: 280, damping: 15 }}
           className="relative w-16 h-16 rounded-[var(--radius-tile)] flex items-center justify-center shrink-0 overflow-hidden"
-          style={{ background: 'linear-gradient(145deg, var(--color-ink-900) 0%, var(--color-ink-850) 60%, color-mix(in srgb, var(--clay-50) 8%, transparent) 100%)' }}
+          style={{ background: 'var(--plate-bg)' }}
         >
-          <span className="text-3xl">{emoji}</span>
+          <span className="text-3xl" aria-hidden="true">{emoji}</span>
           {dishImg && (
             <img src={dishImg} alt={dish.name} loading="lazy"
               className="absolute inset-0 w-full h-full object-cover"
@@ -154,7 +156,8 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
 
         {/* 信息区：滚动中做轻微模糊，落定后清晰弹出 */}
         <div className={`flex-1 min-w-0 transition-all duration-200 ${drawing ? 'blur-[1.5px] opacity-70' : ''}`}>
-          <h3 className="font-serif font-bold text-xl leading-snug text-[var(--color-bone)] truncate">{dish.name}</h3>
+          {/* m-10：菜品名是数据条目非版面主角，h3 → <p> 与 DishRow/Cart 保持一致的读屏层级 */}
+          <p className="font-serif font-bold text-xl leading-snug text-[var(--color-bone)] truncate m-0">{dish.name}</p>
           <p className="text-xs text-[var(--color-ash)] mt-0.5 line-clamp-1">{dish.description || '好吃的~'}</p>
           <div className="flex items-center gap-1 mt-1.5">
             <KissIcon className="w-3.5 h-3.5 text-[var(--color-love)]" />

@@ -3,7 +3,7 @@ export const PERSONA = {
   me: {
     key: 'me', label: '我', emoji: '🐱',
     color: 'var(--clay-50)', colorSoft: 'var(--clay-40)',
-    gradient: 'linear-gradient(180deg, var(--clay-50) 0%, var(--clay-80) 100%)',
+    gradient: 'linear-gradient(180deg, var(--clay-60) 0%, var(--clay-80) 100%)',
     on: 'var(--color-on-dark)',   /* clay 实底上的暖白字（达 AA） */
     glassBorder: 'color-mix(in srgb, var(--clay-50) 45%, transparent)',
     glow: '0 0 0 3px color-mix(in srgb, var(--clay-50) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--clay-50) 22%, transparent)',

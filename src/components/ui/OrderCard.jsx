@@ -130,7 +130,7 @@ export default function OrderCard({
   const shell = (
     <motion.div
       whileTap={{ scale: 0.98 }}
-      whileHover={isAdmin ? undefined : { y: -1 }}
+      /* m-1 修：原用户端 whileHover y:-1 违反 DESIGN「纸不会跳起来——hover 只加深阴影」；移除位移，让 .d3-card:hover 阴影接管 */
       className={`d3-card overflow-hidden transition-shadow duration-200 ${className}`}
     >
       {body}

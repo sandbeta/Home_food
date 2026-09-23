@@ -11,6 +11,7 @@ import DishRow from '../components/ui/DishRow'
 import PageContainer from '../components/ui/PageContainer'
 import EmptyState from '../components/ui/EmptyState'
 import LuckyDishCard from '../components/ui/LuckyDishCard'
+import Icon from '../components/ui/Icons'
 import { useFavorites } from '../lib/favorites'
 import { isNightSnack } from '../lib/nightRules'
 import { SCENES, scenePick } from '../lib/sceneRules'
@@ -21,18 +22,26 @@ import { tap, vibrate } from '../lib/sfx'
 import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 import { EASE, usePrefersReducedMotion } from '../theme/motion'
 
+/* M-k3 修：读屏用户完全听不出当前谁在点菜——这是全站加购归属人格的关键状态。
+   改 role=radiogroup + role=radio + aria-checked，emoji span aria-hidden 避免「猫脸」被朗读。
+   M-t3 修：两钮 min-h-[44px]（原 py-2 高约 38，未达触摸线）。 */
 function WhoSelector({ whoAmI, setWhoAmI }) {
   return (
-    <div className="d3-card-face p-1.5 flex items-center gap-1.5 mb-4">
+    <div
+      className="d3-card-face p-1.5 flex items-center gap-1.5 mb-4"
+      role="radiogroup"
+      aria-label="给谁点点菜"
+    >
       <span className="pl-2 pr-1 text-xs text-[var(--color-ash)] font-bold">给谁点</span>
       {[{ value: 'me', label: '自己', icon: '🐱' }, { value: 'partner', label: 'TA', icon: '🐑' }].map(opt => {
         const active = whoAmI === opt.value
         return (
           <motion.button key={opt.value} whileTap={{ scale: 0.95 }} onClick={() => setWhoAmI(opt.value)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-colors duration-300 ${active ? (opt.value === 'me' ? 'avatar-me glow-clay' : 'avatar-partner glow-sage') : 'text-[var(--color-ash)]'}`}
+            role="radio" aria-checked={active} aria-label={`${opt.label}点菜`}
+            className={`flex-1 min-h-[44px] flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-colors duration-300 ${active ? (opt.value === 'me' ? 'avatar-me glow-clay' : 'avatar-partner glow-sage') : 'text-[var(--color-ash)]'}`}
             style={{ borderRadius: 'var(--radius-ctl)' }}
             animate={active ? { scale: 1.02 } : { scale: 1 }}>
-            <motion.span className="w-5 h-5 rounded-full flex items-center justify-center text-xs"
+            <motion.span className="w-5 h-5 rounded-full flex items-center justify-center text-xs" aria-hidden="true"
               style={{ background: 'color-mix(in srgb, var(--color-on-dark) 22%, transparent)' }}
               animate={active ? { rotate: [0, -8, 8, 0] } : { rotate: 0 }}
               transition={{ duration: 0.5 }}>{opt.icon}</motion.span>
@@ -53,8 +62,10 @@ const CATEGORY_GROUPS = [
 
 export default function Menu() {
   // 形变种子：从详情飞回来时首帧就有带图行，heroNameFor 才挂得上名（无缓存则维持骨架）
+  const [searchParamsRaw] = useSearchParams()
   const [dishes, setDishes] = useState(() => getCachedList('menu') || [])
-  const [activeCategory, setActiveCategory] = useState('全部')
+  /* m-24：activeCategory 初值从 URL ?cat= 读，避免 ?cat=夜宵 进入时先以 '全部' 发一次 + 热同步再置 '夜宵' 二次发的竞态 */
+  const [activeCategory, setActiveCategory] = useState(() => searchParamsRaw.get('cat') || '全部')
   const [keyword, setKeyword] = useState('')
   const [loading, setLoading] = useState(() => !getCachedList('menu'))
   const [loadError, setLoadError] = useState(false)
@@ -74,14 +85,28 @@ export default function Menu() {
   const [scope, setScope] = useState(() => (searchParams.get('fav') ? 'fav' : 'all'))
   const isFavScope = scope === 'fav'
 
+  // M-s8 修：夜宵伪分类与深夜弹窗都走 /api/dishes/all，但该端点不过滤 available → 下架后仍能一键加购。
+  //   修：先 filter available !==0 再 nightPick；同时接 AbortController（m-24）与「有旧数据不整屏替换」（m-28）。
+  //   activeCategory 初值从 searchParams 读，消掉 ?cat=夜宵 双发（m-24）。
   useEffect(() => {
     if (!getCachedList('menu')) setLoading(true)
     setLoadError(false)
+    const ac = new AbortController()
+    let alive = true
     const night = activeCategory === '夜宵' // 前端规则伪分类（nightRules），后端无此 category
-    fetch(night ? '/api/dishes/all' : `/api/dishes?category=${encodeURIComponent(activeCategory)}`)
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
-      .then(data => { const list = night ? data.filter(isNightSnack) : data; setDishes(list); cacheList('menu', list); setLoading(false) })
-      .catch(() => { setLoading(false); setLoadError(true) })
+    const url = night ? '/api/dishes/all' : `/api/dishes?category=${encodeURIComponent(activeCategory)}`
+    requestJson(url, { signal: ac.signal }).then(r => r.json())
+      .then(data => {
+        if (!alive) return
+        const available = Array.isArray(data) ? data.filter(d => Number(d.available) !== 0) : []
+        const list = night ? available.filter(isNightSnack) : available
+        setDishes(list); cacheList('menu', list); setLoading(false)
+      })
+      .catch(() => {
+        if (!alive) return
+        setLoading(false); setLoadError(true)
+      })
+    return () => { alive = false; try { ac.abort() } catch {} }
   }, [activeCategory, retryToken])
 
   // 收藏页签的数据源是本地收藏夹，全部页签是服务端返回；关键词对两者都生效
@@ -144,11 +169,12 @@ export default function Menu() {
       <PageContainer>
         <WhoSelector whoAmI={whoAmI} setWhoAmI={setWhoAmI} />
 
-        {/* 分段控件：收藏并入点菜页（收藏的下一步动作永远是加购，不该埋两级深） */}
-        <div className="d3-card-face p-1.5 flex items-center gap-1.5">
+        {/* 分段控件：收藏并入点菜页（收藏的下一步动作永远是加购，不该埋两级深）
+            M-v5 修：emoji 🍜/⭐ 违反图标纪律 → 换 Icons.jsx 细线 SVG（menu=碗筷、heart=心），与其它 Chip/Dock 语言一致。 */}
+        <div className="d3-card-face p-1.5 flex items-center gap-1.5" role="tablist">
           {[
-            { value: 'all', label: '全部菜品', emoji: '🍜' },
-            { value: 'fav', label: '我的收藏', emoji: '⭐' },
+            { value: 'all', label: '全部菜品', icon: 'menu' },
+            { value: 'fav', label: '我的收藏', icon: 'heart' },
           ].map((opt) => {
             const active = scope === opt.value
             return (
@@ -156,8 +182,10 @@ export default function Menu() {
                 key={opt.value}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => setScope(opt.value)}
+                role="tab"
+                aria-selected={active}
                 aria-pressed={active}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-colors duration-300"
+                className="flex-1 min-h-[44px] flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-bold transition-colors duration-300"
                 style={{
                   borderRadius: 'var(--radius-ctl)',
                   ...(active
@@ -169,38 +197,43 @@ export default function Menu() {
                     : { color: 'var(--color-ash)' }),
                 }}
               >
-                <span>{opt.emoji}</span>
+                <Icon name={opt.icon} size={16} strokeWidth={2.2} />
                 {opt.label}
               </motion.button>
             )
           })}
         </div>
 
-        {/* 搜索框 —— V3 设计稿：一枚糖果描边胶囊（此前是方卡套输入框，两层边界互相打架） */}
-        <div className={`d3-card-face flex items-center gap-2 px-4 py-2 transition-[box-shadow,border-color] duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}
+        {/* 搜索框 —— V3 设计稿：一枚糖果描边胶囊（此前是方卡套输入框，两层边界互相打架）
+            m-15 修：input 无 label、外层无 role=search，读屏只朗读"编辑文本"→ 补 sr-only label + role=search。 */}
+        <form role="search" onSubmit={(e) => e.preventDefault()}
+          className={`d3-card-face flex items-center gap-2 px-4 py-2 transition-[box-shadow,border-color] duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}
           style={{ borderRadius: '999px', background: 'var(--surface)' }}>
+          <label htmlFor="menu-search" className="sr-only">搜菜名或食材</label>
           <motion.svg className={`w-4 h-4 shrink-0 text-[var(--color-ash)] transition-colors duration-300 ${searchFocused ? 'text-[var(--color-clay)]' : ''}`}
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"
             animate={searchFocused ? { rotate: 90 } : { rotate: 0 }}
             transition={{ duration: 0.4, ease: EASE }}>
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
           </motion.svg>
-          <input value={keyword} onChange={e => setKeyword(e.target.value)}
+          <input id="menu-search" value={keyword} onChange={e => setKeyword(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
             placeholder="想吃什么搜一下…"
-            className="flex-1 min-w-0 bg-transparent border-0 outline-none text-sm text-[var(--color-bone)] placeholder:text-[var(--color-mist)]" />
+            inputMode="search"
+            autoComplete="off"
+            className="flex-1 min-w-0 bg-transparent border-0 text-sm text-[var(--color-bone)] placeholder:text-[var(--color-mist)]" />
           <AnimatePresence>
             {keyword && (
-              <motion.button onClick={() => setKeyword('')}
+              <motion.button onClick={() => setKeyword('')} aria-label="清空搜索"
                 initial={{ opacity: 0, scale: 0.9, width: 0 }}
                 animate={{ opacity: 1, scale: 1, width: 'auto' }}
                 exit={{ opacity: 0, scale: 0.8, width: 0 }}
                 transition={{ duration: 0.22, ease: EASE }}
-                className="text-xs text-[var(--color-clay-text)] font-bold px-1 whitespace-nowrap overflow-hidden shrink-0">清空</motion.button>
+                className="min-h-[44px] text-xs text-[var(--color-clay-text)] font-bold px-2 whitespace-nowrap overflow-hidden shrink-0">清空</motion.button>
             )}
           </AnimatePresence>
-        </div>
+        </form>
 
         {!loading && <LuckyDishCard dishes={dishes} onAdd={addItem} spawnParticle={spawnParticle} />}
 
@@ -277,7 +310,20 @@ export default function Menu() {
           </AnimatePresence>
         </div>
 
-        {loadError ? (
+        {loadError && dishes.length > 0 ? (
+          /* m-28 修：有旧数据时切分类失败不再整屏替换（刚浏览的菜被"断联"盖掉），改顶部内联失败条 + 保留列表 */
+          <div role="alert"
+            className="flex items-center justify-between gap-3 px-3.5 py-2.5 mb-3"
+            style={{
+              borderRadius: 'var(--radius-ctl)',
+              background: 'color-mix(in srgb, var(--color-danger) 10%, var(--surface))',
+              border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
+            }}>
+            <span className="text-sm font-semibold" style={{ color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' }}>⚠️ 这个分类没刷出来，先展示上一次的列表</span>
+            <button onClick={() => setRetryToken(t => t + 1)} aria-label="重试加载分类" className="text-xs font-bold shrink-0 min-h-[44px] px-3 rounded-full" style={{ color: 'var(--color-ash)' }}>再试一次</button>
+          </div>
+        ) : null}
+        {loadError && dishes.length === 0 ? (
           <EmptyState
             emoji="📡" tone="error"
             title="厨房暂时断联"
@@ -323,21 +369,13 @@ export default function Menu() {
             }
           />
         ) : filteredDishes.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="d3-card flex flex-col items-center justify-center py-16 px-4">
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-              <div className="w-32 h-32 rounded-full animate-pulse-soft"
-                style={{ background: 'radial-gradient(circle, color-mix(in srgb, var(--clay-50) 8%, transparent), transparent 70%)' }} />
-            </div>
-            <div className="relative">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mb-5 animate-float"
-                style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--clay-50) 12%, transparent), color-mix(in srgb, var(--sage-40) 8%, transparent))' }}>
-                <span className="text-5xl">🔍</span>
-              </div>
-            </div>
-            <p className="text-[var(--color-bone)] font-bold text-base">没搜到这口</p>
-            <p className="text-[var(--color-ash)] text-sm mt-1.5 text-center max-w-[200px] leading-relaxed">换个关键词试试~<br />也许换个名字就能找到啦</p>
-          </motion.div>
+          /* M-v3 修：手写搜索空态与 ui/EmptyState 重复实现（漂移源），收敛到统一组件。
+             Icons.jsx 补 search 后走 icon="search"；未加前仍走 emoji 保持向后兼容。 */
+          <EmptyState
+            emoji="🔍"
+            title="没搜到这口"
+            desc="换个关键词试试~也许换个名字就能找到啦"
+          />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-card-p)' }}>
             {visibleDishes.map(dish => (

@@ -13,9 +13,12 @@ export const SEED_NIGHT_EXTRA = [
   { id: 904, name: '孜然烤鸡翅', price: 22, category: '小吃', description: '焦边渗油，越啃越香', available: 1, image_url: '' },
 
   // —— 夜面炒饭：碳水快乐 ——
-  { id: 905, name: '扬州炒饭', price: 16, category: '主食', description: '粒粒金黄，蛋香包裹', available: 1, image_url: '' },
+  /* M-d2 消歧（2026-09-23 第四轮审查）：夜宵版 905/907/915 与灌库版 735/767/713 同名，
+     fresh 装机同屏出「两条扬州炒饭不同价」；给夜宵版加「深夜」前缀（价/category/desc 保持），
+     与灌库版拉开辨识度。server/data/seed-dishes.json 同步 rename。 */
+  { id: 905, name: '深夜扬州炒饭', price: 16, category: '主食', description: '粒粒金黄，蛋香包裹', available: 1, image_url: '' },
   { id: 906, name: '豪华泡面', price: 12, category: '主食', description: '加蛋加肠加青菜，深夜仪式感', available: 1, image_url: '' },
-  { id: 907, name: '螺蛳粉', price: 18, category: '主食', description: '越嗦越上头，懂的人秒懂', available: 1, image_url: '' },
+  { id: 907, name: '深夜螺蛳粉', price: 18, category: '主食', description: '越嗦越上头，懂的人秒懂', available: 1, image_url: '' },
   { id: 908, name: '酸辣粉', price: 12, category: '主食', description: '粉条弹牙，酸辣醒神', available: 1, image_url: '' },
   { id: 909, name: '酱油炒年糕', price: 14, category: '小吃', description: '软糯焦香，甜咸拉丝', available: 1, image_url: '' },
   { id: 910, name: '鸡蛋炒河粉', price: 15, category: '主食', description: '镬气十足，深夜补给站', available: 1, image_url: '' },
@@ -25,7 +28,7 @@ export const SEED_NIGHT_EXTRA = [
   { id: 912, name: '锅贴饺', price: 13, category: '小吃', description: '金黄脆底，蘸醋刚刚好', available: 1, image_url: '' },
   { id: 913, name: '小笼汤包', price: 16, category: '小吃', description: '轻轻提，慢慢移，先开窗后喝汤', available: 1, image_url: '' },
   { id: 914, name: '红油抄手', price: 14, category: '小吃', description: '皮薄馅嫩，麻辣红油开胃', available: 1, image_url: '' },
-  { id: 915, name: '皮蛋瘦肉粥', price: 10, category: '主食', description: '暖胃绵密，深夜收尾舒服', available: 1, image_url: '' },
+  { id: 915, name: '深夜皮蛋瘦肉粥', price: 10, category: '主食', description: '暖胃绵密，深夜收尾舒服', available: 1, image_url: '' },
   { id: 916, name: '手抓饼加蛋', price: 9, category: '小吃', description: '层层掉渣，海苔肉松自由', available: 1, image_url: '' },
 
   // —— 卤味辣锅：越啃越上头 ——

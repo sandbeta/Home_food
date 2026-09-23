@@ -2,19 +2,39 @@ import { createContext, useContext, useState, useCallback, useEffect } from 'rea
 
 const CartContext = createContext()
 const CART_KEY = 'couple_order_cart_v2'
+const WHO_KEY = 'couple_order_who'
+
+/* M-s4 修（不可变文件 · 改动记入 PROJECT-HANDOFF §4 台账）：
+   原 `JSON.parse(localStorage.cart||'[]')` 只在解析抛错时兜底，不校验类型。
+   若该键被污染成 `{}`/`"null"`/`"0"` 或数组元素缺关键字段，items.reduce 抛 TypeError
+   → CartProvider 崩 → 全站白屏（所有页面通过 useCart 消费）。
+   加两道守卫：parse 结果必是数组 + 每项必是 {dish_id:number, quantity:number, added_by:'me'|'partner'}
+   结构（不合法单项静默丢弃，不影响他项）。 */
+function safeReadCart() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CART_KEY) || '[]')
+    if (!Array.isArray(raw)) return []
+    return raw.filter(it => it && typeof it === 'object'
+      && Number.isFinite(Number(it.dish_id))
+      && Number.isFinite(Number(it.quantity)) && Number(it.quantity) > 0)
+      .map(it => ({ ...it, dish_id: Number(it.dish_id), quantity: Number(it.quantity), price: Number(it.price) || 0 }))
+  } catch { return [] }
+}
+function safeReadWho() {
+  const w = localStorage.getItem(WHO_KEY)
+  return w === 'me' || w === 'partner' ? w : 'me'
+}
 
 export function useCart() {
   return useContext(CartContext)
 }
 
 export function CartProvider({ children }) {
-  const [items, setItems] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(CART_KEY) || '[]') } catch { return [] }
-  })
-  const [whoAmI, setWhoAmI] = useState(() => localStorage.getItem('couple_order_who') || 'me')
+  const [items, setItems] = useState(safeReadCart)
+  const [whoAmI, setWhoAmI] = useState(safeReadWho)
 
   useEffect(() => { localStorage.setItem(CART_KEY, JSON.stringify(items)) }, [items])
-  useEffect(() => { localStorage.setItem('couple_order_who', whoAmI) }, [whoAmI])
+  useEffect(() => { localStorage.setItem(WHO_KEY, whoAmI) }, [whoAmI])
 
   const addItem = useCallback((dish) => {
     setItems(prev => {

@@ -12,13 +12,15 @@ import LoadingState from '../components/ui/LoadingState'
 import { HERO_IMAGES } from '../theme/images'
 import { ORDER_STATUS, PAYER } from '../theme/persona'
 import { EASE, usePrefersReducedMotion } from '../theme/motion'
-import { pickOne, DETAIL_TITLES } from '../lib/sweetCopy'
+import { pickOne, DETAIL_TITLES, ORDER_STATUS_DESC } from '../lib/sweetCopy'
 import { settle, vibrate } from '../lib/sfx'
+import { requestJson } from '../lib/request'
 
+/* m-5 修：三条状态口吻文案内联 → 迁至 sweetCopy.ORDER_STATUS_DESC 单源 */
 const STATUS_MAP = {
-  pending: { ...ORDER_STATUS.pending, emoji: '⏳', desc: '交给厨房啦，等着就好~' },
-  preparing: { ...ORDER_STATUS.preparing, emoji: '👨‍🍳', desc: '正在努力做呢，快好了~' },
-  completed: { ...ORDER_STATUS.completed, emoji: '🎉', desc: '快来吃吧，趁热~' },
+  pending: { ...ORDER_STATUS.pending, emoji: '⏳', desc: ORDER_STATUS_DESC.pending },
+  preparing: { ...ORDER_STATUS.preparing, emoji: '👨‍🍳', desc: ORDER_STATUS_DESC.preparing },
+  completed: { ...ORDER_STATUS.completed, emoji: '🎉', desc: ORDER_STATUS_DESC.completed },
 }
 
 // 灶火接力：订单未完成时低频拉状态（12s 一查，切后台不查、完成即停）。
@@ -32,11 +34,15 @@ export default function OrderDetail() {
   const navigate = useNavigate()
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(true)
+  // B2 修：区分「订单不存在（404）」与「网络失败/服务端挂了」——前者走 EmptyState 找不到态，
+  // 后者走 error 态 + 再试一次；以前两种混在一起，且 404 body truthy 时被 setOrder 收下 → 抛错白屏。
+  const [fetchErr, setFetchErr] = useState(null) // 'notfound' | 'network'
   const [pageTitle] = useState(() => pickOne(DETAIL_TITLES))
   const reduce = usePrefersReducedMotion()
   const [bump, setBump] = useState(null) // 'ignite' | 'serve' | null：真实流转到达的一记反馈
   const statusRef = useRef(null)
   const bumpTimerRef = useRef(null)
+  const [reload, setReload] = useState(0)
 
   const fireBump = (kind) => {
     setBump(kind)
@@ -48,25 +54,32 @@ export default function OrderDetail() {
 
   useEffect(() => {
     let dead = false
-    fetch(`/api/orders/${id}`).then(r => r.json())
+    setFetchErr(null); setLoading(true); statusRef.current = null
+    // B2 修：走 requestJson（自带 r.ok），404 → 'notfound'，其它错误/超时 → 'network'
+    requestJson(`/api/orders/${id}`).then(r => r.json())
       .then(data => {
         if (dead) return
+        if (!data || typeof data !== 'object' || !data.id) { setOrder(null); setFetchErr('notfound'); setLoading(false); return }
         setOrder(data)
         setLoading(false)
         statusRef.current = data.status
       })
-      .catch(() => { if (!dead) setLoading(false) })
+      .catch((err) => {
+        if (dead) return
+        setLoading(false)
+        setOrder(null)
+        setFetchErr(err && err.status === 404 ? 'notfound' : 'network')
+      })
 
     // 低频接力：未完成才轮询；标签页隐藏时跳过本轮，completed 后永不再发
     const timer = setInterval(() => {
       if (dead || document.hidden) return
       if (!statusRef.current || statusRef.current === 'completed') return
-      fetch(`/api/orders/${id}`).then(r => (r.ok ? r.json() : null)).then(next => {
+      requestJson(`/api/orders/${id}`).then(r => r.json()).then(next => {
         if (dead || !next || !next.status) return
         const prev = statusRef.current
         statusRef.current = next.status
         if (next.status !== prev) {
-          // 只在真实前进流转时报喜（completed 必 bump；pending→preparing 点火）
           if (STATUS_FLOW.indexOf(next.status) > STATUS_FLOW.indexOf(prev)) {
             fireBump(next.status === 'preparing' ? 'ignite' : 'serve')
           }
@@ -75,23 +88,29 @@ export default function OrderDetail() {
       }).catch(() => {})
     }, POLL_MS)
     return () => { dead = true; clearInterval(timer); clearTimeout(bumpTimerRef.current) }
-  }, [id])
+  }, [id, reload])
 
   if (loading) return <LoadingState text="正在查订单..." />
 
-  if (!order) return (
+  if (!order || !Array.isArray(order.items)) return (
     <EmptyState
-      emoji="😵" tone="error"
-      title="找不到这个订单了"
-      desc="它可能已被删除，或者链接不对~"
+      emoji={fetchErr === 'network' ? '📡' : '😵'} tone="error"
+      title={fetchErr === 'network' ? '厨房暂时断联' : '找不到这个订单了'}
+      desc={fetchErr === 'network' ? '网络不稳，稍等一下再试' : '它可能已被删除，或者链接不对~'}
       action={
-        <motion.button
-          whileTap={{ scale: 0.95 }}
-          onClick={() => navigate('/orders')}
-          className="d3-btn d3-btn-primary px-5 py-2.5 text-sm font-bold"
-        >
-          回到订单列表
-        </motion.button>
+        fetchErr === 'network' ? (
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setReload(r => r + 1)}
+            className="d3-btn d3-btn-primary px-5 py-2.5 text-sm font-bold"
+          >再试一次</motion.button>
+        ) : (
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/orders')}
+            className="d3-btn d3-btn-primary px-5 py-2.5 text-sm font-bold"
+          >回到订单列表</motion.button>
+        )
       }
     />
   )

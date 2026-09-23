@@ -68,32 +68,38 @@ export default function AddDishModal({ dish, onClose, onSave }) {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
             </button>
           </div>
-          <form onSubmit={handleSubmit} className="px-5 pb-8 overflow-y-auto max-h-[calc(85vh-80px)]">
+          <form onSubmit={handleSubmit} className="px-5 overflow-y-auto max-h-[calc(85vh-80px)]"
+            style={{ paddingBottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 16px)' }}>
             <div className="space-y-4">
-              {FIELDS.map(f => (
-                <div key={f.key}>
-                  <label className="text-sm text-[var(--color-ash)] block mb-1.5 font-semibold">
-                    {f.label}
-                  </label>
-                  <input type={f.type} value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
-                    className="d3-input w-full px-3.5 py-2.5 text-sm"
-                    placeholder={f.placeholder} min={f.min} step={f.step} required={f.required} inputMode={f.inputMode} />
-                </div>
-              ))}
+              {FIELDS.map(f => {
+                const inputId = `adddish-${f.key}`
+                return (
+                  <div key={f.key}>
+                    <label htmlFor={inputId} className="text-sm text-[var(--color-ash)] block mb-1.5 font-semibold">
+                      {f.label}{f.required && <span aria-hidden="true"> *</span>}
+                    </label>
+                    <input id={inputId} type={f.type} value={form[f.key]} onChange={e => setForm({ ...form, [f.key]: e.target.value })}
+                      className="d3-input w-full px-3.5 py-2.5 text-sm"
+                      placeholder={f.placeholder} min={f.min} step={f.step}
+                      required={f.required} aria-required={f.required || undefined}
+                      inputMode={f.inputMode} autoComplete="off" />
+                  </div>
+                )
+              })}
 
               <div>
-                <label className="text-sm text-[var(--color-ash)] block mb-1.5 font-semibold">分类</label>
+                <label htmlFor="adddish-category" className="text-sm text-[var(--color-ash)] block mb-1.5 font-semibold">分类</label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm pointer-events-none opacity-60">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm pointer-events-none opacity-60" aria-hidden="true">
                     {CATEGORY_OPTIONS.find(c => c.value === form.category)?.emoji || '🍽️'}
                   </span>
-                    <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
+                    <select id="adddish-category" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
                     className="d3-input w-full pl-10 pr-3 py-2.5 text-sm appearance-none cursor-pointer">
                     {CATEGORY_OPTIONS.map(c => (
                       <option key={c.value} value={c.value}>{c.emoji} {c.value}</option>
                     ))}
                   </select>
-                  <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-ash)] opacity-40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-ash)] opacity-40 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <polyline points="6 9 12 15 18 9" />
                   </svg>
                 </div>
@@ -101,7 +107,7 @@ export default function AddDishModal({ dish, onClose, onSave }) {
             </div>
 
             {saveErr && (
-              <div role="alert"
+              <div id="adddish-err" role="alert"
                 className="flex items-start gap-1.5 px-3 py-2 mb-1 rounded-xl"
                 style={{
                   background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)',
@@ -112,11 +118,13 @@ export default function AddDishModal({ dish, onClose, onSave }) {
               </div>
             )}
             <div className="flex gap-3 pt-6">
-              <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onClose}
-                className="d3-btn-sm flex-1 py-3 rounded-2xl font-bold text-sm border transition-colors duration-150"
+              {/* m-2 修：原 rounded-2xl (16px) 覆盖 d3-btn-sm/d3-btn-primary 应有的 radius-ctl (8) / radius-btn (12) 标尺。
+                  去掉 rounded-2xl 让 CSS 类接管圆角，与全站 d3-btn 一致。 */}
+              <motion.button type="button" whileTap={{ scale: 0.97 }} onClick={onClose} aria-describedby={saveErr ? 'adddish-err' : undefined}
+                className="d3-btn-sm flex-1 py-3 font-bold text-sm border transition-colors duration-150 min-h-[44px]"
                 style={{ borderColor: 'var(--color-glass-border)', color: 'var(--color-ash)', background: 'transparent' }}>算了</motion.button>
-              <motion.button type="submit" whileTap={{ scale: 0.97 }} disabled={saving}
-                className="d3-btn d3-btn-primary flex-1 py-3 rounded-2xl font-bold text-sm disabled:opacity-60">{saving ? '保存中…' : '好啦'}</motion.button>
+              <motion.button type="submit" whileTap={{ scale: 0.97 }} disabled={saving} aria-describedby={saveErr ? 'adddish-err' : undefined}
+                className="d3-btn d3-btn-primary flex-1 py-3 font-bold text-sm disabled:opacity-60 min-h-[44px]">{saving ? '保存中…' : '好啦'}</motion.button>
             </div>
           </form>
         </div>

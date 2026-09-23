@@ -128,3 +128,27 @@ export const NIGHT_HOME_NOTES = [
   '想吃的我都替你备着了',
   '一碗热的，治愈整个深夜',
 ]
+
+// 热门菜谱页（M-v4 修：HotDishes 曾是全站唯一不走 sweetCopy 的用户页）
+export const HOT_TITLES = [
+  '大家都在做啥菜',
+  '你家最近厨房忙啥呢',
+  '2026 家常趋势速递',
+  '别人家的锅在炒什么',
+]
+export const HOT_NOTES = [
+  '看看别人家餐桌，也想想咱家今晚吃啥',
+  '挑顺眼的偷师一道，做糊了算我的',
+  '趋势是别人的，胃口是你自己的',
+  '你家点得越多，这份榜单就越像你',
+]
+
+// 夜宵开屏弹窗主标题（m-5：副标题走 NIGHT_SNACK_NOTES，主标题过去内联）
+export const NIGHT_SNACK_TITLE = '深夜食堂开张了'
+
+// 订单详情页 状态口吻文案（m-5：从 STATUS_MAP 内联迁到单源）
+export const ORDER_STATUS_DESC = {
+  pending: '交给厨房啦，等着就好~',
+  preparing: '正在努力做呢，快好了~',
+  completed: '快来吃吧，趁热~',
+}

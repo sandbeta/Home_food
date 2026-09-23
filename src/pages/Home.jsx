@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
@@ -13,7 +13,7 @@ import LoadingState from '../components/ui/LoadingState'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { contentEnter, usePrefersReducedMotion } from '../theme/motion'
 import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
-import { morphTo, heroNameFor, cacheList } from '../lib/vt'
+import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 import { useCart } from '../components/CartContext'
 
 function getGreeting() {
@@ -42,9 +42,12 @@ const ROTATE_MS = 5000
  */
 export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
-  const [dishes, setDishes] = useState([])
+  /* m-22 修：以前 cacheList('home', ...) 只写不读，导致从首页网格 morphTo 进详情再 morphBack('/home')
+     时首帧 dishes=[] 无 dish-hero 命名元素，共享元素形变静默退化为普通淡入（首页 overdrive 从未生效）。
+     照抄 Menu：useState 初值从 getCachedList('home') 回填，homeLoading 初值同步。 */
+  const [dishes, setDishes] = useState(() => getCachedList('home') || [])
   // 三态（2026-09-19 critique）：加载中/失败可重试/0 菜引导——此前静默空白像页面坏了
-  const [homeLoading, setHomeLoading] = useState(true)
+  const [homeLoading, setHomeLoading] = useState(() => !getCachedList('home'))
   const [homeFailed, setHomeFailed] = useState(false)
   const [reloadToken, setReloadToken] = useState(0)
   const [rotIdx, setRotIdx] = useState(0)
@@ -58,6 +61,14 @@ export default function Home() {
   const navigate = useNavigate()
   const reduced = usePrefersReducedMotion()
   const { addItem, items, whoAmI, updateQuantity } = useCart()
+  /* M-s2 修：抓取时人格 ≠ 撤销时人格 → 撤销按【当前】whoAmI 减会失效或错减 TA。
+     useRef 记「抓取那一刻」的人格快照，撤销按快照走（浮标 4.2s 窗口内切人格不再误伤）。 */
+  const lastCatchPersonaRef = useRef(whoAmI)
+
+  const onCatch = (dish) => {
+    lastCatchPersonaRef.current = whoAmI
+    addItem(dish)
+  }
 
   useEffect(() => {
     fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3))).catch(() => {})
@@ -117,10 +128,12 @@ export default function Home() {
     setRotateToken(t => t + 1)
   }
 
-  // 撤销一次"抓取即加购"：把该菜在当前人格下的数量减一（减到 0 自动移除该行）
+  // 撤销一次"抓取即加购"：按【抓取那一刻】的人格（lastCatchPersonaRef 快照）减数量，
+  // 减到 0 自动移除该行。M-s2：避免浮标 4.2s 窗口内切人格撤销错减他人格。
   const undoCatch = (dish) => {
-    const cur = items.find(i => i.dish_id === dish.id && i.added_by === whoAmI)?.quantity ?? 0
-    if (cur > 0) updateQuantity(dish.id, cur - 1, whoAmI)
+    const personaAt = lastCatchPersonaRef.current
+    const cur = items.find(i => i.dish_id === dish.id && i.added_by === personaAt)?.quantity ?? 0
+    if (cur > 0) updateQuantity(dish.id, cur - 1, personaAt)
   }
 
   return (
@@ -142,7 +155,7 @@ export default function Home() {
             <ClawMachine
               dish={featured}
               indexNo={(rotIdx % rotSource.length) + 1}
-              onCatch={addItem}
+              onCatch={onCatch}
               onUndo={undoCatch}
               onGrab={nextDish}
               onOpen={() => navigate(`/dish/${featured.id}`)}
@@ -194,7 +207,7 @@ export default function Home() {
             <SectionHeader
               index={1}
               title="常点的"
-              action={<button onClick={() => navigate('/menu')} className="text-xs text-[var(--color-clay-text)] font-bold">全部 →</button>}
+              action={<button onClick={() => navigate('/menu')} className="min-h-[44px] px-2 -mx-2 text-xs text-[var(--color-clay-text)] font-bold rounded-full inline-flex items-center">全部 →</button>}
             />
             <div className="grid grid-cols-2 gap-3 mt-3">
               {popular.map((dish) => {
@@ -204,6 +217,9 @@ export default function Home() {
                     key={dish.id}
                     whileTap={{ scale: 0.97 }}
                     onClick={(e) => morphTo(navigate, `/dish/${dish.id}`, e, dish, '/home')}
+                    /* B4：网格卡键盘可达（进详情） */
+                    role="button" tabIndex={0} aria-label={`查看${dish.name}详情`}
+                    onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(`/dish/${dish.id}`) } }}
                     className="vt-dish-host d3-card-face cursor-pointer flex items-center gap-3 relative"
                     style={{ padding: 'var(--space-card-p)' }}
                   >
@@ -211,13 +227,13 @@ export default function Home() {
                       className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] border-2 border-[var(--color-ink-900)] ${chef === 'me' ? 'avatar-me' : 'avatar-partner'}`}
                       title={chef === 'me' ? '我常点' : 'TA 常点'}
                     >
-                      {chef === 'me' ? '🐱' : '🐑'}
+                      <span aria-hidden="true">{chef === 'me' ? '🐱' : '🐑'}</span>
                     </div>
                     <div
                       className="vt-dish-frame relative w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
-                      style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))', viewTransitionName: heroNameFor(dish.id) }}
+                      style={{ background: 'var(--plate-bg)', viewTransitionName: heroNameFor(dish.id) }}
                     >
-                      <span>{getCategoryEmoji(dish?.category)}</span>
+                      <span aria-hidden="true">{getCategoryEmoji(dish?.category)}</span>
                       {getDishImage(dish) && (
                         <img
                           src={getDishImage(dish)}
@@ -248,7 +264,7 @@ export default function Home() {
             <SectionHeader
               index={2}
               title="最近订单"
-              action={<button onClick={() => navigate('/orders')} className="text-xs text-[var(--color-clay-text)] font-bold">全部</button>}
+              action={<button onClick={() => navigate('/orders')} className="min-h-[44px] px-2 -mx-2 text-xs text-[var(--color-clay-text)] font-bold rounded-full inline-flex items-center">全部</button>}
             />
             <div className="space-y-2.5 mt-3">
               {recentOrders.map((order) => (
@@ -256,6 +272,9 @@ export default function Home() {
                   key={order.id}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate(`/orders/${order.id}`)}
+                  /* B4：最近订单卡键盘可达 */
+                  role="button" tabIndex={0} aria-label={`查看订单 #${order.id}`}
+                  onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(`/orders/${order.id}`) } }}
                   className="d3-card-face flex items-center justify-between gap-3 cursor-pointer"
                   style={{ padding: 'var(--space-card-p)' }}
                 >

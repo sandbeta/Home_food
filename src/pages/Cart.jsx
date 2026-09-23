@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../components/CartContext'
@@ -18,6 +18,7 @@ import { PERSONA } from '../theme/persona'
 import { cardEntrance, EASE, usePrefersReducedMotion } from '../theme/motion'
 import { pickOne, CART_TITLES, CART_NOTES, ORDER_PLACED_NOTE } from '../lib/sweetCopy'
 import { tap, vibrate } from '../lib/sfx'
+import { requestJson } from '../lib/request'
 
 /**
  * 购物车条目 —— V3 设计稿的"糖果清单行"：
@@ -44,7 +45,8 @@ function CartRow({ item, onUpdate, onRemove }) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <h3 className="font-sans font-semibold text-sm text-[var(--color-bone)] truncate">{item.name}</h3>
+        {/* m-10 修：h3 会与 Cart 页 h1 之间缺 h2 中间层，读屏丢层级；条目是数据不是版面主角 → <p> */}
+        <p className="font-sans font-semibold text-sm text-[var(--color-bone)] truncate m-0">{item.name}</p>
         <div className="flex items-center gap-1 mt-0.5">
           <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
           <span className="font-serif text-sm font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{item.price}</span>
@@ -91,10 +93,16 @@ export default function Cart() {
   const [submitError, setSubmitError] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
   const skipRef = useRef(null)
+  const mountedRef = useRef(true)
   const reduce = usePrefersReducedMotion()
   const [pageTitle] = useState(() => pickOne(CART_TITLES))
   const [pageNote] = useState(() => pickOne(CART_NOTES))
   const navigate = useNavigate()
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => { mountedRef.current = false }
+  }, [])
 
   const meItems = items.filter((i) => i.added_by === 'me')
   const partnerItems = items.filter((i) => i.added_by === 'partner')
@@ -102,11 +110,12 @@ export default function Cart() {
   const partnerTotal = partnerItems.reduce((s, i) => s + i.price * i.quantity, 0)
 
   const handleSubmit = async () => {
-    if (items.length === 0) return
+    if (items.length === 0 || submitting) return
     setSubmitting(true)
     setSubmitError(false)
     try {
-      const res = await fetch('/api/orders', {
+      // M-s5：走 requestJson，家庭服务端 hang 时 12s 后自动 abort → 走 catch 分支解禁按钮
+      const res = await requestJson('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -115,8 +124,16 @@ export default function Cart() {
           payer,
         }),
       })
-      if (!res.ok) throw new Error('HTTP ' + res.status)
       const order = await res.json()
+      if (!mountedRef.current) return  // M-s6：卸载后不再执行后续副作用
+      // m-21：cart 快照价 vs 服务端最新价 diff 时播报（家庭两人共享数据场景，一方改价另一方无感知会导致账对不上）
+      try {
+        if (order && Number(order.total_price) !== totalPrice) {
+          window.__cgAnnounce?.(`价格有更新，购物车 ¥${totalPrice} → 订单实际 ¥${order.total_price}`)
+        } else {
+          window.__cgAnnounce?.(`已下单，共 ${totalCount} 件`)
+        }
+      } catch { /* noop */ }
       clearCart()
       setCelebrating(true)
       tap()
@@ -127,11 +144,15 @@ export default function Cart() {
         setTimeout(resolve, 1100)
       })
       skipRef.current = null
+      // M-s6 修：庆祝 1.1s 期间用户返回/切页时组件已卸载 → 不再 navigate（避免幽灵跳转）
+      if (!mountedRef.current) return
       setCelebrating(false)
       navigate(`/orders/${order.id}`)
     } catch {
+      if (!mountedRef.current) return
       setSubmitError(true)
       setSubmitting(false)
+      try { window.__cgAnnounce?.('下单没成功，菜还给你留着') } catch {}
     }
   }
 
@@ -296,7 +317,7 @@ export default function Cart() {
             }}
           >
             <div className="flex justify-between items-center">
-              <span className="text-[var(--color-on-dark)]/85 font-semibold">合计</span>
+              <span className="text-[var(--color-on-dark)] font-semibold">合计</span>
               <motion.span
                 key={totalPrice}
                 initial={{ scale: 1.3, y: -4 }}
@@ -304,7 +325,7 @@ export default function Cart() {
                 transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                 className="font-serif text-display font-bold text-[var(--color-on-dark)] tabular-nums"
               >
-                <span className="text-[0.6em] mr-1 opacity-90">¥</span>{totalPrice}
+                <span className="text-[0.6em] mr-1">¥</span>{totalPrice}
               </motion.span>
             </div>
 
@@ -312,8 +333,8 @@ export default function Cart() {
               className="flex items-center gap-1.5 mb-3.5 mt-2 py-1.5 px-2.5 rounded-xl self-start"
               style={{ background: 'rgba(43,36,41,0.14)' }}
             >
-              <span className="text-xs">⏱️</span>
-              <span className="text-xs text-[var(--color-on-dark)]/85">预估等待约 20-30 分钟</span>
+              <span className="text-xs" aria-hidden>⏱️</span>
+              <span className="text-xs text-[var(--color-on-dark)]">预估等待约 20-30 分钟</span>
             </div>
 
             {submitError && (

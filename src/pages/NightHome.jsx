@@ -4,7 +4,7 @@
 // 内容全部来自 nightPick 夜宵池；双人格/购物车/谁买单/收藏四大语义不动。
 // 动效遵守 Vercel 规范：入场 opacity+≥0.9 scale 淡入、UI<300ms、按压 0.92。
 // ============================================================
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
@@ -16,12 +16,12 @@ import LoadingState from '../components/ui/LoadingState'
 import EmptyState from '../components/ui/EmptyState'
 import ThemeToggle from '../components/ui/ThemeToggle'
 import { useCart } from '../components/CartContext'
-import { nightPick } from '../lib/nightRules'
+import { nightPickInfo } from '../lib/nightRules'
 import { getCategoryEmoji, getDishImage } from '../lib/categoryIcons'
 import { contentEnter, cardEntrance, usePrefersReducedMotion } from '../theme/motion'
 import { pickOne, NIGHT_HOME_TITLES, NIGHT_HOME_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { vibrate } from '../lib/sfx'
-import { morphTo, heroNameFor, cacheList } from '../lib/vt'
+import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 
 const shuffle = (arr) => {
   const a = [...arr]
@@ -33,22 +33,39 @@ const shuffle = (arr) => {
 }
 
 export default function NightHome() {
-  const [pool, setPool] = useState([])
+  /* m-22 修：pool useState 初值从 getCachedList('night') 回填，让从夜宵网格 morphTo 详情再 morphBack
+     时首帧就有 dish-hero 命名元素，共享元素形变不再静默退化。 */
+  const [pool, setPool] = useState(() => getCachedList('night') || [])
   const [rotIdx, setRotIdx] = useState(0)
   // 三态（对齐 Home）：加载/失败可重试/空池——此前 .catch 吞异常致整页空白，像坏了
-  const [loading, setLoading] = useState(true)
+  /* m-27 修：以前"取到数据但池为空"也 setFailed(true) → 渲染成"宵夜机暂时没通电 + 再试一次"，
+     用户反复点重试永远空、误以为是网络故障。改成 empty/fallback 两态分离：
+       · failed = 真网络/服务端错 → EmptyState error + 再试一次
+       · empty  = 拉到数据但 available 过滤后为 0 → 引导去点菜/后台
+       · fallback = nightPick 命中<min 回退整池 → SectionHeader 加提示角标（m-26） */
+  const [loading, setLoading] = useState(() => !getCachedList('night'))
   const [failed, setFailed] = useState(false)
+  const [empty, setEmpty] = useState(false)
+  const [fallback, setFallback] = useState(false)
   const [reload, setReload] = useState(0)
   const navigate = useNavigate()
   const { addItem, items, whoAmI, updateQuantity } = useCart()
   const reduced = usePrefersReducedMotion()
   const [title] = useState(() => pickOne(NIGHT_HOME_TITLES))
   const [note] = useState(() => pickOne(NIGHT_HOME_NOTES))
+  /* M-s2 修：撤销按【当前】whoAmI 会错人格；useRef 记抓取时快照，撤销按快照走 */
+  const lastCatchPersonaRef = useRef(whoAmI)
 
-  // 撤销一次"抓取即加购"：该菜当前人格数量减一，减到 0 自动移除
+  const onCatch = (dish) => {
+    lastCatchPersonaRef.current = whoAmI
+    addItem(dish)
+  }
+
+  // 撤销一次"抓取即加购"：该菜在**抓取那一刻人格**下的数量减一（M-s2）
   const undoCatch = (dish) => {
-    const cur = items.find(i => i.dish_id === dish.id && i.added_by === whoAmI)?.quantity ?? 0
-    if (cur > 0) updateQuantity(dish.id, cur - 1, whoAmI)
+    const personaAt = lastCatchPersonaRef.current
+    const cur = items.find(i => i.dish_id === dish.id && i.added_by === personaAt)?.quantity ?? 0
+    if (cur > 0) updateQuantity(dish.id, cur - 1, personaAt)
   }
 
   // 网格错峰：8 格作为「一排端上桌」整体逐格亮相（cardEntrance + 0.06 步进，
@@ -61,10 +78,13 @@ export default function NightHome() {
     fetch('/api/dishes?category=全部')
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
       .then(d => {
-        const l = shuffle(nightPick(d))
+        const available = (Array.isArray(d) ? d : []).filter(x => Number(x.available) !== 0)
+        const { list, isFallback } = nightPickInfo(available)
+        const l = shuffle(list)
         setPool(l); cacheList('night', l)
+        setFallback(isFallback)
         setLoading(false)
-        if (!l.length) setFailed(true)
+        if (!l.length) setEmpty(true)
       })
       .catch(() => { setLoading(false); setFailed(true) })
   }, [reload])
@@ -95,12 +115,30 @@ export default function NightHome() {
             }
           />
         )}
+        {/* m-27：拉到数据但 available 过滤后为空 → 引导去点菜，别当"网络故障"骗用户反复重试 */}
+        {empty && !loading && !failed && !pool.length && (
+          <EmptyState
+            who="badgeNight"
+            title="宵夜池暂时空了"
+            desc="厨房里今晚还没备宵夜，去点菜页挑几道加进来？"
+            action={
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/menu')}
+                className="d3-btn d3-btn-primary px-6 py-2.5 text-sm font-bold"
+                style={{ borderRadius: 'var(--radius-btn)' }}
+              >
+                去点菜
+              </motion.button>
+            }
+          />
+        )}
         {/* 深夜主推 —— 娃娃机宵夜变体：无泡泡时钟（安静陪吃），手动换一道不自动轮换 */}
         {featured && (
           <ClawMachine
             dish={featured}
             indexNo={(rotIdx % (pool.length || 1)) + 1}
-            onCatch={addItem}
+            onCatch={onCatch}
             onUndo={undoCatch}
             onGrab={() => setRotIdx(i => i + 1)}
             onOpen={(e) => morphTo(navigate, `/dish/${featured.id}`, e, featured, '/home')}
@@ -115,7 +153,13 @@ export default function NightHome() {
           <motion.div {...contentEnter(0.1)}>
             <SectionHeader
               title="这些点得多"
-              action={<button onClick={() => navigate('/menu?cat=夜宵')} className="text-xs text-[var(--color-clay-text)] font-bold">全店夜宵 →</button>}
+              action={
+                <div className="flex items-center gap-2">
+                  {/* m-26：nightPick 命中<6 回退整池 → 明示"这些不是纯宵夜"，避免佛跳墙/剁椒鱼头等正餐混入被误当深夜推荐 */}
+                  {fallback && <span className="text-[11px] text-[var(--color-ash)] whitespace-nowrap">宵夜供给少，先看这些~</span>}
+                  <button onClick={() => navigate('/menu?cat=夜宵')} className="min-h-[44px] px-2 -mx-2 text-xs text-[var(--color-clay-text)] font-bold rounded-full inline-flex items-center">全店夜宵 →</button>
+                </div>
+              }
             />
             <div className="grid grid-cols-2 gap-3 mt-3">
               {grid.map((dish, idx) => (
@@ -125,10 +169,13 @@ export default function NightHome() {
                   className="vt-dish-host d3-card-face relative flex flex-col cursor-pointer"
                   style={{ padding: 'var(--space-card-p)' }}
                   onClick={(e) => morphTo(navigate, `/dish/${dish.id}`, e, dish, '/home')}
+                  /* B4：夜宵网格卡键盘可达（内层加购钮是真 <button>，事件源判定 e.target===e.currentTarget 保证不误触） */
+                  role="button" tabIndex={0} aria-label={`查看${dish.name}详情`}
+                  onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(`/dish/${dish.id}`) } }}
                 >
                   <div className="vt-dish-frame relative h-16 rounded-xl overflow-hidden flex items-center justify-center mb-2.5"
-                    style={{ background: 'linear-gradient(145deg, var(--color-ink-900), var(--color-ink-850))', viewTransitionName: heroNameFor(dish.id) }}>
-                    <span className="text-3xl">{getCategoryEmoji(dish.category)}</span>
+                    style={{ background: 'var(--plate-bg)', viewTransitionName: heroNameFor(dish.id) }}>
+                    <span className="text-3xl" aria-hidden="true">{getCategoryEmoji(dish.category)}</span>
                     {getDishImage(dish) && (
                       <img src={getDishImage(dish)} alt={dish.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover"
                         style={{ filter: 'var(--tile-img-filter)' }}

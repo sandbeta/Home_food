@@ -20,6 +20,15 @@ export function isNightSnack(dish) {
 
 /** 从池中挑夜宵；命中数过少时回退整池，保证夜宵模式永不空池 */
 export function nightPick(dishes, min = 6) {
-  const night = (dishes || []).filter(isNightSnack)
-  return night.length >= min ? night : (dishes || [])
+  return nightPickInfo(dishes, min).list
+}
+
+/* m-26 修（2026-09-23 第四轮审查）：nightPick 命中<min 时回退整池但不给任何标注，
+   UI 层无从得知是"真夜宵推荐"还是"宵夜供给不足先看这些"。新加 nightPickInfo
+   返回 {list, isFallback} 元信息，UI 消费 isFallback 显示降级角标；
+   旧 nightPick 保留兼容签名。 */
+export function nightPickInfo(dishes, min = 6) {
+  const pool = dishes || []
+  const night = pool.filter(isNightSnack)
+  return night.length >= min ? { list: night, isFallback: false } : { list: pool, isFallback: true }
 }

@@ -2,8 +2,9 @@
 
 > **给接力的 AI / 开发者**：本文档自包含，读完即可接手。
 > **协作铁律：每一次代码/数据/文案修改，都必须同步更新本文档（进度表、文件地图、坑清单按需），随代码一起提交。** 这是项目所有者定的规矩。
-> 最后更新：2026-09-21　代码 HEAD：懒羊羊抓娃娃主题 V3 重新落地于分支 `claw-v3-impl`（恢复 claw-v3-snapshot=89bee3f 完整实现，四件套全绿）　工作区：干净
-> **状态：待所有者对照高保真原型拍板观感后，再决定是否合并 master。** 上一轮 V3 曾回滚（见台账「懒羊羊换装（已回滚）」），本轮为按所有者审阅通过的独立原型（`../prototype-lazy-claw/index.html`）重新落地，首页在娃娃机签名交互之下仍保留「常点的」快捷网格与「最近订单」，兼顾主题与点菜效率。
+> 最后更新：2026-09-23　代码 HEAD：master f802a59b + 本轮第四轮全量整改（未提交）　工作区：脏（spark-output/ + .impeccable/critique/ 未追踪 + 大量源码改动）
+> **状态：2026-09-23 第四轮 impeccable critique 全量整改已落地**（4 blocker + 32 major + 26/32 minor，四件套全绿）。详见 §7.15。核心新立规矩见 §4 第 10–13 条：令牌变更 checklist / sub-44 逐消费者验证 / mockApi↔server 自动 diff / PRODUCT.md 承诺自动核查。
+> 上一轮 V3 曾回滚（见台账「懒羊羊换装（已回滚）」），本轮为按所有者审阅通过的独立原型（`../prototype-lazy-claw/index.html`）重新落地，首页在娃娃机签名交互之下仍保留「常点的」快捷网格与「最近订单」，兼顾主题与点菜效率。
 > 注：本文档自身的 docs 提交在代码 HEAD 之后，仓库实际 HEAD 会多一笔，属正常。
 
 ---
@@ -76,6 +77,10 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 7. 共享组件放 `src/components/ui/`，≥2 处真实调用点才建；`Icons.jsx` 是图标基元集，单调用点也保留。
 8. 提交信息用中文，说明「为什么」；**提交前跑 lint + build + `p6_static_gate.py`**。
 9. **四件套别用 `2>&1 | Select-Object` 吞退出码**：构建失败时管道可能仍返回成功假象，判定必须看 `built in` 成功行或 `$LASTEXITCODE`（本轮 ui/ThemeToggle 曾把 `../theme` 写成少一层，就是靠 build 报错抓到的）。`src/components/ui/` 下引主题模块一律 `../../theme/`。
+10. **令牌变更 checklist（2026-09-23 §7.15 立）**：@theme 新增/改动任何"小字前景"令牌（`--color-clay-text` / `--color-caramel` / `--color-mist` 一类）→ 必在 `[data-theme="night"]` 段配套加提亮档（否则夜宵会 ~2-3:1 不达标，如 M-c1 上轮 clay-text 忘加）；任何"实底 fill"令牌 → 必走不反相深档（`--color-caramel-deep` / `--color-mist-deep` / `--clay-10` badge 底一类），或显式声明"text/fill 双职"禁令。检测器看不见 var() 作 fill 越界，只能靠读消费者 + 算比值。
+11. **sub-44 逐消费者验证（2026-09-23 §7.15 立）**：热区抬到 44 类整改必须逐个消费者验（**按钮本体**、内层 icon、伪元素覆盖区），不能只看外层容器（M-t2 上一轮声称"抬到 44"只抬了 pill、真正 button 仍 h-9=36 就是此漏洞）。台账规矩：sub-44 整改条目要写"具体抬了哪些消费者"。
+12. **mockApi ↔ server 自动 diff（2026-09-23 §7.15 立）**：`scripts/p6_static_gate.py` 或 CI 加字段级 diff（id / name / price / category / available / image_url），漂移即 fail；`nextDishId` 段位、seed 同名冲突属同类根因，靠人工容易漏（见 §7.15 M-d1/M-d2）。
+13. **PRODUCT.md 承诺的自动核查（2026-09-23 §7.15 立）**：reduced-motion（M-k1 已加 `<MotionConfig reducedMotion="user">`）、44 触摸区（M-t 系列）、AA 对比（M-c 系列）三大承诺，应有一道自动核查（impeccable detect 或自建规则），别靠每轮 critique 才发现。
 
 ## 5. 数据层（菜品 432 道 + 菜谱 342 份）
 
@@ -262,6 +267,38 @@ scripts/
 - **adminGate 对话框化**：`lib/adminGate.js` 密码层补 `role=dialog`/`aria-modal`/`aria-label` + Esc 取消 + Tab 焦点陷阱 + 点遮罩空白关闭 + 焦点归还；`.cg-gate-err` 加 `role=alert aria-live=assertive`（密码错误可播报）。
 - **成功反馈 live region**：热榜"已加入"toast、购物车"锅已上灶"庆祝层、娃娃机"抓到「X」"浮标 各加 `role=status aria-live=polite`，读屏用户能听到成功。
 - 门禁：build✓ / lint（2 历史）/ test✓ / p6 0·0·0；detect 改动文件仅既有字号建议零新增。观感待 live 目检（关闭钮/抓取 pill 抬到 44 后弹窗与机腹是否协调）。
+
+## 7.15 第四轮 critique + 全量整改（2026-09-23）
+
+第四轮 impeccable 审查（四路并行子 agent + detect 交叉印证，产出 68 findings：4 Blocker / 32 Major / 32 Minor）。同日按分组一次性整改完毕，四件套全绿。审查完整报告与 68 条明细见 `spark-output/check/晨光厨房-走查报告.md` 与 `spark-output/context/check.json`。
+
+**Blocker（4）**：
+- **B1 AdminOrders 做好了推进按钮**：sage 实底上文字用会反相的 `--color-bone`，夜宵 1.38~1.66:1 完全不可见。改 `var(--color-on-sage)`；把「压在人格渐变实底的文字必取 persona.on」写进 STATUS_ACTIONS 注释与本文件正向纪律段。
+- **B2 OrderDetail 首屏 fetch 无 r.ok**：404 body 被当合法订单 setOrder → order.items.map 抛 TypeError → 整站白屏（无 ErrorBoundary）。首屏 fetch 走 `requestJson`（自带 r.ok），404 落 `notfound` 分支、其它错误/超时落 `network` 分支分别渲染 EmptyState；渲染处再补 `!Array.isArray(order.items)` 双兜底。**顶层新增 `<ErrorBoundary>`**（`components/ErrorBoundary.jsx`）包住 Routes，全站任何组件抛错都走 EmptyState 兜底不再白屏。
+- **B3 双端夜宵种子漂移**（澄清为「agent 用 name diff 撞到灌库版」的误报 + 真实同名冲突）：脚本字段级 diff 确认 server/data/seed-dishes.json 里 905/907/915 三处字段其实与 mockApi `seedNightExtra.js` **值已一致**（agent B 把灌库版 735/767/713 的 ¥20/¥19/¥17 误认成夜宵版）。真问题是 M-d2「fresh 装机同屏两条同名不同价」。修 M-d2（下条）后观感自动消解。
+- **B4 键盘不可达簇**：DishRow 整行 / Home 常点网格 / Home 最近订单 / HotDishes 榜单卡 / NightHome 网格 / Profile 头像 / Profile 后台入口 六处主要导航用 `<div onClick>`，键盘用户完全无法进详情、无法进后台。前六处补 `role="button" + tabIndex={0} + onKeyDown Enter/Space`（内部加购/收藏已是真 `<button>` 保留 stopPropagation）；Profile 头像改 `<motion.button role="switch" aria-checked>`，后台入口改 `<Link to="/admin">`。
+
+**Major 分组（32）**：
+- **对比度 7**：M-c1 `--color-clay-text` 加夜宵覆盖（`--clay-30`）救 10 处小字链接；M-c2 `.d3-badge` 底改不反相 `--clay-10` 深字压浅底双档 ≥6；M-c3 `me.gradient` 起色 clay-50→clay-60（on-dark 4.52:1）；M-c4 Cart 锚点小字去 opacity 82~90%→100% on-dark 达 AA；M-c5 焦点环全局改 `outline: bone + box-shadow: on-dark halo`（白天 bone 深、夜宵 bone 浅，两档 ≥9:1）；M-c6 PayerSelector AA 激活档改 `--color-caramel-deep` 底 + `on-dark` 字（同 HotDishes RANK_FILLS 思路）；M-c7 Hot NO.4+ 徽章底从 `rgba(43,36,41,0.45)` → `--color-mist-deep` 与前三同族。
+- **触摸目标 5**：M-t1 PageHeader 返回钮 `w-10→w-11`；M-t2 娃娃机撤销按钮本体 `h-9→h-11`（§7.14 声称抬 44 但只抬外层 pill 是回归验证漏洞）+ 菜名钮 min-h-[44px]；M-t3 Menu WhoSelector + 分段钮 + 清空钮加 min-h-[44px]；M-t4 Home/NightHome SectionHeader 全部链接包 min-h-[44px]；M-t5 Profile 夜宵开关 my-[8px] 撑热区 44 + AdminDishes + 添加/知道了 min-h-[44px] + Admin 快捷入口。
+- **a11y 结构 4**：M-k1 App 外层包 `<MotionConfig reducedMotion="user">` 兑现 PRODUCT.md 承诺（CSS 全局 media query 管不到 framer 内联动画，全站 cardEntrance/contentEnter y:16 / DockLayer 球入场 / navGlow 弹簧 / EmptyState 浮动 / LoadingState 循环 / Cart 💬 呼吸等一次性降级为纯 opacity）；M-k2 AddDishModal 四字段 label 补 htmlFor + input id + 错误 aria-describedby + aria-required；M-k3 WhoSelector 补 role=radiogroup + role=radio + aria-checked + aria-label，emoji span aria-hidden；M-k4 KissIcon svg 加 `aria-hidden focusable="false"`（全站价格前缀噪音清）。
+- **视觉规范 6**：M-v1 `--plate-bg` 迁移 5 处（HotDishes / Home 常点网格 / NightHome 网格 / LuckyDishCard / StoveStage 起锅白盘——StoveStage 是唯一夜宵真会变"半融化灰盘"的破律，改用两端不反相 on-dark 家族渐变）；M-v2 StoveStage/ClawMachine 灶体/火苗/罩底/灶膛口 5 组裸 hex 收编 `@theme static` 新令牌（--stove-body-1/2 / --stove-mouth / --stove-live / --flame-hi / --flame-mid / --claw-case-hi）；M-v3 Menu 手写搜索空态收敛到统一 `EmptyState`；M-v4 HotDishes 页头文案走 sweetCopy 补 HOT_TITLES/HOT_NOTES（曾是全站唯一不走文案池的用户页）；M-v5 Menu 分段「🍜/⭐」→ Icons.jsx 的 menu/heart 细线 SVG；M-v6 Profile 夜宵开关轨道阴影 `rgba(0,0,0,0.12)` → 新令牌 `--inset-warm-1`（暖墨 + 夜宵 0.42 加强版）。
+- **状态交互 8**：M-s1 NightSnackSheet 异步 effect 无 cancel → `alive` flag + isNight=false 兜底 setOpen(false)；M-s2 Home/NightHome undoCatch 用 useRef 记抓取时 whoAmI 快照，撤销按快照人格 updateQuantity（浮标 4.2s 窗口切人格不再错减 TA）；M-s3 MyOrders/Profile/Admin/HotDishes 补 requestJson + catch + 内联失败条（对齐 AdminOrders 模式，曾是同类坑重漏网）；M-s4 CartContext useState 初始化 JSON.parse 后加 `Array.isArray(raw) && 每项关键字段校验` 双守卫（**不可变文件 · 改动逐处说明**）；M-s5 全站 fetch 走新 `lib/request.js`（requestJson 默认 12s 超时 + AbortController）；M-s6 Cart mountedRef 保护 1.1s 庆祝期返回不再 navigate 到幽灵订单；M-s7 ClawMachine SEQ 起手即乐观 onCatch 加购（原落槽才加，动画期间切页/卸载会 clearTimeout 丢加购）；M-s8 Menu 夜宵分支 + NightSnackSheet 消费 `/api/dishes/all` 前 `filter(d => Number(d.available) !== 0)`（原端点不过滤，下架语义在夜宵链路整体失效）。
+- **数据一致性 2**：M-d1 mockApi fresh 态 `nextDishId: 66 → 10000`（与 server 字面一致，**不可变文件 · 改动逐处说明**）；M-d2 mockApi missingSeed 判定从 `name` → ``${id}|${name}` 双键（**不可变文件 · 同 §4**）+ seedNightExtra 905/907/915 三道 name 加「深夜」前缀消歧（与灌库版 735/767/713 拉开），server/data/seed-dishes.json 同步 rename。
+
+**Minor 修 26 / 留下轮 6**：修完 m-1~m-24（含 m-30 两段式删除 5s 自动收起 / m-11 DishDetail 首字下沉 Array.from 取首字素 + sr-only 完整文本 / m-20 Stepper useRef 累加防丢更新 / m-17 摇签 65→130ms 步进避 15Hz 闪变 / m-21 Cart 下单响应 price diff 播报 / m-22 Home/NightHome/Hot cacheList 回填初值让 VT 生效 / m-23 PayerSelector label 「我/TA」→ 🐱/🐑 明示真实人格 / m-26 nightPickInfo 返回 isFallback + NightHome 降级角标 / m-27 空池 empty 与 failed 分离 / m-31 App 顶部 debugLocked 可关闭角标 / m-12 lib/announce 挂全局 sr-only live region / m-13 保留组件独立 role=status 兼容）；**留下轮**：m-25 撤销浮标改队列（UI 结构变更）、m-32 OrderDetail completed 停轮询（服务端 PUT 状态方向校验涉及不可变文件两端同步）、m-4 Profile 头像 hover scale+rotate（有意为之的彩蛋，保留）、m-9 Stepper 完整 name 传参（可选 prop 已加，各调用点补齐留后）。
+
+**四条新立的正向纪律**（追加到 §4，防同类回归）：
+1. **令牌变更 checklist**：@theme 里新增/改动任何"小字前景"令牌（如 --color-clay-text / --color-caramel / --color-mist）→ 必在 `[data-theme="night"]` 段配套加提亮档（否则夜宵 ~2-3:1）；任何"实底 fill"令牌 → 必走不反相深档（--color-caramel-deep / --color-mist-deep 一类），或显式声明"text/fill 双职"禁令。检测器看不见 var() 作 fill 越界，只能靠读消费者 + 算比值。
+2. **sub-44 逐消费者验证**：热区抬到 44 类整改必须逐个消费者验（按钮本体、内层 icon），不能只看外层容器（本轮 §7.14 声称撤销浮标抬到 44 只抬了 pill、真正 button 仍 h-9=36 就是此漏洞）。
+3. **mockApi ↔ server 自动 diff**：`scripts/p6_static_gate.py` 或 CI 加字段级 diff（id/name/price/category/available/image_url），漂移即 fail；`nextDishId` 段位、seed 同名冲突属同类根因，靠人工容易漏。
+4. **PRODUCT.md 承诺的自动核查**：reduced-motion（M-k1 MotionConfig）、44 触摸区（M-t 系列）、AA 对比（M-c 系列）三大承诺，应有一道自动核查（impeccable detect 或自建规则），别靠每轮 critique 才发现。
+
+**新增文件**：`src/lib/request.js`（fetch 超时/AbortController 封装）、`src/lib/announce.js`（sr-only live region 桥）、`src/components/ErrorBoundary.jsx`（顶层兜底）。
+
+**不可变文件改动清单**（§4.6 铁律）：`CartContext.jsx`（M-s4 类型守卫）· `mockApi.js`（M-d1 nextDishId 10000 + M-d2 (id|name) 双键去重）· `favorites.js`（未改）。所有改动均在源码里注释了 "M-sX/M-dX 修" 标记，便于逐处追溯。
+
+**门禁**：build✓ / lint 仅 2 历史 warnings（`_an.mjs` 根脚本 + CartContext 只导出 hook 触发 react-refresh 属既有）/ test 8 项✓ / p6 静态门禁 色值泄露 0·暗色残留 0·断头路 0；四路 agent 交叉印证的高置信度 3 项（B1 视觉+a11y / B2 逻辑+边界 / B4 键盘不可达簇）+ 逻辑 agent 独立脚本 diff 确认的 B3 全部落地。观感待 live 目检（撤销按钮 h-11、Menu 分段 SVG 化、ClawMachine 起手即加购手感、focus 环双层 bone+halo 两主题、PayerSelector 「🐱 请 / 🐑 请」新文案）。
 
 ## 8. 已知待办 / 候选项
 

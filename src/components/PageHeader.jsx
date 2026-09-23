@@ -61,7 +61,10 @@ export default function PageHeader({ title, eyebrow, subtitle, back = false, bac
               whileTap={{ scale: 0.9 }}
               onClick={onBack || goBack}
               aria-label="返回"
-              className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+              /* M-t1 修：原 w-10 h-10 = 40×40 不达 PRODUCT.md 承诺的 44px 触摸底线。
+                 全站最高频导航钮（所有带 back 的页都用它）。视觉圆可保 40 用 padding 撑，
+                 或直接抬到 44；此处选后者保持与上轮 sub-44 二批一致（w-11=44×44）。 */
+              className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center"
               style={{
                 background: 'var(--color-glass)',
                 border: '2px solid var(--color-line)',

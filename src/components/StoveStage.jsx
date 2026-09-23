@@ -86,11 +86,14 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
               <div
                 className="w-24 h-12 rounded-[50%] flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(180deg, var(--color-on-dark) 0%, var(--color-ink-850) 100%)',
+                  /* M-v1 关键修：起锅白盘原用 linear-gradient(180deg, on-dark → ink-850)——两端分属反相/不反相色系，
+                     夜宵下白盘从奶油白渐变到深莓紫（=半融化灰盘），正是 DESIGN 图鉴盘底警告过的历史踩坑。
+                     改两端都用不反相的 on-dark 家族：白盘跨主题恒为"奶油白 + 底部微玫瑰高光"，与签名拟物豁免段一致。 */
+                  background: 'linear-gradient(180deg, var(--color-on-dark) 0%, color-mix(in srgb, var(--color-on-dark) 92%, var(--clay-30)) 100%)',
                   boxShadow: '0 10px 24px rgba(43,36,41,0.18), inset 0 2px 4px rgba(255,255,255,0.8)',
                 }}
               >
-                <span className="text-4xl -mt-2">🍽️</span>
+                <span className="text-4xl -mt-2" aria-hidden="true">🍽️</span>
               </div>
               {/* 懒羊羊开饭仪式：小羊趴在盘边缓慢呼吸，配一个睡眠符号 */}
               <motion.div

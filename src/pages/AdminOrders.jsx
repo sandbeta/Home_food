@@ -19,6 +19,9 @@ const PAYER_LABEL = { aa: 'AA', me: '我请', partner: 'TA请' }
 
 // 状态推进按钮（管理端唯一主操作位）：冷暖语义照旧 —— 开始做=赤陶(暖)，做好了=鼠尾草绿(冷)
 // 管理端 quieter：去光晕与 hover 浮起，按钮以实底安静存在，反馈只留按压缩放；图标走统一细线集
+// 正向纪律（B1 修，教训入 PROJECT-HANDOFF §4）：**任何压在人格渐变实底上的文字必须取 persona.on**
+//   · clay 实底 → var(--color-on-dark)（不反相暖白 #FFF9FC）
+//   · sage 实底 → var(--color-on-sage)（不反相深绿 #1A2417；bone 会反相 → 夜宵近白压浅绿仅 1.4:1）
 const STATUS_ACTIONS = {
   pending: {
     next: 'preparing', text: '开始做', icon: 'flame',
@@ -27,7 +30,7 @@ const STATUS_ACTIONS = {
   preparing: {
     next: 'completed', text: '做好了', icon: 'check',
     gradient: 'linear-gradient(135deg, var(--color-sage-soft), var(--color-sage))',
-    color: 'var(--color-bone)',
+    color: 'var(--color-on-sage)',
   },
 }
 

@@ -11,7 +11,8 @@ import Chip from '../components/ui/Chip'
 import Icon from '../components/ui/Icons'
 import { HERO_IMAGES } from '../theme/images'
 import { orderStatusOf } from '../theme/persona'
-import { pickOne, ORDERS_TITLES, ORDERS_NOTES } from '../lib/sweetCopy'
+import { pickOne, ORDERS_TITLES, ORDERS_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
+import { requestJson } from '../lib/request'
 
 const STATUS_FILTERS = [
   { value: '', label: '全部', icon: 'sparkles' },
@@ -23,16 +24,25 @@ const STATUS_FILTERS = [
 /**
  * 订单列表 —— 复用 ui/OrderCard（与 AdminOrders 同源），带状态筛选。
  * （此前的手写订单卡副本已删除：改一次样式要同步两处的日子结束了）
+ * M-s3 修：以前 fetch 无 catch 无 r.ok，服务端挂/断网 → 无限转圈。
+ *   走 requestJson（自带超时），catch 落 error 态 + 再试一次（对齐 AdminOrders 模式）。
  */
 export default function MyOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [err, setErr] = useState('')
   const [filter, setFilter] = useState('')
+  const [reload, setReload] = useState(0)
   const [pageTitle] = useState(() => pickOne(ORDERS_TITLES))
   const [pageNote] = useState(() => pickOne(ORDERS_NOTES))
   const navigate = useNavigate()
 
-  useEffect(() => { fetch('/api/orders').then(r => r.json()).then(d => { setOrders(d); setLoading(false) }) }, [])
+  useEffect(() => {
+    setLoading(true); setErr('')
+    requestJson('/api/orders').then(r => r.json())
+      .then(d => { setOrders(Array.isArray(d) ? d : []); setLoading(false) })
+      .catch(() => { setLoading(false); setErr('订单没加载出来，看看服务端开好了没') })
+  }, [reload])
 
   const filtered = filter ? orders.filter(o => o.status === filter) : orders
 
@@ -55,6 +65,19 @@ export default function MyOrders() {
 
         {loading ? (
           <LoadingState />
+        ) : err ? (
+          <EmptyState
+            emoji="📡" tone="error"
+            title="订单没加载出来"
+            desc={pickOne(RETRY_NOTES)}
+            action={
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setReload(r => r + 1)}
+                className="d3-btn d3-btn-primary px-6 py-2.5 text-sm font-bold"
+              >再试一次</motion.button>
+            }
+          />
         ) : filtered.length === 0 ? (
           <EmptyState
             who="grass"

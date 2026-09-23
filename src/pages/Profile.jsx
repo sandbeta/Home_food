@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
 import ThemeToggle from '../components/ui/ThemeToggle'
@@ -13,20 +13,26 @@ import { useTheme } from '../theme/useTheme'
 import { pickOne, PROFILE_TITLES, partnerBadge } from '../lib/sweetCopy'
 import Icon from '../components/ui/Icons'
 import LazySheep from '../components/ui/LazySheep'
+import { requestJson } from '../lib/request'
 
 export default function Profile() {
   const [stats, setStats] = useState({ orders: 0, total: 0 })
+  const [statsErr, setStatsErr] = useState('')
+  const [reload, setReload] = useState(0)
   const [pageTitle] = useState(() => pickOne(PROFILE_TITLES))
-  const navigate = useNavigate()
   const { whoAmI, setWhoAmI } = useCart()
   const { isNight, toggle: toggleThemeMode } = useTheme()
   const persona = PERSONA[whoAmI]
 
+  /* M-s3 修：以前 fetch('/api/orders') 无 catch/无 r.ok，服务端挂时停在 0 单/¥0 累计——
+     看起来像"真的没数据"而不是加载失败。补 catch → 统计条下方一条错误提示。 */
   useEffect(() => {
-    fetch('/api/orders').then(r => r.json()).then(d => {
-      setStats({ orders: d.length, total: d.reduce((s, o) => s + o.total_price, 0) })
-    })
-  }, [])
+    setStatsErr('')
+    requestJson('/api/orders').then(r => r.json()).then(d => {
+      if (!Array.isArray(d)) { setStatsErr('订单数据格式不对，再试一次'); return }
+      setStats({ orders: d.length, total: d.reduce((s, o) => s + (Number(o.total_price) || 0), 0) })
+    }).catch(() => setStatsErr('订单没加载出来，看看服务端开好了没'))
+  }, [reload])
 
   return (
     <div className="relative">
@@ -47,15 +53,21 @@ export default function Profile() {
             className="absolute -top-16 left-1/2 -translate-x-1/2 w-56 h-40 rounded-full pointer-events-none"
             style={{ background: `radial-gradient(closest-side, ${persona.chipBg}, transparent 72%)` }}
           />
-          <motion.div
+          {/* B4 修：头像从 <motion.div onClick> 改成 <motion.button role=switch>，键盘可达；
+              aria-checked 让读屏播报「美食家 开 / 另一半 关」等价语义；emoji 装饰 aria-hidden。 */}
+          <motion.button
+            type="button"
             className={`relative w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl cursor-pointer ${whoAmI === 'me' ? 'avatar-me is-active' : 'avatar-partner is-active'}`}
             style={{ boxShadow: persona.glow }}
-            onClick={() => setWhoAmI(whoAmI === 'me' ? 'partner' : 'me')}
+            onClick={() => { const next = whoAmI === 'me' ? 'partner' : 'me'; setWhoAmI(next); try { window.__cgAnnounce?.(`已切换到${next === 'me' ? '美食家我' : '另一半TA'}身份`) } catch {} }}
             whileHover={{ scale: 1.05, rotate: 5 }}
             whileTap={{ scale: 0.95 }}
+            role="switch"
+            aria-checked={whoAmI === 'partner'}
+            aria-label={`切换点菜身份，当前：${whoAmI === 'me' ? '我' : 'TA'}`}
           >
-            {persona.emoji}
-          </motion.div>
+            <span aria-hidden="true">{persona.emoji}</span>
+          </motion.button>
           <h2
             className="text-3xl font-bold font-serif leading-tight text-[var(--color-bone)]"
           >
@@ -85,6 +97,18 @@ export default function Profile() {
           <StatCard value={stats.orders} label="订单总数" accent="var(--color-clay)" delay={0.1} />
           <StatCard value={stats.total} label="累计消费" accent="var(--color-caramel)" delay={0.16} prefix="¥" />
         </div>
+        {statsErr && (
+          <div role="alert"
+            className="flex items-center justify-between gap-3 px-3.5 py-2.5 mt-2"
+            style={{
+              borderRadius: 'var(--radius-ctl)',
+              background: 'color-mix(in srgb, var(--color-danger) 10%, var(--surface))',
+              border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
+            }}>
+            <span className="text-sm font-semibold" style={{ color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' }}>⚠️ {statsErr}</span>
+            <button onClick={() => setReload(r => r + 1)} aria-label="重新加载统计" className="text-xs font-bold shrink-0 min-h-[44px] px-3 rounded-full" style={{ color: 'var(--color-ash)' }}>再试一次</button>
+          </div>
+        )}
 
         {/* 入口列表 —— 收藏已并入点菜页，空壳项已删 */}
         <motion.div
@@ -100,16 +124,20 @@ export default function Profile() {
               <span className="block text-sm font-bold text-[var(--color-bone)]">夜宵模式</span>
               <span className="block text-xs text-[var(--color-ash)] mt-0.5">深夜 21 点后自动开，也可手动切</span>
             </div>
+            {/* M-t5 修：switch 视觉 w-12 h-7=48×28，触摸热区不达 44。
+                保留视觉尺寸不变，用 py + 负 margin 撑热区到 ≥44（48×44）。 */}
             <motion.button
               onClick={toggleThemeMode}
               whileTap={{ scale: 0.92 }}
               role="switch"
               aria-checked={isNight}
               aria-label="切换夜宵模式"
-              className="relative w-12 h-7 rounded-full shrink-0 transition-colors duration-300"
+              className="relative w-12 h-7 rounded-full shrink-0 transition-colors duration-300 my-[8px] -my-[8px] py-[8px]"
               style={{
                 background: isNight ? 'var(--color-clay)' : 'color-mix(in srgb, var(--color-bone) 16%, transparent)',
-                boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.12)',
+                /* M-v6 修：原 rgba(0,0,0,0.12) 违反 The Warm Shadow Rule（暖墨阴影）；
+                   改吃 --inset-warm-1 令牌，白天 rgba(43,36,41,0.12)、夜宵自动升到 0.42 保持可见。 */
+                boxShadow: 'var(--inset-warm-1)',
               }}
             >
               <motion.span
@@ -118,23 +146,24 @@ export default function Profile() {
                 animate={{ x: isNight ? 20 : 0 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               >
-                {isNight ? '🌙' : '☀️'}
+                <span aria-hidden="true">{isNight ? '🌙' : '☀️'}</span>
               </motion.span>
             </motion.button>
           </div>
 
           <div className="h-px mx-4" style={{ background: 'var(--color-glass-border)' }} />
 
-          <motion.div
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/admin')}
-            className="flex items-center gap-3 cursor-pointer"
-            style={{ padding: 'var(--space-card-p)' }}
+          {/* B4 修：管理后台入口从 <motion.div onClick> 改成 <Link>，键盘可达；
+              视觉与 tap 反馈保持（motion.button 内嵌 <a> 不合语义，直接 <Link>+ hover/tap 由 CSS 承担）。 */}
+          <Link
+            to="/admin"
+            className="flex items-center gap-3 cursor-pointer no-underline focus-visible:outline focus-visible:outline-2"
+            style={{ padding: 'var(--space-card-p)', color: 'inherit' }}
           >
             <Icon name="gear" size={20} style={{ color: 'var(--color-ash)' }} />
             <span className="flex-1 text-sm font-bold text-[var(--color-bone)]">管理后台</span>
             <span className="text-[var(--color-ash)] text-lg">›</span>
-          </motion.div>
+          </Link>
         </motion.div>
       </PageContainer>
     </div>
