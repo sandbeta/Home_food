@@ -784,6 +784,17 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 **四批后仍欠（记 §8）**：P2 长尾（死令牌/死导出清理、sweetCopy 大迁移、时区分桶统一、@layer 收编、VT target 清理、AdminDishes 搜索器、anniversary 2/29、seed 价格规则语义化、avoid 词表修订等）+ 各条已在附录 I/II 逐行留档；night FOUC 的 theme-color 双档写死在预载脚本内（改主题基色需两端同改）。
 
+## 7.29 第五批 · 移动端专项（2026-09-25，commit `9245e0079`）
+
+所有者要求专业评估移动端体验后授权全做。四路（分享卡 / 缩略图 / 键盘滚动 / PWA）：
+
+- **① 分享卡救活**（`DishShareCard.jsx`）：此前 iPhone 上「长按保存」被全局 `-webkit-touch-callout:none` 杀掉、「下载」用 data:URL 被 iOS 无视——两条路全断。改：canvas→Blob+objectURL（关窗 revoke）、`navigator.share({files})` 系统分享钮（`canShare` 检测，不支持图退文本）、`.share-img-callout` 给卡面图片解禁长按、海报中央图取 w800 大图档。
+- **② 缩略图管线**（`scripts/build_thumbs.mjs` + `categoryIcons.js`）：移动流量头号大户——列表 70px 格曾直出 512KB 原图。sharp 批产 thumb(160w)/w800 两档 webp，`getDishImage(dish,size)` 三档（thumb 默认/w800/orig），命名规则 `<路径>.<原扩展>.webp` 写进 JSDoc 单源。htc 列表 8.45MB→0.73MB（11.6×）；6 处 `<img>` 补 `decoding=async`。devDep 新增 sharp（仅构建期脚本，不进运行时 bundle）；`npm run thumbs` 幂等重跑。
+- **③ 键盘 + 滚动锁**（`useDialogA11y.js` + `index.css`）：滚动锁 body overflow→`position:fixed`+scrollTop 还原（iOS 真锁）；`visualViewport` 监听把面板 `bottom` 顶到键盘之上（只碰 bottom 不碰 framer transform）；`html{overscroll-behavior-y:contain}` 去误触下拉刷新。
+- **④ PWA**：品牌图标 SVG（替代 Vite 闪电）+ sharp 出 192/512/maskable；`manifest.webmanifest`（standalone/竖屏/子路径相对）；运行期缓存 `sw.js`（导航 network-first 回退缓存壳=离线点菜、静态 cache-first）；`main.jsx` 仅 PROD 注册；index.html 补 meta。
+
+**校验（四件套全绿）**：lint 0 error（9 warning 全既有）/ 53 断言全过 / build ✅（dist 含 thumb·w800·icons·sw.js·manifest）/ p6 退出码 0。**待真机复验项**（无头环境测不了）：iPhone 长按保存/系统分享面板、键盘抬升不遮提交钮、加桌面后离线开图。
+
 ## 8. 已知待办 / 候选项
 
 - ~~【最紧要·未完成】§7.25e 的 13 个 UI 审查修复未提交~~ ✅ 本轮（2026-09-25）已随 §7.26 娃娃机整改一并 commit（`5365e6b25`）+ 推 master + 镜像 gh-pages（`53d4495ab`）+ 线上 hash 核对一致（`index-C99AJePq.js`）。
