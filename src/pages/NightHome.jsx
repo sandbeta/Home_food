@@ -25,6 +25,7 @@ import { pickOne, NIGHT_HOME_TITLES, NIGHT_HOME_NOTES, RETRY_NOTES, MOOD_NIGHT_N
 import { MOODS, readMood, writeMood } from '../lib/mood'
 import { vibrate } from '../lib/sfx'
 import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
+import { requestJson } from '../lib/request'
 
 const shuffle = (arr) => {
   const a = [...arr]
@@ -88,8 +89,7 @@ export default function NightHome() {
     : cardEntrance(0.1 + idx * 0.06)
 
   useEffect(() => {
-    fetch('/api/dishes?category=全部')
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
+    requestJson('/api/dishes?category=全部').then(r => r.json())
       .then(d => {
         const available = (Array.isArray(d) ? d : []).filter(x => Number(x.available) !== 0)
         const { list, isFallback } = nightPickInfo(available)
@@ -218,9 +218,8 @@ export default function NightHome() {
                   className="vt-dish-host d3-card-face relative flex flex-col cursor-pointer"
                   style={{ padding: 'var(--space-card-p)' }}
                   onClick={(e) => morphTo(navigate, `/dish/${dish.id}`, e, dish, '/home')}
-                  /* B4：夜宵网格卡键盘可达（内层加购钮是真 <button>，事件源判定 e.target===e.currentTarget 保证不误触） */
-                  role="button" tabIndex={0} aria-label={`查看${dish.name}详情`}
-                  onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(`/dish/${dish.id}`) } }}
+                  /* 批4：role=button 容器内嵌真加购 <button> 属非法 ARIA 嵌套（B4 老注只解了误触）；
+                     容器降回普通点击面，键盘可达改由菜名真按钮承载（与 DishRow 同法）。 */
                 >
                   <div className="vt-dish-frame relative h-16 rounded-xl overflow-hidden flex items-center justify-center mb-2.5"
                     style={{ background: 'var(--plate-bg)', viewTransitionName: heroNameFor(dish.id) }}>
@@ -231,7 +230,13 @@ export default function NightHome() {
                         onError={(e) => { e.currentTarget.style.display = 'none' }} />
                     )}
                   </div>
-                  <p className="text-sm font-bold text-[var(--color-bone)] truncate">{dish.name}</p>
+                  <button type="button"
+                    onClick={(e) => { e.stopPropagation(); morphTo(navigate, `/dish/${dish.id}`, e, dish, '/home') }}
+                    aria-label={`查看${dish.name}详情`}
+                    className="text-sm font-bold text-[var(--color-bone)] truncate text-left"
+                    style={{ background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}>
+                    {dish.name}
+                  </button>
                   <div className="flex items-center justify-between gap-2 mt-1.5">
                     <div className="flex items-center gap-1 shrink-0">
                       <KissIcon className="w-3 h-3 text-[var(--color-love)]" />

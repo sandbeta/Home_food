@@ -10,6 +10,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useFavorites } from '../lib/favorites'
 import { computeEatSignals, tagLayers, trimPoolToWorkingSet } from '../lib/clawPool'
+import { requestJson } from '../lib/request'
 
 /**
  * @param {Array} dishes  当前页面的候选菜（Home=剔除网格后 rotSource；NightHome=夜宵池），裸 dish 对象数组
@@ -26,8 +27,8 @@ export function useClawSignals(dishes, { workingSet = 48, promotedIds, todayDish
     let alive = true
     // 各自独立 catch：任一挂掉只让对应信号为空、退化为等权，不整体失败
     Promise.all([
-      fetch('/api/wishes?status=added').then((r) => (r.ok ? r.json() : [])).catch(() => { if (alive) setSignalsOk(false); return [] }),
-      fetch('/api/orders').then((r) => (r.ok ? r.json() : [])).catch(() => { if (alive) setSignalsOk(false); return [] }),
+      requestJson('/api/wishes?status=added').then((r) => r.json()).catch(() => { if (alive) setSignalsOk(false); return [] }),
+      requestJson('/api/orders').then((r) => r.json()).catch(() => { if (alive) setSignalsOk(false); return [] }),
     ]).then(([w, o]) => {
       if (!alive) return
       setWishes(Array.isArray(w) ? w : [])

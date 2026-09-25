@@ -8,6 +8,7 @@ import Chip from '../components/ui/Chip'
 import Icon from '../components/ui/Icons'
 import PurchaseListSheet from '../components/PurchaseListSheet'
 import { orderStatusOf, PERSONA } from '../theme/persona'
+import { requestJson } from '../lib/request'
 
 const STATUS_FILTERS = [
   /* 批 2c · 首位加"今日待做"档：他打开看板就是一屏看清今天要做的所有单 + 合并采购清单 */
@@ -53,8 +54,7 @@ export default function AdminOrders() {
     /* 批 2c · __today 特殊档：拉全表本地过滤（当天 created_at + status !== 'completed'），
        避免给两端加 ?status_in/未完结参数；家庭订单量 <百级，成本可忽略 */
     const url = filter && filter !== '__today' ? `/api/orders?status=${filter}` : '/api/orders'
-    fetch(url)
-      .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
+    requestJson(url).then((r) => r.json())
       .then((d) => {
         if (!Array.isArray(d)) { setOrders([]); setLoading(false); return }
         if (filter === '__today') {
@@ -81,14 +81,16 @@ export default function AdminOrders() {
 
   const handleStatusChange = async (id, s) => {
     try {
-      const res = await fetch(`/api/orders/${id}/status`, {
+      await requestJson(`/api/orders/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: s }),
       })
-      if (!res.ok) throw new Error('HTTP ' + res.status)
       loadOrders()
-    } catch { setErr('状态没推进成功，网络可能不稳，再点一次') }
+    } catch (e) {
+      // adminGate 正常工作时 401 已被门消化（重放成功走不到这里）；此分支只是兜底
+      setErr(e && e.status === 401 ? '未通过管理验证' : '状态没推进成功，网络可能不稳，再点一次')
+    }
   }
 
   return (

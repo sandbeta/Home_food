@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { requestJson } from '../lib/request'
 
 const CartContext = createContext()
 const CART_KEY = 'couple_order_cart_v2'
@@ -16,13 +17,21 @@ function safeReadCart() {
     if (!Array.isArray(raw)) return []
     return raw.filter(it => it && typeof it === 'object'
       && Number.isFinite(Number(it.dish_id))
-      && Number.isFinite(Number(it.quantity)) && Number(it.quantity) > 0)
+      && Number.isFinite(Number(it.quantity)) && Number(it.quantity) > 0
+      /* 批3 修 P1：兑现上方注释承诺的 added_by 校验——幽灵条目（缺/非法）不再进入金额统计 */
+      && (it.added_by === 'me' || it.added_by === 'partner'))
       .map(it => ({ ...it, dish_id: Number(it.dish_id), quantity: Number(it.quantity), price: Number(it.price) || 0 }))
   } catch { return [] }
 }
 function safeReadWho() {
-  const w = localStorage.getItem(WHO_KEY)
-  return w === 'me' || w === 'partner' ? w : 'me'
+  try {
+    const w = localStorage.getItem(WHO_KEY)
+    return w === 'me' || w === 'partner' ? w : 'me'
+  } catch { return 'me' }   // 批3 修 P1：Safari 无痕/禁站点数据时 getItem 也 throw，原裸调用=全站白屏
+}
+/* 批3 修 P1：写盘统一走带守卫的 setItem（配额满/隐私模式抛错只降级为"本次不持久化"，不再崩树） */
+function safeWriteKey(key, value) {
+  try { localStorage.setItem(key, value) } catch { console.warn('[cart] 本地存储写入失败（隐私模式/配额）', key) }
 }
 
 export function useCart() {
@@ -33,8 +42,26 @@ export function CartProvider({ children }) {
   const [items, setItems] = useState(safeReadCart)
   const [whoAmI, setWhoAmI] = useState(safeReadWho)
 
-  useEffect(() => { localStorage.setItem(CART_KEY, JSON.stringify(items)) }, [items])
-  useEffect(() => { localStorage.setItem(WHO_KEY, whoAmI) }, [whoAmI])
+  useEffect(() => { safeWriteKey(CART_KEY, JSON.stringify(items)) }, [items])
+  useEffect(() => { safeWriteKey(WHO_KEY, whoAmI) }, [whoAmI])
+
+  /* 批3 修 P1（双窗互盖）：另一标签页改了车/身份，本页跟随最新，
+     不再等下一次 reducer 用自己的陈旧整表盖掉对方的加购。 */
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (!e.key) return
+      if (e.key === CART_KEY) {
+        try {
+          const raw = JSON.parse(e.newValue || '[]')
+          if (Array.isArray(raw)) setItems(safeReadCart())
+        } catch { /* 坏负载维持本表 */ }
+      } else if (e.key === WHO_KEY) {
+        setWhoAmI(e.newValue === 'partner' ? 'partner' : 'me')
+      }
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
 
   const addItem = useCallback((dish) => {
     setItems(prev => {
@@ -65,20 +92,18 @@ export function CartProvider({ children }) {
      → 点合并 = 把 sharedCart.items 逐个并入本地（保留每条原 added_by 归属，不重贴当前人格）。
      只做增量：items/whoAmI 主 reducer 语义不变，仅加三个方法。 */
   const shareCart = useCallback(async () => {
-    const res = await fetch('/api/cart/share', {
+    const res = await requestJson('/api/cart/share', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items, by: whoAmI }),
     })
-    if (!res.ok) throw new Error('HTTP ' + res.status)
     const data = await res.json()
     try { window.__cgAnnounce?.(`购物车已分享给${whoAmI === 'me' ? 'TA' : '你'}，共 ${items.length} 件`) } catch {}
     return data
   }, [items, whoAmI])
 
   const fetchSharedCart = useCallback(async () => {
-    const res = await fetch('/api/cart/shared')
-    if (!res.ok) throw new Error('HTTP ' + res.status)
+    const res = await requestJson('/api/cart/shared')
     return res.json()
   }, [])
 

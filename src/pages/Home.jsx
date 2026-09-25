@@ -20,6 +20,7 @@ import { MOODS, readMood, writeMood } from '../lib/mood'
 import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 import { useCart } from '../components/CartContext'
 import { useClawSignals } from '../hooks/useClawSignals'
+import { requestJson } from '../lib/request'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -98,11 +99,10 @@ export default function Home() {
   }, [whoAmI, addItem])
 
   useEffect(() => {
-    fetch('/api/orders').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
+    requestJson('/api/orders').then(r => r.json())
       .then(d => { const list = Array.isArray(d) ? d : []; setRecentOrders(list.slice(0, 3)); setOrdersAll(list) })
       .catch(() => { setRecentOrders([]); setOrdersAll([]) })
-    fetch('/api/dishes?category=全部')
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
+    requestJson('/api/dishes?category=全部').then(r => r.json())
       .then(d => {
         // 带实拍图的菜排前，娃娃机堆/主推更有图；Fisher-Yates 无偏洗牌
         const shuf = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] } return a }
@@ -111,7 +111,8 @@ export default function Home() {
         setHomeLoading(false)
       })
       .catch(() => { setHomeLoading(false); setHomeFailed(true) })
-    fetch('/api/anniversaries').then(r => r.ok ? r.json() : []).then(setAnniversaries).catch(() => {})
+    // 静默位点：requestJson 对 !ok 抛错，catch 兜回空数组（等价原 r.ok ? r.json() : []）
+    requestJson('/api/anniversaries').then(r => r.json()).catch(() => []).then(setAnniversaries)
   }, [reloadToken])
 
   /* 修 P0-5：网格与徽章全部吃真实订单数据。

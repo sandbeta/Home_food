@@ -6,6 +6,7 @@ import DishRow from '../components/ui/DishRow'
 import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import AddDishModal from '../components/AddDishModal'
+import { requestJson } from '../lib/request'
 
 /* ============================================================
  * 批 1 · 愿望链（P0-2 修）
@@ -47,8 +48,7 @@ export default function AdminDishes() {
   }, [pendingDel])
 
   const loadDishes = () => {
-    fetch('/api/dishes/all')
-      .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
+    requestJson('/api/dishes/all').then((r) => r.json())
       .then((d) => { setDishes(d); setLoading(false); setListErr('') })
       .catch(() => { setLoading(false); setListErr('菜品列表没加载出来，看看服务端开好了没') })
   }
@@ -68,12 +68,12 @@ export default function AdminDishes() {
 
   const handleSave = async (form) => {
     const isEdit = !!editingDish
-    const res = await fetch(isEdit ? `/api/dishes/${editingDish.id}` : '/api/dishes', {
+    // requestJson 自带 !ok 抛错：失败仍抛给弹窗处理（保留输入、不关闭）
+    const res = await requestJson(isEdit ? `/api/dishes/${editingDish.id}` : '/api/dishes', {
       method: isEdit ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     })
-    if (!res.ok) throw new Error('HTTP ' + res.status)   // 抛给弹窗处理：失败保留输入、不关闭
 
     /* 愿望链（顺序：POST 成功 → PUT 愿望 → 清 location.state → 关弹窗 + 刷新列表）
        POST /api/dishes 两端（mockApi :292-298 / server :141-147）都返回创建后的整行 201，含 id。 */
@@ -81,12 +81,11 @@ export default function AdminDishes() {
       try {
         const created = await res.json()
         if (created?.id == null) throw new Error('响应里没有新菜 id')
-        const wres = await fetch(`/api/wishes/${wishMode.id}`, {
+        await requestJson(`/api/wishes/${wishMode.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: 'added', added_dish_id: created.id }),
         })
-        if (!wres.ok) throw new Error('HTTP ' + wres.status)
         navigate('/admin/dishes', { replace: true })
         window.__cgAnnounce?.('愿望已变成为这道菜')
       } catch {
@@ -107,8 +106,7 @@ export default function AdminDishes() {
     if (pendingDel !== id) { setPendingDel(id); return }   // 第一次=进入确认，再点才真删
     setPendingDel(null)
     try {
-      const res = await fetch(`/api/dishes/${id}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('HTTP ' + res.status)
+      await requestJson(`/api/dishes/${id}`, { method: 'DELETE' })
       loadDishes()
     } catch { setListErr('这道菜没删掉，再试一次') }
   }
@@ -116,12 +114,11 @@ export default function AdminDishes() {
   const handleToggle = async (d) => {
     setPendingDel(null)
     try {
-      const res = await fetch(`/api/dishes/${d.id}`, {
+      await requestJson(`/api/dishes/${d.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ available: d.available ? 0 : 1 }),
       })
-      if (!res.ok) throw new Error('HTTP ' + res.status)
       loadDishes()
     } catch { setListErr('上架状态没改过来，再试一次') }
   }
@@ -140,12 +137,12 @@ export default function AdminDishes() {
     let ok = 0, fail = 0
     for (const id of selected) {
       try {
-        const res = await fetch(`/api/dishes/${id}`, {
+        await requestJson(`/api/dishes/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ available: wantAvailable }),
         })
-        if (!res.ok) fail++; else ok++
+        ok++
       } catch { fail++ }
     }
     setBatchBusy(false)
