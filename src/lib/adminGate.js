@@ -1,6 +1,9 @@
 // ============================================================
 // Admin 密码门（前端侧，2026-09-18 公网部署）
-// 家庭服务端对"公网来源的写接口"返回 401 {message:'admin_auth_required'}；
+// 家庭服务端对"公网来源的管理写接口"返回 401 {message:'admin_auth_required'}；
+// 拦截清单（与 server needsAdminGuard 同步，2026-09-25 修 P0-7 扩面）：
+//   菜品增删改 / 订单状态推进 / 纪念日增删改 / 愿望处理（PUT/DELETE /api/wishes/:id）。
+// 放行：所有 GET、POST /api/orders（下单）、POST /api/wishes（许愿）——家人公网日常操作零门。
 // 这里包装 window.fetch：捕获该 401 → 弹密码层 → POST /api/admin/login
 // 换 httpOnly cookie → 成功后自动重放原请求，用户只在首次输一次密码。
 // 局域网来源永远不会收到 401，本模块零打扰；浏览器 mock 模式也不安装它。
@@ -56,13 +59,13 @@ function askPassword() {
       ev.preventDefault()
       err.textContent = ''
       try {
-        const r = await window.fetch('/api/admin/login', {
+        const r = await (window.__cgNativeFetch || window.fetch)('/api/admin/login', {   // 走原生 fetch：登录请求绝不能再进门包装
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password: input.value }),
         })
         if (r.ok) return close(true)
-        if (r.status === 503) { err.textContent = '管理员尚未设置密码（server/admin-password.txt）'; return }
+        if (r.status === 503) { err.textContent = '家庭管理密码还没设好，待会儿再试'; console.warn('[adminGate] 服务端未配置管理密码'); return }
         err.textContent = r.status === 401 ? '密码不对，再试试' : '验证失败，请稍后再试'
         input.select()
       } catch {

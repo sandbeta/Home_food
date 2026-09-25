@@ -185,6 +185,7 @@ async function handleApi(req, res, url) {
         price: Number(dish.price || item.price || 0),
         quantity: Number(item.quantity || 1),
         added_by: item.added_by || 'me',
+        category: dish.category || '', /* 修 P0-3：快照分类 */
       }
     })
     const total_price = items.reduce((s, i) => s + i.price * i.quantity, 0)
@@ -421,8 +422,9 @@ function clientIsPublic(req) {
 // 局域网零打扰：内网访问行为如旧。公网访问默认拒绝（403），直到用环境变量
 // FAMILY_ADMIN_PASSWORD 设置密码后，凭同一密码换 httpOnly cookie 进入。
 function needsAdminGuard(pathname, method) {
-  // 写保护：只拦"改数据"的接口（增删改菜、上下架、推进订单状态）。
-  // 读接口与 POST /api/orders（家人公网点餐）放行——公网浏览/下单无感；
+  // 写保护：拦「改数据」的管理动作（增删改菜、推进订单状态、处理愿望、纪念日增删改）。
+  // 读接口与 POST /api/orders、POST /api/wishes（家人公网点餐/许愿）放行——公网浏览/下单/许愿无感；
+  // 修 P0-7：wishes 的 PUT/DELETE 与 anniversaries 的写操作原为裸奔（公网陌生人可删光愿望池）。
   // 注：SPA 是 hash 路由，/admin 页面路径不会到达服务端，管理入口的写
   // 操作全部经由下面这些 API 接口，拦接口即拦住管理行为。
   const mutating = method !== 'GET' && method !== 'HEAD'
@@ -430,6 +432,9 @@ function needsAdminGuard(pathname, method) {
   if (pathname === '/api/dishes') return true
   if (/^\/api\/dishes\/\d+$/.test(pathname)) return true
   if (/^\/api\/orders\/\d+\/status$/.test(pathname)) return true
+  if (pathname === '/api/anniversaries') return true              // 建纪念日 = 管理动作
+  if (/^\/api\/anniversaries\/\d+$/.test(pathname)) return true   // 改/删纪念日
+  if (/^\/api\/wishes\/\d+$/.test(pathname)) return true          // 处理愿望（婉拒 PUT/删除/变出来回写）；她许愿走 POST /api/wishes 不拦
   return false
 }
 const crypto = require('node:crypto')

@@ -66,7 +66,16 @@ export default function Profile() {
 
   /* 批 6b · 成就：拉一次全表算徽章（与 stats 共用一份数据） */
   const [allOrders, setAllOrders] = useState([])
-  const achievements = useMemo(() => computeAchievements(allOrders), [allOrders])
+  /* 修 P0-3：老订单 items 快照没有 category → 拉一次菜品表按 dish_id 兜底成就判定。
+     用 /api/dishes/all（不过滤 available），历史订单里已下架的菜也能查到分类；失败静默（同现状，只是徽章算不出）。 */
+  const [dishes, setDishes] = useState([])
+  useEffect(() => {
+    requestJson('/api/dishes/all').then(r => r.json())
+      .then(d => setDishes(Array.isArray(d) ? d : []))
+      .catch(() => setDishes([]))
+  }, [])
+  const dishCats = useMemo(() => new Map(dishes.map(d => [Number(d.id), d.category])), [dishes])
+  const achievements = useMemo(() => computeAchievements(allOrders, dishCats), [allOrders, dishCats])
   const unlockedCount = ACHIEVEMENTS.filter(a => achievements[a.key]?.unlocked).length
 
   return (

@@ -339,6 +339,7 @@ export function installMockApi() {
           price: Number(dish.price || item.price || 0),
           quantity: Number(item.quantity || 1),
           added_by: item.added_by || 'me',
+          category: dish.category || '', /* 修 P0-3：快照分类 */
         }
       })
       const total_price = items.reduce((sum, i) => sum + i.price * i.quantity, 0)

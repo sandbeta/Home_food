@@ -218,19 +218,24 @@ export function decideFeint(rng = Math.random, rate = CLAW_TIMING.feintRate) {
 }
 
 /**
- * 拖拽：把指针横向百分比(0~100)映射到最近槽位下标。
- * slotLayout 每项含 x:'NN%'。无有效槽位返回 -1。
+ * 拖拽/键盘瞄准的统一吸附真源（修 P1 门禁盲区：原 nearestSlotIdx 被 aimTo 内联
+ * 版取代后成了"测试保护死码、真逻辑零覆盖"；现在反过来——aimTo 调用本函数）。
+ * 把指针横向百分比(0~100)映射到槽位下标：优先吸附「最近的有菜槽位」，
+ * 整堆全空才退回最近任意槽（杜绝拖到空槽抬手静默失败）。
+ * slotLayout 每项含 x:'NN%'；slots 与之等长（空位为 null/undefined）。无有效槽位返回 -1。
  */
-export function nearestSlotIdx(percent, slotLayout) {
+export function aimSlotIdx(percent, slotLayout, slots = []) {
   if (!slotLayout || !slotLayout.length) return -1
-  let best = -1, bestD = Infinity
+  let bestOcc = -1, dOcc = Infinity
+  let bestAny = -1, dAny = Infinity
   slotLayout.forEach((s, i) => {
     const cx = parseFloat(s && s.x)
     if (!Number.isFinite(cx)) return
     const d = Math.abs(cx - percent)
-    if (d < bestD) { bestD = d; best = i }
+    if (d < dAny) { dAny = d; bestAny = i }
+    if (slots[i] && d < dOcc) { dOcc = d; bestOcc = i }
   })
-  return best
+  return bestOcc >= 0 ? bestOcc : bestAny
 }
 
 /**

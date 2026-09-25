@@ -29,8 +29,15 @@ function getGreeting() {
   return '晚上好'
 }
 
-// 常点人 mock：按菜品 id 稳定分配 🐱/🐑，让双人格出现在首页网格里
-const chefOf = (dish) => (dish.id % 2 === 0 ? 'me' : 'partner')
+// 修 P0-5：「谁常点」不再是 id%2 的 mock——用真实订单 items 的 added_by 聚合判多数方；
+// 无数据或两方持平返回 null（卡片隐藏徽章，宁缺毋假）。定义移到组件内以便读 eatStats。
+function chefOfFrom(eatStats, dish) {
+  const s = eatStats.get(Number(dish.id))
+  if (!s) return null
+  if (s.me > s.partner) return 'me'
+  if (s.partner > s.me) return 'partner'
+  return null
+}
 
 /**
  * 首页 —— 「娃娃机 + 常点的网格 + 最近订单」，约 1 屏出头。
@@ -38,16 +45,16 @@ const chefOf = (dish) => (dish.id % 2 === 0 ? 'me' : 'partner')
  * 批 8（V4 现实娃娃机）：娃娃机内部自己管理"堆里 8 个槽位 + 随机抓一个 + 抓走的槽刷新补货"，
  * Home 只负责把候选池 rotSource 传下去（pool）、接住"上一个抓到的菜"（onActiveChange，供分享卡/跳详情），
  * 以及加购/撤销。旧的 rotIdx 顺序轮换、自动换主推、播放/暂停钮全部移除——现实娃娃机不会自己抓。
- * 「常点的」网格保持静止（那是"你家稳定爱吃的那几道"）。
+ * 「常点的」网格保持静止（那是"你家稳定爱吃的那几道"——真实订单份数聚合，够 6 道才配这个标题）。
  */
 export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
+  const [ordersAll, setOrdersAll] = useState([])   // 全量订单：网格与徽章的真实数据源
   // m-22：useState 初值从 getCachedList('home') 回填，让 morphBack 首页形变生效
   const [dishes, setDishes] = useState(() => getCachedList('home') || [])
   const [homeLoading, setHomeLoading] = useState(() => !getCachedList('home'))
   const [homeFailed, setHomeFailed] = useState(false)
   const [reloadToken, setReloadToken] = useState(0)
-  const [gridOffset] = useState(0)   // 网格固定（不再顺移）
 
   /* 批 1 · 纪念日：命中日一次性切页头文案池 */
   const [anniversaries, setAnniversaries] = useState([])
@@ -91,7 +98,9 @@ export default function Home() {
   }, [whoAmI, addItem])
 
   useEffect(() => {
-    fetch('/api/orders').then(r => r.json()).then(d => setRecentOrders(d.slice(0, 3))).catch(() => {})
+    fetch('/api/orders').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
+      .then(d => { const list = Array.isArray(d) ? d : []; setRecentOrders(list.slice(0, 3)); setOrdersAll(list) })
+      .catch(() => { setRecentOrders([]); setOrdersAll([]) })
     fetch('/api/dishes?category=全部')
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json() })
       .then(d => {
@@ -105,16 +114,43 @@ export default function Home() {
     fetch('/api/anniversaries').then(r => r.ok ? r.json() : []).then(setAnniversaries).catch(() => {})
   }, [reloadToken])
 
-  const len = dishes.length
-  // 网格占用的菜从娃娃机候选池剔除，避免同菜同时出现在网格和堆里
-  const gridIdx = useMemo(() => len >= 7
-    ? Array.from({ length: 6 }, (_, k) => (gridOffset + 1 + k) % len)
-    : Array.from({ length: Math.min(6, len) }, (_, k) => k), [len, gridOffset])
+  /* 修 P0-5：网格与徽章全部吃真实订单数据。
+     eatStats：dish_id → {qty 总份数, me/partner 分人格份数}；
+     「常点的」= 按真实份数降序取 6；有单菜数 ≥6 才用「常点的」标题，不足按菜单顺序补位、标题降为「今天想吃」（不拿随机冒充常点）。 */
+  const eatStats = useMemo(() => {
+    const m = new Map()
+    for (const o of ordersAll) {
+      for (const it of (o.items || [])) {
+        const k = Number(it.dish_id)
+        if (!Number.isFinite(k)) continue
+        const q = Number(it.quantity) || 1
+        const e = m.get(k) || { qty: 0, me: 0, partner: 0 }
+        e.qty += q
+        if (it.added_by === 'partner') e.partner += q
+        else e.me += q
+        m.set(k, e)
+      }
+    }
+    return m
+  }, [ordersAll])
+  const popular = useMemo(() => {
+    if (!dishes.length) return []
+    const stat = (d) => eatStats.get(Number(d.id))?.qty || 0
+    const withData = dishes.filter((d) => stat(d) > 0)
+      .sort((a, b) => stat(b) - stat(a) || Number(a.id) - Number(b.id))
+    const out = withData.slice(0, 6)
+    if (out.length < 6) out.push(...dishes.filter((d) => stat(d) === 0).slice(0, 6 - out.length))
+    return out
+  }, [dishes, eatStats])
+  const gridIsFrequent = useMemo(
+    () => dishes.filter((d) => (eatStats.get(Number(d.id))?.qty || 0) > 0).length >= 6,
+    [dishes, eatStats])
+  // 网格占用的菜从娃娃机候选池剔除（按 id 集合，避免同菜同时出现在网格和堆里）
   const rotSource = useMemo(() => {
-    const pool = len ? dishes.filter((_, i) => !gridIdx.includes(i)) : []
+    const ids = new Set(popular.map((d) => Number(d.id)))
+    const pool = dishes.filter((d) => !ids.has(Number(d.id)))
     return pool.length ? pool : dishes
-  }, [dishes, gridIdx, len])
-  const popular = gridIdx.map(i => dishes[i])
+  }, [dishes, popular])
 
   /* 智能三层池（白天版）：从 rotSource 聚合收藏/常点/愿望加权，并把当天纪念日绑定菜并入 B 层。 */
   const { pool: clawPool } = useClawSignals(rotSource, { todayDishId: todayHit?.dish_id ?? null })
@@ -224,12 +260,12 @@ export default function Home() {
           <motion.div {...contentEnter(0.1)}>
             <SectionHeader
               index={1}
-              title="常点的"
+              title={gridIsFrequent ? '常点的' : '今天想吃'}
               action={<button onClick={() => navigate('/menu')} className="min-h-[44px] px-2 -mx-2 text-xs text-[var(--color-clay-text)] font-bold rounded-full inline-flex items-center">全部 →</button>}
             />
             <div className="grid grid-cols-2 gap-3 mt-3">
               {popular.map((dish) => {
-                const chef = chefOf(dish)
+                const chef = chefOfFrom(eatStats, dish)
                 return (
                   <motion.div
                     key={dish.id}
@@ -240,12 +276,14 @@ export default function Home() {
                     className="vt-dish-host d3-card-face cursor-pointer flex items-center gap-3 relative"
                     style={{ padding: 'var(--space-card-p)' }}
                   >
-                    <div
-                      className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] border-2 border-[var(--color-ink-900)] ${chef === 'me' ? 'avatar-me' : 'avatar-partner'}`}
-                      title={chef === 'me' ? '我常点' : 'TA 常点'}
-                    >
-                      <span aria-hidden="true">{chef === 'me' ? '🐱' : '🐑'}</span>
-                    </div>
+                    {chef && (
+                      <div
+                        className={`absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-[10px] border-2 border-[var(--color-ink-900)] ${chef === 'me' ? 'avatar-me' : 'avatar-partner'}`}
+                        title={chef === 'me' ? '我点得多' : 'TA 点得多'}
+                      >
+                        <span aria-hidden="true">{chef === 'me' ? '🐱' : '🐑'}</span>
+                      </div>
+                    )}
                     <div
                       className="vt-dish-frame relative w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden"
                       style={{ background: 'var(--plate-bg)', viewTransitionName: heroNameFor(dish.id) }}

@@ -24,10 +24,17 @@ export const ACHIEVEMENTS = [
   { key: 'anniversary',title: '一周年了', icon: '💍', desc: '第一单至今满 365 天' },
 ]
 
-/** 计算每枚徽章是否解锁 + 首次达成时间（ISO）；orders 是完整 /api/orders 返回 */
-export function computeAchievements(orders) {
+/**
+ * 计算每枚徽章是否解锁 + 首次达成时间（ISO）；orders 是完整 /api/orders 返回
+ * @param {Array} orders 历史订单
+ * @param {Map<number,string>} [dishCats] 修 P0-3：dish_id → category 映射，
+ *   给「下单时才快照 category」之前的老订单兜底；省略时行为与原先一致
+ */
+export function computeAchievements(orders, dishCats) {
   const out = {}
   if (!Array.isArray(orders) || orders.length === 0) return out
+  /* 修 P0-3：老订单 items 无 category 快照 → 有 dishCats 时按 dish_id 兜底（有值时行为不变） */
+  const catOf = (it) => it.category || (dishCats && typeof dishCats.get === 'function' ? dishCats.get(Number(it.dish_id)) : '') || ''
   const sorted = [...orders].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
   const first = sorted[0]
   const last = sorted[sorted.length - 1]
@@ -49,7 +56,7 @@ export function computeAchievements(orders) {
   if (sorted.length >= 100) out.hundred = { unlocked: true, at: sorted[99].created_at }
   // 吃遍八系：某单含 >=5 种八大菜系
   const cuisineOrder = sorted.find(o => {
-    const set = new Set((o.items || []).map(i => i.category).filter(c => EIGHT_CUISINES.includes(c)))
+    const set = new Set((o.items || []).map(i => catOf(i)).filter(c => EIGHT_CUISINES.includes(c)))
     return set.size >= 5
   })
   if (cuisineOrder) out.cuisine = { unlocked: true, at: cuisineOrder.created_at }

@@ -52,6 +52,16 @@ export default function KitchenCalendar() {
   }
   useEffect(() => { load() }, [])
 
+  /* 修 P0-3：历史订单 items 快照没有 category（新单两端已补）→ 与 load 并行拉一次菜品表按
+     dish_id 兜底，否则圆点永不出现。/api/dishes/all 不过滤 available，下架菜也查得到；失败静默。 */
+  const [dishes, setDishes] = useState([])
+  useEffect(() => {
+    requestJson('/api/dishes/all').then(r => r.json())
+      .then(d => setDishes(Array.isArray(d) ? d : []))
+      .catch(() => setDishes([]))
+  }, [])
+  const dishCats = useMemo(() => new Map(dishes.map(d => [Number(d.id), d.category])), [dishes])
+
   /* 按 YYYY-MM-DD 分桶，一天可能多单；同时统计每天 category 分布决定圆点色 */
   const dayMap = useMemo(() => {
     const map = {}
@@ -60,10 +70,13 @@ export default function KitchenCalendar() {
       const key = o.created_at.slice(0, 10)
       if (!map[key]) map[key] = { orders: [], cats: new Set() }
       map[key].orders.push(o)
-      for (const it of (o.items || [])) if (it.category) map[key].cats.add(it.category)
+      for (const it of (o.items || [])) {
+        const cat = it.category || dishCats.get(Number(it.dish_id)) || '' /* 修 P0-3：老数据兜底 */
+        if (cat) map[key].cats.add(cat)
+      }
     }
     return map
-  }, [orders])
+  }, [orders, dishCats])
 
   /* 月历网格：从当月 1 号所在周一起铺，共 42 格（6 周） */
   const cells = useMemo(() => {

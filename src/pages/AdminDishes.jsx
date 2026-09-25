@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import AdminShell from '../components/ui/AdminShell'
 import DishRow from '../components/ui/DishRow'
@@ -6,14 +7,30 @@ import EmptyState from '../components/ui/EmptyState'
 import LoadingState from '../components/ui/LoadingState'
 import AddDishModal from '../components/AddDishModal'
 
+/* ============================================================
+ * 批 1 · 愿望链（P0-2 修）
+ * ------------------------------------------------------------
+ * AdminWishes 点「变出来」→ navigate('/admin/dishes', { state: { wishMode } })，
+ * 本页消费 wishMode：自动弹出「新建菜」表单并预填菜名/描述，顶部挂一条说明横幅。
+ * 只有 POST 真的把这道菜建出来之后，才回头 PUT 愿望 {status:'added', added_dish_id:新菜 id}
+ * —— 娃娃机 B 层加权（useClawSignals）只认 added_dish_id 有值的愿望，所以 PUT 必须后置。
+ * 用户中途取消弹窗：不发任何 PUT，愿望保持 pending，横幅留着可继续。
+ * ============================================================ */
 export default function AdminDishes() {
   const [dishes, setDishes] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingDish, setEditingDish] = useState(null)
+  /* 新建时的预填（只由 wishMode 带来；编辑态优先用 editingDish） */
+  const [addInitial, setAddInitial] = useState(null)
+
+  const navigate = useNavigate()
+  const location = useLocation()
+  const wishMode = location.state?.wishMode || null
 
   const [visibleCount, setVisibleCount] = useState(30)
   const [listErr, setListErr] = useState('')
+  const [wishLinkErr, setWishLinkErr] = useState('')   // 菜建好了、但愿望关联没写进去
   const [pendingDel, setPendingDel] = useState(null)   // 两段式删除：记住当前待确认的行
   /* 批 6c · 批量上下架模式 */
   const [batchMode, setBatchMode] = useState(false)
@@ -36,17 +53,52 @@ export default function AdminDishes() {
       .catch(() => { setLoading(false); setListErr('菜品列表没加载出来，看看服务端开好了没') })
   }
   useEffect(() => { loadDishes() }, [])
+
+  /* 愿望链 · 消费 wishMode：从愿望池跳过来就直接开一张预填好的「新菜」表单。
+     deps 用 wishMode?.id —— 进入本页时消费一次即可；离开再回来（重新点「变出来」，哪怕同一条愿望）
+     时本页重新挂载，会再开一次。建菜成功后 state 被清 → wishMode 变 null，这里走早退。 */
+  useEffect(() => {
+    if (!wishMode?.id) return
+    setEditingDish(null)
+    setAddInitial({ name: wishMode.name || '', description: wishMode.note || '' })
+    setShowModal(true)
+  }, [wishMode?.id, wishMode?.name, wishMode?.note])
+
   const visibleDishes = dishes.slice(0, visibleCount)
 
   const handleSave = async (form) => {
-    const res = await fetch(editingDish ? `/api/dishes/${editingDish.id}` : '/api/dishes', {
-      method: editingDish ? 'PUT' : 'POST',
+    const isEdit = !!editingDish
+    const res = await fetch(isEdit ? `/api/dishes/${editingDish.id}` : '/api/dishes', {
+      method: isEdit ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     })
     if (!res.ok) throw new Error('HTTP ' + res.status)   // 抛给弹窗处理：失败保留输入、不关闭
+
+    /* 愿望链（顺序：POST 成功 → PUT 愿望 → 清 location.state → 关弹窗 + 刷新列表）
+       POST /api/dishes 两端（mockApi :292-298 / server :141-147）都返回创建后的整行 201，含 id。 */
+    if (!isEdit && wishMode) {
+      try {
+        const created = await res.json()
+        if (created?.id == null) throw new Error('响应里没有新菜 id')
+        const wres = await fetch(`/api/wishes/${wishMode.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'added', added_dish_id: created.id }),
+        })
+        if (!wres.ok) throw new Error('HTTP ' + wres.status)
+        navigate('/admin/dishes', { replace: true })
+        window.__cgAnnounce?.('愿望已变成为这道菜')
+      } catch {
+        // 菜已经落库、不回收；只提示关联没写进去（愿望保持 pending，可再点一次「变出来」补链）
+        // 注意用独立 state：loadDishes() 成功时会把 listErr 清空，不能借那条横幅报这个错
+        setWishLinkErr('菜已建好，但愿望关联没写进去，再点一次变出来或稍后重试')
+      }
+    }
+
     setShowModal(false)
     setEditingDish(null)
+    setAddInitial(null)
     setSelected(new Set())
     loadDishes()
   }
@@ -127,6 +179,32 @@ export default function AdminDishes() {
         </div>
       }
     >
+      {wishMode && (
+        <div role="status"
+          className="flex items-start gap-2 px-3.5 py-2.5 mb-3"
+          style={{
+            borderRadius: 'var(--radius-ctl)',
+            background: 'color-mix(in srgb, var(--color-clay) 10%, var(--surface))',
+            border: '2px solid color-mix(in srgb, var(--color-clay-text) 45%, transparent)',
+          }}>
+          <span aria-hidden className="text-sm leading-5">🌠</span>
+          <span className="text-sm font-semibold leading-5" style={{ color: 'var(--color-clay-text)' }}>
+            正在把 TA 的愿望变成一道菜：「{wishMode.name}」。建好这道菜之前，它还留在愿望池里等着。
+          </span>
+        </div>
+      )}
+      {wishLinkErr && (
+        <div role="alert"
+          className="flex items-center justify-between gap-3 px-3.5 py-2.5 mb-3"
+          style={{
+            borderRadius: 'var(--radius-ctl)',
+            background: 'color-mix(in srgb, var(--color-danger) 10%, var(--surface))',
+            border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
+          }}>
+          <span className="text-sm font-semibold" style={{ color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' }}>⚠️ {wishLinkErr}</span>
+          <button onClick={() => setWishLinkErr('')} aria-label="关闭提示" className="text-xs font-bold shrink-0 min-h-[44px] px-3 rounded-full" style={{ color: 'var(--color-ash)' }}>知道了</button>
+        </div>
+      )}
       {listErr && (
         <div role="alert"
           className="flex items-center justify-between gap-3 px-3.5 py-2.5 mb-3"
@@ -228,8 +306,11 @@ export default function AdminDishes() {
 
       <AnimatePresence>
         {showModal && (
+          /* 取消：只收弹窗、不发任何 PUT（愿望保持 pending = 正确语义）；
+             addInitial 与顶部横幅都留着，再点「+ 添加」还是那张预填好的表单 */
           <AddDishModal
             dish={editingDish}
+            initial={addInitial}
             onClose={() => { setShowModal(false); setEditingDish(null) }}
             onSave={handleSave}
           />

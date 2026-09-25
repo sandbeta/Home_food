@@ -201,7 +201,7 @@ export default function NightHome() {
         {grid.length > 0 && (
           <motion.div {...contentEnter(0.1)}>
             <SectionHeader
-              title="这些点得多"
+              title="这些适合深夜"
               action={
                 <div className="flex items-center gap-2">
                   {/* m-26：nightPick 命中<6 回退整池 → 明示"这些不是纯宵夜"，避免佛跳墙/剁椒鱼头等正餐混入被误当深夜推荐 */}

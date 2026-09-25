@@ -8,9 +8,11 @@
 //   · 抬手在 onPointerUp 里直接落爪，不再依赖 onClick，消除"拖完紧跟一次 click"的竞态
 //     （原 grabLockout 250ms 补丁因此不再需要，保留常量仅作兜底参考）。
 // 瞄准格切换时抛一个 aria-live 文本给屏幕阅读器（当前瞄准哪道）。
-// 映射逻辑内联在 aimTo：优先吸附「最近的有菜槽位」，全空才退回最近任意槽，杜绝拖到空槽抬手静默失败。
+// 映射逻辑走 clawPool.aimSlotIdx 纯函数单一真源：优先吸附「最近的有菜槽位」，
+// 全空才退回最近任意槽，杜绝拖到空槽抬手静默失败（且有单测保护）。
 // ============================================================
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { aimSlotIdx } from '../lib/clawPool'
 
 /**
  * @param {object}   o
@@ -28,6 +30,7 @@ export function useClawAim({ caseRef, slots, layout, disabled = false, onDrop })
   const [dragging, setDragging] = useState(false)
   const rectRef = useRef(null)     // pointerdown 时测一次，move 复用，避免每帧 getBoundingClientRect 触发 reflow
   const aimRef = useRef(-1)
+  const pidRef = useRef(null)      // 本次拖拽的 pointerId（修 P1：原 el._pid 从未赋值，释放捕获是空操作）
 
   const setAim = useCallback((i) => {
     if (i !== aimRef.current) { aimRef.current = i; setAimIdx(i) }
@@ -42,46 +45,45 @@ export function useClawAim({ caseRef, slots, layout, disabled = false, onDrop })
 
   const aimTo = useCallback((clientX) => {
     const pct = percentFrom(clientX)
-    if (!layout || !layout.length) return
-    let bestOccupied = -1, dOcc = Infinity
-    let bestAny = -1, dAny = Infinity
-    for (let i = 0; i < layout.length; i++) {
-      const cx = parseFloat(layout[i] && layout[i].x)
-      if (!Number.isFinite(cx)) continue
-      const d = Math.abs(cx - pct)
-      if (d < dAny) { dAny = d; bestAny = i }
-      if (slots[i] && d < dOcc) { dOcc = d; bestOccupied = i }
-    }
-    const target = bestOccupied >= 0 ? bestOccupied : bestAny
+    const target = aimSlotIdx(pct, layout, slots)
     if (target >= 0) setAim(target)
   }, [layout, slots, setAim])
 
   const onPointerDown = useCallback((e) => {
     if (disabled || e.button != null && e.button !== 0) return
+    if (pidRef.current != null) return        // 多指：只认起手那一指，其余手指的 down/move/up 全部忽略
     const el = caseRef.current
     if (!el) return
     try { el.setPointerCapture(e.pointerId) } catch { /* 某些环境不支持则忽略，退回元素内事件 */ }
+    pidRef.current = e.pointerId
     rectRef.current = el.getBoundingClientRect()
     setDragging(true)
     aimTo(e.clientX)
   }, [disabled, caseRef, aimTo])
 
   const onPointerMove = useCallback((e) => {
-    if (!dragging || disabled) return
+    if (!dragging || disabled || e.pointerId !== pidRef.current) return
     aimTo(e.clientX)
   }, [dragging, disabled, aimTo])
 
   // 抬手 = 下爪：抓到当前瞄准的那一格（未拖过则用 aimRef，可能 -1 交给 onDrop 兜随机）
   const endDrag = useCallback((commit) => {
     const el = caseRef.current
-    if (el) { try { el.releasePointerCapture?.(el._pid) } catch {} }
+    if (el && pidRef.current != null) { try { el.releasePointerCapture(pidRef.current) } catch { /* 未捕获/已随抬手隐式释放 */ } }
+    pidRef.current = null
     setDragging(false)
     if (commit && aimRef.current >= 0) onDrop?.(aimRef.current)
   }, [caseRef, onDrop])
 
-  const onPointerUp = useCallback(() => endDrag(true), [endDrag])
+  const onPointerUp = useCallback((e) => {
+    if (e.pointerId !== pidRef.current) return   // 非起手手指抬起不参与落爪判定
+    endDrag(true)
+  }, [endDrag])
   // 系统手势/来电/多指打断：只清态不落爪，杜绝卡死
-  const onPointerCancel = useCallback(() => endDrag(false), [endDrag])
+  const onPointerCancel = useCallback((e) => {
+    if (e.pointerId !== pidRef.current) return
+    endDrag(false)
+  }, [endDrag])
 
   // 卸载兜底：清 dragging（pointer capture 由浏览器随元素销毁自动释放）
   useEffect(() => () => setDragging(false), [])

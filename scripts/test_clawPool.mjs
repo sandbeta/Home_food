@@ -15,7 +15,7 @@ const {
   CLAW_WEIGHTS, CLAW_TIMING, HOT_THRESHOLD,
   computeEatSignals, tagLayers, weightedPick,
   buildInitialSlots, refillOne, pickBuddyA,
-  buildTimeline, decideFeint, nearestSlotIdx, trimPoolToWorkingSet,
+  buildTimeline, decideFeint, aimSlotIdx, trimPoolToWorkingSet,
 } = await import('../src/lib/clawPool.js')
 
 const D = (id, extra = {}) => ({ id, name: '菜' + id, price: 10 + id, available: 1, ...extra })
@@ -144,13 +144,16 @@ const pool = [D(1), D(2), D(3), D(4), D(5), D(6)]
   assert(decideFeint(() => 0.5, 0.6) === true, '自定义 rate 生效')
 }
 
-// 11) nearestSlotIdx：横向百分比映射到最近槽位
+// 11) aimSlotIdx：横向百分比→槽位吸附（真逻辑：优先吸附有菜槽，全空退最近任意槽）
 {
   const layout = [{ x: '30%' }, { x: '50%' }, { x: '70%' }]
-  assert(nearestSlotIdx(30, layout) === 0, '30% → 第 0 槽')
-  assert(nearestSlotIdx(49, layout) === 1, '49% 更接近 50 → 第 1 槽')
-  assert(nearestSlotIdx(100, layout) === 2, '100% 边缘 → 最近的第 2 槽')
-  assert(nearestSlotIdx(50, []) === -1, '空布局返回 -1')
+  const withDish = [D(1), null, D(3)]
+  assert(aimSlotIdx(30, layout, withDish) === 0, '30% → 第 0 槽')
+  assert(aimSlotIdx(49, layout, withDish) === 0, '49% 离空的第 1 槽最近(距1)但优先有菜槽：0(距19)胜过2(距21)')
+  assert(aimSlotIdx(100, layout, withDish) === 2, '100% 边缘 → 最近的第 2 槽')
+  assert(aimSlotIdx(50, layout, [null, null, null]) === 1, '整堆全空 → 退回最近任意槽（第 1）')
+  assert(aimSlotIdx(50, [], [D(1)]) === -1, '空布局返回 -1')
+  assert(aimSlotIdx(50, [{ x: 'abc' }, { x: '40%' }], [null, D(9)]) === 1, '坏 x 值跳过不炸')
 }
 
 // 12) trimPoolToWorkingSet：全保 A/B、总数不超预算、小池原样

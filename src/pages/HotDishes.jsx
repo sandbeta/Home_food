@@ -116,7 +116,7 @@ export default function HotDishes() {
 
         {/* 你们最近点最多的 */}
         <motion.div {...contentEnter(0.05)}>
-          <SectionHeader title="你家最近热门" action={<span className="text-xs text-[var(--color-ash)]">按点单份数</span>} />
+          <SectionHeader title="你家点过的热门" action={<span className="text-xs text-[var(--color-ash)]">按点单份数</span>} />
           {shownOwn.length === 0 ? (
             <div className="d3-card-face mt-3 text-center" style={{ padding: 'var(--space-card-p)' }}>
               <p className="text-sm text-[var(--color-ash)]">
@@ -164,9 +164,9 @@ export default function HotDishes() {
           )}
         </motion.div>
 
-        {/* 2026 家常趋势榜 */}
+        {/* 家常灵感榜（修 P0-6：原「2026 家常趋势榜·家庭烹饪率 87.6%」为无来源伪权威数据，已去数字化） */}
         <motion.div {...contentEnter(0.1)} className="mt-6">
-          <SectionHeader title="2026 家常趋势榜" action={<span className="text-xs text-[var(--color-ash)]">家庭烹饪率口径</span>} />
+          <SectionHeader title="家常灵感榜" action={<span className="text-xs text-[var(--color-ash)]">口味方向参考 · 非统计</span>} />
           <div className="d3-card-face mt-3 overflow-hidden">
             {shownTrends.length === 0 ? (
               <div className="text-center" style={{ padding: 'var(--space-card-p)' }}>
@@ -192,10 +192,7 @@ export default function HotDishes() {
                         {t.tag}
                       </span>
                     </div>
-                    <p className="text-xs text-[var(--color-ash)] mt-0.5">{t.heat}</p>
-                    <div className="mt-1.5 h-[3px] rounded-full overflow-hidden" style={{ background: 'var(--color-glass-border)' }}>
-                      <div className="h-full rounded-full ink-reveal-line" style={{ width: (parseFloat((t.heat.match(/([\d.]+)%/) || [0, '0'])[1]) || 0) + '%', background: 'var(--color-clay-gradient)' }} />
-                    </div>
+                    <p className="text-xs text-[var(--color-ash)] mt-0.5">{t.line}</p>
                   </div>
                   {/* 行动区：菜单里有 → 看菜谱/点一份；没有 → 提示 */}
                   {dish ? (
@@ -231,9 +228,9 @@ export default function HotDishes() {
             })}
           </div>
 
-          {/* 数据来源脚注：诚实标注口径 */}
+          {/* 诚实脚注：本榜只是口味方向参考，不挂任何外部统计口径 */}
           <p className="text-center text-[11px] text-[var(--color-mist)] mt-3 leading-relaxed">
-            趋势数据综合 2026 年公开家常菜榜单整理，仅供参考
+            这榜只是「家常菜常有的口味方向」参考，没有任何统计口径；你家真实的热门在上面那节。
           </p>
         </motion.div>
       </PageContainer>

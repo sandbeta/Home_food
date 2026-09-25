@@ -14,11 +14,14 @@ import { orderStatusOf } from '../theme/persona'
 import { pickOne, ORDERS_TITLES, ORDERS_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { requestJson } from '../lib/request'
 
+// 修 P1-3：后台早已只产 cutting/cooking/plating，旧值 preparing 仅作历史别名——
+// 用户侧「在做了」必须按集合匹配，否则新单在该档永远空列表（与 AdminOrders 词表同源四档）。
+const DOING = ['preparing', 'cutting', 'cooking', 'plating']
 const STATUS_FILTERS = [
-  { value: '', label: '全部', icon: 'sparkles' },
-  { value: 'pending', label: '等着呢', icon: 'clock' },
-  { value: 'preparing', label: '在做了', icon: 'potBoil' },
-  { value: 'completed', label: '做好啦', icon: 'check' },
+  { value: '', label: '全部', icon: 'sparkles', match: null },
+  { value: 'pending', label: '等着呢', icon: 'clock', match: ['pending'] },
+  { value: 'doing', label: '在做了', icon: 'potBoil', match: DOING },
+  { value: 'completed', label: '做好啦', icon: 'check', match: ['completed'] },
 ]
 
 /**
@@ -44,7 +47,8 @@ export default function MyOrders() {
       .catch(() => { setLoading(false); setErr('订单没加载出来，看看服务端开好了没') })
   }, [reload])
 
-  const filtered = filter ? orders.filter(o => o.status === filter) : orders
+  const activeFilter = STATUS_FILTERS.find((f) => f.value === filter)
+  const filtered = activeFilter?.match ? orders.filter(o => activeFilter.match.includes(o.status)) : orders
 
   return (
     <div className="relative">

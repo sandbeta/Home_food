@@ -56,5 +56,25 @@ const advanced = await req(`/api/orders/${post.body.id}/status`, {
 })
 assert(advanced.body.status === 'preparing', '状态推进 pending→preparing')
 
+// 6) 修 P0-3 回归位：下单 items 必须快照 category（画像/日历/成就三读取端的根因）
+assert(post.body.items[0].category === d502.body.category, `订单快照分类落库（${post.body.items[0].category}）`)
+
+// 7) 修 P0-2 回归位：愿望全链（建→补齐→PUT 回写 added_dish_id 必须持久化，
+//    useClawSignals 靠 status==='added' && added_dish_id!=null 点亮娃娃机 B 层）
+const wish = await req('/api/wishes', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name: '冒烟愿望', note: '', by: 'partner' }),
+})
+assert(wish.status === 201 && wish.body.status === 'pending' && wish.body.added_dish_id === null, '愿望创建：pending + added_dish_id 初值 null')
+const wishPut = await req(`/api/wishes/${wish.body.id}`, {
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ status: 'added', added_dish_id: 502 }),
+})
+const wishGet = await req('/api/wishes')
+const wishRow = wishGet.body.find((w) => w.id === wish.body.id)
+assert(wishPut.status === 200 && wishRow?.status === 'added' && Number(wishRow?.added_dish_id) === 502, '愿望回写：added + added_dish_id 持久化（B 层链路可通电）')
+
 console.log(failed ? `\n${failed} 项未通过` : '\n冒烟测试全部通过')
 process.exitCode = failed ? 1 : 0

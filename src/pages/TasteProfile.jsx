@@ -49,6 +49,17 @@ export default function TasteProfile() {
   }
   useEffect(() => { load() }, [])
 
+  /* 修 P0-3：历史订单的 items 快照没有 category（新单两端已补上）→ 与 load 并行拉一次菜品表，
+     按 dish_id 兜底查分类。/api/dishes/all 不过滤 available，下架菜也查得到；失败静默
+     （退化成兜底前的行为，不额外报错）。 */
+  const [dishes, setDishes] = useState([])
+  useEffect(() => {
+    requestJson('/api/dishes/all').then(r => r.json())
+      .then(d => setDishes(Array.isArray(d) ? d : []))
+      .catch(() => setDishes([]))
+  }, [])
+  const dishCats = useMemo(() => new Map(dishes.map(d => [Number(d.id), d.category])), [dishes])
+
   /* 聚合：每菜按 category 落到一个维度；同名菜计数 TOP5 */
   const { dims, top, total } = useMemo(() => {
     const counts = { meat: 0, veg: 0, staple: 0, snack: 0, night: 0 }
@@ -63,7 +74,8 @@ export default function TasteProfile() {
         const isNight = isNightSnack({ name: nameCat })
         if (isNight) { counts.night += qty }
         else {
-          const d = DIMS.find(dim => dim.key !== 'night' && dim.cats.includes(it.category))
+          const cat = it.category || dishCats.get(Number(it.dish_id)) || '' /* 修 P0-3：老数据兜底 */
+          const d = DIMS.find(dim => dim.key !== 'night' && dim.cats.includes(cat))
           if (d) counts[d.key] += qty
         }
         if (it.dish_name) dishCount[it.dish_name] = (dishCount[it.dish_name] || 0) + qty
@@ -73,7 +85,7 @@ export default function TasteProfile() {
     const dims = DIMS.map(d => ({ ...d, count: counts[d.key], ratio: counts[d.key] / sum }))
     const top = Object.entries(dishCount).sort((a, b) => b[1] - a[1]).slice(0, 5)
     return { dims, top, total }
-  }, [orders])
+  }, [orders, dishCats])
 
   // 雷达半径归一化：以最大维度为满格
   const maxRatio = Math.max(0.01, ...dims.map(d => d.ratio))

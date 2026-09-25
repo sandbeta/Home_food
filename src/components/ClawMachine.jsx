@@ -176,7 +176,8 @@ export default function ClawMachine({
     setSlots(next)
     if (buddy) onCatch?.(buddy)   // 带出的 A 层菜走同样的乐观加购语义，可撤销
     const mainMsg = blessingOf(target) || `抓到「${target.name}」`
-    setLabel({ name: target.name, dish: target, key: Date.now(), msg: mainMsg, sub: buddy ? '虚惊一场，旁边这盘也一起给你了～' : null })
+    // 修 P1：整轮抓到的菜（主抓+带出）都记进 label.dishes，撤销逐笔减，「可撤销」不再只对一半
+    setLabel({ name: target.name, dish: target, dishes: buddy ? [target, buddy] : [target], key: Date.now(), msg: mainMsg, sub: buddy ? '虚惊一场，旁边这盘也一起给你了～' : null })
     if (fly) setBuddyFly(fly)
     shakeControls.start({ x: [0, -4, 4, -3, 3, 0], transition: { duration: 0.4, ease: EASE } })
   }, [pool, onCatch, shakeControls])
@@ -207,7 +208,8 @@ export default function ClawMachine({
     const idx = (typeof idxArg === 'number' && idxArg >= 0) ? idxArg : Math.floor(Math.random() * N)
     const target = slots[idx]
     if (!target) return
-    const feint = !reduced && decideFeint(Math.random)   // 约三成演虚惊（浓度 B）
+    // 约三成演虚惊（浓度 B）。修 P1：动画可关、奖励不关——reduced 也照常「带出」，只是不演滑落
+    const feint = decideFeint(Math.random)
     buddyRef.current = (feint && pickBuddyA(slots, idx)) || null
     clearTimeline()
     setBuddyFly(null)
@@ -229,7 +231,7 @@ export default function ClawMachine({
       })
       if (buddy) onCatch?.(buddy)
       const mainMsg = blessingOf(target) || `抓到「${target.name}」`
-      setLabel({ name: target.name, dish: target, key: Date.now(), msg: mainMsg, sub: buddy ? '虚惊一场，旁边这盘也一起给你了～' : null })
+      setLabel({ name: target.name, dish: target, dishes: buddy ? [target, buddy] : [target], key: Date.now(), msg: mainMsg, sub: buddy ? '虚惊一场，旁边这盘也一起给你了～' : null })
       setGrabIdx(-1); setFrozen(null)
       return
     }
@@ -318,7 +320,7 @@ export default function ClawMachine({
             animate={shakeControls}
             {...(reduced
               ? { onClick: () => runGrab(-1) }
-              : { onPointerDown: aim.onPointerDown, onPointerMove: aim.onPointerMove, onPointerUp: aim.onPointerUp, onPointerCancel: aim.onPointerCancel })}
+              : aim.handlers)}
             role="group" tabIndex={0}
             onKeyDown={(e) => {
               if (reduced) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); runGrab(-1) } return }
@@ -471,8 +473,8 @@ export default function ClawMachine({
                     {label.sub && <span className="text-[10px] font-medium opacity-90 pl-[18px]">{label.sub}</span>}
                   </span>
                   {onUndo && label.dish && (
-                    <button type="button" aria-label={`撤销加入的「${label.name}」`}
-                      onClick={(e) => { e.stopPropagation(); const d = label.dish; setLabel(null); undoCatch(d) }}
+                    <button type="button" aria-label={label.dishes && label.dishes.length > 1 ? `撤销加入的「${label.name}」等 ${label.dishes.length} 道菜` : `撤销加入的「${label.name}」`}
+                      onClick={(e) => { e.stopPropagation(); const ds = label.dishes || [label.dish]; setLabel(null); ds.forEach((d) => undoCatch(d)) }}
                       className="text-xs font-bold px-3 h-11 rounded-full shrink-0 self-center"
                       style={{ background: 'var(--color-on-dark)', color: 'var(--clay-deep)' }}>
                       撤销

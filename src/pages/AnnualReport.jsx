@@ -55,8 +55,10 @@ export default function AnnualReport() {
       monthTotals[m].total += amt
       monthTotals[m].orders += 1
       const items = o.items || []
-      monthTotals[m].items += items.length
-      totalItems += items.length
+      const qtySum = items.reduce((s, i) => s + (Number(i.quantity) || 1), 0)
+      monthTotals[m].items += qtySum
+      // 修 P0-4：与 UI「共 N 份」及 nightItems 同用「份数」口径，此前行数/份数混用可致深夜 300%/白天 −200%
+      totalItems += qtySum
       // 分账：优先读快照，缺则按 items.added_by+payer 现算
       if (Number.isFinite(o.owed_me)) { owedMe += o.owed_me; owedPartner += o.owed_partner || 0 }
       else {

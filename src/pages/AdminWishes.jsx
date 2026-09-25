@@ -12,7 +12,9 @@ import { PERSONA } from '../theme/persona'
  * 批 1 新增 · 愿望池管理（他侧）
  * ------------------------------------------------------------
  * 语义：她许的愿（by='partner'）+ 他自己提的（by='me'）都在这一屏；
- *   他"补齐"= 跳去 AddDish 页面并预填菜名/描述 → 新建后 PUT wish.status='added' + added_dish_id；
+ *   他"变出来"= 把这条愿望随路由 state 带去 /admin/dishes，那一页自动弹出预填好的新建表单；
+ *     本屏【不发任何 PUT】—— 菜真的建出来之后才由 AdminDishes 写 status='added' + added_dish_id
+ *     （娃娃机 B 层加权只认这两个字段都在，先标 added 就是假状态）；
  *   "拒绝"= PUT status='rejected'（不真删，保留历史，她能看到"他还没做"）。
  * ============================================================ */
 const TABS = [
@@ -39,14 +41,10 @@ export default function AdminWishes() {
   }
   useEffect(() => { load() }, [tab])
 
-  const markAdded = async (w) => {
-    // 跳去添加菜品表单，把菜名与描述预填进 URL；AddDishModal 若支持可读取预填
-    // 简化：先跳 /admin/dishes?wishId=xx 让列表页顶部提示（下一轮把预填做进 AddDishModal 里）
-    try {
-      await requestJson(`/api/wishes/${w.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'added' }) })
-      load()
-      navigate('/admin/dishes', { state: { prefill: { name: w.name, description: w.note }, wishId: w.id } })
-    } catch { setErr('标记失败，再试一次') }
+  const markAdded = (w) => {
+    // 只跳转、不改状态：愿望原文交给 /admin/dishes（wishMode），由那一页在建菜成功后
+    // 才 PUT status='added' + added_dish_id；用户中途取消则愿望一直是 pending（正确语义）。
+    navigate('/admin/dishes', { state: { wishMode: { id: w.id, name: w.name, note: w.note } } })
   }
   const markRejected = async (w) => {
     try {

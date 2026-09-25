@@ -20,8 +20,11 @@ const FIELDS = [
   { label: '一句话描述', key: 'description', type: 'text', placeholder: '好吃到飞起~' },
 ]
 
-export default function AddDishModal({ dish, onClose, onSave }) {
-  const [form, setForm] = useState({ name: '', price: '', category: '家常菜', image_url: '', description: '' })
+export default function AddDishModal({ dish, initial, onClose, onSave }) {
+  /* 初值优先级：编辑（dish）> 预填（initial，来自愿望池「变出来」带过来的那条愿望）> 空表 */
+  const [form, setForm] = useState(() => dish
+    ? { name: dish.name || '', price: dish.price || '', category: dish.category || '家常菜', image_url: dish.image_url || '', description: dish.description || '' }
+    : { name: initial?.name || '', price: '', category: '家常菜', image_url: '', description: initial?.description || '' })
   const [saving, setSaving] = useState(false)
   const [saveErr, setSaveErr] = useState('')
   const reduce = usePrefersReducedMotion()
@@ -34,10 +37,11 @@ export default function AddDishModal({ dish, onClose, onSave }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (saving) return
-    if (!form.name || !form.price) { setSaveErr('菜名和"亲亲数量"得填上呀'); return }
+    const name = (form.name || '').trim()   // 纯空格菜名不算填了
+    if (!name || !form.price) { setSaveErr('菜名和"亲亲数量"得填上呀'); return }
     setSaving(true); setSaveErr('')
     try {
-      await onSave({ ...form, price: Number(form.price) })
+      await onSave({ ...form, name, price: Number(form.price) })
     } catch {
       setSaveErr('没保存上——检查下服务端还开着没，再点一次「好啦」')
     } finally {
