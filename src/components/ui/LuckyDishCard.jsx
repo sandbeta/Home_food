@@ -186,6 +186,8 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
             <motion.button
               whileTap={{ scale: 0.92 }}
               whileHover={{ scale: 1.04 }}
+              type="button"
+              aria-label={`加一份 ${dish.name}`}   /* 批4：与 Stepper m-9 同病——长列表里光"加一份"听不出加哪道 */
               onClick={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect()
                 spawnParticle(rect.left + rect.width / 2, rect.top)

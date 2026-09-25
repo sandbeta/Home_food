@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import { CartProvider } from './components/CartContext'
@@ -44,6 +44,29 @@ function PageLoader() {
         </div>
         <SheepZzz size={9} className="top-0" />
       </div>
+    </div>
+  )
+}
+
+/* 批4 · 路由级滚动复位：挂在 keyed 转场容器内，每次换页重新挂载 → 滚回顶部。 */
+function ScrollToTop() {
+  useEffect(() => { window.scrollTo(0, 0) }, [])
+  return null
+}
+
+/* 批4 · 未知 hash 兜底页：原 <Route path="*"> 缺失时渲染空白只剩 Dock，像应用坏了。
+   用纯 a-href（HashRouter 原生可用），不引页面级组件、不进 lazy chunk。 */
+function NotFound() {
+  return (
+    <div className="flex flex-col items-center justify-center text-center" style={{ gap: 10, padding: '22vh var(--space-page-x) 0' }}>
+      <div style={{ fontSize: 40 }} aria-hidden>🧭</div>
+      <p className="font-serif text-xl font-bold text-[var(--color-bone)]">这条走道没连着厨房</p>
+      <p className="text-xs text-[var(--color-ash)]">地址页不存在，回首页点菜吧~</p>
+      <a href="#/home" role="button"
+        className="d3-btn d3-btn-primary font-bold text-sm no-underline"
+        style={{ marginTop: 10, padding: '10px 26px', minHeight: 44, color: 'var(--color-on-dark)' }}>
+        回首页
+      </a>
     </div>
   )
 }
@@ -139,8 +162,11 @@ function App() {
           */}
           <AnimatePresence mode="wait">
             <motion.div key={routeKey} {...(viaVT ? { initial: false, animate: { opacity: 1 }, exit: {} } : pageEnter)}>
+              {/* 批4 修 P1：全站曾无路由级滚动复位——长页滚到第 3 屏再进详情/购物车，新页从半截开始，
+                  PageHeader 像没吸顶、Hero 顶部露底。挂在 keyed 容器内 = 每次换页挂一次、回顶一次。 */}
+              <ScrollToTop />
               <Suspense fallback={<PageLoader />}>
-                <ErrorBoundary>
+                <ErrorBoundary resetKey={routeKey}>
                   <Routes location={location}>
                     <Route path="/" element={<Navigate to="/home" replace />} />
                     {/* 首页按主题分发：夜宵模式=深夜食堂专属界面，白天=原首页 */}
@@ -170,6 +196,8 @@ function App() {
                     {/* 批 1 新增 · 纪念日与愿望池 */}
                     <Route path="/admin/anniversaries" element={<AdminAnniversaries />} />
                     <Route path="/admin/wishes" element={<AdminWishes />} />
+                    {/* 批4 修 P1：原无通配兜底——#/setting、#/dish/(缺 id) 等未知 hash 渲染空白只剩 Dock */}
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                 </ErrorBoundary>
               </Suspense>

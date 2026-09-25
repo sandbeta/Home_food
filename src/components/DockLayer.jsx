@@ -23,7 +23,7 @@ export default function DockLayer() {
       style={{ width: 'min(var(--shell-w), 100%)' }}
     >
       <div
-        className="flex items-center pointer-events-auto"
+        className="flex items-center"   /* 批4：pointer-events 收回给药丸/球本体——原挂整行，底部 72px 透明带（含左右内边距与间隙）整排吞点击 */
         style={{
           gap: 'var(--dock-gap)',
           paddingLeft: 'var(--space-page-x)',
@@ -40,7 +40,7 @@ export default function DockLayer() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-              className="shrink-0 flex items-center justify-center"
+              className="shrink-0 flex items-center justify-center pointer-events-auto"
               style={{ width: 'var(--dock-orb)', height: 'var(--dock-orb)' }}
             >
               <D3CartOrb />

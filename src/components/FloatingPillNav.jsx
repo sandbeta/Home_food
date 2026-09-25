@@ -32,7 +32,8 @@ export default function FloatingPillNav() {
   return (
     <motion.nav
       layout
-      className="flex-1 glass rounded-full px-2.5 py-2 flex items-center justify-around gap-1"
+      aria-label="主导航"
+      className="flex-1 glass rounded-full px-2.5 py-2 flex items-center justify-around gap-1 pointer-events-auto"
       style={{
         minHeight: 'var(--dock-h)',
         background: 'var(--glass-strong)',

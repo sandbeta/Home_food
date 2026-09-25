@@ -30,10 +30,11 @@ export default function Stepper({ value, onChange, min = 1, size = 44, className
   return (
     <div className={`flex items-center gap-1.5 ${className}`} role="group" aria-label={`调整${nameSuffix}`}>
       <motion.button
+        type="button"
         whileTap={{ scale: 0.92 }}
         onClick={dec}
         disabled={value <= min}
-        aria-label={name ? `减少${name}数量，当前 ${value} 份` : '减少'}
+        aria-label={name ? `减少${name}数量，当前 ${value} 份` : `减少${nameSuffix}数量，当前 ${value} 份`}
         className="rounded-full flex items-center justify-center text-[var(--color-bone)] disabled:opacity-40 disabled:cursor-not-allowed"
         style={{
           width: size,
@@ -53,15 +54,18 @@ export default function Stepper({ value, onChange, min = 1, size = 44, className
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 420, damping: 30 }}
         className="w-5 text-center font-bold text-base tabular-nums text-[var(--color-bone)]"
-        aria-live="polite"
+        aria-hidden="true"
       >
+        {/* 批4：原 key+aria-live 组合=整块替换式播报，NVDA/VoiceOver 经常不念；
+            数量读数已由两个按钮的 aria-label（当前 N 份）承载，这里回归纯视觉弹动。 */}
         {value}
       </motion.span>
 
       <motion.button
+        type="button"
         whileTap={{ scale: 0.92 }}
         onClick={inc}
-        aria-label={name ? `增加${name}数量，当前 ${value} 份` : '增加'}
+        aria-label={name ? `增加${name}数量，当前 ${value} 份` : `增加${nameSuffix}数量，当前 ${value} 份`}
         className="rounded-full flex items-center justify-center text-[var(--color-on-dark)]"
         style={{
           width: size,

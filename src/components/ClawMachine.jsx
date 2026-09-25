@@ -31,16 +31,18 @@ import { useClawAim } from '../hooks/useClawAim'
 const GEO = { railY: 16, carH: 12, cableUp: 22, cableDown: 112, clawH: 46, pileTop: 156, slotTop: 246, chuteX: '18%' }
 const clawTop = (cable) => GEO.railY + GEO.carH + cable
 
-/* 底部待抓菜堆：8 个槽位，错落堆在罩底（避开左侧出菜口 chuteX=18%）。x=left%、y=top(px)、r=rotate、s=直径 */
+/* 底部待抓菜堆：8 个槽位，错落堆在罩底（避开左侧出菜口 chuteX=18%）。x=left%、y=top(px)、r=rotate、s=直径
+   批4 修 P1：①最小盘径 40/42 → 统一 ≥44（热区铁律）；②原底行 y232~240+直径 顶到 276~286，超出罩内净高 ~260
+   被 overflow-hidden 裁半张盘——整堆上收 ~16px，底行盘脚全部回到罩内。 */
 const PILE_SLOTS = [
-  { x: '30%', y: 200, r: -10, s: 50 },
-  { x: '46%', y: 214, r: 6,  s: 46 },
-  { x: '62%', y: 202, r: -4, s: 48 },
-  { x: '78%', y: 216, r: 9,  s: 44 },
-  { x: '37%', y: 232, r: 4,  s: 44 },
-  { x: '54%', y: 240, r: -8, s: 46 },
-  { x: '70%', y: 236, r: 5,  s: 42 },
-  { x: '88%', y: 220, r: -6, s: 40 },
+  { x: '30%', y: 186, r: -10, s: 50 },
+  { x: '46%', y: 196, r: 6,  s: 46 },
+  { x: '62%', y: 186, r: -4, s: 48 },
+  { x: '78%', y: 198, r: 9,  s: 44 },
+  { x: '37%', y: 206, r: 4,  s: 44 },
+  { x: '54%', y: 214, r: -8, s: 46 },
+  { x: '70%', y: 210, r: 5,  s: 44 },
+  { x: '88%', y: 198, r: -6, s: 44 },
 ]
 const N = PILE_SLOTS.length
 
@@ -204,8 +206,16 @@ export default function ClawMachine({
 
   const runGrab = useCallback((idxArg) => {
     if (grabbing) return
-    // 有瞄准（拖拽/键盘）则抓那一格，否则退回随机（兼容 reduced / 直接点抓取键）
-    const idx = (typeof idxArg === 'number' && idxArg >= 0) ? idxArg : Math.floor(Math.random() * N)
+    // 批4 修 P1：随机位只在非空槽里抽——原 Math.random()*N 可能砸中空槽后静默 return，
+    // 池小或补货不及时的瞬间点「领取」会出现"按了没反应"。
+    // 有瞄准（拖拽/键盘）则抓那一格，否则随机（兼容 reduced / 领取键）
+    let idx = (typeof idxArg === 'number' && idxArg >= 0) ? idxArg : -1
+    if (idx < 0) {
+      const occupied = []
+      for (let i = 0; i < N; i++) if (slots[i]) occupied.push(i)
+      if (!occupied.length) return            // 整堆全空：无事可抓（理论上补货会很快填满）
+      idx = occupied[Math.floor(Math.random() * occupied.length)]
+    }
     const target = slots[idx]
     if (!target) return
     // 约三成演虚惊（浓度 B）。修 P1：动画可关、奖励不关——reduced 也照常「带出」，只是不演滑落

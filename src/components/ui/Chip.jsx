@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 export default function Chip({ active = false, onClick, children, className = '' }) {
   return (
     <motion.button
+      type="button"
       whileTap={{ scale: 0.94 }}
       onClick={onClick}
       aria-pressed={active}

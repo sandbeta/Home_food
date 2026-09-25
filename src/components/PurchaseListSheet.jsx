@@ -29,12 +29,13 @@ export default function PurchaseListSheet({ open, onClose, items }) {
     let alive = true
     setState({ loading: true, list: [], noRecipe: [], err: '' })
     setFridgeMap(readFridge())
+    setTab('all')   // 批4 修 P1：tab 跨次打开复位——上次停在「家里有」这次点开是别的菜时，正文困死在空态
     buildPurchaseList(items)
       .then(r => {
         if (!alive) return
         const fridge = readFridge()
-        const keys = Object.keys(fridge)
-        const list = r.list.map(e => ({ ...e, hasAtHome: !!keys.find(k => k && (e.name === k || e.name.includes(k))) }))
+        // 批4：统一走 lib/fridge 的 hasInFridge 原语（原内联重写了一份匹配逻辑，必漂移）
+        const list = r.list.map(e => ({ ...e, hasAtHome: !!hasInFridge(e.name, fridge) }))
         setState({ loading: false, list, noRecipe: r.noRecipe, err: '' })
       })
       .catch(() => { if (alive) setState({ loading: false, list: [], noRecipe: [], err: '拉不到菜谱数据，看看服务端还在不？' }) })
@@ -47,7 +48,9 @@ export default function PurchaseListSheet({ open, onClose, items }) {
 
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(toPlainText(state))
+      // 批4 修 P1：复制当前 tab 所见（原复制全量 list——屏幕上「要买 8 件」，粘走 20 件含已划线的"家里有"，
+      // "自动划掉家里有"这条特性在出口处直接兑现失败）
+      await navigator.clipboard.writeText(toPlainText({ list: shownList, noRecipe: state.noRecipe }))
       setCopied(true); tap(); vibrate([10, 30, 12])
       setTimeout(() => setCopied(false), 1800)
       try { window.__cgAnnounce?.('采购清单已复制') } catch {}

@@ -756,11 +756,38 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 **校验（四件套全绿）**：`npm run build` ✅ / `oxlint` 0 error（9 warning 全既有）/ `npm test`（mockApi + clawPool 全过）/ `p6_static_gate.py` 退出码 0。观感待 live 目检：点盘的 cursor/press 手感、8 盘 Tab 焦点顺序、领取按钮随机与拖拽瞄准并存是否清晰。
 
+## 7.28 穷尽式审查（86 文件逐行）与四批修复（2026-09-25）
+
+所有者要求"作为产品经理重新验证审查一遍项目 → 所有功能、每一行代码"。执行方式：86 源文件切 7 个互斥分片逐行审计（覆盖清单与全量发现落盘在**仓库外** `E:\点餐小程序—抓娃娃机\穷尽式审查报告-2026-09-25.md` + 附录 I/II，勿提交），P0 级指控逐条回代码/线上复核。**结论：P0×9 / P1×32 / P2×60+**；修复分四批全部落地。
+
+**第一批+第二批（commit `76252fa1a`）· 止血与真实**：
+- **P0-1 拖拽瞄准断线**（§7.27 引入的接线错：hook 返回 `handlers` 嵌套、消费点顶层取 → 拖拽零绑定，已随 `53d4495ab` 上线过！）：改 spread `aim.handlers`；`useClawAim` 记真实 pointerId（原 `el._pid` 从未赋值=释放捕获空转）、多指忽略；线上实测拖拽端到端（瞄准播报→抓到→撤销浮标）全通。**教训：交互改动必须行为级实测，"build+测试全绿"不等于手势活着。**
+- **P0-2 愿望链**：`AdminWishes` 的「变出来」不再先 PUT status=added，改携 `state.wishMode` 跳 `AdminDishes` → 自动开预填弹窗（`AddDishModal` 新增 `initial` prop）→ 建菜成功拿 `dish.id` → `PUT {status:'added', added_dish_id}` → 清 state/播报；取消=愿望保持 pending。B 层愿望信号自此可通电。
+- **P0-3 category 快照**：`mockApi`/`server` 下单 items 各加 `category: dish.category||''`；`TasteProfile/KitchenCalendar/achievements` 三读取端用 `/api/dishes/all`（含下架菜）建 dishCats 兜底老订单——画像恒 0%、日历永不亮点、"吃遍八系"永不解锁一并根治。
+- **P0-4 年报份/行单位错配**（可渲染深夜 300%·白天 −200%）：totalItems 改份数口径。
+- **P1-3 MyOrders 筛选**：「在做了」改按 `{preparing,cutting,cooking,plating}` 集合匹配（原写死 preparing=后台词表已废 → 永空列表）。
+- **虚惊带出可撤销**：label 记 `dishes:[target,buddy?]`、撤销钮逐笔减；reduced 分支"动画可关、奖励不关"（原 reduced 用户永久少拿一盘）。
+- **P0-5 首页真实化**：`chefOf=id%2` 废除，🐱/🐑 徽章=订单 `added_by` 多数方（无数据/持平不出徽章）；「常点的」网格按真实份数降序，有单菜不足 6 道时标题降「今天想吃」；NightHome「这些点得多」→「这些适合深夜」（词表匹配不再冒充订单）。
+- **P0-6 热榜撤伪权威**：`hotRecipes` 十条"家庭烹饪率 87.6%"及按百分比进度条全撤，退成定性口味词条；sweetCopy HOT_TITLES 去"别人家/2026"暗示。
+- **P0-7 adminGuard 扩面**（server）：wishes PUT/DELETE、anniversaries 全部写操作纳入公网 401 门（她许愿的 POST /api/wishes 与下单一样放行）；`adminGate.js` 假注释按实、503 不再广播口令文件路径、登录走原生 fetch 防自包装递归。
+- **门禁补强**：`aimTo` 吸附逻辑收进 `clawPool.aimSlotIdx`（有菜槽优先）纯函数，`test_clawPool` 从保护死码 `nearestSlotIdx` 改为写真逻辑（+空槽/全空/坏值 6 断言）；`test_mockApi` 新增 category 快照 + 愿望回写持久化 2 条回归。
+
+**第三批（commit `36d2216b5`）· 数据安全**：mockApi/server 双端一比一——POST 主键收归服务端、PUT 字段白名单+404 化、DELETE 404+种子墓碑、下单空 items/查无此菜 400 + quantity/payer/added_by 归一、状态机补方向校验（preparing 降只读别名、禁回退）、anniversaries date 正则/annual 归一/dish_id 存在性、loadState 读写分离 try + nextDishId NaN 自愈 + fresh 深拷贝防 seedDishes 污染、storage 事件失效缓存；CartContext/mood/sfx/useTheme/favorites 全量 safe-storage（无痕白屏群灭根治）+ favorites 双广播同步（收藏后娃娃机 A 层不再过期）+ vibrate 与音效开关解绑；main.jsx bootstrap 失败落纯静态恢复面板；ErrorBoundary 降级页零依赖纯静态 + 回首页/刷新双出口 + resetKey 派生复位；`--color-ink-fixed`/sticker 墨色系令牌立档。裸 fetch 16 处收编 requestJson（M-s5 补全）。
+
+**第四批·体验债（本 commit）**：对比度——`--status-completed-text` 白天档 sage-60→sage-80（2.41:1→AA）、`PERSONA.partner.chipColor` 并入该令牌、`SectionHeader` 序号改 `--color-clay-text`（夜宵 1.67:1 根治）、夜宵忌口确认双按钮改 ink-fixed（1.04:1 空白块根治）。热区——StickerEditor 底色点/图钉/收起叉 24/28/32→44（视觉尺寸不变）、NightSnackSheet CTA 补 safe-area、KitchenCalendar 360px 机历格 41.1→44 + disabled→aria-disabled+选择性 tabIndex、娃娃机堆盘 min 44 + 底行不再被罩底裁掉。a11y——useDialogA11y 焦点陷阱真闭环（面板外焦点收敛回环）+ 全站首个统一 body 滚动锁（引用计数）+ 归还焦点判序；DishRow/NightHome 网格 role=button 嵌 button 根治（容器回归点击面、菜名升真按钮）；Stepper type=button + aria-live/key 冲突解（数量播报归按钮 label）+ 两调用点补 name；EmptyState error 态 role=alert + 无限浮动接 reduced + 角色肖像垫 plate-bg 圆底（奶白边规则执行）；LoadingState/LuckyDishCard 文案入 sweetCopy、加一份带菜名。性能——FullBleedHero 20s 无限 scale 撤（9 页掉帧源）、AmbientLightCanvas 30fps 抽帧 + GL 资源/context 释放 + contextlost 具名摘除、purchaseList 并发+去重+括号别名剥离+厨具过滤、PurchaseListSheet 复制当前 tab 所见 + tab 复位 + hasInFridge 归一、DishShareCard 取图 4s 超时 + 子路径 URL 修正（Pages 上分享卡此前永画不出实拍图）。功能——Menu 收藏签分类/场景筛选生效 + 收藏用现物刷新（下架/旧价不再可加购）；娃娃机随机落点只抽非空槽（点领取不再可能"没反应"）；DishDetail 缓存命中不再闪 loading、网络失败不清缓存；StoveStage 进度判据改派生「进行中」（原字面 preparing 永假=进度冻结首帧）；假 ETA「20-30 分钟」撤；PageHeader 深链冷启返回兜底回首页；App 补 `path="*"` NotFound + 路由级 ScrollToTop；DockLayer pointer-events 收回本体（原整行吞点击）；FloatingPillNav 补 nav aria-label。
+
+**复核推翻的一条**：LazySheep INK「夜宵 1.67:1」为测量对象错位——线稿全部画在 WOOL 白脸上（非页面底），两主题均 ≈8.5:1，未改。
+
+**校验（四件套全绿 ×4 轮）**：lint 0 error（9 warning 全既有）/ 双测试文件全过（含 3 条新回归）/ build ✅ / p6 退出码 0；本地 dev + 浏览器实测：拖拽 handler 三件套 typeof function、拖拽→瞄准播报→抓到→撤销端到端通、8 盘+领取健在、NotFound 冷载渲染、console 零报错。
+
+**四批后仍欠（记 §8）**：P2 长尾（死令牌/死导出清理、sweetCopy 大迁移、时区分桶统一、@layer 收编、VT target 清理、AdminDishes 搜索器、anniversary 2/29、seed 价格规则语义化、avoid 词表修订等）+ 各条已在附录 I/II 逐行留档；night FOUC 的 theme-color 双档写死在预载脚本内（改主题基色需两端同改）。
+
 ## 8. 已知待办 / 候选项
 
 - ~~【最紧要·未完成】§7.25e 的 13 个 UI 审查修复未提交~~ ✅ 本轮（2026-09-25）已随 §7.26 娃娃机整改一并 commit（`5365e6b25`）+ 推 master + 镜像 gh-pages（`53d4495ab`）+ 线上 hash 核对一致（`index-C99AJePq.js`）。
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。
-- 测试覆盖仅 mockApi 冒烟（8 项），UI 组件无自动化测试——demo 项目可接受，引入框架时优先补 DishRow/OrderCard。
+- 测试覆盖：mockApi 冒烟（现含 category 快照 / 愿望回写持久化 / 下单校验等，11 项）+ clawPool 纯函数（aimSlotIdx 吸附真逻辑已补测试）；UI 组件仍无自动化测试——demo 可接受，引入框架时优先补 DishRow/OrderCard 的 a11y 与娃娃机事件绑定冒烟（P0-1 类接线错只有运行时能抓）。
+- **穷尽审查遗留 P2 长尾**：全量清单见仓库外 `E:\点餐小程序—抓娃娃机\穷尽式审查报告-2026-09-25.md` + 附录 I/II（86 文件逐行、按 P0/P1/P2 分级带 file:line）。四批已清 P0×9 + 精选 P1；余 P2（死令牌/死导出清理、sweetCopy 全量迁移、UTC/本地分桶统一、@layer 收编、VT target 清理、AdminDishes dish_id 选择器、anniversary 2/29、seed 价格规则语义化、avoid 词表修订、假注释批量订正）待排期。
 - 官方角色素材（`public/lazy-assets/`）为本人非商用家庭自用；若要对外分发，需替换为自绘 LazySheep 或取得授权。
 - ~~D3StatusRing 内圈一处 rgba(0,0,0,0.5) 暗影为有意保留~~ ✅ 组件整体已删（死文件零引用，见台账"机械债清零"）；--ring-size 令牌仍由 StoveStage 消费。
 - ~~AddDishModal 旧命名残留~~ ✅ 已清零（见台账「旧命名清零」）；~~preview 落后~~ ✅ 已同步（但 clay-60 回退与色阶绑定后的 preview 仍未重建，观感等价影响小）。

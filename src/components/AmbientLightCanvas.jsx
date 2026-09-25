@@ -68,6 +68,8 @@ export default function AmbientLightCanvas() {
     let dead = false
     let onPointerMove = null
     let onVis = null
+    let onCtxLost = null
+    let glRes = null
 
     try {
       const prog = gl.createProgram()
@@ -87,6 +89,7 @@ export default function AmbientLightCanvas() {
 
       const uTime = gl.getUniformLocation(prog, 'uTime')
       const uPointer = gl.getUniformLocation(prog, 'uPointer')
+      glRes = { prog, buf }
 
       gl.enable(gl.BLEND)
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
@@ -103,8 +106,14 @@ export default function AmbientLightCanvas() {
 
       const start = () => { if (!raf && !dead) raf = requestAnimationFrame(tick) }
       const stop = () => { if (raf) { cancelAnimationFrame(raf); raf = 0 } }
-      function tick() {
+      /* 批4 性能修：光斑漂移是 0.13rad/s 级慢速，60/90/120Hz 原样抽帧=99% 白画，
+         还带着 .ambient-gl 的 28px 全屏 blur 每帧重跑——限 ~30fps，观感无损、功耗减半起步。 */
+      let lastDraw = 0
+      function tick(now) {
         if (dead) return
+        raf = requestAnimationFrame(tick)
+        if (now - lastDraw < 33) return
+        lastDraw = now
         ptr.x += (dst.x - ptr.x) * 0.04
         ptr.y += (dst.y - ptr.y) * 0.04
         gl.viewport(0, 0, canvas.width, canvas.height)
@@ -112,16 +121,16 @@ export default function AmbientLightCanvas() {
         gl.uniform1f(uTime, (performance.now() - t0) / 1000)
         gl.uniform2f(uPointer, ptr.x, ptr.y)
         gl.drawArrays(gl.TRIANGLES, 0, 3)
-        raf = requestAnimationFrame(tick)
       }
       onVis = () => (document.hidden ? stop() : start())
       document.addEventListener('visibilitychange', onVis)
-      canvas.addEventListener('webglcontextlost', (e) => {
+      onCtxLost = (e) => {
         e.preventDefault()
         dead = true
         stop()
         canvas.style.display = 'none' // 掉上下文即退场，CSS 光斑本就在底层
-      })
+      }
+      canvas.addEventListener('webglcontextlost', onCtxLost)
       start()
     } catch {
       dead = true
@@ -133,6 +142,15 @@ export default function AmbientLightCanvas() {
       if (raf) cancelAnimationFrame(raf)
       if (onPointerMove) window.removeEventListener('pointermove', onPointerMove)
       if (onVis) document.removeEventListener('visibilitychange', onVis)
+      if (onCtxLost) canvas.removeEventListener('webglcontextlost', onCtxLost)
+      /* 批4：effect 重跑（如系统改 reduced-motion）会重建一套 GL 资源；
+         移动端 WebGL context 有硬上限，不释放则氛围层永久黑、连"渐进增强退路"都被泄漏吃掉。 */
+      try {
+        if (gl) {
+          if (glRes) { gl.deleteProgram(glRes.prog); gl.deleteBuffer(glRes.buf) }
+          gl.getExtension('WEBGL_lose_context')?.loseContext()
+        }
+      } catch { /* 尽力而为 */ }
     }
   }, [reduce])
 

@@ -2,14 +2,14 @@ import { motion } from 'framer-motion'
 import { usePrefersReducedMotion } from '../../theme/motion'
 import Icon from './Icons'
 import LazySheep, { SheepZzz } from './LazySheep'
+import { LOADING_NOTE } from '../../lib/sweetCopy'
 
 /**
  * 统一加载态 —— 取代各页手写的相同实现。已接入：AdminDishes / AdminOrders /
  * MyOrders / OrderDetail / DishDetail / Home。
- * mode="pot"（默认）：锅沿水开冒泡——把"等"做成灶台叙事的一部分；
- * 传 emoji 走旧版 emoji 浮动（后台页保留人味表情）。
+ * 传 emoji 走旧版 emoji 浮动（后台页保留人味表情）；不传默认锅沿水开冒泡。
  */
-export default function LoadingState({ emoji, text = '加载中...' }) {
+export default function LoadingState({ emoji, text = LOADING_NOTE }) {
   const reduce = usePrefersReducedMotion()
   const isPot = !emoji || emoji === '🍳'
   return (

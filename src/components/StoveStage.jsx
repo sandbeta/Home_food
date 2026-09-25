@@ -16,7 +16,8 @@ import LazySheep, { SheepZzz } from './ui/LazySheep'
  * 只保留静态形态（火焰/蒸汽隐藏、进度条直读当前值）。
  */
 
-// 与购物车「预估等待约 20-30 分钟」文案同源的焖煮时长
+// 焖煮节律参考时长（25 分钟封顶 92%）——只表达"锅上一直在等"的陪伴感，
+// 不是承诺完成时间（批4：购物车伪 ETA 文案已删，这里注释同步改口径）
 const COOK_MS = 25 * 60 * 1000
 const PROGRESS_MAX = 0.92
 
@@ -26,16 +27,20 @@ function cookElapsed(createdAt) {
 
 export default function StoveStage({ statusKey = 'pending', createdAt }) {
   const reduce = usePrefersReducedMotion()
+  /* 批4 修 P1：进度 tick 判据从字面 'preparing' 换成派生「进行中」——
+     后台早已只产 cutting/cooking/plating，旧判据永假 → 进度条永远冻结在首帧（灶台核心戏成死表）。 */
+  const inProgress = statusKey !== 'pending' && statusKey !== 'completed'
   const [progress, setProgress] = useState(() =>
     Math.min(cookElapsed(createdAt) / COOK_MS, PROGRESS_MAX))
 
   // 焖煮中：每 5 秒推进一次进度（封顶 PROGRESS_MAX，菜"做好"由后台推进状态决定）
   useEffect(() => {
-    if (statusKey !== 'preparing') return undefined
+    if (!inProgress) return undefined
+    setProgress(Math.min(cookElapsed(createdAt) / COOK_MS, PROGRESS_MAX))   // 换单/重挂载先对齐真实已等时长
     const tick = () => setProgress(p => Math.min(p + 5000 / COOK_MS, PROGRESS_MAX))
     const timer = setInterval(tick, 5000)
     return () => clearInterval(timer)
-  }, [statusKey])
+  }, [inProgress, createdAt])
 
   /* 批 2a · 三态视觉兼容六值 statusKey：
      pending → 熄火陪等；completed → 起锅叙事；其它（preparing 旧 / cutting / cooking / plating 新）

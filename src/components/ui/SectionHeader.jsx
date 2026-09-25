@@ -11,7 +11,7 @@ export default function SectionHeader({ title, action, index, className = '' }) 
           <span
             aria-hidden
             className="shrink-0 font-serif text-xs font-bold tabular-nums"
-            style={{ color: 'var(--clay-deep)', letterSpacing: '0.08em' }}
+            style={{ color: 'var(--color-clay-text)', letterSpacing: '0.08em' }}   /* 批4：原 --clay-deep 夜宵压 surface 仅 1.67:1；clay-text 白天 clay-70(5.5:1)/夜宵提亮档双主题达标（index.css 567 自订纪律的正身） */
           >
             {String(index).padStart(2, '0')}
           </span>

@@ -134,15 +134,18 @@ export default function KitchenCalendar() {
               ))}
             </div>
 
-            {/* 42 格月历 */}
-            <div className="grid grid-cols-7 gap-1">
+            {/* 42 格月历：批4 热区修——原 gap-1 时 360px 机单格 ~41.1px 低于 44 铁律，收 gap 到 0；
+                空日子 disabled 直接跳出 Tab 流读屏无从知晓"这天存在但没单"，改 aria-disabled +
+                tabIndex 只放行有单/今天（42 格全可聚焦也太吵）。 */}
+            <div className="grid grid-cols-7 gap-0">
               {cells.map(c => (
                 <button
                   key={c.key}
                   onClick={() => c.has && setSelectedDay(c.key)}
-                  disabled={!c.has}
+                  aria-disabled={!c.has}
+                  tabIndex={c.has || c.isToday ? 0 : -1}
                   aria-label={c.has ? `${c.dayNum} 日，${c.count} 单，点看详情` : `${c.dayNum} 日，没下单`}
-                  className="relative aspect-square rounded-[var(--radius-tile)] flex flex-col items-center justify-center transition-colors"
+                  className="relative aspect-square min-h-[44px] rounded-[var(--radius-tile)] flex flex-col items-center justify-center transition-colors"
                   style={{
                     background: c.has
                       ? 'color-mix(in srgb, var(--clay-50) 12%, var(--surface))'
@@ -173,7 +176,7 @@ export default function KitchenCalendar() {
 
             {/* 图例 */}
             <p className="text-[11px] text-[var(--color-ash)] mt-3 leading-relaxed">
-              点了菜的日子会亮起来 · 每下一单一枚圆点，最多显 3 枚 · 数字角标代表那天一共下了几单
+              点了菜的日子会亮起来 · 圆点=那天最多吃了三类菜（玫粉同色） · 数字角标代表那天一共下了几单
             </p>
           </>
         )}

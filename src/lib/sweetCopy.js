@@ -231,3 +231,16 @@ export const ANNIVERSARY_NOTES = [
   '懒洋洋又陪我一岁，加菜不加价',
   '这个日子不能随便吃，我认真做',
 ]
+
+/* —— 批4 文案单源补课（穷尽审查：LoadingState/StickerEditor 用户可见文案散落在组件里）——
+   昵称纪律：她=懒洋洋（NICKNAME），懒羊羊只指动画羊角色本身，两词不得互串。 */
+export const LOADING_NOTE = '加载中…'
+export const STICKER = {
+  add: '贴一张便签留言',
+  addShort: '贴张便签',
+  collapse: '收起便签',
+  placeholder: '写给 TA 的悄悄话…（不用给厨房看的那种）',
+  hint: 'TA 会在订单详情看到这张纸',
+  content: '便签内容',
+}
+

@@ -16,7 +16,7 @@ export const PERSONA = {
     on: 'var(--color-on-sage)',   /* sage 实底上的深绿字（白字在此仅 ~1.9:1，不达标） */
     glassBorder: 'color-mix(in srgb, var(--sage-40) 45%, transparent)',
     glow: '0 0 0 3px color-mix(in srgb, var(--sage-40) 18%, transparent), 0 6px 20px color-mix(in srgb, var(--sage-40) 22%, transparent)',
-    chipBg: 'color-mix(in srgb, var(--sage-40) 14%, transparent)', chipColor: 'var(--sage-60)',
+    chipBg: 'color-mix(in srgb, var(--sage-40) 14%, transparent)', chipColor: 'var(--status-completed-text)',   /* 批4：原 sage-60 白天 2.44:1；与「做好啦」共用双主题状态字令牌（me 侧 chipColor=clay-80 同档对称） */
   },
 }
 export const ORDER_STATUS = {

@@ -35,7 +35,11 @@ export default function DishDetail() {
   const addingRef = useRef(false)
 
   useEffect(() => {
-    setLoading(true); setFetchErr(null)
+    setFetchErr(null)
+    // 批4 修 P1（形变首帧稳定）：命中缓存时不再倒退回 loading——
+    // 原实现 setLoading(true) 无条件把首帧换成"正在端上来…"，VT 抓不到稳定的 .vt-dish-frame，
+    // 用户看到"详情闪一帧→加载圈"的抖动。
+    if (!dish) setLoading(true)
     // m-29：走 requestJson（自带 r.ok），404 → notfound，其它错误/超时 → network
     requestJson(`/api/dishes/${id}`).then(r => r.json())
       .then(data => {
@@ -46,8 +50,9 @@ export default function DishDetail() {
         setLoading(false)
       })
       .catch((err) => {
-        setDish(null)
-        setFetchErr(err && err.status === 404 ? 'notfound' : 'network')
+        const notfound = err && err.status === 404
+        if (notfound) setDish(null)      // 批4：网络失败不再把已看得到摸得着的缓存菜清成空白
+        setFetchErr(notfound ? 'notfound' : 'network')
         setLoading(false)
       })
   }, [id, reload])
@@ -162,7 +167,7 @@ export default function DishDetail() {
         <GlassCard delay={0.1}>
           <div className="flex items-center justify-between" style={{ padding: 'var(--space-card-p)' }}>
             <span className="text-sm font-bold text-[var(--color-bone)]">数量</span>
-            <Stepper value={quantity} onChange={setQuantity} min={1} size={44} />
+            <Stepper value={quantity} onChange={setQuantity} min={1} size={44} name={dish?.name} />
           </div>
         </GlassCard>
 

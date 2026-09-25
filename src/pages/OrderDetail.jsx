@@ -13,6 +13,7 @@ import { HERO_IMAGES } from '../theme/images'
 import { ORDER_STATUS, PAYER } from '../theme/persona'
 import { EASE, usePrefersReducedMotion } from '../theme/motion'
 import { pickOne, DETAIL_TITLES, ORDER_STATUS_DESC } from '../lib/sweetCopy'
+import { bgCss } from '../components/ui/StickerEditor'
 import { settle, vibrate } from '../lib/sfx'
 import { requestJson } from '../lib/request'
 
@@ -265,34 +266,26 @@ export default function OrderDetail() {
               <div
                 className="relative w-full"
                 style={{
-                  background: (() => {
-                    /* 与 StickerEditor 共 4 色，走 @theme 令牌单源（批 1 便签世界件）*/
-                    const map = {
-                      rose: 'linear-gradient(180deg, var(--sticker-rose-a), var(--sticker-rose-b))',
-                      sage: 'linear-gradient(180deg, var(--sticker-sage-a), var(--sticker-sage-b))',
-                      apricot: 'linear-gradient(180deg, var(--sticker-apricot-a), var(--sticker-apricot-b))',
-                      sky: 'linear-gradient(180deg, var(--sticker-sky-a), var(--sticker-sky-b))',
-                    }
-                    return map[order.sticker.bg] || map.rose
-                  })(),
-                  color: '#2B2429',
+                  /* 批4：4 色与阴影/墨色收进 bgCss + --sticker-* 令牌单源（原与 StickerEditor 逐字两份，改色必漏一处） */
+                  background: bgCss(order.sticker.bg),
+                  color: 'var(--sticker-ink)',
                   borderRadius: 4,
                   transform: 'rotate(-1.2deg)',
-                  boxShadow: '0 6px 18px rgba(43,36,41,0.14), inset 0 1px 0 rgba(255,255,255,0.5)',
+                  boxShadow: 'var(--sticker-shadow)',
                   padding: '22px 18px 16px',
                 }}
               >
                 <span
                   className="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl select-none"
-                  style={{ filter: 'drop-shadow(0 2px 2px rgba(43,36,41,0.28))' }}
+                  style={{ filter: 'drop-shadow(var(--sticker-pin-shadow))' }}
                   aria-hidden="true"
                 >{order.sticker.pin || '💕'}</span>
                 <p
                   className="text-[15px] leading-relaxed whitespace-pre-wrap"
-                  style={{ fontStyle: 'italic', fontFamily: '"Ma Shan Zheng", "KaiTi", "STKaiti", cursive, serif' }}
+                  style={{ fontStyle: 'italic', fontFamily: '"KaiTi", "STKaiti", cursive, serif' }}
                 >{order.sticker.msg}</p>
                 {order.note && (
-                  <p className="text-xs mt-2 pt-2 opacity-70" style={{ borderTop: '1px dashed rgba(43,36,41,0.16)' }}>
+                  <p className="text-xs mt-2 pt-2 opacity-70" style={{ borderTop: '1px dashed var(--sticker-ink-hair)' }}>
                     给厨房：{order.note}
                   </p>
                 )}

@@ -126,7 +126,9 @@ export default function NightSnackSheet() {
                 ))}
               </div>
 
-              <div className="px-5 pb-7 pt-3">
+              {/* 批4 修 P1：原 pb-7(28px) 顶不过 iPhone 34px 手势条——主 CTA 下沿落进上滑手势带，
+                  与同族其余四张 sheet 的 safe-area 算法对齐 */}
+              <div className="px-5 pt-3" style={{ paddingBottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 12px)' }}>
                 <motion.button whileTap={tapScale} onClick={goAll}
                   className="d3-btn d3-btn-primary w-full py-3 text-sm">
                   去菜单看全店夜宵 →

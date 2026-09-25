@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion'
 import { usePrefersReducedMotion } from '../theme/motion'
-import { heroFallback } from '../theme/images'
 
 // 全屏底片层：object-cover 美食大图 + 晨光浅叠层，衬于页面内容之下
 // variant: 'immersive'（图清晰微提亮 + 顶部浅渐隐）| 'functional'（轻模糊 + 浅遮罩，作功能页背景）
-// 宽度与 App 容器(480)对齐，桌面预览也不溢出；KenBurns 在 reduced-motion 下关闭
+// 宽度与 App 容器(480)对齐，桌面预览也不溢出
+// 批4 性能修：原 scale[1.04→1→1.04] 20s 无限循环 ×9 页 = 全站最稳定掉帧源
+// （与 PageHeader backdrop-blur 同屏时每帧都在重算模糊+变换合成层），改为入场一次缓推后静止；
+// 图挂了直接隐身露 --color-ink-900 纸底（heroFallback 是给背景图 div 写的，对 <img> 会连容器一起 display:none 掉、已弃用）。
 export default function FullBleedHero({ src, variant = 'immersive', alt = '', children, className = '', name }) {
   const reduce = usePrefersReducedMotion()
   const functional = variant === 'functional'
@@ -22,10 +24,12 @@ export default function FullBleedHero({ src, variant = 'immersive', alt = '', ch
       <motion.img
         src={src}
         alt={alt}
-        onError={(e) => heroFallback(e)}
-        initial={{ scale: 1.04 }}
-        animate={reduce ? { scale: 1 } : { scale: [1.04, 1.0, 1.04] }}
-        transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
+        fetchPriority="high"
+        decoding="async"
+        onError={(e) => { e.currentTarget.style.visibility = 'hidden' }}
+        initial={reduce ? false : { scale: 1.04 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
         className="absolute inset-0 w-full h-full object-cover"
         style={{
           filter: functional

@@ -73,6 +73,7 @@
   --radius-sheet: 28px;  /* 底部浮层顶部 */
   --clay-deep: #7F2A3D;  /* 深梅粉（渐变收尾/按压态·=clay-90） */
   --color-on-dark: #FFF9FC;   /* 深色锚卡/实底上的粉白字（第六轮归粉） */
+  --color-ink-fixed: #2B2429; /* 批4：跨主题恒定浅底（ember/on-dark 混色卡）上的墨字——这些底不反相，字也不能反相 */
   --color-on-sage: #1A2417;   /* sage 实底上的深绿字（TA 侧反色唯一值） */
   --color-ember: #9C8F96;     /* 熄火余温梅灰（=ORDER_STATUS.pending.ring，StoveStage 待机柔光） */
   --color-caramel-deep: #8A4E56;  /* 焦糖实底专用（AA 徽章/排名徽章的底）：刻意不随夜宵反相，保证徽章上 on-dark 亮字达标；勿与会提亮的文本色 --color-caramel 混用 */
@@ -137,13 +138,22 @@
   --sticker-sage-a: #E9F2E5;    --sticker-sage-b: #CFE2C9;
   --sticker-apricot-a: #FFEFD6; --sticker-apricot-b: #F7DBB0;
   --sticker-sky-a: #E8F0F7;     --sticker-sky-b: #CFDFEE;
+  /* 批4 令牌化：便签是"从抽屉里摸出的纸"，世界件跨主题恒定不反相（同 --stove-* 待遇）。
+     原 StickerEditor/OrderDetail 各写一份 #2B2429/rgba 字面量（P1 双份漂移源），现收单源。 */
+  --sticker-ink: #2B2429;
+  --sticker-ink-hair: rgba(43, 36, 41, 0.16);
+  --sticker-ink-tint: rgba(43, 36, 41, 0.10);
+  --sticker-shadow: 0 4px 14px rgba(43, 36, 41, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --sticker-pin-shadow: 0 2px 2px rgba(43, 36, 41, 0.28);
 
   /* —— 订单状态 chip 文字色（语义令牌，夜宵反相块换浅色档）——
      白天深字压浅底；夜宵若仍用 clay-80/深梅灰会"暗字压暗底"不达 4.5:1，
      故夜宵覆盖为 clay-30/sage-30/浅梅灰。见 [data-theme="night"] 段。 */
   --status-pending-text: #5F5259;
   --status-preparing-text: var(--clay-80);
-  --status-completed-text: var(--sage-60);
+  /* 批4 修 P1（对比度）：sage-60 压 sage-40 16% 底白天仅 2.41:1（全站「做好啦」chip 与 TA 徽标同病），
+     降两档到 sage-80（≈4.6:1 达 AA）；夜宵档仍由 [data-theme="night"] 段覆盖为浅绿 */
+  --status-completed-text: var(--sage-80);
 
   /* —— 遮罩 / 背景（夜宵模式反相点：亮暗两档只换这几个令牌） —— */
   --scrim-top: rgba(252, 231, 240, 0.88);          /* PageHeader 吸顶渐隐 */

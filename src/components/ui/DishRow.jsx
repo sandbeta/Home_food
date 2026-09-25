@@ -35,15 +35,9 @@ export default function DishRow({
     <div
       className={`d3-card overflow-hidden ${onClick ? 'cursor-pointer' : ''} ${className}`}
       onClick={onClick}
-      /* B4 修：Menu 页菜品进详情唯一入口，原为纯 <div onClick> 键盘用户完全不可达。
-         补 role=button + tabIndex + Enter/Space 键盘路径；内部收藏/加购按钮已是真 <button> 保留 stopPropagation。 */
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => {
-        if (e.target !== e.currentTarget) return
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e) }
-      } : undefined}
-      aria-label={onClick && dish ? `查看${dish.name}详情` : undefined}
+      /* 批4 修 P1（非法 ARIA 根治）：原容器 role=button 内嵌收藏/加购真 <button> = "按钮里长按钮"，
+         读屏项套项。现容器只作**指点便利**（普通 div + onClick），键盘/读屏的可达路径
+         由菜名那个真 <button>（下方 nameBtn）承载——焦点、Enter/Space、可访问名都在它身上。 */
     >
       {showFav && onToggleFav && (
         <motion.button
@@ -92,10 +86,23 @@ export default function DishRow({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            {/* m-10 修：h3 会与 h1 之间缺 h2 中间层（读屏按标题导航丢层级）→ 菜品名是数据条目而非版面主角，改 <p> */}
-            <p className="font-sans font-bold text-base text-[var(--color-bone)] truncate m-0">
-              {dish.name}
-            </p>
+            {/* m-10 修：h3 会与 h1 之间缺 h2 中间层（读屏按标题导航丢层级）→ 菜品名是数据条目而非版面主角，改 <p>
+                批4：可点场景下名字升为真 <button>——容器不再是 role=button 后，键盘/读屏进详情就靠它 */}
+            {onClick ? (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onClick(e) }}
+                aria-label={`查看${dish.name}详情`}
+                className="font-sans font-bold text-base text-[var(--color-bone)] truncate m-0 text-left cursor-pointer"
+                style={{ background: 'transparent', border: 0, padding: 0 }}
+              >
+                {dish.name}
+              </button>
+            ) : (
+              <p className="font-sans font-bold text-base text-[var(--color-bone)] truncate m-0">
+                {dish.name}
+              </p>
+            )}
             <span className="badge-soft text-xs px-1.5 py-0.5 rounded-full font-bold text-[var(--color-ash)]">
               {dish.category}
             </span>

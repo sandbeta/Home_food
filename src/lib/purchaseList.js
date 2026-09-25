@@ -16,36 +16,51 @@
  * ============================================================ */
 import { requestJson } from './request'
 
+/* 批4 修 P1：
+   ①串行 await → Promise.all 并发（同 dish_id 去重）：mock 每请求固定 160ms，
+     10 道菜原来要 1.6s 起，现在一次并发拿齐；
+   ②normName 剥掉括号说明再取词：真实语料 20.3% 原料形如「青蟹（别称：肉蟹）」，
+     原实现把整串当名字——既不并名又把不可读的串复制进超市清单；
+   ③厨具词过滤：烤箱/筛网/打蛋器…是工具不是食材（语料里 36 种 53 次），
+     混进"要买这些东西"清单等于让人拿买菜钱买锅。 */
+const PAREN_RE = /[（(][^）)]*[)）]/g
+const TOOL_RE = /烤箱|烤盘|烤网|筛网|漏勺|滤网|打蛋器|料理机|破壁机|搅拌机|厨房秤|电子秤|不粘锅|砂锅|奶锅|雪平锅|模具|锡纸|保鲜膜|保鲜袋|油纸|烘焙纸|温度计|量杯|量勺|擀面杖|蒸笼|蒸屉/
+
 function normName(raw) {
-  // "生姜 3 片" → "生姜"；"盐 适量" → "盐"；"（可选）葱花" → "（可选）葱花"（无空格保留原样）
   if (!raw || typeof raw !== 'string') return ''
-  const trimmed = raw.trim()
+  const trimmed = raw.replace(PAREN_RE, '').trim()
   const i = trimmed.search(/[\s ]/)
-  return i === -1 ? trimmed : trimmed.slice(0, i)
+  const name = i === -1 ? trimmed : trimmed.slice(0, i)
+  if (!name || TOOL_RE.test(name)) return ''
+  return name
 }
 
 /**
- * 拉每道菜的 recipe（懒加载）→ 合并 ingredients → 返回 [{ name, from: [dishName...] }]。
+ * 并发拉每道菜的 recipe（懒加载）→ 合并 ingredients → 返回 { list, noRecipe }。
  * 无菜谱数据的菜（原 65 道老菜）跳过、单独列进 noRecipe，UI 提示"这几道没菜谱原料清单"。
+ * 用法：const { list, noRecipe } = await buildPurchaseList(items)
  */
 export async function buildPurchaseList(items) {
   const map = new Map() // name -> Set(dishName)
   const noRecipe = []
+  const uniq = new Map() // dish_id -> name（同菜多行只拉一次）
   for (const it of (items || [])) {
-    if (!it || !it.dish_id) continue
+    if (it && it.dish_id) uniq.set(String(it.dish_id), it.name || `菜#${it.dish_id}`)
+  }
+  await Promise.all(Array.from(uniq.entries()).map(async ([dishId, dishName]) => {
     try {
-      const res = await requestJson(`/api/dishes/${it.dish_id}`)
+      const res = await requestJson(`/api/dishes/${dishId}`)
       const dish = await res.json()
       const ings = dish && dish.recipe && Array.isArray(dish.recipe.ingredients) ? dish.recipe.ingredients : null
-      if (!ings) { noRecipe.push(it.name || `菜#${it.dish_id}`); continue }
+      if (!ings) { noRecipe.push(dishName); return }
       for (const raw of ings) {
         const name = normName(raw)
         if (!name) continue
         if (!map.has(name)) map.set(name, new Set())
-        map.get(name).add(it.name || `菜#${it.dish_id}`)
+        map.get(name).add(dishName)
       }
-    } catch { noRecipe.push(it.name || `菜#${it.dish_id}`) }
-  }
+    } catch { noRecipe.push(dishName) }
+  }))
   const list = Array.from(map.entries())
     .map(([name, from]) => ({ name, from: Array.from(from) }))
     .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'))

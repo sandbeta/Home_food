@@ -76,9 +76,15 @@ async function drawPoster({ dish, indexNo, date }) {
     try {
       const el = new Image()
       el.crossOrigin = 'anonymous'
+      /* 批4 修 P1：①加 4s 超时——原 onload/onerror 悬 pending 时 Promise 永不 settle，
+         "手绘中…"无限转圈（与 M-s5 同类的 hang 死锁）；
+         ②子路径部署取图修正——原 location.origin + '/' 会把 /Home_food/ 段丢掉，
+         GitHub Pages 上分享卡永远只画 emoji 画不出真实菜品照片。 */
       await new Promise((resolve, reject) => {
-        el.onload = resolve; el.onerror = reject
-        el.src = img.startsWith('http') ? img : (location.origin + '/' + img.replace(/^\/+/, ''))
+        const to = setTimeout(() => reject(new Error('img timeout')), 4000)
+        el.onload = () => { clearTimeout(to); resolve() }
+        el.onerror = () => { clearTimeout(to); reject(new Error('img error')) }
+        el.src = img.startsWith('http') ? img : new URL((img.startsWith('/') ? '.' : '') + img, location.href).href
       })
       // 圆形图鉴盘：clip + cover
       ctx.save()

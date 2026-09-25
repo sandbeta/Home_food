@@ -74,6 +74,7 @@ function CartRow({ item, onUpdate, onRemove }) {
         value={item.quantity}
         min={1}
         size={44}
+        name={item.name}   /* 批4：补上 m-9 的无障碍名——否则一屏 8 行的 +/- 读屏全叫"增加/减少" */
         onChange={(v) => onUpdate(item.dish_id, v, item.added_by)}
       />
 
@@ -309,6 +310,34 @@ export default function Cart() {
 
       <PageHeader title={pageTitle} subtitle={totalCount > 0 ? pageNote(totalCount) : ''} back right={<ThemeToggle />} />
 
+      {/* 批4 修 P1：分享提示条从"非空车"分支里提出来——空车（最需要一键合并的时刻）也要看得见点得到 */}
+      {shared && (
+        <div className="px-[var(--space-page-x)]">
+          <motion.div
+            initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+            className="mb-3 px-4 py-3 flex items-center gap-3"
+            style={{
+              background: 'color-mix(in srgb, var(--color-sage) 16%, var(--surface))',
+              border: '2px solid color-mix(in srgb, var(--color-sage) 55%, transparent)',
+              borderRadius: 'var(--radius-card)',
+              color: 'var(--color-bone)',
+            }}
+            role="status"
+          >
+            <span aria-hidden className="text-2xl shrink-0">📬</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold truncate">TA 分享了 {shared.items.length} 件</p>
+              <p className="text-[11px] text-[var(--color-ash)] mt-0.5">{shared.sharedAt ? timeAgo(shared.sharedAt) : '刚刚'} · 合并进来一起下单？</p>
+            </div>
+            <button onClick={handleMerge}
+              className="d3-btn-sm px-3 py-1.5 text-xs font-bold min-h-[44px] shrink-0"
+              style={{ background: 'var(--color-sage)', color: 'var(--color-on-sage)', border: '2px solid var(--sage-60)' }}>
+              合并
+            </button>
+          </motion.div>
+        </div>
+      )}
+
       {items.length === 0 ? (
         <EmptyState
           who="badgeDay"
@@ -327,31 +356,6 @@ export default function Cart() {
         />
       ) : (
         <PageContainer>
-          {/* 批 5 · 跨设备分享提示条：TA 在另一台设备分享过 → 显"TA xx 分钟前分享了 N 件 · 一键合并" */}
-          {shared && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-              className="mb-3 px-4 py-3 flex items-center gap-3"
-              style={{
-                background: 'color-mix(in srgb, var(--color-sage) 16%, var(--surface))',
-                border: '2px solid color-mix(in srgb, var(--color-sage) 55%, transparent)',
-                borderRadius: 'var(--radius-card)',
-                color: 'var(--color-bone)',
-              }}
-              role="status"
-            >
-              <span aria-hidden className="text-2xl shrink-0">📬</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate">TA 分享了 {shared.items.length} 件</p>
-                <p className="text-[11px] text-[var(--color-ash)] mt-0.5">{shared.sharedAt ? timeAgo(shared.sharedAt) : '刚刚'} · 合并进来一起下单？</p>
-              </div>
-              <button onClick={handleMerge}
-                className="d3-btn-sm px-3 py-1.5 text-xs font-bold min-h-[44px] shrink-0"
-                style={{ background: 'var(--color-sage)', color: 'var(--color-on-sage)', border: '2px solid var(--sage-60)' }}>
-                合并
-              </button>
-            </motion.div>
-          )}
           {mergeDone && (
             <div role="status" className="mb-3 px-4 py-2 text-xs font-bold text-[var(--color-on-sage)]"
               style={{ background: 'var(--color-sage)', borderRadius: 'var(--radius-ctl)' }}>已合并 ✓</div>
@@ -506,7 +510,7 @@ export default function Cart() {
               style={{ background: 'rgba(43,36,41,0.14)' }}
             >
               <span className="text-xs" aria-hidden>⏱️</span>
-              <span className="text-xs text-[var(--color-on-dark)]">预估等待约 20-30 分钟</span>
+              <span className="text-xs text-[var(--color-on-dark)]">已记入灶台，等出锅的消息</span>
             </div>
 
             {avoidHit && (
@@ -515,7 +519,7 @@ export default function Cart() {
                 style={{
                   background: 'color-mix(in srgb, var(--color-ember) 22%, var(--color-on-dark))',
                   border: '2px solid color-mix(in srgb, var(--color-ember) 60%, transparent)',
-                  color: '#2B2429',
+                  color: 'var(--color-ink-fixed)',
                 }}>
                 <p className="text-xs font-bold mb-1.5 flex items-center gap-1"><span aria-hidden>🌿</span> 这几道里有忌口，看看要不要换</p>
                 <ul className="text-[11px] leading-relaxed space-y-0.5" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -530,13 +534,13 @@ export default function Cart() {
                   <button type="button"
                     onClick={() => { setAvoidConfirmed(true); handleSubmit() }}
                     className="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold min-h-[44px]"
-                    style={{ background: 'var(--color-bone)', color: 'var(--color-on-dark)' }}>
+                    style={{ background: 'var(--color-ink-fixed)', color: 'var(--color-on-dark)' }}>
                     知道啦，仍然下单
                   </button>
                   <button type="button"
                     onClick={() => setAvoidHit(null)}
                     className="flex-1 py-1.5 px-2 rounded-lg text-xs font-bold min-h-[44px]"
-                    style={{ background: 'transparent', border: '2px solid var(--color-line)', color: 'var(--color-bone)' }}>
+                    style={{ background: 'transparent', border: '2px solid color-mix(in srgb, var(--color-ink-fixed) 30%, transparent)', color: 'var(--color-ink-fixed)' }}>
                     先返回改改
                   </button>
                 </div>

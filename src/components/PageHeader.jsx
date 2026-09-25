@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Character from './ui/Character'
 import { useTheme } from '../theme/useTheme'
@@ -18,7 +18,14 @@ import { useTheme } from '../theme/useTheme'
  */
 export default function PageHeader({ title, eyebrow, subtitle, back = false, backTo, right, onBack }) {
   const navigate = useNavigate()
-  const goBack = () => (backTo ? navigate(backTo) : navigate(-1))
+  const location = useLocation()
+  /* 批4 修 P1：分享单号/直接敲 #/dish/5 冷启动时这是首条历史，navigate(-1)=退出站点或死键；
+     location.key==='default' 即"落地页无来路"，返回一律回首页。 */
+  const goBack = () => {
+    if (backTo) return navigate(backTo)
+    if (location.key === 'default') return navigate('/home', { replace: true })
+    navigate(-1)
+  }
   const { isNight } = useTheme()
 
   return (
