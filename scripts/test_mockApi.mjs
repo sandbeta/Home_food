@@ -32,11 +32,22 @@ assert(new Set(all.body.map(d => d.id)).size === all.body.length, '菜品 id 无
 const veg = await req('/api/dishes?category=' + encodeURIComponent('素菜'))
 assert(veg.body.length >= 60 && veg.body.every(d => d.category === '素菜'), `素菜分类过滤（${veg.body.length} 道）`)
 
-// 3) 菜谱懒注入：HowToCook 菜带步骤，老种子菜为 null
+// 3) 菜谱注入：详情接口带原料+步骤；批7 起全菜单 432/432 有做法（防"某道菜没菜谱"回归）
 const d502 = await req('/api/dishes/502')
 assert(d502.body.recipe?.steps?.length > 0 && d502.body.recipe.ingredients?.length > 0, '小龙虾(#502) 带原料+步骤菜谱')
 const d1 = await req('/api/dishes/1')
-assert(d1.body.recipe === null, '老种子菜(#1) recipe=null')
+assert(d1.body.recipe?.steps?.length > 0, '老种子菜(#1) 批7 已补做法（原 recipe=null）')
+
+const recipes = (await import('../src/lib/seedRecipes.js')).default
+const noRec = all.body.filter(d => !recipes[String(d.id)])
+assert(noRec.length === 0, `每道菜都有菜谱：${all.body.length - noRec.length}/${all.body.length}${noRec.length ? ' 缺 ' + noRec.slice(0, 5).map(d => d.id + d.name).join(',') : ''}`)
+const shapeBad = Object.entries(recipes).filter(([, r]) =>
+  !Array.isArray(r.ingredients) || !r.ingredients.length || !Array.isArray(r.steps) || !r.steps.length ||
+  !/^[★☆]{1,5}$/.test(r.difficulty || '') || !/^\d+ 大卡$/.test(r.calories || ''))
+assert(shapeBad.length === 0, `菜谱字段完整（五字段合规，异常 ${shapeBad.length} 条）`)
+const { default: fs } = await import('node:fs')
+const serverCopy = JSON.parse(fs.readFileSync(new URL('../server/data/seed-recipes.json', import.meta.url), 'utf8'))
+assert(JSON.stringify(serverCopy) === JSON.stringify(recipes), 'server 菜谱副本与前端逐字节一致（双端同源）')
 
 // 4) 下单链路：总价按服务端菜价重算
 const post = await req('/api/orders', {

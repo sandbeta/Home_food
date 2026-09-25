@@ -37,7 +37,8 @@ function normName(raw) {
 
 /**
  * 并发拉每道菜的 recipe（懒加载）→ 合并 ingredients → 返回 { list, noRecipe }。
- * 无菜谱数据的菜（原 65 道老菜）跳过、单独列进 noRecipe，UI 提示"这几道没菜谱原料清单"。
+ * 无菜谱数据的菜跳过、单独列进 noRecipe（批7 补全后正常菜单已 0 命中；此路径保留给
+ * 管理员新增菜与请求失败，UI 提示"这几道没菜谱原料清单"）。
  * 用法：const { list, noRecipe } = await buildPurchaseList(items)
  */
 export async function buildPurchaseList(items) {

@@ -186,7 +186,7 @@ export default function DishDetail() {
           </div>
         </GlassCard>
 
-        {/* 男朋友的菜谱（HowToCook 灌库菜才有） */}
+        {/* 男朋友的菜谱（批7 起全菜单 432/432 均有；recipe 为 null 时仍优雅降级不渲染） */}
         {dish.recipe && (
           <GlassCard delay={0.25}>
             <div style={{ padding: 'var(--space-card-p)' }}>
