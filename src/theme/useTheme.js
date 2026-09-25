@@ -46,8 +46,11 @@ function resolveTheme() {
   const url = readThemeParam()
   if (url === 'night' || url === 'light') return url
   const auto = slotTheme()
-  const saved = localStorage.getItem(THEME_KEY)
-  if ((saved === 'light' || saved === 'night') && localStorage.getItem(MANUAL_SLOT_KEY) === slotStamp()) {
+  /* 批3 修 P1：无痕模式/禁站点数据下 getItem 会 throw——本模块在 JS 顶层即执行，
+     原裸调用=启动即抛=整个应用白屏。 */
+  let saved = null, stamp = null
+  try { saved = localStorage.getItem(THEME_KEY); stamp = localStorage.getItem(MANUAL_SLOT_KEY) } catch { saved = null }
+  if ((saved === 'light' || saved === 'night') && stamp === slotStamp()) {
     return saved
   }
   return auto
@@ -58,7 +61,12 @@ const listeners = new Set()
 
 function apply(theme) {
   document.documentElement.setAttribute('data-theme', theme)
-  document.documentElement.classList.toggle('theme-night', theme === 'night')
+  /* 批3 修 P1：手机状态栏/浏览器外壳色跟随主题（原 index.html 里 #FCE7F0 焊死，
+     夜宵模式"页面是夜的、外壳是粉的"两张皮）。取运行时令牌，不破颜色单源。 */
+  try {
+    const meta = document.querySelector('meta[name="theme-color"]')
+    if (meta) meta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--color-ink-900').trim() || (theme === 'night' ? '#241B21' : '#FCE7F0'))
+  } catch { /* 老 WebView 无 getComputedStyle 时静默 */ }
 }
 apply(current)
 
@@ -66,8 +74,10 @@ function emit() { listeners.forEach(l => l()) }
 
 export function toggleTheme() {
   current = current === 'light' ? 'night' : 'light'
-  localStorage.setItem(THEME_KEY, current)
-  localStorage.setItem(MANUAL_SLOT_KEY, slotStamp())
+  try {
+    localStorage.setItem(THEME_KEY, current)
+    localStorage.setItem(MANUAL_SLOT_KEY, slotStamp())
+  } catch { /* 存储不可用：切换只在本次页面生效 */ }
   apply(current)
   emit()
 }

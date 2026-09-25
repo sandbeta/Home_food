@@ -6,6 +6,18 @@
 
 const SFX_KEY = 'couple_order_sfx'
 let ctx = null
+let enabledCache = null   // 批3：一次同步读缓存（tick 连发不再每下打 localStorage）
+
+export function sfxEnabled() {
+  if (enabledCache == null) {
+    try { enabledCache = localStorage.getItem(SFX_KEY) !== 'off' } catch { enabledCache = true }
+  }
+  return enabledCache
+}
+export function setSfxEnabled(on) {
+  enabledCache = !!on
+  try { localStorage.setItem(SFX_KEY, on ? 'on' : 'off') } catch { /* 无痕模式：本次会话内仍生效 */ }
+}
 
 function audio() {
   if (typeof window === 'undefined') return null
@@ -19,13 +31,6 @@ function audio() {
     if (ctx.state === 'suspended') ctx.resume().catch(() => {})
     return ctx
   } catch { return null }
-}
-
-export function sfxEnabled() {
-  return localStorage.getItem(SFX_KEY) !== 'off'
-}
-export function setSfxEnabled(on) {
-  localStorage.setItem(SFX_KEY, on ? 'on' : 'off')
 }
 
 function tone({ freq, dur = 0.08, type = 'sine', gain = 0.05, at = 0, slideTo }) {
@@ -67,8 +72,8 @@ export function tap() {
   tone({ freq: 660, dur: 0.05, type: 'triangle', gain: 0.03 })
 }
 
-/** 振动：触屏设备的物理反馈，不支持则静默（pattern 为 ms 数组或数字） */
+/** 振动：触屏设备的物理反馈，不支持则静默（pattern 为 ms 数组或数字）。
+ *  批3 修 P1：不再被"音效开关"拦——静音的用户照样该有触觉反馈（无障碍通道独立于音频通道）。 */
 export function vibrate(pattern = 14) {
-  if (!sfxEnabled()) return
   try { navigator.vibrate?.(pattern) } catch { /* 静默 */ }
 }

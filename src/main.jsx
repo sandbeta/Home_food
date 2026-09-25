@@ -23,7 +23,9 @@ async function bootstrap() {
     // 家庭模式：包装 fetch，公网写操作收到 401 时弹密码门（局域网永不触发）
     installAdminGate()
   }
-  createRoot(document.getElementById('root')).render(
+  const mount = document.getElementById('root')
+  if (!mount) throw new Error('#root missing')   // 旧缓存 HTML/注入失败：交给下方兜底面板，不炸成白屏
+  createRoot(mount).render(
     <StrictMode>
       {/*
         Hash 路由（URL 形如 /#/menu）：GitHub Pages 等静态托管
@@ -37,4 +39,15 @@ async function bootstrap() {
     </StrictMode>
   )
 }
-bootstrap()
+/* 批3 修 P1（冷启死白屏）：mock chunk 拉取失败（Pages 部署中间态 404/弱网）原会让
+   bootstrap 的 promise 静默 reject——createRoot 永不执行，ErrorBoundary（在 App 内）
+   根本没机会登场。兜一块纯静态恢复面板：零依赖、必可见，恢复网络后重进即自愈。 */
+bootstrap().catch(() => {
+  const root = document.getElementById('root') || document.body
+  root.innerHTML =
+    '<div style="min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:32px;font-family:system-ui,sans-serif;color:#2B2429;text-align:center">' +
+    '<div style="font-size:40px" aria-hidden="true">🍳</div>' +
+    '<p style="font-size:15px;line-height:1.7;margin:0">厨房的锅没端上来（资源没加载成功）<br>检查下网络，再试一次</p>' +
+    '<button onclick="location.reload()" style="padding:10px 22px;border:2px solid #BE4E67;border-radius:999px;background:#BE4E67;color:#FFF9FC;font-size:14px;font-weight:700">再试一次</button>' +
+    '</div>'
+})

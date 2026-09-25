@@ -97,42 +97,56 @@ const seedDishes = [
 // 首次 loadState 解析后驻留内存，写入时同步落盘（单标签页 demo 场景足够）
 let stateCache = null
 
+/* 批3 修 P1（跨标签失效）：另一页签写盘后本标签读路径下次取最新，
+   不再拿陈旧整表去覆盖对方写入（写侧仍是 last-writer-wins，真双端请用家庭服务端）。 */
+if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+  window.addEventListener('storage', (e) => { if (e.key === STORAGE_KEY) stateCache = null })
+}
+
 function loadState() {
   if (stateCache) return stateCache
-  let state
+  /* 修 P1（批3·数据安全）：原 try 把 saveState 也圈了进去——写盘异常（配额满/Safari 无痕）
+     会被误判成"数据损坏"、整表回退 fresh seed：内存里 432 道、磁盘仍是用户那几道，
+     后续任何写请求直接未捕获抛错。现在只有「读/解析」失败才回退，补齐落盘各自包自家 try。 */
+  const fresh = () => ({ dishes: seedDishes.map(d => ({ ...d })), orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, deletedSeedIds: [], sharedCart: { items: [], sharedBy: null, sharedAt: null } })
+  let state = null
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
-      state = JSON.parse(saved)
-      /* M-d2 修（不可变文件 · 改动记入 PROJECT-HANDOFF §4 台账）：
-         原按 name 去重导致夜宵版 905/907/915 与灌库版 735/767/713 同名时被跳过，
-         老设备夜宵池永远少 3 道定向种子。改成 (id,name) 双键判等 —— 灌库版在场不影响夜宵版补齐，
-         夜宵版也不会因名同灌库版被误去重。 */
-      const existing = new Set((state.dishes || []).map(d => `${d.id}|${d.name}`))
-      const missingSeed = seedDishes.filter(d => !existing.has(`${d.id}|${d.name}`))
-      if (missingSeed.length) {
-        state.dishes = [...(state.dishes || []), ...missingSeed]
-        state.nextDishId = Math.max(Number(state.nextDishId || 1), ...state.dishes.map(d => Number(d.id || 0))) + 1
-        saveState(state)
-      }
-      /* 批 1 新增 · 老 state 兼容补齐（anniversaries / wishes 两表 + 序列号） */
-      if (!Array.isArray(state.anniversaries)) state.anniversaries = []
-      if (!Array.isArray(state.wishes)) state.wishes = []
-      if (!Number.isFinite(state.nextAnniversaryId)) state.nextAnniversaryId = 1
-      if (!Number.isFinite(state.nextWishId)) state.nextWishId = 1
-      /* 批 5 新增 · sharedCart（跨设备分享购物车，家庭"手动分享+拉取合并"，非实时同步） */
-      if (!state.sharedCart || typeof state.sharedCart !== 'object') state.sharedCart = { items: [], sharedBy: null, sharedAt: null }
-    } else {
-      /* M-d1 修（不可变文件 · 同 §4 台账）：
-         fresh 态 nextDishId 原为魔法数 66（按早期 65 道种子写就，灌库扩充后未回改），
-         与 server/index.cjs 的 10000 漂移 → 双端新建菜 id 段位不可互认。
-         改为与 server 字面一致 10000（当前 seed 段位 1-65/500-841/900-924 均 <10000 无冲突；
-         未来 seed 逼近该值需两端同调，写进 §4 提醒）。
-       批 1 新增：anniversaries / wishes 空表 + 序列号（与 server 端一比一复刻） */
-      state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, sharedCart: { items: [], sharedBy: null, sharedAt: null } }
+      const parsed = JSON.parse(saved)
+      if (parsed && typeof parsed === 'object' && Array.isArray(parsed.dishes)) state = parsed
     }
   } catch {
-    state = { dishes: seedDishes, orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, sharedCart: { items: [], sharedBy: null, sharedAt: null } }
+    state = null
+  }
+  if (state) {
+    /* M-d2 修（不可变文件 · 改动记入 PROJECT-HANDOFF §4 台账）：
+       原按 name 去重导致夜宵版 905/907/915 与灌库版 735/767/713 同名时被跳过，
+       老设备夜宵池永远少 3 道定向种子。改成 (id,name) 双键判等 —— 灌库版在场不影响夜宵版补齐，
+       夜宵版也不会因名同灌库版被误去重。
+       批3 修 P1「删不掉」：deletedSeedIds 墓碑——用户真删掉的内置种子不再刷新复活（下架 available=0 不受影响）。 */
+    if (!Array.isArray(state.deletedSeedIds)) state.deletedSeedIds = []
+    const tombstone = new Set(state.deletedSeedIds.map(Number))
+    const existing = new Set((state.dishes || []).map(d => `${d.id}|${d.name}`))
+    const missingSeed = seedDishes.filter(d => !existing.has(`${d.id}|${d.name}`) && !tombstone.has(Number(d.id)))
+    if (missingSeed.length) {
+      state.dishes = [...(state.dishes || []), ...missingSeed]
+    }
+    /* 老 state 兼容补齐（anniversaries / wishes 两表 + 序列号 + sharedCart） */
+    if (!Array.isArray(state.anniversaries)) state.anniversaries = []
+    if (!Array.isArray(state.wishes)) state.wishes = []
+    if (!Number.isFinite(state.nextAnniversaryId)) state.nextAnniversaryId = 1
+    if (!Number.isFinite(state.nextWishId)) state.nextWishId = 1
+    if (!state.sharedCart || typeof state.sharedCart !== 'object') state.sharedCart = { items: [], sharedBy: null, sharedAt: null }
+    /* 修 P1（脏 id 传染）：原 Math.max(...ids) 遇一条 id='abc' 即 NaN → 落盘 null → 之后所有新菜 id:null
+       全线不可自愈。改为过滤非有限值后重算，且顺带修复已损坏的 nextDishId。 */
+    const ids = (state.dishes || []).map(d => Number(d && d.id)).filter(Number.isFinite)
+    const maxId = ids.length ? Math.max(...ids) : 0
+    const cur = Number(state.nextDishId)
+    if (!Number.isFinite(cur) || cur <= maxId) state.nextDishId = maxId + 1
+    try { saveState(state) } catch { /* 补齐落盘失败不拦读路径（内存态已就绪） */ }
+  } else {
+    state = fresh()
   }
   stateCache = state
   return state
@@ -291,7 +305,10 @@ export function installMockApi() {
 
     if (pathname === '/api/dishes' && method === 'POST') {
       const body = await readBody(init)
-      const dish = { id: state.nextDishId++, available: 1, image_url: '', description: '', ...body, price: Number(body.price || 0) }
+      /* 修 P0-8（主键收归服务端）：原 ...body 排在 id 之后，客户端可指定 id 造双主键撞车、
+         旧条目永久不可寻址，脏 id 还会传染 nextDishId=NaN 拖垮全库。 */
+      const { id: _bodyId, nextDishId: _nd, ...rest } = body || {}
+      const dish = { id: state.nextDishId++, available: 1, image_url: '', description: '', ...rest, price: Number(rest.price || 0) }
       state.dishes.unshift(dish)
       saveState(state)
       return json(dish, 201)
@@ -308,14 +325,28 @@ export function installMockApi() {
     }
     if (dishMatch && method === 'PUT') {
       const id = Number(dishMatch[1])
-      const body = await readBody(init)
-      state.dishes = state.dishes.map(d => d.id === id ? { ...d, ...body, price: body.price === undefined ? d.price : Number(body.price) } : d)
+      const body = await readBody(init) || {}
+      const idx = state.dishes.findIndex(d => Number(d.id) === id)
+      if (idx === -1) return json({ message: 'Not found' }, 404)   // 修 P1：原 200+null 前端永不报错
+      /* 修 P1（字段白名单）：body 不再能注入 id/内部字段（原可把菜"改名换身份证"致 GET 404） */
+      const pick = {}
+      for (const k of ['name', 'price', 'category', 'description', 'available', 'image_url']) {
+        if (Object.prototype.hasOwnProperty.call(body, k)) pick[k] = body[k]
+      }
+      if ('price' in pick) pick.price = Number(pick.price) || 0
+      state.dishes[idx] = { ...state.dishes[idx], ...pick, id }
       saveState(state)
-      return json(state.dishes.find(d => d.id === id) || null)
+      return json(state.dishes[idx])
     }
     if (dishMatch && method === 'DELETE') {
       const id = Number(dishMatch[1])
-      state.dishes = state.dishes.filter(d => d.id !== id)
+      const idx = state.dishes.findIndex(d => Number(d.id) === id)
+      if (idx === -1) return json({ message: 'Not found' }, 404)     // 修 P1：删除假成功
+      state.dishes.splice(idx, 1)
+      /* 批3 墓碑：内置种子（id<10000 且在 seed 名单里）被真删后不再刷新复活 */
+      if (id < 10000 && seedDishes.some(d => Number(d.id) === id) && !state.deletedSeedIds.includes(id)) {
+        state.deletedSeedIds.push(id)
+      }
       saveState(state)
       return json({ ok: true })
     }
@@ -330,22 +361,28 @@ export function installMockApi() {
 
     if (pathname === '/api/orders' && method === 'POST') {
       const body = await readBody(init)
+      /* 修 P1（幽灵订单）：空 items / 非数组拒建；dish_id 查无此菜拒建——
+         原先客户端可提交 {dish_name:'伪造', price:999} 落进真账（settlements/年报/成就全吃它）。 */
+      if (!Array.isArray(body.items) || !body.items.length) return json({ message: 'items required' }, 400)
+      for (const it of body.items) {
+        if (!state.dishes.some(d => Number(d.id) === Number(it.dish_id))) return json({ message: 'unknown dish_id', dish_id: it.dish_id }, 400)
+      }
       const items = (body.items || []).map((item, idx) => {
         const dish = state.dishes.find(d => d.id === Number(item.dish_id)) || {}
         return {
           id: Date.now() + idx,
           dish_id: Number(item.dish_id),
-          dish_name: dish.name || item.name || '未知菜品',
-          price: Number(dish.price || item.price || 0),
-          quantity: Number(item.quantity || 1),
-          added_by: item.added_by || 'me',
+          dish_name: dish.name || '未知菜品',
+          price: Number(dish.price) || 0,
+          quantity: Math.max(1, Number(item.quantity) || 1),   // 修 P2：负数/NaN 份数入库致 -84 元单
+          added_by: item.added_by === 'partner' ? 'partner' : 'me',
           category: dish.category || '', /* 修 P0-3：快照分类 */
         }
       })
       const total_price = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
       /* 批 4a · AA 结算快照（家庭语义 AA = 各付各的）：payer=me 全归 🐱 / partner 全归 🐑 / aa 按 added_by 分账。
          落库到订单，避免"事后 admin 改菜价历史订单金额漂"问题（同 §7.15 m-21 快照价缝隙的补丁）。 */
-      const PAYER = body.payer || 'aa'
+      const PAYER = ['aa', 'me', 'partner'].includes(body.payer) ? body.payer : 'aa'   // 修 P1：非法 payer 静默丢钱
       const meSub = items.filter(i => i.added_by === 'me').reduce((s, i) => s + i.price * i.quantity, 0)
       const partnerSub = items.filter(i => i.added_by === 'partner').reduce((s, i) => s + i.price * i.quantity, 0)
       const owed_me = PAYER === 'me' ? total_price : PAYER === 'partner' ? 0 : meSub
@@ -374,12 +411,18 @@ export function installMockApi() {
     if (orderStatusMatch && method === 'PUT') {
       const id = Number(orderStatusMatch[1])
       const body = await readBody(init)
-      /* 批 2a · 状态白名单校验：pending / preparing(旧) / cutting / cooking / plating / completed 六值合法。
-         非法 status 返回 400 而非静默收下脏数据（服务端与 mockApi 一比一，两端同规则）。
-         方向校验（禁回退）留给 m-32 下一轮做，本批只挡"错拼/错值"。 */
+      /* 批2a 状态白名单 + 批3（原 m-32 欠账今天还）：方向校验——只许持平或前进，禁一切回退。
+         preparing 降级为只读别名（=cooking）；completed 是终点，不可再改。404=无此单。 */
       const NEXT = body.status
       const VALID = ['pending', 'preparing', 'cutting', 'cooking', 'plating', 'completed']
       if (!NEXT || VALID.indexOf(NEXT) === -1) return json({ message: 'invalid status', allowed: VALID }, 400)
+      const FLOW = ['pending', 'cutting', 'cooking', 'plating', 'completed']
+      const norm = (s) => (s === 'preparing' ? 'cooking' : s)
+      const order = state.orders.find(o => o.id === id)
+      if (!order) return json({ message: 'Not found' }, 404)
+      const from = FLOW.indexOf(norm(order.status))
+      const to = FLOW.indexOf(norm(NEXT))
+      if (to < from) return json({ message: 'status rollback not allowed', from: order.status, to: NEXT }, 400)
       state.orders = state.orders.map(o => o.id === id ? { ...o, status: NEXT } : o)
       saveState(state)
       return json(state.orders.find(o => o.id === id) || null)
@@ -398,12 +441,19 @@ export function installMockApi() {
     }
     if (pathname === '/api/anniversaries' && method === 'POST') {
       const body = await readBody(init)
+      /* 修 P2（脏数据静默隐形）：date 必须 YYYY-MM-DD；annual 归一布尔（'false' 字符串不再判真）；
+         dish_id 给了就必须存在，否则 400——填错当场可见而不是"绑了但永不亮" */
+      const dateStr = String(body.date || '')
+      if (!/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(dateStr)) return json({ message: 'date must be YYYY-MM-DD' }, 400)
+      const dishId = body.dish_id == null || body.dish_id === '' ? null : Number(body.dish_id)
+      if (dishId != null && !Number.isFinite(dishId)) return json({ message: 'dish_id must be number' }, 400)
+      if (dishId != null && !state.dishes.some(d => Number(d.id) === dishId)) return json({ message: 'unknown dish_id', dish_id: dishId }, 400)
       const item = {
         id: state.nextAnniversaryId++,
         name: String(body.name || '纪念日'),
-        date: String(body.date || ''),          // YYYY-MM-DD 首次日期
-        annual: body.annual !== false,           // 是否每年重复（默认 true）
-        dish_id: Number(body.dish_id) || null,   // 可选绑定的「回忆里那道菜」
+        date: dateStr,                          // YYYY-MM-DD 首次日期
+        annual: !(body.annual === false || body.annual === 'false'),  // 是否每年重复（默认 true）
+        dish_id: dishId,                        // 可选绑定的「回忆里那道菜」
         note: String(body.note || ''),
       }
       state.anniversaries.push(item)
@@ -413,13 +463,26 @@ export function installMockApi() {
     const anniMatch = pathname.match(/^\/api\/anniversaries\/(\d+)$/)
     if (anniMatch && method === 'PUT') {
       const id = Number(anniMatch[1])
-      const body = await readBody(init)
-      state.anniversaries = state.anniversaries.map(a => a.id === id ? { ...a, ...body, id } : a)
+      const body = await readBody(init) || {}
+      const found = state.anniversaries.find(a => Number(a.id) === id)
+      if (!found) return json({ message: 'Not found' }, 404)        // 修 P1：200+null 假成功
+      const pick = {}
+      for (const k of ['name', 'date', 'annual', 'dish_id', 'note']) {
+        if (Object.prototype.hasOwnProperty.call(body, k)) pick[k] = body[k]
+      }
+      if (Object.prototype.hasOwnProperty.call(pick, 'date') && !/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(String(pick.date))) return json({ message: 'date must be YYYY-MM-DD' }, 400)
+      if (Object.prototype.hasOwnProperty.call(pick, 'dish_id')) {
+        const dv = pick.dish_id == null || pick.dish_id === '' ? null : Number(pick.dish_id)
+        if (dv != null && !state.dishes.some(d => Number(d.id) === dv)) return json({ message: 'unknown dish_id' }, 400)
+        pick.dish_id = dv
+      }
+      state.anniversaries = state.anniversaries.map(a => a.id === id ? { ...a, ...pick, id } : a)
       saveState(state)
-      return json(state.anniversaries.find(a => a.id === id) || null)
+      return json(state.anniversaries.find(a => a.id === id))
     }
     if (anniMatch && method === 'DELETE') {
       const id = Number(anniMatch[1])
+      if (!state.anniversaries.some(a => Number(a.id) === id)) return json({ message: 'Not found' }, 404)
       state.anniversaries = state.anniversaries.filter(a => a.id !== id)
       saveState(state)
       return json({ ok: true })
@@ -450,13 +513,20 @@ export function installMockApi() {
     const wishMatch = pathname.match(/^\/api\/wishes\/(\d+)$/)
     if (wishMatch && method === 'PUT') {
       const id = Number(wishMatch[1])
-      const body = await readBody(init)
-      state.wishes = state.wishes.map(w => w.id === id ? { ...w, ...body, id } : w)
+      const body = await readBody(init) || {}
+      if (!state.wishes.some(w => Number(w.id) === id)) return json({ message: 'Not found' }, 404)   // 修 P1：假成功
+      const pick = {}
+      for (const k of ['status', 'added_dish_id', 'note']) {
+        if (Object.prototype.hasOwnProperty.call(body, k)) pick[k] = body[k]
+      }
+      if (pick.status != null && !['pending', 'added', 'rejected'].includes(pick.status)) return json({ message: 'invalid wish status' }, 400)
+      state.wishes = state.wishes.map(w => w.id === id ? { ...w, ...pick, id } : w)
       saveState(state)
-      return json(state.wishes.find(w => w.id === id) || null)
+      return json(state.wishes.find(w => w.id === id))
     }
     if (wishMatch && method === 'DELETE') {
       const id = Number(wishMatch[1])
+      if (!state.wishes.some(w => Number(w.id) === id)) return json({ message: 'Not found' }, 404)
       state.wishes = state.wishes.filter(w => w.id !== id)
       saveState(state)
       return json({ ok: true })

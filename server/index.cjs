@@ -81,16 +81,23 @@ function initState() {
     saveState()
     console.log('[init] 已从种子创建 state.json（%d 道菜）', state.dishes.length)
   } else {
-    /* 修（§7.15 M-d2 双端同步）：mockApi 端已改成 (id|name) 双键去重，server 端曾漏同步 —— 本轮
-       「两端自动 diff」教训第一次兑现。改成同规则，夜宵版 905/907/915 与灌库版 735/767/713 各自补齐。 */
+    /* 修（§7.15 M-d2 双键去重）+ 批3 双端同步（与 mockApi 一比一）：
+       ① deletedSeedIds 墓碑——真删掉的种子菜不再重启复活；
+       ② nextDishId 重算过滤非有限值——脏 id 不再把它传染成 NaN。 */
+    if (!Array.isArray(state.deletedSeedIds)) state.deletedSeedIds = []
+    const tomb = new Set(state.deletedSeedIds.map(Number))
     const existing = new Set(state.dishes.map((d) => `${d.id}|${d.name}`))
-    const missing = dishes.filter((d) => !existing.has(`${d.id}|${d.name}`))
+    const missing = dishes.filter((d) => !existing.has(`${d.id}|${d.name}`) && !tomb.has(Number(d.id)))
     if (missing.length) {
       state.dishes.push(...missing)
-      state.nextDishId = Math.max(state.nextDishId || 1, ...state.dishes.map((d) => Number(d.id) || 0)) + 1
-      saveState()
       console.log('[init] 补齐新增种子菜品 %d 道', missing.length)
     }
+    {
+      const ids = state.dishes.map((d) => Number(d.id)).filter(Number.isFinite)
+      const maxId = ids.length ? Math.max(...ids) : 0
+      if (!Number.isFinite(state.nextDishId) || state.nextDishId <= maxId) state.nextDishId = maxId + 1
+    }
+    saveState()
     /* 批 1 新增 · 老 state.json 兼容补齐 anniversaries / wishes 两表 */
     if (!Array.isArray(state.anniversaries)) state.anniversaries = []
     if (!Array.isArray(state.wishes)) state.wishes = []
@@ -140,7 +147,8 @@ async function handleApi(req, res, url) {
 
   if (pathname === '/api/dishes' && method === 'POST') {
     const body = await readJsonBody(req)
-    const dish = { id: state.nextDishId++, available: 1, image_url: '', description: '', ...body, price: Number(body.price || 0) }
+    const { id: _bodyId, nextDishId: _nd, ...rest } = body || {}   // 批3：主键收归服务端
+    const dish = { id: state.nextDishId++, available: 1, image_url: '', description: '', ...rest, price: Number(rest.price || 0) }
     state.dishes.unshift(dish)
     saveState()
     return sendJson(res, dish, 201)
@@ -155,14 +163,24 @@ async function handleApi(req, res, url) {
   }
   if (dishM && method === 'PUT') {
     const id = Number(dishM[1])
-    const body = await readJsonBody(req)
-    state.dishes = state.dishes.map((d) => d.id === id ? { ...d, ...body, price: body.price === undefined ? d.price : Number(body.price) } : d)
+    const body = await readJsonBody(req) || {}
+    const idx = state.dishes.findIndex((d) => Number(d.id) === id)
+    if (idx === -1) return sendJson(res, { message: 'Not found' }, 404)
+    const pick = {}
+    for (const k of ['name', 'price', 'category', 'description', 'available', 'image_url']) {
+      if (Object.prototype.hasOwnProperty.call(body, k)) pick[k] = body[k]
+    }
+    if ('price' in pick) pick.price = Number(pick.price) || 0
+    state.dishes[idx] = { ...state.dishes[idx], ...pick, id }
     saveState()
-    return sendJson(res, state.dishes.find((d) => d.id === id) || null)
+    return sendJson(res, state.dishes[idx])
   }
   if (dishM && method === 'DELETE') {
     const id = Number(dishM[1])
-    state.dishes = state.dishes.filter((d) => d.id !== id)
+    const idx = state.dishes.findIndex((d) => Number(d.id) === id)
+    if (idx === -1) return sendJson(res, { message: 'Not found' }, 404)
+    state.dishes.splice(idx, 1)
+    if (id < 10000 && dishes.some((d) => Number(d.id) === id) && !state.deletedSeedIds.includes(id)) state.deletedSeedIds.push(id)
     saveState()
     return sendJson(res, { ok: true })
   }
@@ -176,21 +194,25 @@ async function handleApi(req, res, url) {
   }
   if (pathname === '/api/orders' && method === 'POST') {
     const body = await readJsonBody(req)
+    if (!Array.isArray(body.items) || !body.items.length) return sendJson(res, { message: 'items required' }, 400)
+    for (const it of body.items) {
+      if (!state.dishes.some((d) => Number(d.id) === Number(it.dish_id))) return sendJson(res, { message: 'unknown dish_id', dish_id: it.dish_id }, 400)
+    }
     const items = (body.items || []).map((item, idx) => {
       const dish = state.dishes.find((d) => d.id === Number(item.dish_id)) || {}
       return {
         id: Date.now() + idx,
         dish_id: Number(item.dish_id),
-        dish_name: dish.name || item.name || '未知菜品',
-        price: Number(dish.price || item.price || 0),
-        quantity: Number(item.quantity || 1),
-        added_by: item.added_by || 'me',
+        dish_name: dish.name || '未知菜品',
+        price: Number(dish.price) || 0,
+        quantity: Math.max(1, Number(item.quantity) || 1),
+        added_by: item.added_by === 'partner' ? 'partner' : 'me',
         category: dish.category || '', /* 修 P0-3：快照分类 */
       }
     })
     const total_price = items.reduce((s, i) => s + i.price * i.quantity, 0)
     /* 批 4a · AA 结算快照（家庭语义 AA = 各付各的）：payer=me 全归 🐱 / partner 全归 🐑 / aa 按 added_by 分账 */
-    const PAYER = body.payer || 'aa'
+    const PAYER = ['aa', 'me', 'partner'].includes(body.payer) ? body.payer : 'aa'
     const meSub = items.filter(i => i.added_by === 'me').reduce((s, i) => s + i.price * i.quantity, 0)
     const partnerSub = items.filter(i => i.added_by === 'partner').reduce((s, i) => s + i.price * i.quantity, 0)
     const owed_me = PAYER === 'me' ? total_price : PAYER === 'partner' ? 0 : meSub
@@ -208,10 +230,15 @@ async function handleApi(req, res, url) {
   if (osM && method === 'PUT') {
     const id = Number(osM[1])
     const body = await readJsonBody(req)
-    /* 批 2a · 状态白名单（与 mockApi 一比一）：pending / preparing(旧) / cutting / cooking / plating / completed */
+    /* 批2a 白名单 + 批3 方向校验（与 mockApi 一比一）：preparing=只读别名(cooking)；只许持平/前进 */
     const NEXT = body.status
     const VALID = ['pending', 'preparing', 'cutting', 'cooking', 'plating', 'completed']
     if (!NEXT || VALID.indexOf(NEXT) === -1) return sendJson(res, { message: 'invalid status', allowed: VALID }, 400)
+    const FLOW = ['pending', 'cutting', 'cooking', 'plating', 'completed']
+    const norm = (s) => (s === 'preparing' ? 'cooking' : s)
+    const order = state.orders.find((o) => o.id === id)
+    if (!order) return sendJson(res, { message: 'Not found' }, 404)
+    if (FLOW.indexOf(norm(NEXT)) < FLOW.indexOf(norm(order.status))) return sendJson(res, { message: 'status rollback not allowed', from: order.status, to: NEXT }, 400)
     state.orders = state.orders.map((o) => o.id === id ? { ...o, status: NEXT } : o)
     saveState()
     return sendJson(res, state.orders.find((o) => o.id === id) || null)
@@ -229,12 +256,18 @@ async function handleApi(req, res, url) {
   }
   if (pathname === '/api/anniversaries' && method === 'POST') {
     const body = await readJsonBody(req)
+    /* 批3（与 mockApi 一比一）：date 校验 / annual 归一 / dish_id 必须存在 */
+    const dateStr = String(body.date || '')
+    if (!/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(dateStr)) return sendJson(res, { message: 'date must be YYYY-MM-DD' }, 400)
+    const dishId = body.dish_id == null || body.dish_id === '' ? null : Number(body.dish_id)
+    if (dishId != null && !Number.isFinite(dishId)) return sendJson(res, { message: 'dish_id must be number' }, 400)
+    if (dishId != null && !state.dishes.some((d) => Number(d.id) === dishId)) return sendJson(res, { message: 'unknown dish_id', dish_id: dishId }, 400)
     const item = {
       id: state.nextAnniversaryId++,
       name: String(body.name || '纪念日'),
-      date: String(body.date || ''),
-      annual: body.annual !== false,
-      dish_id: Number(body.dish_id) || null,
+      date: dateStr,
+      annual: !(body.annual === false || body.annual === 'false'),
+      dish_id: dishId,
       note: String(body.note || ''),
     }
     state.anniversaries.push(item)
@@ -244,13 +277,25 @@ async function handleApi(req, res, url) {
   const anniM = pathname.match(/^\/api\/anniversaries\/(\d+)$/)
   if (anniM && method === 'PUT') {
     const id = Number(anniM[1])
-    const body = await readJsonBody(req)
-    state.anniversaries = state.anniversaries.map((a) => a.id === id ? { ...a, ...body, id } : a)
+    const body = await readJsonBody(req) || {}
+    if (!state.anniversaries.some((a) => Number(a.id) === id)) return sendJson(res, { message: 'Not found' }, 404)
+    const pick = {}
+    for (const k of ['name', 'date', 'annual', 'dish_id', 'note']) {
+      if (Object.prototype.hasOwnProperty.call(body, k)) pick[k] = body[k]
+    }
+    if (Object.prototype.hasOwnProperty.call(pick, 'date') && !/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(String(pick.date))) return sendJson(res, { message: 'date must be YYYY-MM-DD' }, 400)
+    if (Object.prototype.hasOwnProperty.call(pick, 'dish_id')) {
+      const dv = pick.dish_id == null || pick.dish_id === '' ? null : Number(pick.dish_id)
+      if (dv != null && !state.dishes.some((d) => Number(d.id) === dv)) return sendJson(res, { message: 'unknown dish_id' }, 400)
+      pick.dish_id = dv
+    }
+    state.anniversaries = state.anniversaries.map((a) => Number(a.id) === id ? { ...a, ...pick, id } : a)
     saveState()
-    return sendJson(res, state.anniversaries.find((a) => a.id === id) || null)
+    return sendJson(res, state.anniversaries.find((a) => Number(a.id) === id))
   }
   if (anniM && method === 'DELETE') {
     const id = Number(anniM[1])
+    if (!state.anniversaries.some((a) => Number(a.id) === id)) return sendJson(res, { message: 'Not found' }, 404)
     state.anniversaries = state.anniversaries.filter((a) => a.id !== id)
     saveState()
     return sendJson(res, { ok: true })
@@ -281,13 +326,20 @@ async function handleApi(req, res, url) {
   const wishM = pathname.match(/^\/api\/wishes\/(\d+)$/)
   if (wishM && method === 'PUT') {
     const id = Number(wishM[1])
-    const body = await readJsonBody(req)
-    state.wishes = state.wishes.map((w) => w.id === id ? { ...w, ...body, id } : w)
+    const body = await readJsonBody(req) || {}
+    if (!state.wishes.some((w) => Number(w.id) === id)) return sendJson(res, { message: 'Not found' }, 404)
+    const pick = {}
+    for (const k of ['status', 'added_dish_id', 'note']) {
+      if (Object.prototype.hasOwnProperty.call(body, k)) pick[k] = body[k]
+    }
+    if (pick.status != null && !['pending', 'added', 'rejected'].includes(pick.status)) return sendJson(res, { message: 'invalid wish status' }, 400)
+    state.wishes = state.wishes.map((w) => Number(w.id) === id ? { ...w, ...pick, id } : w)
     saveState()
-    return sendJson(res, state.wishes.find((w) => w.id === id) || null)
+    return sendJson(res, state.wishes.find((w) => Number(w.id) === id))
   }
   if (wishM && method === 'DELETE') {
     const id = Number(wishM[1])
+    if (!state.wishes.some((w) => Number(w.id) === id)) return sendJson(res, { message: 'Not found' }, 404)
     state.wishes = state.wishes.filter((w) => w.id !== id)
     saveState()
     return sendJson(res, { ok: true })
