@@ -125,26 +125,30 @@ function loadState() {
        老设备夜宵池永远少 3 道定向种子。改成 (id,name) 双键判等 —— 灌库版在场不影响夜宵版补齐，
        夜宵版也不会因名同灌库版被误去重。
        批3 修 P1「删不掉」：deletedSeedIds 墓碑——用户真删掉的内置种子不再刷新复活（下架 available=0 不受影响）。 */
-    if (!Array.isArray(state.deletedSeedIds)) state.deletedSeedIds = []
+    let dirty = false
+    if (!Array.isArray(state.deletedSeedIds)) { state.deletedSeedIds = []; dirty = true }
     const tombstone = new Set(state.deletedSeedIds.map(Number))
     const existing = new Set((state.dishes || []).map(d => `${d.id}|${d.name}`))
     const missingSeed = seedDishes.filter(d => !existing.has(`${d.id}|${d.name}`) && !tombstone.has(Number(d.id)))
     if (missingSeed.length) {
       state.dishes = [...(state.dishes || []), ...missingSeed]
+      dirty = true
     }
     /* 老 state 兼容补齐（anniversaries / wishes 两表 + 序列号 + sharedCart） */
-    if (!Array.isArray(state.anniversaries)) state.anniversaries = []
-    if (!Array.isArray(state.wishes)) state.wishes = []
-    if (!Number.isFinite(state.nextAnniversaryId)) state.nextAnniversaryId = 1
-    if (!Number.isFinite(state.nextWishId)) state.nextWishId = 1
-    if (!state.sharedCart || typeof state.sharedCart !== 'object') state.sharedCart = { items: [], sharedBy: null, sharedAt: null }
+    if (!Array.isArray(state.anniversaries)) { state.anniversaries = []; dirty = true }
+    if (!Array.isArray(state.wishes)) { state.wishes = []; dirty = true }
+    if (!Number.isFinite(state.nextAnniversaryId)) { state.nextAnniversaryId = 1; dirty = true }
+    if (!Number.isFinite(state.nextWishId)) { state.nextWishId = 1; dirty = true }
+    if (!state.sharedCart || typeof state.sharedCart !== 'object') { state.sharedCart = { items: [], sharedBy: null, sharedAt: null }; dirty = true }
     /* 修 P1（脏 id 传染）：原 Math.max(...ids) 遇一条 id='abc' 即 NaN → 落盘 null → 之后所有新菜 id:null
        全线不可自愈。改为过滤非有限值后重算，且顺带修复已损坏的 nextDishId。 */
     const ids = (state.dishes || []).map(d => Number(d && d.id)).filter(Number.isFinite)
     const maxId = ids.length ? Math.max(...ids) : 0
     const cur = Number(state.nextDishId)
-    if (!Number.isFinite(cur) || cur <= maxId) state.nextDishId = maxId + 1
-    try { saveState(state) } catch { /* 补齐落盘失败不拦读路径（内存态已就绪） */ }
+    if (!Number.isFinite(cur) || cur <= maxId) { state.nextDishId = maxId + 1; dirty = true }
+    // 复核修（二批后自查）：仅在真补齐/修复时才落盘，避免每次冷读无条件写整份 432 道 +
+    // 给兄弟标签页白發 storage 事件（loadState 的 storage 监听会把对方缓存打回重解析）。
+    if (dirty) { try { saveState(state) } catch { /* 补齐落盘失败不拦读路径（内存态已就绪） */ } }
   } else {
     state = fresh()
   }
