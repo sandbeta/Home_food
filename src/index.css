@@ -219,6 +219,12 @@
 /* ========== Reset & Base ========== */
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
 
+/* 批5 移动端：长按保存/选择的解禁位——全局 touch-callout:none 是防"长按误弹菜单"的护盾，
+   但它会连分享卡的「存储图像」一起杀掉；需要在长按里保存图片的元素单独加此类放回来。 */
+.share-img-callout { -webkit-touch-callout: default; user-select: auto; -webkit-user-select: auto; }
+
+html { overscroll-behavior-y: contain; }  /* 批5：页顶一拉不再触发浏览器下拉刷新（情侣 app 误触白闪一次） */
+
 html, body, #root { min-height: 100%; }
 
 html, body {

@@ -140,7 +140,7 @@ export default function HotDishes() {
                     style={{ background: 'var(--plate-bg)', viewTransitionName: heroNameFor(dish.id) }}>
                     <span className="text-4xl" aria-hidden="true">{getCategoryEmoji(dish.category)}</span>
                     {getDishImage(dish) && (
-                      <img src={getDishImage(dish)} alt={dish.name} loading="lazy"
+                      <img src={getDishImage(dish)} alt={dish.name} loading="lazy" decoding="async"
                         className="absolute inset-0 w-full h-full object-cover"
                         onError={(e) => { e.currentTarget.style.display = 'none' }} />
                     )}

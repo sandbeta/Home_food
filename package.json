@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test": "node scripts/test_mockApi.mjs && node scripts/test_clawPool.mjs",
     "export:seeds": "node scripts/export-seeds.mjs",
+    "thumbs": "node scripts/build_thumbs.mjs",
     "pack:exe": "node scripts/pack-exe.mjs",
     "family": "node server/index.cjs"
   },
@@ -25,6 +26,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
     "oxlint": "^1.69.0",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4.3.2",
     "vite": "^8.1.0"
   }

@@ -51,3 +51,13 @@ bootstrap().catch(() => {
     '<button onclick="location.reload()" style="padding:10px 22px;border:2px solid #BE4E67;border-radius:999px;background:#BE4E67;color:#FFF9FC;font-size:14px;font-weight:700">再试一次</button>' +
     '</div>'
 })
+
+/* 批5 PWA：生产环境注册 Service Worker（离线可用 + 二次秒开 + 可装到桌面）。
+   dev 不注册（public/sw.js 在 vite dev 下路径不同，且热更会被缓存干扰）；
+   注册失败静默（不支持 SW 的内核照常在线用，不影响主流程）。 */
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    const swUrl = new URL('sw.js', document.baseURI).href
+    navigator.serviceWorker.register(swUrl).catch(() => { /* 尽力而为 */ })
+  })
+}

@@ -89,7 +89,8 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
   const dish = current
   if (!dish) return null
   const emoji = getCategoryEmoji(dish.category)
-  const dishImg = getDishImage(dish)
+  // 预览位是 w-16 h-16（64px）的小格子，thumb（宽 160）够用；改大展示再换 'w800'
+  const dishImg = getDishImage(dish, 'thumb')
 
   return (
     <div className="d3-card-face p-4 mb-4 overflow-hidden relative">
@@ -148,7 +149,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
         >
           <span className="text-3xl" aria-hidden="true">{emoji}</span>
           {dishImg && (
-            <img src={dishImg} alt={dish.name} loading="lazy"
+            <img src={dishImg} alt={dish.name} loading="lazy" decoding="async"
               className="absolute inset-0 w-full h-full object-cover"
               onError={(e) => { e.currentTarget.style.display = 'none' }} />
           )}

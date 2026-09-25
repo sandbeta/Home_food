@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="clay" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#D8748A"/>
+      <stop offset="1" stop-color="#973148"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#clay)"/>
+  <!-- 晨光：顶部柔光弧 -->
+  <circle cx="256" cy="150" r="58" fill="#FFF9FC" opacity="0.95"/>
+  <!-- 碗：奶油白描边 -->
+  <path d="M128 286a128 128 0 0 0 256 0Z" fill="#FFF9FC"/>
+  <rect x="112" y="278" width="328" height="20" rx="10" fill="#FFF9FC"/>
+  <!-- 鼠尾草绿筷子（TA 侧点缀） -->
+  <g stroke="#7FA37A" stroke-width="18" stroke-linecap="round">
+    <line x1="300" y1="150" x2="410" y2="236"/>
+    <line x1="336" y1="130" x2="430" y2="206"/>
+  </g>
+  <!-- 蒸汽三缕 -->
+  <g stroke="#F6C1CD" stroke-width="14" stroke-linecap="round" fill="none" opacity="0.9">
+    <path d="M200 236c-14-18 14-32 0-52"/>
+    <path d="M236 236c-14-18 14-32 0-52"/>
+    <path d="M272 236c-14-18 14-32 0-52"/>
+  </g>
+</svg>

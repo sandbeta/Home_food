@@ -28,6 +28,7 @@ export default function DishRow({
   className = '',
   vtName,
 }) {
+  // 70px 图鉴圆牌 → thumb 档（getDishImage 默认档）。这里是列表流量大户，别改回原图直出
   const image = getDishImage(dish)
   const emoji = getCategoryEmoji(dish.category)
 
@@ -78,6 +79,7 @@ export default function DishRow({
               src={image}
               alt={dish.name}
               loading="lazy"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover"
               onError={(e) => { e.currentTarget.style.display = 'none' }}
             />

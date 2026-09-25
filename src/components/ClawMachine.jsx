@@ -109,6 +109,7 @@ function Claw({ open, x, cable, grabbing }) {
 /* 一个菜品圆盘（堆里 / 被夹的都用它）。memo：slots 数组每次变化时，未换的盘不再重算图片/emoji */
 const Plate = memo(function Plate({ dish, size, grabbing, dim }) {
   if (!dish) return null
+  // 圆盘只有 44~72px（见 PLATES / <Plate size>），thumb 档足够，不需要 w800
   const img = getDishImage(dish)
   return (
     <div className="relative flex items-center justify-center overflow-hidden"
@@ -117,7 +118,7 @@ const Plate = memo(function Plate({ dish, size, grabbing, dim }) {
         boxShadow: grabbing ? 'var(--shadow-glow-clay)' : '0 3px 8px rgba(43,36,41,0.10), inset 0 1px 0 rgba(255,255,255,0.5)',
         opacity: dim ? 0.9 : 1 }}>
       <span style={{ fontSize: size * 0.5, filter: 'var(--tile-img-filter)' }} aria-hidden>{getCategoryEmoji(dish.category)}</span>
-      {img && <img src={img} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
+      {img && <img src={img} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none' }} />}
     </div>
   )
 })

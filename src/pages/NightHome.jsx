@@ -225,7 +225,7 @@ export default function NightHome() {
                     style={{ background: 'var(--plate-bg)', viewTransitionName: heroNameFor(dish.id) }}>
                     <span className="text-3xl" aria-hidden="true">{getCategoryEmoji(dish.category)}</span>
                     {getDishImage(dish) && (
-                      <img src={getDishImage(dish)} alt={dish.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover"
+                      <img src={getDishImage(dish)} alt={dish.name} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover"
                         style={{ filter: 'var(--tile-img-filter)' }}
                         onError={(e) => { e.currentTarget.style.display = 'none' }} />
                     )}

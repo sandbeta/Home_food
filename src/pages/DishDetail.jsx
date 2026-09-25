@@ -99,7 +99,8 @@ export default function DishDetail() {
 
   return (
     <div className="relative">
-      <FullBleedHero src={getDishImage(dish) || HERO_IMAGES.dish} variant="immersive" alt={dish.name} name={heroNameFor(dish.id)} />
+      {/* 主视觉铺满屏宽 → 走 w800 档；列表/格子档 thumb 在这里会糊 */}
+      <FullBleedHero src={getDishImage(dish, 'w800') || HERO_IMAGES.dish} variant="immersive" alt={dish.name} name={heroNameFor(dish.id)} />
 
       <PageHeader
         title={dish.name}

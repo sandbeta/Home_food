@@ -3,8 +3,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import useDialogA11y from '../lib/useDialogA11y'
 import { sheetUp, usePrefersReducedMotion, tapScale } from '../theme/motion'
-import { getDishImage } from '../lib/categoryIcons'
-import { getCategoryEmoji } from '../lib/categoryIcons'
+import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import Icon from './ui/Icons'
 import { NICKNAME } from '../lib/sweetCopy'
 
@@ -12,13 +11,30 @@ import { NICKNAME } from '../lib/sweetCopy'
  * 批 3c · 今日菜卡分享
  * ------------------------------------------------------------
  * 语义：把娃娃机当前主推 + 编号 + 日期 + slogan 手绘成一张 800×1000 的分享海报，
- *   长按可保存到相册 / 发到家庭群 —— 让"这本别册"翻得出门。
+ *   发到家庭群 / 存进相册 —— 让"这本别册"翻得出门。
  * 实现：纯 canvas 2D（无外部依赖），图 URL 走 crossorigin=anonymous 加载；
  *   跨域失败（tainted canvas）→ 回退到大 emoji 版本，仍可分享。
+ * 批5 移动端修（分享三件套，此前 iPhone 上两条保存路全断）：
+ *   ① dataURL → Blob + objectURL：`<a download>` 在 iOS 对 data: URL 普遍无视，blob 才走 QuickLook 能存；
+ *   ② 「分享到家庭群」走系统 Web Share（canShare({files}) 能力检测，不支持图片时退文本分享）；
+ *   ③ 卡面图片单独解禁长按保存（全局 -webkit-touch-callout:none 会连"存储图像"一起杀掉，
+ *      .share-img-callout 见 index.css）。
  * ============================================================ */
 const W = 800, H = 1000
 
 function pad2(n) { return String(n).padStart(2, '0') }
+
+/** dataURL → Blob（浏览器不支援或 tainted 返回 null，调用方回退 dataURL 预览） */
+function dataUrlToBlob(dataUrl) {
+  try {
+    const [head, body] = dataUrl.split(',')
+    const mime = /^data:([^;]+)/.exec(head)?.[1] || 'image/png'
+    const bin = atob(body)
+    const arr = new Uint8Array(bin.length)
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i)
+    return new Blob([arr], { type: mime })
+  } catch { return null }
+}
 
 /** 主绘：返回 dataURL（Promise），无图或跨域失败降级到 emoji */
 async function drawPoster({ dish, indexNo, date }) {
@@ -69,7 +85,7 @@ async function drawPoster({ dish, indexNo, date }) {
   ty += 20
 
   // 菜品图像区（若图为 emoji 走大字；有图尝试加载）
-  const img = getDishImage(dish)
+  const img = getDishImage(dish, 'w800')   // 海报 800×1000 中央 420px 圆盘，必须大图档（批5：默认档已变 160w 列表缩略）
   const centerY = ty + 200
   let imgDrawn = false
   if (img) {
@@ -156,18 +172,48 @@ export default function DishShareCard({ open, onClose, dish, indexNo = 1 }) {
   const [drawing, setDrawing] = useState(false)
   const [err, setErr] = useState('')
   const reqIdRef = useRef(0)
+  const blobRef = useRef(null)     // 分享/下载共用的原始 Blob
+  const urlRef = useRef(null)      // 当前 objectURL，重绘/关窗时 revoke
 
   useEffect(() => {
     if (!open || !dish) return undefined
     const my = ++reqIdRef.current
-    setDrawing(true); setErr(''); setUrl(null)
+    setDrawing(true); setErr(''); setUrl(null); blobRef.current = null
     const d = new Date()
     const dateStr = `${d.getFullYear()} · ${pad2(d.getMonth() + 1)} 月 ${pad2(d.getDate())} 日 · 周${'日一二三四五六'[d.getDay()]}`
     drawPoster({ dish, indexNo, date: dateStr })
-      .then(res => { if (reqIdRef.current !== my) return; setUrl(res); setDrawing(false) })
+      .then(res => {
+        if (reqIdRef.current !== my) return
+        let out = res
+        const blob = res ? dataUrlToBlob(res) : null
+        if (blob) {
+          blobRef.current = blob
+          try { out = URL.createObjectURL(blob); urlRef.current = out } catch { /* 极端环境无 URL API：留 dataURL */ }
+        }
+        setUrl(out); setDrawing(false)
+      })
       .catch(e => { if (reqIdRef.current !== my) return; setErr('画不出来：' + ((e && e.message) || '未知')); setDrawing(false) })
-    return undefined
+    return () => {
+      if (urlRef.current && urlRef.current.startsWith('blob:')) URL.revokeObjectURL(urlRef.current)
+      urlRef.current = null
+    }
   }, [open, dish, indexNo])
+
+  const hasNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
+  const onShare = async () => {
+    try {
+      const blob = blobRef.current
+      const file = blob && blob.type.startsWith('image/')
+        ? new File([blob], `晨光厨房-${dish.name || '今日菜卡'}.png`, { type: 'image/png' })
+        : null
+      if (file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: '晨光厨房 · 今日菜卡', text: `今天想吃「${dish.name || '这道菜'}」— ${NICKNAME}的抓娃娃点餐机` })
+        try { window.__cgAnnounce?.('已呼起系统分享面板') } catch {}
+      } else {
+        await navigator.share({ title: '晨光厨房 · 今日菜卡', text: `今天想吃「${dish.name || '这道菜'}」！来一起点菜 ${location.href}` })
+      }
+    } catch { /* 用户在系统面板点了「取消」：不是错误，静默 */ }
+  }
 
   if (!open || !dish) return null
 
@@ -188,7 +234,7 @@ export default function DishShareCard({ open, onClose, dish, indexNo = 1 }) {
           <div className="px-5 pb-2 flex items-center justify-between shrink-0">
             <div>
               <h2 className="text-base font-bold font-serif text-[var(--color-bone)] leading-tight">今日菜卡</h2>
-              <p className="text-[11px] text-[var(--color-ash)]">长按图片 → 保存到相册</p>
+              <p className="text-[11px] text-[var(--color-ash)]">发到家庭群，或长按图片存进相册</p>
             </div>
             <button onClick={onClose} aria-label="关闭"
               className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] border-2 border-[var(--color-line)] bg-[var(--color-glass)]">
@@ -206,17 +252,26 @@ export default function DishShareCard({ open, onClose, dish, indexNo = 1 }) {
               <p className="text-sm text-center py-8" style={{ color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' }}>⚠️ {err}</p>
             ) : url ? (
               <img src={url} alt={`今日菜卡：${dish.name}`}
-                className="w-full rounded-xl"
+                className="share-img-callout w-full rounded-xl"
                 style={{ boxShadow: 'var(--shadow-3)', display: 'block' }} />
             ) : null}
           </div>
           {url && (
-            <div className="px-5 pt-2 pb-1 shrink-0">
+            <div className="px-5 pt-2 pb-1 shrink-0 flex gap-2">
+              {hasNativeShare && (
+                <motion.button type="button" whileTap={tapScale} onClick={onShare}
+                  className="d3-btn d3-btn-primary flex-1 py-3 text-sm font-bold min-h-[44px] flex items-center justify-center gap-1.5"
+                  style={{ color: 'var(--color-on-dark)' }}>
+                  <Icon name="heart" size={14} /> 分享到家庭群
+                </motion.button>
+              )}
               <motion.a whileTap={tapScale} href={url}
                 download={`晨光厨房-${dish.name || '今日菜卡'}.png`}
-                className="d3-btn d3-btn-primary w-full py-3 text-sm font-bold min-h-[44px] flex items-center justify-center gap-1.5 no-underline"
-                style={{ color: 'var(--color-on-dark)' }}>
-                <Icon name="heart" size={14} /> 下载图片 · 或长按上方保存
+                className={`d3-btn flex-1 py-3 text-sm font-bold min-h-[44px] flex items-center justify-center gap-1.5 no-underline ${hasNativeShare ? '' : 'd3-btn-primary'}`}
+                style={hasNativeShare
+                  ? { color: 'var(--color-clay-text)', background: 'var(--surface)', border: '2px solid var(--color-line)', borderRadius: 'var(--radius-btn)' }
+                  : undefined}>
+                存为图片
               </motion.a>
             </div>
           )}

@@ -296,6 +296,7 @@ export default function Home() {
                           className="absolute inset-0 w-full h-full object-cover"
                           alt={dish.name}
                           loading="lazy"
+                          decoding="async"
                           onError={(e) => { e.currentTarget.style.display = 'none' }}
                         />
                       )}
