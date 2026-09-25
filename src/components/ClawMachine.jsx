@@ -122,7 +122,7 @@ const Plate = memo(function Plate({ dish, size, grabbing, dim }) {
 
 export default function ClawMachine({
   pool = [], onCatch, onUndo, onOpen, onActiveChange,
-  showClock = true, title = '抓娃娃点餐机', note = '今日主推 · 拖一下瞄准，松手就下爪',
+  showClock = true, title = '抓娃娃点餐机', note = '今日主推 · 点菜盘直接抓它，拖一下瞄准也行',
 }) {
   const reduced = usePrefersReducedMotion()
   const [slots, setSlots] = useState(() => buildInitialSlots(pool, N))
@@ -319,7 +319,7 @@ export default function ClawMachine({
             {...(reduced
               ? { onClick: () => runGrab(-1) }
               : { onPointerDown: aim.onPointerDown, onPointerMove: aim.onPointerMove, onPointerUp: aim.onPointerUp, onPointerCancel: aim.onPointerCancel })}
-            role="button" tabIndex={0}
+            role="group" tabIndex={0}
             onKeyDown={(e) => {
               if (reduced) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); runGrab(-1) } return }
               if (e.key === 'ArrowLeft') { e.preventDefault(); aim.shiftAim(-1) }
@@ -327,8 +327,8 @@ export default function ClawMachine({
               else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); runGrab(aimIdx) }
             }}
             aria-label={reduced
-              ? '抓娃娃点餐机，点按从堆里随机抓一个'
-              : '抓娃娃点餐机。按住横向拖动瞄准，松手下爪；键盘左右方向键移格、空格下爪'}
+              ? '抓娃娃点餐机。点某个菜盘抓它，或Tab到下方「领取」按钮随机抓一个'
+              : '抓娃娃点餐机。点菜盘直接抓对应那道；也可按住横向拖动瞄准、松手下爪；键盘左右方向键移格、空格下爪'}
           >
             {/* 瞄准播报（屏幕阅读器）：切换格子时朗读当前瞄准菜名 */}
             {!reduced && <span className="sr-only" aria-live="polite">{aim.aimLabel}</span>}
@@ -343,8 +343,8 @@ export default function ClawMachine({
               <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold" style={{ color: 'var(--color-ash)', letterSpacing: '0.1em' }}>出菜口</span>
             </div>
 
-            {/* 底部菜堆：8 个槽位的物品（抓取中被夹走的那个槽暂不渲染） */}
-            <div aria-hidden="true" style={{ position: 'absolute', inset: 0 }}>
+            {/* 底部菜堆：8 个槽位。每盘是可点按钮——点它即抓那道菜（stopPropagation 让点盘不触发拖拽瞄准） */}
+            <div style={{ position: 'absolute', inset: 0 }}>
               {slots.map((p, i) => {
                 if (!p) return null
                 if (grabbing && i === grabIdx) return null   // 被夹走的不留在堆里
@@ -352,7 +352,16 @@ export default function ClawMachine({
                 const amp = 5 + (i % 3) * 3
                 const isAim = !reduced && aimIdx === i && !grabbing
                 return (
-                  <div key={i} className="absolute" style={{ left: lay.x, top: lay.y, transform: `translateX(-50%) rotate(${lay.r}deg)` }}>
+                  <button
+                    type="button"
+                    key={i}
+                    disabled={grabbing}
+                    aria-label={`抓取「${p.name}」`}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); runGrab(i) }}
+                    className="absolute cursor-pointer disabled:cursor-default"
+                    style={{ left: lay.x, top: lay.y, transform: `translateX(-50%) rotate(${lay.r}deg)`, padding: 0, border: 'none', background: 'transparent', touchAction: 'none' }}
+                  >
                     <motion.div
                       animate={jig ? { y: [0, -amp, 0] } : { y: 0 }}
                       transition={{ duration: 0.45, ease: 'easeOut' }}
@@ -364,7 +373,7 @@ export default function ClawMachine({
                       )}
                       <Plate dish={p} size={lay.s} dim />
                     </motion.div>
-                  </div>
+                  </button>
                 )
               })}
             </div>
@@ -490,11 +499,11 @@ export default function ClawMachine({
                 <span className="text-[0.55em] mr-0.5">¥</span>{activeDish ? activeDish.price : '—'}
               </span>
             </div>
-            <motion.button whileTap={{ scale: 0.93 }} onClick={(e) => { e.stopPropagation(); runGrab(aimIdx) }} disabled={grabbing}
-              aria-label={aimIdx >= 0 ? '下爪，抓当前瞄准的菜' : '随机抓一个'} className="font-serif text-sm font-bold px-4 py-2.5 rounded-full inline-flex items-center justify-center min-h-[44px]"
+            <motion.button whileTap={{ scale: 0.93 }} onClick={(e) => { e.stopPropagation(); runGrab(-1) }} disabled={grabbing}
+              aria-label="随机领取一道" className="font-serif text-sm font-bold px-4 py-2.5 rounded-full inline-flex items-center justify-center min-h-[44px]"
               style={{ background: 'var(--color-clay)', color: 'var(--color-on-dark)', border: '2px solid var(--clay-deep)',
                 boxShadow: '0 4px 12px color-mix(in srgb, var(--color-clay) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.25)', opacity: grabbing ? 0.6 : 1 }}>
-              {grabbing ? '抓取中…' : (aimIdx >= 0 ? '下爪' : '抓取')}
+              {grabbing ? '抓取中…' : '领取'}
             </motion.button>
           </div>
         </div>

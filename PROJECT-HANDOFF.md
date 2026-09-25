@@ -745,9 +745,20 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 **遗留（本轮未做，非 major）**：方案 §4 的"新大陆（抓到新菜专属庆祝）"与"手气小灯"仍未实现（`_flags.new` 数据已在，属 P2 情绪彩蛋，待所有者确认是刻意留还是补）；minor 若干（"第 1 抓"徽章读数歧义、Plate 首屏 emoji 闪、撤销窗可发现性）见当轮走查记录。
 
+## 7.27 娃娃机新增「点菜盘直接抓它」交互（2026-09-25）
+
+所有者要求：点娃娃机里某个菜盘 → 爪子抓对应那道菜；同时「领取」随机抓取保留。全部改动在 `ClawMachine.jsx` 内部，`pool/onCatch/onUndo/onOpen/onActiveChange` 契约不变（Home/NightHome 零改动）。
+
+- **菜盘变真按钮**：底部 8 格从 `aria-hidden` 纯装饰 `<div>` 改为 `<button type="button">`，`onClick → runGrab(i)` 精准抓那一格；`onPointerDown stopPropagation` 让点盘不触发拖拽瞄准的 pointer-capture。抓取中 `disabled={grabbing}`，被夹走那格本就 `return null`。`aria-label="抓取「菜名」"`，键盘 Tab 可逐盘聚焦（全局 `:focus-visible` 环自动生效），reduced 下点盘同样直抓。
+- **罩 `role="button" → role="group"`**：菜盘是交互件后，若罩仍是 `role="button"` 会造成非法 ARIA 嵌套（§7.10 P1-2 同款坑）。改 group 后罩继续承载拖拽瞄准 + 键盘 ←→/空格落爪，aria-label 更新为「点菜盘直抓 / 拖拽瞄准」双提示。
+- **底部按钮 `抓取/下爪` → `领取`**：`onClick` 从 `runGrab(aimIdx)` 改 `runGrab(-1)`（随机），兑现「点击领取，随机抓取保留」。拖拽瞄准的落爪本就在 pointerup 自动触发，按钮专职随机不再兼职「下爪」；键盘 Enter/空格仍走 `runGrab(aimIdx)`。
+- 默认 `note` 文案改为「今日主推 · 点菜盘直接抓它，拖一下瞄准也行」。
+
+**校验（四件套全绿）**：`npm run build` ✅ / `oxlint` 0 error（9 warning 全既有）/ `npm test`（mockApi + clawPool 全过）/ `p6_static_gate.py` 退出码 0。观感待 live 目检：点盘的 cursor/press 手感、8 盘 Tab 焦点顺序、领取按钮随机与拖拽瞄准并存是否清晰。
+
 ## 8. 已知待办 / 候选项
 
-- **【最紧要·未完成】§7.25e 的 13 个 UI 审查修复仍是未提交工作区改动**（未 commit / 未 push / 未上线）。新对话应先向用户确认后：`git add` 那 13 个源文件 → 中文 commit → 走 §7.25d 流程推 master + 镜像 gh-pages + 核对线上。**切勿 `git add -A`**（会带进 `.impeccable/critique/`、`_an.mjs`、`detect_err.txt`、`detect_out.json` 四个工具产物）。
+- ~~【最紧要·未完成】§7.25e 的 13 个 UI 审查修复未提交~~ ✅ 本轮（2026-09-25）已随 §7.26 娃娃机整改一并 commit（`5365e6b25`）+ 推 master + 镜像 gh-pages（`53d4495ab`）+ 线上 hash 核对一致（`index-C99AJePq.js`）。
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。
 - 测试覆盖仅 mockApi 冒烟（8 项），UI 组件无自动化测试——demo 项目可接受，引入框架时优先补 DishRow/OrderCard。
 - 官方角色素材（`public/lazy-assets/`）为本人非商用家庭自用；若要对外分发，需替换为自绘 LazySheep 或取得授权。
