@@ -780,6 +780,8 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 **校验（四件套全绿 ×4 轮）**：lint 0 error（9 warning 全既有）/ 双测试文件全过（含 3 条新回归）/ build ✅ / p6 退出码 0；本地 dev + 浏览器实测：拖拽 handler 三件套 typeof function、拖拽→瞄准播报→抓到→撤销端到端通、8 盘+领取健在、NotFound 冷载渲染、console 零报错。
 
+**复查轮（2026-09-25 收盘自检，commit `5b22f45`）**：所有者要求"再检查一遍"。逐处复核自写高风险改动（Home 网格/StoveStage 判据/Menu allDishes 顺序/favorites reactive/Stove 双派生名），发现并修一处**自查引入的退化**：mockApi `loadState` 每次冷读无条件 saveState 整份 432 道（原只在有补齐时写）→ 改 dirty 标志按需落盘（省白写 + 不再给兄弟标签页发空转 storage 事件）。Home/Stove/Menu 复核无悬空引用；LazySheep 误报维持不改（线稿在白脸上、非页面底）。线上复验（入口 `index-o0UU2nhg.js` 哈希一致）：拖拽 handler=真函数、新访客网格标题诚实显示「今天想吃」、伪造人格徽章 0 个（旧版此处必出 6 个 id%2 假徽章）、8 盘健在、console 零报错。
+
 **四批后仍欠（记 §8）**：P2 长尾（死令牌/死导出清理、sweetCopy 大迁移、时区分桶统一、@layer 收编、VT target 清理、AdminDishes 搜索器、anniversary 2/29、seed 价格规则语义化、avoid 词表修订等）+ 各条已在附录 I/II 逐行留档；night FOUC 的 theme-color 双档写死在预载脚本内（改主题基色需两端同改）。
 
 ## 8. 已知待办 / 候选项
