@@ -118,7 +118,7 @@ export default function Fridge() {
                     <p className="text-sm font-bold text-[var(--color-bone)] truncate">{k}</p>
                     <p className="text-[11px] text-[var(--color-ash)] mt-0.5 tabular-nums">{v.qty}{v.unit || ''} · {new Date(v.updatedAt).toLocaleDateString('zh-CN')}</p>
                   </div>
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button onClick={() => bump(k, -1)} aria-label={`减少 ${k}`}
                       className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-bone)]"
                       style={{ background: 'var(--color-ink-850)', border: '2px solid var(--color-line)' }}>

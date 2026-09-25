@@ -344,13 +344,12 @@ export default function Profile() {
                   style={{
                     background: unlocked ? 'color-mix(in srgb, var(--color-sage) 14%, var(--surface))' : 'color-mix(in srgb, var(--color-ash) 6%, transparent)',
                     border: `2px solid ${unlocked ? 'color-mix(in srgb, var(--color-sage) 50%, transparent)' : 'var(--color-line)'}`,
-                    opacity: unlocked ? 1 : 0.55,
                   }}
                 >
                   <span aria-hidden className="text-2xl shrink-0" style={{ filter: unlocked ? 'none' : 'grayscale(1)' }}>{a.icon}</span>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold truncate" style={{ color: unlocked ? 'var(--color-bone)' : 'var(--color-ash)' }}>{a.title}</p>
-                    <p className="text-[10px] truncate opacity-75" style={{ color: 'var(--color-ash)' }}>{a.desc}</p>
+                    <p className="text-[10px] truncate" style={{ color: 'var(--color-ash)' }}>{unlocked ? a.desc : `未解锁 · ${a.desc}`}</p>
                   </div>
                 </div>
               )
@@ -380,7 +379,7 @@ export default function Profile() {
               role="switch"
               aria-checked={isNight}
               aria-label="切换夜宵模式"
-              className="relative w-12 h-7 rounded-full shrink-0 transition-colors duration-300 my-[8px] -my-[8px] py-[8px]"
+              className="relative w-12 h-7 rounded-full shrink-0 transition-colors duration-300 hit-pad-y"
               style={{
                 background: isNight ? 'var(--color-clay)' : 'color-mix(in srgb, var(--color-bone) 16%, transparent)',
                 /* M-v6 修：原 rgba(0,0,0,0.12) 违反 The Warm Shadow Rule（暖墨阴影）；

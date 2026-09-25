@@ -208,7 +208,8 @@ export default function OrderDetail() {
                   className="flex items-center justify-between rounded-lg px-2 py-1.5 -mx-2 transition-colors duration-150 relative group">
                   <div className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full group-hover:bg-[var(--color-clay)]/40 transition-colors duration-150" />
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 ${item.added_by === 'me' ? 'avatar-me' : 'avatar-partner'}`}>
+                    <span className="sr-only">{item.added_by === 'me' ? '我点的：' : 'TA点的：'}</span>
+                    <div aria-hidden="true" className={`w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 ${item.added_by === 'me' ? 'avatar-me' : 'avatar-partner'}`}>
                       {item.added_by === 'me' ? '🐱' : '🐑'}
                     </div>
                     <span className="text-sm text-[var(--color-bone)] font-medium truncate">{item.dish_name}</span>
@@ -274,7 +275,7 @@ export default function OrderDetail() {
                     }
                     return map[order.sticker.bg] || map.rose
                   })(),
-                  color: 'var(--color-bone)',
+                  color: '#2B2429',
                   borderRadius: 4,
                   transform: 'rotate(-1.2deg)',
                   boxShadow: '0 6px 18px rgba(43,36,41,0.14), inset 0 1px 0 rgba(255,255,255,0.5)',

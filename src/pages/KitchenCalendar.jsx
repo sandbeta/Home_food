@@ -11,6 +11,7 @@ import { HERO_IMAGES } from '../theme/images'
 import { orderStatusOf } from '../theme/persona'
 import { requestJson } from '../lib/request'
 import { pickOne } from '../lib/sweetCopy'
+import useDialogA11y from '../lib/useDialogA11y'
 
 /* ============================================================
  * 批 3a · 菜谱日历（月历视图回看每天吃了什么）
@@ -87,6 +88,7 @@ export default function KitchenCalendar() {
   }
 
   const selectedOrders = selectedDay && dayMap[selectedDay] ? dayMap[selectedDay].orders : []
+  const daySheetRef = useDialogA11y(!!selectedDay, () => setSelectedDay(null))
 
   return (
     <div className="relative">
@@ -158,7 +160,7 @@ export default function KitchenCalendar() {
 
             {/* 图例 */}
             <p className="text-[11px] text-[var(--color-ash)] mt-3 leading-relaxed">
-              点了菜的日子会亮起来，红点是那天的分类分布 · 一单一菜一圆点，最多显 3 个 · 数字角标代表下了几单
+              点了菜的日子会亮起来 · 每下一单一枚圆点，最多显 3 枚 · 数字角标代表那天一共下了几单
             </p>
           </>
         )}
@@ -172,6 +174,7 @@ export default function KitchenCalendar() {
               onClick={() => setSelectedDay(null)} className="fixed inset-0 z-50"
               style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,36,41,0.35)' }} />
             <motion.div
+              ref={daySheetRef}
               initial={{ y: 400, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 400, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 260, damping: 26 }}
               role="dialog" aria-modal="true" aria-label="当日订单" tabIndex={-1}

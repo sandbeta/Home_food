@@ -263,11 +263,16 @@ h1, h2, h3, h4, h5, h6 {
      · 白天：深墨 outline + 白 halo → 对纸面 ≥12:1
      · 夜宵：浅骨 outline + 白 halo 变暗环（on-dark 不反相，暗底上仍亮） → 对暗底 ≥9:1 */
 button:focus-visible, a:focus-visible, input:focus-visible,
-textarea:focus-visible, select:focus-visible {
+textarea:focus-visible, select:focus-visible,
+[role="button"]:focus-visible, [tabindex]:not([tabindex="-1"]):focus-visible {
   outline: 2px solid var(--color-bone);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px var(--color-on-dark);
 }
+
+/* 触达热区外扩：视觉尺寸不变，纵向各扩 8px 让点击区达 ≥44（紧凑开关/图标钮用） */
+.hit-pad-y { position: relative; }
+.hit-pad-y::before { content: ""; position: absolute; top: -8px; bottom: -8px; left: 0; right: 0; }
 
 /* 触控即时响应：去掉部分移动浏览器对可点的 300ms 双击缩放等待 */
 button, a, [role="button"], label, input[type="submit"] { touch-action: manipulation; }
@@ -721,6 +726,10 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
 /* 玻璃罩：机内天空（白天樱粉渐白 / 夜宵夜纸渐深） */
 .claw-case {
   background: linear-gradient(180deg, var(--claw-case-hi) 0%, var(--surface) 62%);
+  /* 横向 pointer 拖拽瞄准：必须禁浏览器手势，否则真机上手指横移被当成页面滚动/双击缩放 */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 [data-theme="night"] .claw-case {
   background: linear-gradient(180deg, var(--color-ink-800) 0%, var(--surface) 62%);

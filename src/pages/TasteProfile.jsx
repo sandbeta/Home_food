@@ -154,7 +154,7 @@ export default function TasteProfile() {
                 ) : top.map(([name, cnt], i) => (
                   <div key={name} className="flex items-center gap-2.5 py-1.5" style={{ borderTop: i ? '1px solid var(--color-glass-border)' : 'none' }}>
                     <span className="font-serif text-lg font-bold w-6 text-center shrink-0 tabular-nums"
-                      style={{ color: ['var(--color-clay)', 'var(--color-mist-deep)', 'var(--color-caramel-deep)', 'var(--color-ash)', 'var(--color-ash)'][i] }}>
+                      style={{ color: ['var(--color-clay-text)', 'var(--color-mist)', 'var(--color-caramel)', 'var(--color-ash)', 'var(--color-ash)'][i] }}>
                       {i + 1}
                     </span>
                     <span className="flex-1 text-sm font-bold text-[var(--color-bone)] truncate">{name}</span>

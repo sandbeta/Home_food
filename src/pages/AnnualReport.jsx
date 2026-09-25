@@ -127,8 +127,8 @@ export default function AnnualReport() {
                 <div className="grid grid-cols-2 gap-3">
                   <ReportStat label="这一年吃了" value={`${data.total}`} unit="单" accent="var(--color-clay)" />
                   <ReportStat label="总共花了" value={`¥${Math.round(data.totalSpend)}`} accent="var(--color-caramel)" />
-                  <ReportStat label="🐱 出了" value={`¥${Math.round(data.owedMe)}`} accent="var(--color-clay-text)" />
-                  <ReportStat label="🐑 出了" value={`¥${Math.round(data.owedPartner)}`} accent="var(--color-sage)" />
+                  <ReportStat label="我出了" value={`¥${Math.round(data.owedMe)}`} accent="var(--color-clay-text)" />
+                  <ReportStat label="TA出了" value={`¥${Math.round(data.owedPartner)}`} accent="var(--color-sage)" />
                 </div>
 
                 {/* 月度柱图 */}
@@ -171,7 +171,7 @@ export default function AnnualReport() {
                       {data.top.map(([name, cnt], i) => (
                         <div key={name} className="flex items-center gap-2.5 py-1.5" style={{ borderTop: i ? '1px solid var(--color-glass-border)' : 'none' }}>
                           <span className="font-serif font-bold w-6 text-center shrink-0 tabular-nums"
-                            style={{ color: ['var(--color-clay)', 'var(--color-mist-deep)', 'var(--color-caramel-deep)', 'var(--color-ash)'][Math.min(i, 3)] }}>
+                            style={{ color: ['var(--color-clay-text)', 'var(--color-mist)', 'var(--color-caramel)', 'var(--color-ash)'][Math.min(i, 3)] }}>
                             {i + 1}
                           </span>
                           <span className="flex-1 text-sm text-[var(--color-bone)] truncate">{name}</span>
@@ -202,8 +202,8 @@ export default function AnnualReport() {
                     <p className="text-xs text-[var(--color-ash)] font-bold mb-2">谁在买单</p>
                     <div className="flex items-center gap-3 text-xs">
                       <PayerBar label="AA" amount={data.payerAA} total={data.totalSpend} color="var(--color-caramel-deep)" />
-                      <PayerBar label="🐱 请" amount={data.payerMe} total={data.totalSpend} color="var(--color-clay)" />
-                      <PayerBar label="🐑 请" amount={data.payerPartner} total={data.totalSpend} color="var(--color-sage)" />
+                      <PayerBar label="我请" amount={data.payerMe} total={data.totalSpend} color="var(--color-clay)" />
+                      <PayerBar label="TA请" amount={data.payerPartner} total={data.totalSpend} color="var(--color-sage)" />
                     </div>
                   </div>
                 </GlassCard>

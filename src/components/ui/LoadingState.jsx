@@ -13,7 +13,7 @@ export default function LoadingState({ emoji, text = '加载中...' }) {
   const reduce = usePrefersReducedMotion()
   const isPot = !emoji || emoji === '🍳'
   return (
-    <div className="flex flex-col items-center justify-center py-20">
+    <div className="flex flex-col items-center justify-center py-20" role="status" aria-live="polite">
       {isPot ? (
         <div className="relative w-[64px] h-[64px]">
           {/* 水开：三串气泡从锅沿错峰升起（reduced 静止） */}

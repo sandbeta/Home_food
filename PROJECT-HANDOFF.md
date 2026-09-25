@@ -2,9 +2,9 @@
 
 > **给接力的 AI / 开发者**：本文档自包含，读完即可接手。
 > **协作铁律：每一次代码/数据/文案修改，都必须同步更新本文档（进度表、文件地图、坑清单按需），随代码一起提交。** 这是项目所有者定的规矩。
-> 最后更新：2026-09-23　代码 HEAD：master f802a59b + 本轮第四轮全量整改（未提交）　工作区：脏（spark-output/ + .impeccable/critique/ 未追踪 + 大量源码改动）
+> 最后更新：2026-09-24　交付包顶层路径全部英文化并重命名为 `E:\home-food-delivery`（详见 §0.1）；代码 HEAD：master f802a59b + 本轮第四轮全量整改（未提交）　工作区：脏（spark-output/ + .impeccable/critique/ 未追踪 + 大量源码改动）
 > **状态：2026-09-23 第四轮 impeccable critique 全量整改已落地**（4 blocker + 32 major + 26/32 minor，四件套全绿）。详见 §7.15。核心新立规矩见 §4 第 10–13 条：令牌变更 checklist / sub-44 逐消费者验证 / mockApi↔server 自动 diff / PRODUCT.md 承诺自动核查。
-> 上一轮 V3 曾回滚（见台账「懒羊羊换装（已回滚）」），本轮为按所有者审阅通过的独立原型（`../prototype-lazy-claw/index.html`）重新落地，首页在娃娃机签名交互之下仍保留「常点的」快捷网格与「最近订单」，兼顾主题与点菜效率。
+> 上一轮 V3 曾回滚（见台账「懒羊羊换装（已回滚）」），本轮为按所有者审阅通过的独立原型（`../design/prototype-lazy-claw/index.html`）重新落地，首页在娃娃机签名交互之下仍保留「常点的」快捷网格与「最近订单」，兼顾主题与点菜效率。
 > 注：本文档自身的 docs 提交在代码 HEAD 之后，仓库实际 HEAD 会多一笔，属正常。
 
 ---
@@ -12,13 +12,34 @@
 ## 0. 项目身份与位置
 
 - **是什么**：情侣点餐 H5 小程序（480px 手机竖屏框）。**男朋友视角的文案，写给女朋友——昵称「懒洋洋」**，所有面向用户的标题/情话都按此人设写。
-- **位置（2026-08-29 已迁移）**：`E:\晨光厨房-交付包\extracted`（应用仓库）；交付包根目录还有 4 个历史 zip 与本文档副本 `PROJECT-HANDOFF-晨光厨房.md`（与仓库内本文档保持同步）。
+- **位置（2026-08-29 已迁移）**：`E:\home-food-delivery\extracted`（应用仓库）；交付包根目录已按用途归类为 `docs/`、`design/`、`research/`、`archives/` 四个归档夹（本文档副本 `PROJECT-HANDOFF-晨光厨房.md` 在 `docs/` 下，与仓库内本文档保持同步；5 个历史 zip 快照在 `archives/` 下）——详见 §0.1。
 - **当前状态**：重构（P0–P6）已完成验收；之后又经多轮实测打磨（视觉层次、文案个性化、HowToCook 数据源灌库、菜谱卡）。处于**个人使用 + 持续迭代**状态。
+
+## 0.1 目录结构（2026-09-24 整理后）
+
+顶层路径已全部英文化，与旧的中文路径不再兼容：
+
+- `E:\home-food-delivery\` — 交付包根（旧 `E:\晨光厨房-交付包` / `E:\晨光厨房-交付包-qoderwork`）
+- `extracted\` — 应用仓库 + git 工作树（未动，本 `PROJECT-HANDOFF.md` 就在这里）
+- `docs\` — 顶层 .md 归档（含本文件的镜像副本 `PROJECT-HANDOFF-晨光厨房.md`、四份会话交接、产品审查报告、娃娃机游戏化设计方案）
+- `design\` — 设计原型与产出（`design-proposals/`、`prototype-lazy-claw/`、`prototype-claw-pile/`、`lazy-theme-design-20260921T064417653Z/`、`pdf/`、`_shots/`、`scripts-tmp/`）
+- `research\` — 深度研究（`20260919-002553-16a0fded/`、`20260919-025605-9adcae50/`）
+- `archives\` — 5 个 `food-ordering-miniapp-*.zip` 历史快照
+- `.ghp-deploy\` — GitHub Pages 发布用的 git worktree（分支 gh-pages）；改名后已跑 `git worktree repair` 迁移
+- 回收站：`.tmp/`（约 2.9G 无头截图缓存）与 顶层 `.impeccable/`（工具缓存），需要时可从回收站还原
+
+**换机 / 换路径注意**：
+
+1. QoderWork 的"选中文件夹"授权是按路径锁的；改名后要在 QoderWork 里重新指到 `E:\home-food-delivery`，否则下会话会没权限读写。
+2. `.ghp-deploy\.git` 与 `extracted\.git\worktrees\-ghp-deploy\gitdir` 曾写死旧绝对路径，已由 `git worktree repair` 修复；下次若再改名或移动，重跑 `git -C <新路径>\extracted worktree repair <新路径>\.ghp-deploy` 即可。（改名首次 `mv` 若报 `Device or resource busy` 通常是瞬时句柄占用，重试即可。）
+3. 跨平台拷贝建议先删 `extracted\node_modules\` 再 `npm install`；同 Windows x64 之间直接可用。
+4. `.tmp/`（2.9G）与 顶层 `.impeccable/` 目前在 Windows 回收站，确认无误后清空才能真正释放那 2.9G。
+5. `extracted\.git`、`PROJECT-HANDOFF.md`、未提交的娃娃机改造工作区改动（ClawMachine / clawPool / useClawAim / useClawSignals / test_clawPool 等）都随文件一起搬过来了，git 状态未受影响。
 
 ## 1. 跑起来
 
 ```bash
-cd E:\晨光厨房-交付包\extracted
+cd E:\home-food-delivery\extracted
 npm install        # 仅首次/换机器
 npm run dev        # http://127.0.0.1:5173/
 npm run build      # 构建验证（也可 --outDir 任意临时目录）
@@ -52,7 +73,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 
 **编辑杂志换装（2026-09-17）**：在晨光厨房色板与四大核心语义不变的前提下换装为「编辑杂志质感」——卡片由半透玻璃改为暖纸实底（`--color-glass: #FFF9FB`）+ 发丝边框 + 浅投影；圆角整体收敛（card 28→20px）；品牌渐变从 135° 粉橙对改为 180° 深梅粉/深鼠尾草（低饱和"专色"感）；页面边距 16→20px、区块节奏 20→26px、行高 1.6→1.7、display 字阶 34→40px 收紧字距；PageHeader 改为眉题（kicker 大写字距）+ 大衬线标题 + 底部贯通发丝线；SectionHeader 前缀梅粉短线；首页主推卡徽章改 No.xx 编号眉题。夜宵模式与 reduced-motion 降级逻辑未动。若所有者不喜欢，revert 本轮提交即可整体回退。
 
-**懒羊羊抓娃娃主题 V3 换装（2026-09-21，本轮）** —— 设计稿 `懒羊羊抓娃娃主题设计稿 V3 · 粉色基调`（源文件 `E:\晨光厨房-交付包\lazy-theme-design-20260921T064417653Z\懒羊羊抓娃娃主题设计稿.html`，PDF 同目录 `pdf\20260921\`）落地为**形态层**，色板与圆角标尺**逐值吻合、零改动**：
+**懒羊羊抓娃娃主题 V3 换装（2026-09-21，本轮）** —— 设计稿 `懒羊羊抓娃娃主题设计稿 V3 · 粉色基调`（源文件 `E:\home-food-delivery\design\lazy-theme-design-20260921T064417653Z\懒羊羊抓娃娃主题设计稿.html`，PDF 同目录 `design\pdf\20260921\`）落地为**形态层**，色板与圆角标尺**逐值吻合、零改动**：
 
 | 层 | 内容 |
 |---|---|
@@ -181,6 +202,7 @@ scripts/
 | 后台分页 | AdminDishes 同款「初始 30 条 + 加载更多」（407 行全量渲染是第二遍体检的唯一新发现） | 见 fix(admin) 提交 |
 | WeUI 试点（已回滚） | 尝试微信 iOS 风（#EDEDED/品牌绿/系统字体/扁平白卡）于首页+点菜页；所有者确认**不好看**，整体 revert。结论：本项目设计语言仍为晨光厨房，勿再提议 WeUI/扁平风 | `5d2a066` |
 | 迁移 | 项目迁至 E:\晨光厨房-交付包（本目录） | （无代码变更） |
+| 迁移 | 2026-09-24 交付包根目录改名 `E:\晨光厨房-交付包` → `E:\home-food-delivery`，顶层归入 `docs/` `design/` `research/` `archives/` 四归档夹；`.tmp/` 与 顶层 `.impeccable/` 移到 Windows 回收站；`.ghp-deploy/` worktree 已 `git worktree repair` 迁移 | （无代码变更） |
 | 旧命名清零 | AddDishModal 全量迁移新令牌（新增 --color-clay-deep 深赤陶）；index.css 删除全部历史别名定义（cream 系 13 处用法迁至 ink-900/850）；Icons 新增 gear 并推广到后台快捷入口 + Profile（3 调用点）| 本轮 |
 | 质量体检轮 | 全工程审计后修复：灵感卡打字乱跳（改吃全量池）、死 Fredoka 字体、死端点 categories 移除、Fisher-Yates 无偏洗牌、featIdx 归零、状态 emoji 统一 🎉、Menu 列表分页（初始 30+加载更多）、mockApi 内存态缓存；新增 mockApi 冒烟测试 8 项（npm test）；README 重写 + prd.md 标注历史；preview 同步最新视觉 | 本轮 |
 | 编辑杂志换装 | 全站视觉换装「编辑杂志质感」（所有者选定）：纸面卡/收圆角/深专色渐变/松间距/大衬线/眉题页头/编号主推卡；StoveStage、HotDishes 两处硬编码色收编令牌；DishDetail 价格补对齐 caramel 原则。build/lint/test/静态门禁全过 | 本轮 |
@@ -650,8 +672,82 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 **教训**：三轮扫描（identifier 定义 → 语义/回归/资源 → 双端/树摇/ARIA/z-index/安全）逐层深入，第二轮发现的 8 处真 bug 到第三轮已归零，说明修复稳定。扫描器 v1→v4 每轮补新的交叉验证维度，`scripts/runtime_audit.py`（v2 落地版）覆盖 identifier 类，语义/深度类靠人工核对（正则跨行/嵌套有误报，需 AST 才精准，家庭项目不值得上 AST 工具链）。
 
+## 7.25 夜宵对齐 + 娃娃机动画修复 + 购物车清空 + ui-ux-pro-max 第5轮审查（2026-09-24）
+
+**⚠️ 交接时状态**：`73be27cfa`（夜宵对齐 + 娃娃机修复 + 购物车清空）**已 push master 且已上线**（gh-pages `7e5b9b92c`，线上入口 `index-DFGqsls1.js` 已核对一致）。但**§7.25e 的 13 个 UI 审查修复文件仍是未提交的工作区改动**，未 commit、未 push、未上线——新对话第一件事就是确认这批要不要提交上线。
+
+### 7.25a · 夜宵首页对齐白天（`NightHome.jsx` + `sweetCopy.js`）
+
+用户指出「今日心情」chips 与「分享这张菜卡给 TA 看」两块新功能白天有、夜宵没有。补齐：
+
+- `NightHome.jsx`：页头副标题 `note` 由只读 state 改为带 setter；顶部接入 `MOODS` 心情 chips（与 Home 同 markup、同 `readMood/writeMood` 共键，故白天设的心情切到夜宵保留选中态）；娃娃机抓到菜后下方出现分享按钮 + `DishShareCard` 弹窗（`shareOpen` state）。
+- 新增 `MOOD_NIGHT_NOTES`（四档夜宵口吻文案），而非硬套白天 `MOOD_HOME_NOTES`——保持夜宵"安静陪吃"语气。
+- `DishShareCard` 纯 CSS 变量驱动，夜宵自动适配，无需改。海报本体是 canvas 硬编码粉色（分享图内容，非界面）。
+- **沿用 Home 既有行为**：首次进页面副标题是随机文案，只有点 chips 才切心情池。若要做到"进页面即按已存心情显示"，需白天/夜宵一起改（未做，已告知用户）。
+
+### 7.25b · 娃娃机抓取动画两处修复（`ClawMachine.jsx`）
+
+签名组件，改动谨慎。两个 bug 同源：**分段动画的"结束拍"没归到终态那一侧，被最新 state 重算**。
+
+1. **settle 末拍回弹**：六拍 `drop/close/lift/carry/release/settle` 中，`falling` 原只 `=== 'release'`、`carX` 出菜口分支原只含 `carry/release` → `settle` 帧钩子从出菜口**弹回被抓槽位**、被夹盘 `opacity 0→1` 重新浮现飞回堆上方。修：`falling = release || settle`；`carX`/`grabX` 出菜口判定加入 `settle`。路径变单调：中位→槽位→出菜口→回中。
+2. **隔空取物**（用户称"重大 bug"）：爪尖绝对 Y ≈ `57 + cable`，旧版下探用固定 `cableDown=112` → 爪尖停在 ≈169px，而 `PILE_SLOTS` 盘子顶在 y=200~240，**差 30~70px**；且旧 `grabY` 在 `close` 拍就把盘瞬移到 `clawTop+16≈156`，看着像"隔着空气一合钳菜就到手"。修：`dropCable = min(max(targetSpot.y - 47, cableUp), 200)`（爪尖落盘顶 +~10px 咬合，上限 200 防戳出 264 罩底）；`cable` 在 `drop/close` 用 `dropCable`；`grabY` 在 `drop/close` 留 `targetSpot.y`（等钳子咬合），`lift` 起才随爪升起；合钳星芒 `top` 从固定 `cableDown` 改 `targetSpot.y + s/2`。
+
+### 7.25c · 购物车一键清空（`Cart.jsx`）
+
+`clearCart` 本就在 `CartContext`（不可变文件）里，只是 UI 没接。新增条目分组上方右对齐的 🗑 **一键清空**：
+
+- **两段式确认**（清空一次抹掉双方全部条目、不可逆）：首点变红色「确认清空？」并播报件数，4s 内再点才执行；超时自动取消，卸载时 `clearTimerRef` 清定时器。
+- 确认态红字走 `color-mix(danger 70%, bone)` 压 tint 底（守 §4 对比度规矩），`min-h-[44px]`，`aria-label` + `window.__cgAnnounce`。
+- **当前语义是清双方全部**；若要改成"只清当前人格"，需按 `whoAmI` 过滤（已告知用户，未做）。
+
+### 7.25d · 上线（GitHub Pages）
+
+直连 github 返回 `HTTP=000`（不通）→ 走 Clash 代理 `-c http.proxy=http://127.0.0.1:7897 -c https.proxy=同`（仅本次命令）。代理实测 `HTTP=200`。复用既有 worktree `../.ghp-deploy`（未重建）：`git rm -r --ignore-unmatch .` + `git clean -fdxq -e .git` 清空 → `cp -r dist/. .` → `.nojekyll` → commit → push。35 个 chunk 更新。线上轮询 2 次后 hash 匹配。
+
+### 7.25e · ui-ux-pro-max 第 5 轮 UI 审查 + 全量修复（**未提交**）
+
+用 `ui-ux-pro-max` 技能（读 `references/quick-reference.md` + `pro-rules.md`，按优先级跑 `--domain ux/icons` 检索）审查。派 general-purpose 子 agent 全量扫描后**逐条读码复核**（历史教训：子 agent 有误报先例）。本轮新发现均为真实问题，已全修：
+
+**令牌方向铁律（两向都要扫，这是本轮最大收获）**：
+- ①**会反相的文本令牌不能当 background 配恒亮字**：`--color-bone`（日 `#2B2429` / 夜宵 `#F3ECEF`）作底 + `--color-on-dark`（恒 `#FFF9FC`）作字 → 夜宵 1.1:1 全糊。深色浮层/工具条底色改用**不反相**的 `--anchor-ink`（Cart 锚点卡同款）。
+- ②**不反相的"实底档"不能反过来当文字色**：`--color-mist-deep` / `--color-caramel-deep` 是给徽章底配亮字用的，作文字在夜宵暗底 ~2:1。文字要用反相档 `--color-clay-text` / `--color-mist` / `--color-caramel`。
+- ③ `--color-ink-850` 是**反相**的（日浅玫瑰 `#FADCE9` / 夜宵深 `#2E2229`），只能配 `bone` 文字，不能配 `on-dark`。
+
+**修复清单（13 文件）**：
+- `index.css`：全局 `:focus-visible` 原只覆盖原生 `button/a/input/textarea/select`，**漏 `div[role=button]`**（Menu/热榜/首页菜品卡是 `motion.div role=button tabIndex=0`，进详情唯一入口，键盘聚焦无焦点环）→ 补 `[role="button"]:focus-visible` + `[tabindex]:not([tabindex="-1"]):focus-visible`。另新增 `.hit-pad-y` 工具类（`::before` 纵向各扩 8px，视觉不变把命中撑到 44）。
+- `AdminDishes.jsx`：批量操作条 `bone`→`anchor-ink`（修①）；「加载更多」补 `min-h-[44px]`。
+- `OrderDetail.jsx`：便签**展示**文字 `bone`→固定 `#2B2429`（浅粉纸 `--sticker-*` 不反相；编辑侧 `StickerEditor` 本就是 `#2B2429`，两处终于一致）；条目头像补 sr-only「我点的：/TA点的：」+ emoji 标 `aria-hidden`。
+- `HotDishes.jsx`：搜索框补 `role=search` + `<label class="sr-only">`（`Menu.jsx` 同类已修，此页漏网）。
+- `KitchenCalendar.jsx`：当日订单 sheet 接 `useDialogA11y`（全站其他 5 个弹窗都有，此漏 → 缺 Esc/焦点圈定/初始焦点）；图例文案删掉"红点是那天的分类分布"——圆点其实全用 `--color-clay` 同色，属**文案承诺了不存在的颜色编码**。
+- `AdminWishes.jsx`：「删掉这条」补两段式确认（照 `AdminDishes` 的 `pendingDel` + 4s 自动复位），此前直接 DELETE 违反 §4.15。
+- `TasteProfile.jsx` / `AnnualReport.jsx`：排名文字 `mist-deep/caramel-deep`→反相文字档（修②）；AnnualReport 的 `🐱出了/🐑出了`、`🐱请/🐑请` 标签→「我出了/TA出了」「我请/TA请」（emoji 承载身份无文字替代）。
+- `OrderCard.jsx`：列表头像堆标 `aria-hidden`（装饰性预览，权威归属在详情页）。
+- `Profile.jsx`：夜宵开关原 `py-[8px] my-[8px] -my-[8px]` 在 **Tailwind v4 border-box 下撑不出热区**（注释声称 ≥44 是假的，实际 48×28）→ 改用 `.hit-pad-y`；成就卡去掉「整卡 `opacity:.55` × desc `opacity-75`」双重压暗（10px ash 小字有效对比远低 4.5:1），改文字「未解锁 ·」传达状态。
+- `Fridge.jsx`：±/删除按钮组 `gap-1`→`gap-2`（8px 触控间距）。
+- `Menu.jsx`：「加载更多」补 `min-h-[44px]`。
+- `LoadingState.jsx`：根节点补 `role="status" aria-live="polite"`。
+
+**有意不改**：emoji 当结构图标全站约 36 处，严格违反 `no-emoji-icons`，但系本作情侣向俏皮风格的有意选择（已作为权衡项告知用户）。
+
+**校验**：`npm run build` ✅ / `p6_static_gate.py` 退出码 0（色值泄露 0、暗色残留 0、断头路 0）/ `oxlint` 0 error + 4 warning（`TasteProfile` 未用 `motion`、`KitchenCalendar` 未用 `parseYmd`、`AdminWishes` 既有 `load` 依赖、`Profile` 未用 `readFridge`——**全是既有代码，非本轮引入，未越界清理**）。`npm test` 本轮未跑（改动纯 UI 层，未触数据/接口）。
+
+## 7.26 娃娃机交互审查 + 5 个 major 全量整改（2026-09-25）
+
+对 V5 娃娃机（`ClawMachine` + `useClawAim` + `useClawSignals` + `clawPool`，约 1150 行）做交互走查，对照产品收敛方案 `docs/娃娃机游戏化设计方案.md`，发现并修复 5 个 major：
+
+- **M1 · 智能三层池白天首页根本没接**（最大问题）：`Home.jsx` 一直把裸数组 `rotSource` 直接传给 `ClawMachine`，只有 `NightHome` 走了 `useClawSignals`——方案 §2 标注"本方案最大价值"的加权池在白天等于没生效（退化等权随机）。→ Home 引入 `useClawSignals(rotSource, { todayDishId })`，`pool` 改传 `clawPool`。
+- **M2 · `todayDishId` 从未透传**：`tagLayers`/`blessingOf` 都支持 `f.today`，但 `useClawSignals` 没往下传，纪念日专属文案分支永不触发。→ hook 增 `todayDishId` 参数并透传 + 补进 useMemo 依赖；Home 传 `todayHit.dish_id`。（夜宵按"安静陪吃、不叠纪念日文案"有意不传。）
+- **M3 · 拖到空槽抬手静默失败**：`useClawAim.aimTo` 旧逻辑两个分支都 `setAim(i)`，即便 `slots[i]` 为空也定位过去，抬手时 `runGrab` 见 target 为 null 直接 return——用户"拖到位却没反应"。→ 重写为优先吸附横向最近的**有菜槽**，全空才退回最近任意槽；不再依赖 `nearestSlotIdx`（纯函数保留供测试）。
+- **M4 · 瞄准/拖拽中仍在悄悄补货**：闲置 4.5s `setInterval` 与 `dragging`/`aimIdx` 无耦合，可能把用户正瞄准那一格换掉，破"这台机器听我指挥"的心智。→ 补货 tick 内 `grabbingRef`（合并 grabbing + aim.dragging）为真则整次跳过；选格时排除 `aimIdxRef` 所指格。effect 与 ref 同步块移到 `useClawAim` 之后。
+- **M5 · 虚惊"带出的那盘"画面里不消失 + B 层心动文案被覆盖**：`finalizeCatch` 只 `onCatch(buddy)` 却没把 buddy 槽移出堆，且紧接着第二次 `setLabel` 把 `blessingOf(target)` 覆盖成"虚惊一场…"。→ 结算时把 buddy 槽也 `refillOne` 掉并新增 `buddyFly` 飞行动画（原槽→出菜口淡出，视觉确认"这盘也给你了"）；label 改为 `msg`(主=B 层文案或"抓到 xx") + `sub`(副=虚惊文案) 两行，主文案不再被顶掉。reduced 分支同步移除 buddy 槽 + 两行文案。浮标有 sub 时上移 20px 防盖出菜口。
+
+**校验（四件套全绿）**：`oxlint` 0 error（9 warning 全为既有 `_an.mjs`/`Profile.jsx` 等，非本轮）/ `npm test`（mockApi + clawPool 全过，含 nearestSlotIdx）/ `npm run build` ✅ / `p6_static_gate.py` 退出码 0。改动文件：`ClawMachine.jsx`、`useClawAim.js`、`useClawSignals.js`、`Home.jsx`。
+
+**遗留（本轮未做，非 major）**：方案 §4 的"新大陆（抓到新菜专属庆祝）"与"手气小灯"仍未实现（`_flags.new` 数据已在，属 P2 情绪彩蛋，待所有者确认是刻意留还是补）；minor 若干（"第 1 抓"徽章读数歧义、Plate 首屏 emoji 闪、撤销窗可发现性）见当轮走查记录。
+
 ## 8. 已知待办 / 候选项
 
+- **【最紧要·未完成】§7.25e 的 13 个 UI 审查修复仍是未提交工作区改动**（未 commit / 未 push / 未上线）。新对话应先向用户确认后：`git add` 那 13 个源文件 → 中文 commit → 走 §7.25d 流程推 master + 镜像 gh-pages + 核对线上。**切勿 `git add -A`**（会带进 `.impeccable/critique/`、`_an.mjs`、`detect_err.txt`、`detect_out.json` 四个工具产物）。
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。
 - 测试覆盖仅 mockApi 冒烟（8 项），UI 组件无自动化测试——demo 项目可接受，引入框架时优先补 DishRow/OrderCard。
 - 官方角色素材（`public/lazy-assets/`）为本人非商用家庭自用；若要对外分发，需替换为自绘 LazySheep 或取得授权。
@@ -669,7 +765,7 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 **部署三步（在家电脑上）**：
 ```bash
-cd E:\晨光厨房-交付包\extracted
+cd E:\home-food-delivery\extracted
 npm run build          # 产出 dist/（服务端直接托管）
 npm run family         # 启动，控制台打印局域网地址
 ```
@@ -696,4 +792,4 @@ npm run family         # 启动，控制台打印局域网地址
 
 ## 11. 给接力的开场白模板
 
-> 请先读 `E:\晨光厨房-交付包\extracted\PROJECT-HANDOFF.md`。遵守第 4 节架构约定与第 5/9 节的坑，改动前跑 `npm run build`、`npm run lint`、`npm test`、`python scripts/p6_static_gate.py` 复验。**每次修改同步更新本文档（进度台账 + 文件地图 + 坑清单），随代码一起提交。** 文案改 `src/lib/sweetCopy.js`，菜品/菜谱数据用 `scripts/build_htc_seed.py` 重新生成。
+> 请先读 `E:\home-food-delivery\extracted\PROJECT-HANDOFF.md`。遵守第 4 节架构约定与第 5/9 节的坑，改动前跑 `npm run build`、`npm run lint`、`npm test`、`python scripts/p6_static_gate.py` 复验。**每次修改同步更新本文档（进度台账 + 文件地图 + 坑清单），随代码一起提交。** 文案改 `src/lib/sweetCopy.js`，菜品/菜谱数据用 `scripts/build_htc_seed.py` 重新生成。

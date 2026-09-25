@@ -219,7 +219,7 @@ export default function AdminDishes() {
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => setVisibleCount(c => c + 30)}
-          className="d3-btn-sm py-2.5 text-sm font-bold text-[var(--color-ash)] self-center px-6"
+          className="d3-btn-sm py-2.5 min-h-[44px] text-sm font-bold text-[var(--color-ash)] self-center px-6"
           style={{ borderRadius: 'var(--radius-btn)' }}
         >
           加载更多（还有 {dishes.length - visibleDishes.length} 道）
@@ -242,7 +242,7 @@ export default function AdminDishes() {
           <motion.div
             initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
             className="fixed left-0 right-0 mx-auto z-40 flex items-center gap-2 px-3 py-2"
-            style={{ bottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 8px)', maxWidth: 'var(--shell-w)', background: 'var(--color-bone)', color: 'var(--color-on-dark)', borderRadius: 'var(--radius-card)', boxShadow: 'var(--shadow-4)' }}
+            style={{ bottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 8px)', maxWidth: 'var(--shell-w)', background: 'var(--anchor-ink)', color: 'var(--color-on-dark)', borderRadius: 'var(--radius-card)', boxShadow: 'var(--shadow-4)' }}
             role="toolbar" aria-label="批量操作"
           >
             <span className="text-sm font-bold px-2 shrink-0">选 {selected.size} 道</span>

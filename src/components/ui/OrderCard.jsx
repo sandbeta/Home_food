@@ -103,7 +103,7 @@ export default function OrderCard({
             ) : (
               (order.items || []).length > 0 && (
                 <div className="flex items-center gap-2 shrink-0">
-                  <div className="flex -space-x-1.5">
+                  <div className="flex -space-x-1.5" aria-hidden="true">
                     {(order.items || []).slice(0, 3).map((it, idx) => (
                       <div
                         key={idx}

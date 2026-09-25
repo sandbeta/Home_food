@@ -19,6 +19,7 @@ import { anniversariesToday } from '../lib/anniversary'
 import { MOODS, readMood, writeMood } from '../lib/mood'
 import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 import { useCart } from '../components/CartContext'
+import { useClawSignals } from '../hooks/useClawSignals'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -115,6 +116,9 @@ export default function Home() {
   }, [dishes, gridIdx, len])
   const popular = gridIdx.map(i => dishes[i])
 
+  /* 智能三层池（白天版）：从 rotSource 聚合收藏/常点/愿望加权，并把当天纪念日绑定菜并入 B 层。 */
+  const { pool: clawPool } = useClawSignals(rotSource, { todayDishId: todayHit?.dish_id ?? null })
+
   // 撤销一次"抓取即加购"：按抓取那一刻的人格快照减数量
   const undoCatch = useCallback((dish) => {
     const personaAt = lastCatchPersonaRef.current
@@ -161,7 +165,7 @@ export default function Home() {
         {rotSource.length > 0 && (
           <div>
             <ClawMachine
-              pool={rotSource}
+              pool={clawPool}
               onCatch={onCatch}
               onUndo={undoCatch}
               onOpen={activeDish ? () => navigate(`/dish/${activeDish.id}`) : undefined}

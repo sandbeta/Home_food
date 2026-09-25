@@ -87,17 +87,19 @@ export default function HotDishes() {
 
       <PageContainer>
         {/* 搜索 —— 与点菜页同一枚糖果胶囊语言 */}
-        <div className="d3-card-face flex items-center gap-2 px-4 py-2" style={{ borderRadius: '999px', background: 'var(--surface)' }}>
-          <svg className="w-4 h-4 text-[var(--color-ash)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+        <form role="search" onSubmit={(e) => e.preventDefault()} className="d3-card-face flex items-center gap-2 px-4 py-2" style={{ borderRadius: '999px', background: 'var(--surface)' }}>
+          <label htmlFor="hot-search" className="sr-only">搜菜名或食材</label>
+          <svg aria-hidden="true" className="w-4 h-4 text-[var(--color-ash)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
           </svg>
           <input
+            id="hot-search"
             value={keyword}
             onChange={e => setKeyword(e.target.value)}
             placeholder="搜菜名或食材，比如 牛肉"
             className="flex-1 min-w-0 bg-transparent border-0 outline-none text-sm text-[var(--color-bone)] placeholder:text-[var(--color-mist)]"
           />
-        </div>
+        </form>
 
         {err && (
           <div role="alert"

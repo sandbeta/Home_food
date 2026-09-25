@@ -17,6 +17,7 @@ import EmptyState from '../components/ui/EmptyState'
 import ThemeToggle from '../components/ui/ThemeToggle'
 import DishShareCard from '../components/DishShareCard'
 import { useCart } from '../components/CartContext'
+import { useClawSignals } from '../hooks/useClawSignals'
 import { nightPickInfo } from '../lib/nightRules'
 import { getCategoryEmoji, getDishImage } from '../lib/categoryIcons'
 import { contentEnter, cardEntrance, usePrefersReducedMotion } from '../theme/motion'
@@ -103,6 +104,9 @@ export default function NightHome() {
 
   const grid = useMemo(() => pool.filter(d => d.id !== activeDish?.id).slice(0, 8), [pool, activeDish])
 
+  /* 智能三层池（夜宵版）：从夜宵池聚合收藏/常点/愿望加权（安静陪吃，不叠加纪念日专属文案）。 */
+  const { pool: clawPool } = useClawSignals(pool)
+
   return (
     <div className="relative flex flex-col" style={{ minHeight: 'calc(100dvh - var(--bottom-inset))' }}>
       <PageHeader title={title} subtitle={note} right={<ThemeToggle />} />
@@ -170,7 +174,7 @@ export default function NightHome() {
         {pool.length > 0 && (
           <div>
             <ClawMachine
-              pool={pool}
+              pool={clawPool}
               onCatch={onCatch}
               onUndo={undoCatch}
               onOpen={activeDish ? () => navigate(`/dish/${activeDish.id}`) : undefined}

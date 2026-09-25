@@ -408,7 +408,7 @@ export default function Menu() {
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={() => setVisibleCount(c => c + 30)}
-            className="d3-btn-sm py-2.5 text-sm font-bold text-[var(--color-clay-text)] border border-[var(--color-clay)]/30 self-center px-6"
+            className="d3-btn-sm py-2.5 min-h-[44px] text-sm font-bold text-[var(--color-clay-text)] border border-[var(--color-clay)]/30 self-center px-6"
             style={{ borderRadius: 'var(--radius-btn)' }}
           >
             加载更多（还有 {filteredDishes.length - visibleDishes.length} 道）

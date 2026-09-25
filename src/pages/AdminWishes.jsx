@@ -27,6 +27,7 @@ export default function AdminWishes() {
   const [tab, setTab] = useState('pending')
   const [loading, setLoading] = useState(true)
   const [err, setErr] = useState('')
+  const [pendingDel, setPendingDel] = useState(null)   // 两段式删除：记住当前待确认的行
   const navigate = useNavigate()
 
   const load = () => {
@@ -56,6 +57,17 @@ export default function AdminWishes() {
   const remove = async (id) => {
     try { await requestJson(`/api/wishes/${id}`, { method: 'DELETE' }); load() } catch { setErr('删不掉，再试') }
   }
+  // 两段式删除：首点进确认态，再点同一行才真删
+  const handleDelete = (id) => {
+    if (pendingDel !== id) { setPendingDel(id); return }
+    setPendingDel(null)
+    remove(id)
+  }
+  useEffect(() => {
+    if (pendingDel === null) return undefined
+    const t = setTimeout(() => setPendingDel(null), 4000)
+    return () => clearTimeout(t)
+  }, [pendingDel])
 
   return (
     <AdminShell title="愿望池" subtitle={wishes.length > 0 ? `${wishes.length} 个愿望` : ''}>
@@ -107,7 +119,12 @@ export default function AdminWishes() {
                     <span className="text-xs" style={{ color: w.status === 'added' ? 'var(--color-sage)' : 'var(--color-ash)' }}>
                       {w.status === 'added' ? '已入菜单' : '暂时做不了'}
                     </span>
-                    <button onClick={() => remove(w.id)} className="text-xs font-bold text-[var(--color-danger)] min-h-[44px] px-3">删掉这条</button>
+                    <button onClick={() => handleDelete(w.id)} aria-label={pendingDel === w.id ? '确认删除这条愿望' : '删除这条愿望'}
+                      className="text-xs font-bold min-h-[44px] px-3 rounded-full"
+                      style={{
+                        color: pendingDel === w.id ? 'var(--color-on-dark)' : 'var(--color-danger)',
+                        background: pendingDel === w.id ? 'var(--color-danger)' : 'transparent',
+                      }}>{pendingDel === w.id ? '确认删除？' : '删掉这条'}</button>
                   </div>
                 )}
               </div>
