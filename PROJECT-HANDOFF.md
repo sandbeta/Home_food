@@ -795,6 +795,20 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 **校验（四件套全绿）**：lint 0 error（9 warning 全既有）/ 53 断言全过 / build ✅（dist 含 thumb·w800·icons·sw.js·manifest）/ p6 退出码 0。**待真机复验项**（无头环境测不了）：iPhone 长按保存/系统分享面板、键盘抬升不遮提交钮、加桌面后离线开图。
 
+## 7.30 第六批 · 娃娃机拟真包 V6（2026-09-25）
+
+所有者问"如何做到和现实娃娃机一样"→ 授权全做。设计原则：**复刻现实的过程张力，保留必赢的结局**（现实娃娃机的"真失败"与"抓到=今晚这顿饭"的产品承诺互斥，用街机 pity 机制替代）。全部收在 `ClawMachine.jsx` + `clawPool.js`（时间线单源）+ `sfx.js` + `index.css`，数据层零改动。
+
+- **① 音效四件套**（sfx.js 新增 motor/clank/chuteThud/winJingle，Web Audio 合成零音频文件，统一走 sfxEnabled 开关+静默降级）：`buildTimeline` 新增 `type:'sfx'` 事件在相位起点触发——下爪/提起电机嗡、合爪咔哒（+vibrate 12）、落槽哐当（+vibrate [12,40,18]）、中奖神曲。
+- **② 落槽终拍**：`CLAW_TIMING` 新增 `chute:300` 相位——出菜口挡板（`.claw-flap`，CSS rotateX+父级 perspective 透视翻起）在 release→chute 间弹开、盘子穿过取物口、哐当+神曲，收口回落。
+- **③ 物理感**：小车行进时缆线+爪以挂点为轴钟摆（`.claw-swing` ±2.4°，全局 reduced 块自动停摆）；下爪过冲 8px 再回弹咬合（dropish=dropCable+8、closeish 回落）；carry/carry2 平移途经菜盘被掠碰带歪抖一下（`jostle` 按 x 区间命中，0.55s 衰减）。
+- **④ 巡游模式**：机顶「巡游」小开关（reduced 不出现，外钮 44px 热区、视觉小胶囊不变）——小车 30%↔88% 三角波往复（50ms tick、周期 6.8s，抓取中冻结），点罩面/空格在当前位置 `aimSlotIdx` 吸附最近有菜槽下爪（真机的时机考验）；拖拽/点盘保留为简单模式。
+- **⑤ pity 保底**：`decideOutcome(rng, slipStreak)`（替代 decideFeint）——18% 滑脱演出（`slip/slipHold/drop2/close2/lift2/carry2` 二段爪：盘子坠回、全场静止一拍、再下一爪抱死，副文案「跑掉的东西，它自己追回来了」）；连续 2 滑脱第 3 抓必 `pityWin`（14 片彩纸+必带赔礼盘）。**起手乐观加购语义不变——滑脱只消耗时间，从不消耗食物**。reduced 不演滑脱（归 normal），奖励语义保留。
+- **⑥ 氛围**：玻璃罩缓慢移动高光带（`.claw-case::after` claw-sheen 9s）；出菜面板「今晚战利品」最近 6 道小盘堆（role=img+aria-label 计数）。
+- **门禁补强**：`buildTimeline` 未知相位名直接 throw（原 `T[phase]||0` 把拼错静默成 0ms）；`grabLockout` 死常量清除；test_clawPool #9/#10 重写（chute 相位、sfx 编排序、slip 二段、pity 分档、throw 断言）。
+
+**校验（四件套全绿 + 浏览器行为实测）**：lint 0 error / 双测试全过 / build ✅ / p6=0；dev 实测——巡游小车 inline left 随时变化（无头视口宽 4px 会把 computed px 位移坍缩，验位移读 style.left）、滑脱全时间线跑通（label「跑掉的东西」+二段爪）、挡板 data-open=1、.claw-swing/.claw-sheen 挂上、战利品 aria 出现、console 零报错。**待真机目检**：音效音量（已压 ≤0.06）、挡板透视翻起、掠碰幅度、巡游速度（59±29/6800 两魔数在组件 interval 内，嫌快慢改那里）。
+
 ## 8. 已知待办 / 候选项
 
 - ~~【最紧要·未完成】§7.25e 的 13 个 UI 审查修复未提交~~ ✅ 本轮（2026-09-25）已随 §7.26 娃娃机整改一并 commit（`5365e6b25`）+ 推 master + 镜像 gh-pages（`53d4495ab`）+ 线上 hash 核对一致（`index-C99AJePq.js`）。

@@ -15,7 +15,7 @@ const {
   CLAW_WEIGHTS, CLAW_TIMING, HOT_THRESHOLD,
   computeEatSignals, tagLayers, weightedPick,
   buildInitialSlots, refillOne, pickBuddyA,
-  buildTimeline, decideFeint, aimSlotIdx, trimPoolToWorkingSet,
+  buildTimeline, decideOutcome, aimSlotIdx, trimPoolToWorkingSet,
 } = await import('../src/lib/clawPool.js')
 
 const D = (id, extra = {}) => ({ id, name: '菜' + id, price: 10 + id, available: 1, ...extra })
@@ -117,31 +117,47 @@ const pool = [D(1), D(2), D(3), D(4), D(5), D(6)]
   assert(noA && noA.id === 12, '无 A 层时退取任意非目标菜')
 }
 
-// 9) buildTimeline：相位序列 + 时间单调；feint 插 slipOn/slipOff 且在 release 前
+// 9) buildTimeline：相位序列 + 时间单调 + 音效事件；feint 插 slipOn/slipOff；slip 走二段爪
 {
-  const tl = buildTimeline({ feint: false })
+  const tl = buildTimeline({ outcome: 'normal' })
   const phases = tl.filter((e) => e.type === 'phase').map((e) => e.phase)
-  assert(JSON.stringify(phases) === JSON.stringify(['drop', 'close', 'lift', 'carry', 'release', 'settle']), '无虚惊时相位顺序为 drop→settle')
+  assert(JSON.stringify(phases) === JSON.stringify(['drop', 'close', 'lift', 'carry', 'release', 'settle', 'chute']), 'normal 相位序列含落槽终拍 chute')
   const ats = tl.map((e) => e.at)
   assert(ats.every((v, i) => i === 0 || v >= ats[i - 1]), '时间戳单调不减')
   const end = tl.find((e) => e.type === 'end')
-  const expectTotal = CLAW_TIMING.drop + CLAW_TIMING.close + CLAW_TIMING.lift + CLAW_TIMING.carry + CLAW_TIMING.release + CLAW_TIMING.settle
-  assert(end.at === expectTotal, '无虚惊总时长 = 各节拍之和（自动累加，非手算）')
-  assert(!tl.some((e) => e.type === 'slipOn'), '无虚惊不含 slipOn')
+  const expectTotal = CLAW_TIMING.drop + CLAW_TIMING.close + CLAW_TIMING.lift + CLAW_TIMING.carry + CLAW_TIMING.release + CLAW_TIMING.settle + CLAW_TIMING.chute
+  assert(end.at === expectTotal, 'normal 总时长 = 各节拍之和（自动累加，非手算）')
+  assert(!tl.some((e) => e.type === 'slipOn'), 'normal 不含 slipOn')
+  const sfx = tl.filter((e) => e.type === 'sfx').map((e) => e.name)
+  assert(JSON.stringify(sfx) === JSON.stringify(['motor', 'clank', 'motor', 'win', 'chute']), '音效编排：电机→合爪→电机→中奖→哐当')
 
-  const tlf = buildTimeline({ feint: true })
+  const tlf = buildTimeline({ feint: true })  // 兼容旧参数 feint=true ⇔ outcome='feint'
   const slipOn = tlf.find((e) => e.type === 'slipOn')
   const slipOff = tlf.find((e) => e.type === 'slipOff')
   const releaseAt = tlf.find((e) => e.type === 'phase' && e.phase === 'release').at
   assert(slipOn && slipOff, '虚惊插入 slipOn/slipOff 两个事件')
   assert(slipOn.at < slipOff.at && slipOff.at <= releaseAt, '滑出→晃回 顺序正确且不晚于落槽')
+
+  const tls = buildTimeline({ outcome: 'slip' })
+  const sPhases = tls.filter((e) => e.type === 'phase').map((e) => e.phase)
+  assert(sPhases.includes('slip') && sPhases.includes('drop2') && sPhases.includes('carry2'), 'slip 走二段爪：坠回→再抓')
+  assert(sPhases.lastIndexOf('release') > sPhases.indexOf('drop2'), '二段抓后才落槽')
+  const sEnd = tls.find((e) => e.type === 'end')
+  assert(sEnd.at > end.at, 'slip 结局总时长 > normal（多演坠回+二段）')
+
+  // 未知相位名直接 throw（原 T[phase]||0 会静默成 0ms，测试全绿也漏过拼错）
+  let threw = false
+  try { buildTimeline({ T: { ...CLAW_TIMING, drop: undefined } }) } catch { threw = true }
+  assert(threw, '未知/缺时长相位 throw（不再静默 0ms）')
 }
 
-// 10) decideFeint：确定性 rng 命中/未命中
+// 10) decideOutcome：pity 保底 + 确定性 rng 分档
 {
-  assert(decideFeint(() => 0.1) === true, 'rng<rate → 触发虚惊')
-  assert(decideFeint(() => 0.9) === false, 'rng>=rate → 不触发')
-  assert(decideFeint(() => 0.5, 0.6) === true, '自定义 rate 生效')
+  assert(decideOutcome(() => 0.99, 0) === 'normal', '高 rng → normal')
+  assert(decideOutcome(() => 0.01, 0) === 'slip', '极低 rng(<slipRate) → slip')
+  assert(decideOutcome(() => 0.25, 0) === 'feint', 'slipRate~slipRate+feintRate → feint')
+  assert(decideOutcome(() => 0.99, 2) === 'pityWin', '连续滑脱 2 次 → 第 3 抓必 pityWin（无视 rng）')
+  assert(decideOutcome(() => 0.99, 1) === 'normal', '仅滑脱 1 次不触发保底')
 }
 
 // 11) aimSlotIdx：横向百分比→槽位吸附（真逻辑：优先吸附有菜槽，全空退最近任意槽）

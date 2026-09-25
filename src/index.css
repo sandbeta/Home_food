@@ -751,6 +751,47 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
   background: linear-gradient(180deg, var(--color-ink-800) 0%, var(--surface) 62%);
 }
 
+/* 批6 拟真 · 玻璃罩缓慢移动高光带（纯装饰，pointer-events:none；全局 reduced 块自动停） */
+.claw-case::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background: linear-gradient(105deg, transparent 32%, color-mix(in srgb, var(--color-on-dark) 22%, transparent) 46%, transparent 60%);
+  transform: translateX(-70%);
+  animation: claw-sheen 9s ease-in-out infinite;
+}
+@keyframes claw-sheen {
+  0%, 100% { transform: translateX(-70%); }
+  50% { transform: translateX(70%); }
+}
+
+/* 批6 拟真 · 爪钩钟摆：小车行进时缆线+爪以挂点为轴轻晃（组件挂 .claw-swing 触发；reduced 全局停） */
+.claw-swing { animation: claw-swing 1.15s ease-in-out infinite; }
+@keyframes claw-swing {
+  0%, 100% { transform: rotate(-2.4deg); }
+  50% { transform: rotate(2.4deg); }
+}
+
+/* 批6 拟真 · 出菜口挡板：落袋相位 data-open=1 时向上翻起，收口回落（transform-origin 顶边） */
+.claw-flap {
+  position: absolute;
+  left: 50%;
+  top: -1px;
+  width: 60px;
+  height: 11px;
+  margin-left: -30px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, var(--color-clay-soft), var(--color-clay));
+  border: 2px solid var(--clay-deep);
+  border-bottom: none;
+  transform-origin: top center;
+  transform: rotateX(0deg);
+  transition: transform 0.3s var(--ease-soft);
+}
+.claw-flap[data-open="1"] { transform: rotateX(-72deg); }
+
 /* 悬挂轨道/横梁/缆线：**自绘**（V3 · 2026-09-22 所有者认可）。
    爪钩机构由组件自绘（轨道 + 滑车 + 缆线 + 三指爪），抓取物 = 当前主推菜圆盘，
    落槽即 onCatch→加购（"抓一个算一个"）。旧版交给官方素材悬吊的做法与

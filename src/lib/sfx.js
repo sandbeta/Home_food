@@ -77,3 +77,63 @@ export function tap() {
 export function vibrate(pattern = 14) {
   try { navigator.vibrate?.(pattern) } catch { /* 静默 */ }
 }
+
+// ============================================================
+// 抓娃娃机四声：电机 → 合爪 → 掉落 → 中奖，一条动作链各配一味音。
+// 沿用 tone() 那套合成路子（零音频文件、全静默降级），音量都压得低，不抢 BGM。
+// ============================================================
+
+/** 小车电机嗡嗡：3~5 段 60~95Hz 的锯齿/三角接力推进，段间频率微抖模拟电机纹波。
+ *  定位是背景音（gain 0.015），整段含 tone() 的 20ms 释放尾巴严格不越过 durationMs。 */
+export function motor(durationMs = 400) {
+  if (!sfxEnabled()) return
+  try {
+    // 入参兜底：过长截到 1.5s（防止 tick 卡住时一直嗡），过短按 90ms（三段接力至少要这点）
+    const ms = Math.min(Math.max(Number(durationMs) || 400, 90), 1500)
+    const total = ms / 1000
+    const steps = total >= 0.42 ? 5 : total >= 0.3 ? 4 : 3
+    const seg = (total - 0.02) / steps
+    for (let i = 0; i < steps; i++) {
+      const jitter = (((i * 7) % 5) - 2) * 3.5   // -7~+7Hz 失谐，听感是"颤"不是"平"
+      tone({
+        freq: 78 + jitter,                        // 71~85Hz，落在低频电机区
+        dur: seg,
+        type: i % 2 ? 'triangle' : 'sawtooth',    // 锯齿与三角交替，避免一路纯 buzz 太冲
+        gain: 0.015,
+        at: i * seg,
+      })
+    }
+  } catch { /* 静默降级 */ }
+}
+
+/** 合爪"咔哒"：两记极短方波，先脆后闷、干脆不拖尾。
+ *  300Hz 是爪叶咬合的那下脆响，隔 40ms 的 150Hz 是机构本体的闷响。 */
+export function clank() {
+  if (!sfxEnabled()) return
+  try {
+    tone({ freq: 300, dur: 0.03, type: 'square', gain: 0.05 })
+    tone({ freq: 150, dur: 0.045, type: 'square', gain: 0.045, at: 0.04 })
+  } catch { /* 静默降级 */ }
+}
+
+/** 盘子掉进出菜口"哐当"：三段式——坠落、砸盘、金属余音。
+ *  400→100Hz 下滑是自由落体的失重感，0.13s 后 90Hz 方波砸在托盘上，
+ *  再过 0.02s 的 700Hz 正弦是出菜口金属挡板被打了一下之后的余音。 */
+export function chuteThud() {
+  if (!sfxEnabled()) return
+  try {
+    tone({ freq: 400, slideTo: 100, dur: 0.12, type: 'triangle', gain: 0.035 })
+    tone({ freq: 90, dur: 0.06, type: 'square', gain: 0.06, at: 0.13 })
+    tone({ freq: 700, dur: 0.1, type: 'sine', gain: 0.03, at: 0.15 })
+  } catch { /* 静默降级 */ }
+}
+
+/** 中奖小神曲：直接复用 settle() 的 C 大调琶音（=摇中那一声），
+ *  尾巴上叠 2093Hz（C7）高八度长"叮"拉出庆祝感；最后一声 0.59s 收干净，不超 0.6s。 */
+export function winJingle() {
+  if (!sfxEnabled()) return
+  try {
+    settle()
+    tone({ freq: 2093, dur: 0.21, type: 'sine', gain: 0.045, at: 0.36 })
+  } catch { /* 静默降级 */ }
+}

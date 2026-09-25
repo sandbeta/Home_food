@@ -175,46 +175,91 @@ export function pickBuddyA(slots, targetIdx, rng = Math.random) {
 }
 
 /* ---------- 演出配置：单一真源，收口所有时间魔数 ---------- */
-/** 抓取节拍 + 虚惊 + 撤销窗 + 防连点（ms）。改时长只动这里，buildTimeline 自动重排。 */
+/** 抓取节拍 + 悬念/滑脱演出 + 撤销窗（ms）。改时长只动这里，buildTimeline 自动重排。
+ *  批6 拟真包新增：chute 落槽终拍（挡板开合+哐当）、slip 滑脱演出（pity 保底的前戏）、
+ *  drop2/close2/lift2/carry2 二段再抓；grabLockout 死常量已清。 */
 export const CLAW_TIMING = {
-  drop: 360, close: 170, lift: 460, carry: 330, release: 320, settle: 340,
-  feintSlip: 120,      // 盘子"往下滑"段
-  feintRecover: 180,   // "又晃回爪上"段
-  feintRate: 0.3,      // 约三成触发虚惊（浓度 B）
-  labelHold: 4200,     // 撤销窗（落袋浮标停留）
-  grabLockout: 250,    // 拖拽抬手后吞掉紧随 click 的时间窗
+  drop: 380, close: 180, lift: 460, carry: 340, release: 320, settle: 320,
+  chute: 300,            // 落槽终拍：挡板弹开、盘子掉进取物口、哐当
+  slip: 340,             // 滑脱：盘子从爪间坠回菜堆
+  slipHold: 430,         // 全场静止一拍（真实的"啊？要跑了？"）
+  drop2: 300, close2: 170, lift2: 380, carry2: 320,   // 再下一爪（这次抱死）
+  feintSlip: 120,        // 盘子"往下滑"段
+  feintRecover: 180,     // "又晃回爪上"段
+  feintRate: 0.3,        // 虚惊浓度（normal 之上再叠的概率）
+  slipRate: 0.18,        // 滑脱演出浓度（只消耗时间，从不消耗食物）
+  labelHold: 4200,       // 撤销窗（落袋浮标停留）
 }
 
 /* ---------- 声明式抓取时间线（纯函数、可单测、无手算累加） ---------- */
 /**
- * 产出相位计划 [{ type, phase?, at }]，at = 相对起手的毫秒偏移。
- *   type='phase'  → 组件 setPhase(phase)
- *   type='slipOn' → setSlipping(true)（虚惊：盘子往下滑）
- *   type='slipOff'→ setSlipping(false)（又晃回）
- *   type='end'    → 收口 setPhase('idle')
- * feint=false 时不插 slipOn/slipOff。总时长按需顺延，调用方不必知道具体数字。
+ * 产出相位计划 [{ type, phase?, name?, at, d? }]，at = 相对起手的毫秒偏移。
+ *   type='phase' → 组件 setPhase(phase)
+ *   type='slipOn'/'slipOff' → 虚惊：盘子往下滑 / 又晃回
+ *   type='sfx'   → 音效（motor/clank/chute/win），d=建议时长
+ *   type='end'   → 收口 setPhase('idle')
+ * outcome（批6 拟真）：'normal' | 'feint'（虚惊悬念） | 'slip'（滑脱再抓，pity 演出）。
+ * 兼容旧参数 feint=true ⇔ outcome='feint'。未知相位名直接 throw（原 `T[phase]||0` 会把拼错
+ * 的相位静默成 0ms，测试全绿也发现不了——今天补上）。
  */
-export function buildTimeline({ feint = false, T = CLAW_TIMING } = {}) {
+export function buildTimeline({ feint = false, outcome, T = CLAW_TIMING } = {}) {
+  const oc = outcome || (feint ? 'feint' : 'normal')
   const seq = []
   let t = 0
-  const step = (phase) => { seq.push({ type: 'phase', phase, at: t }); t += (T[phase] || 0) }
-  step('drop'); step('close'); step('lift')
-  seq.push({ type: 'phase', phase: 'carry', at: t })
-  const carryEnd = t + T.carry
-  if (feint) {
-    // 虚惊演出压在 carry 尾段：滑出→晃回，都在 release 前结束
-    seq.push({ type: 'slipOn', at: carryEnd - T.feintRecover - T.feintSlip })
-    seq.push({ type: 'slipOff', at: carryEnd - T.feintSlip })
+  const step = (phase) => {
+    const d = T[phase]
+    if (!Number.isFinite(d)) throw new Error(`buildTimeline: 未知相位或缺时长 "${phase}"`)
+    seq.push({ type: 'phase', phase, at: t })
+    t += d
   }
-  t = carryEnd
-  step('release'); step('settle')
+  const beat = (phase, sound) => {
+    const start = t
+    step(phase)
+    if (sound) seq.push({ type: 'sfx', name: sound, at: start, d: T[phase] })
+  }
+  const carryTo = (carryPhase) => {
+    seq.push({ type: 'phase', phase: carryPhase, at: t })
+    t += T[carryPhase]
+  }
+
+  if (oc === 'slip') {
+    // 第一爪：抓起→平移途中脱手→坠回→静止一拍→第二爪抱死
+    beat('drop', 'motor'); beat('close', 'clank'); beat('lift', 'motor')
+    carryTo('carry')
+    beat('slip'); beat('slipHold')
+    beat('drop2', 'motor'); beat('close2', 'clank'); beat('lift2', 'motor')
+    carryTo('carry2')
+  } else {
+    beat('drop', 'motor'); beat('close', 'clank'); beat('lift', 'motor')
+    const carryStart = t
+    carryTo('carry')
+    if (oc === 'feint') {
+      // 虚惊演出压在 carry 尾段：滑出→晃回，都在 release 前结束
+      seq.push({ type: 'slipOn', at: carryStart + T.carry - T.feintRecover - T.feintSlip })
+      seq.push({ type: 'slipOff', at: carryStart + T.carry - T.feintSlip })
+    }
+  }
+  beat('release')
+  beat('settle', 'win')
+  beat('chute', 'chute')
   seq.push({ type: 'end', at: t })
   return seq
 }
 
-/** 是否触发"必中悬念（虚惊）"。独立成纯函数便于单测与调参。 */
-export function decideFeint(rng = Math.random, rate = CLAW_TIMING.feintRate) {
-  return rng() < rate
+/**
+ * 本抓结局判定（纯函数、注入 rng 可测）。街机 pity 机制的家庭化：
+ * 滑脱只演"心跳过程"，购物车早已乐观加购——**失败从不消耗食物**；
+ * 连续 slip 到第 3 抓必演"大团圆"（pityWin：抱死 + 必带出一盘赔礼）。
+ * @param {() => number} rng
+ * @param {number} slipStreak 连续滑脱次数（组件维护，>=2 时下一抓必 pityWin）
+ * @returns {'normal'|'feint'|'slip'|'pityWin'}
+ */
+export function decideOutcome(rng = Math.random, slipStreak = 0) {
+  if (slipStreak >= 2) return 'pityWin'
+  const r = rng()
+  if (r < CLAW_TIMING.slipRate) return 'slip'
+  if (r < CLAW_TIMING.slipRate + CLAW_TIMING.feintRate) return 'feint'
+  return 'normal'
 }
 
 /**
