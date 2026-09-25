@@ -6,11 +6,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#FCE7F0" />
     <title>晨光厨房 · 今天想吃什么</title>
-    <script type="module" crossorigin src="./assets/index-BzG52Fs5.js"></script>
+    <script>
+      /* 批3 修 P1（夜宵 FOUC）：主题原在 JS chunk 执行时才写 <html>，21 点后冷启会先闪
+         粉纸亮屏再转暗——恰是夜宵要防的护眼反效果。这里首帧同步预写 data-theme。
+         与 src/theme/useTheme.js 的 时段判定/手动戳 规则一比一（改那边须改这边）。 */
+      (function () {
+        try {
+          var h = new Date().getHours(), night = (h >= 21 || h < 5), theme = night ? 'night' : 'light';
+          var d = new Date(); if (d.getHours() < 5) d.setDate(d.getDate() - 1);
+          var stamp = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + '-' + theme;
+          var saved = localStorage.getItem('couple_order_theme'), man = localStorage.getItem('couple_order_theme_manual_slot');
+          if ((saved === 'light' || saved === 'night') && man === stamp) theme = saved;
+          var q = location.search + location.hash, m = q.match(/[?&]theme=(night|light)/);
+          if (m) theme = m[1];
+          document.documentElement.setAttribute('data-theme', theme);
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', theme === 'night' ? '#241B21' : '#FCE7F0');
+        } catch (e) { /* 任何异常都不如不预写 */ }
+      })();
+    </script>
+    <script type="module" crossorigin src="./assets/index-CDLhsFLC.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/rolldown-runtime-CNC7AqOf.js">
     <link rel="modulepreload" crossorigin href="./assets/framer-motion-CyCmUUfe.js">
     <link rel="modulepreload" crossorigin href="./assets/react-vendor--9EP2x94.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-B_5zJggH.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-DB-M9qU5.css">
   </head>
   <body>
     <div id="root"></div>
