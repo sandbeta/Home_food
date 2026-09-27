@@ -104,8 +104,10 @@ export default function NightHome() {
 
   const grid = useMemo(() => pool.filter(d => d.id !== activeDish?.id).slice(0, 8), [pool, activeDish])
 
-  /* 智能三层池（夜宵版）：从夜宵池聚合收藏/常点/愿望加权（安静陪吃，不叠加纪念日专属文案）。 */
-  const { pool: clawPool } = useClawSignals(pool)
+  /* 智能三层池（夜宵版）：从夜宵池聚合收藏/常点/愿望加权（安静陪吃，不叠加纪念日专属文案）。
+     批 9：心情同样接入；夜宵池已由 nightPickInfo 按时段筛过，甜口心情对咸口夜宵只加不减
+     （MOOD_WEIGHTS.sweet.nightKeep=1），不与「深夜只捞夜宵」的时段规则打架。 */
+  const { pool: clawPool } = useClawSignals(pool, { mood })
 
   return (
     <div className="relative flex flex-col" style={{ minHeight: 'calc(100dvh - var(--bottom-inset))' }}>

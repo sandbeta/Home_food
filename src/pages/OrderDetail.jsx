@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
@@ -16,6 +16,7 @@ import { pickOne, DETAIL_TITLES, ORDER_STATUS_DESC } from '../lib/sweetCopy'
 import { bgCss } from '../components/ui/StickerEditor'
 import { settle, vibrate } from '../lib/sfx'
 import { requestJson } from '../lib/request'
+import RatingPicker from '../components/RatingPicker'
 
 /* m-5 修：三条状态口吻文案内联 → 迁至 sweetCopy.ORDER_STATUS_DESC 单源
    批 2a · 从三档扩到六档：pending / cutting / cooking / plating / completed + 旧 preparing 别名（走 cooking 视觉） */
@@ -51,6 +52,8 @@ export default function OrderDetail() {
   const statusRef = useRef(null)
   const bumpTimerRef = useRef(null)
   const [reload, setReload] = useState(0)
+  /* 批 9 · 星级评分：completed 态给逐道打分；整表拉一次本地按 dish_id 分桶（家庭评分量小） */
+  const [ratings, setRatings] = useState([])
 
   const fireBump = (kind) => {
     setBump(kind)
@@ -79,6 +82,11 @@ export default function OrderDetail() {
         setFetchErr(err && err.status === 404 ? 'notfound' : 'network')
       })
 
+    // 静默位点：/api/ratings 挂了不影响订单呈现，只是打分区没历史（仍可新记）
+    requestJson('/api/ratings').then(r => r.json())
+      .then(d => { if (!dead) setRatings(Array.isArray(d) ? d : []) })
+      .catch(() => { if (!dead) setRatings([]) })
+
     // 低频接力：未完成才轮询；标签页隐藏时跳过本轮，completed 后永不再发
     const timer = setInterval(() => {
       if (dead || document.hidden) return
@@ -99,6 +107,17 @@ export default function OrderDetail() {
     }, POLL_MS)
     return () => { dead = true; clearInterval(timer); clearTimeout(bumpTimerRef.current) }
   }, [id, reload])
+
+  /* 批 9 · 本单逐道菜去重（同一道点多份也只打一次分），供 completed 态打分区 */
+  const ratedDishes = useMemo(() => {
+    const seen = new Map()
+    for (const it of (order && order.items) || []) {
+      const id = Number(it.dish_id)
+      if (!Number.isFinite(id) || seen.has(id)) continue
+      seen.set(id, { id, name: it.dish_name || `菜#${id}` })
+    }
+    return Array.from(seen.values())
+  }, [order])
 
   if (loading) return <LoadingState text="正在查订单..." />
 
@@ -258,6 +277,31 @@ export default function OrderDetail() {
             </div>
           </div>
         </GlassCard>
+
+        {/* 批 9 · 吃好啦 → 逐道打分（≥3 星记一次「完成」，攒满 3 颗 5 星自动盖「拿手菜」章） */}
+        {order.status === 'completed' && ratedDishes.length > 0 && (
+          <GlassCard delay={0.2}>
+            <div className="p-4">
+              <h2 className="font-sans font-bold text-sm text-[var(--color-bone)] mb-1 flex items-center gap-2">
+                ⭐ 这顿吃得咋样
+              </h2>
+              <p className="text-[11px] text-[var(--color-ash)] mb-3">
+                一颗星到五颗星，半分也能给 · 同一道菜攒满三颗五星就记成拿手菜
+              </p>
+              <div className="space-y-4">
+                {ratedDishes.map((d) => (
+                  <RatingPicker
+                    key={d.id}
+                    dish={d}
+                    orderId={order.id}
+                    ratings={ratings.filter(r => Number(r.dish_id) === d.id)}
+                    onSaved={(rec) => setRatings(prev => [rec, ...prev])}
+                  />
+                ))}
+              </div>
+            </div>
+          </GlassCard>
+        )}
 
         {/* 备注 / 批 1 · 便签纸：有 sticker 优先展示便签（贴灶台上的小纸条），否则回落到纯文字备注 */}
         {order.sticker && order.sticker.msg ? (

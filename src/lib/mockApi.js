@@ -2,6 +2,7 @@ const STORAGE_KEY = 'couple_order_app_state_v2'
 
 import { SEED_MENU_EXTRA } from './seedMenuExtra.js'
 import { SEED_NIGHT_EXTRA } from './seedNightExtra.js'
+import { normalizeStars } from './dishRating.js'
 
 const seedDishes = [
   { id: 1, name: '番茄牛腩煲', price: 28, category: '硬菜', description: '酸甜浓郁，拌饭一绝', available: 1, image_url: '/dish-images/dish-1.webp' },
@@ -108,7 +109,7 @@ function loadState() {
   /* 修 P1（批3·数据安全）：原 try 把 saveState 也圈了进去——写盘异常（配额满/Safari 无痕）
      会被误判成"数据损坏"、整表回退 fresh seed：内存里 432 道、磁盘仍是用户那几道，
      后续任何写请求直接未捕获抛错。现在只有「读/解析」失败才回退，补齐落盘各自包自家 try。 */
-  const fresh = () => ({ dishes: seedDishes.map(d => ({ ...d })), orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, deletedSeedIds: [], sharedCart: { items: [], sharedBy: null, sharedAt: null } })
+  const fresh = () => ({ dishes: seedDishes.map(d => ({ ...d })), orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, ratings: [], nextRatingId: 1, deletedSeedIds: [], sharedCart: { items: [], sharedBy: null, sharedAt: null } })
   let state = null
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
@@ -140,6 +141,9 @@ function loadState() {
     if (!Number.isFinite(state.nextAnniversaryId)) { state.nextAnniversaryId = 1; dirty = true }
     if (!Number.isFinite(state.nextWishId)) { state.nextWishId = 1; dirty = true }
     if (!state.sharedCart || typeof state.sharedCart !== 'object') { state.sharedCart = { items: [], sharedBy: null, sharedAt: null }; dirty = true }
+    /* 批 9 新增 · 老 state 兼容补齐 ratings 表 + 序列号 */
+    if (!Array.isArray(state.ratings)) { state.ratings = []; dirty = true }
+    if (!Number.isFinite(state.nextRatingId)) { state.nextRatingId = 1; dirty = true }
     /* 修 P1（脏 id 传染）：原 Math.max(...ids) 遇一条 id='abc' 即 NaN → 落盘 null → 之后所有新菜 id:null
        全线不可自愈。改为过滤非有限值后重算，且顺带修复已损坏的 nextDishId。 */
     const ids = (state.dishes || []).map(d => Number(d && d.id)).filter(Number.isFinite)
@@ -534,6 +538,40 @@ export function installMockApi() {
       state.wishes = state.wishes.filter(w => w.id !== id)
       saveState(state)
       return json({ ok: true })
+    }
+
+    /* —— 批 9 新增 · 星级评分 ratings（一餐一条记录，同一道菜可反复记） —— */
+    if (pathname === '/api/ratings' && method === 'GET') {
+      const dishId = searchParams.get('dish_id')
+      const limit = Number(searchParams.get('limit'))
+      let list = [...state.ratings].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      if (dishId && Number.isFinite(Number(dishId))) list = list.filter(r => Number(r.dish_id) === Number(dishId))
+      if (Number.isFinite(limit) && limit > 0) list = list.slice(0, limit)
+      return json(list)
+    }
+    if (pathname === '/api/ratings' && method === 'POST') {
+      const body = await readBody(init)
+      const dishId = Number(body.dish_id)
+      if (!Number.isFinite(dishId) || !state.dishes.some(d => Number(d.id) === dishId)) {
+        return json({ message: 'unknown dish_id', dish_id: body.dish_id }, 400)
+      }
+      /* 星级归一（1–5、半星）复用 src/lib/dishRating.normalizeStars 单源，前端/服务端同一套规则 */
+      const stars = normalizeStars(body.stars)
+      if (stars == null) return json({ message: 'stars must be 1-5 (half stars allowed)', got: body.stars }, 400)
+      const dish = state.dishes.find(d => Number(d.id) === dishId) || {}
+      const item = {
+        id: state.nextRatingId++,
+        dish_id: dishId,
+        dish_name: dish.name || '',
+        stars,
+        note: String(body.note || '').slice(0, 60),
+        by: body.by === 'partner' ? 'partner' : 'me',
+        order_id: Number.isFinite(Number(body.order_id)) ? Number(body.order_id) : null,
+        created_at: new Date().toISOString(),
+      }
+      state.ratings.unshift(item)
+      saveState(state)
+      return json(item, 201)
     }
 
     /* —— 批 4a · 结算单：按月聚合订单 owed_me/owed_partner（历史订单无 owed_* 时按 items+payer 现算兜底） —— */

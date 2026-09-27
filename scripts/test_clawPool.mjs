@@ -12,8 +12,8 @@ function makeRng(seed = 1) {
 }
 
 const {
-  CLAW_WEIGHTS, CLAW_TIMING, HOT_THRESHOLD,
-  computeEatSignals, tagLayers, weightedPick,
+  CLAW_WEIGHTS, CLAW_TIMING, HOT_THRESHOLD, MOOD_WEIGHTS, MOOD_EFFORT_CUT,
+  computeEatSignals, tagLayers, weightedPick, moodBiasFor, effortClassOf,
   buildInitialSlots, refillOne, pickBuddyA,
   buildTimeline, decideOutcome, aimSlotIdx, trimPoolToWorkingSet,
 } = await import('../src/lib/clawPool.js')
@@ -183,6 +183,58 @@ const pool = [D(1), D(2), D(3), D(4), D(5), D(6)]
   assert(kept.has(1) && kept.has(2) && kept.has(3) && kept.has(4), 'A/B 层全部保留在预算内')
   const small = trimPoolToWorkingSet(tagged.slice(0, 5), 20)
   assert(small.length === 5, '池本身小于预算时原样返回')
+}
+
+// 13) 批 9 · 心情加权：未选/未知心情 = 分布逐字节不变；选了才按倍率偏置
+{
+  const D2 = (id, extra = {}) => ({ id, name: '菜' + id, price: 10, available: 1, ...extra })
+  const dishes = [
+    D2(1, { name: '葱油拌面', category: '主食', description: '香气扑鼻的快乐碳水' }),
+    D2(2, { name: '番茄牛腩煲', category: '硬菜', description: '酸甜浓郁，拌饭一绝' }),
+    D2(3, { name: '麻婆豆腐', category: '川菜', description: '麻辣鲜香，拌饭超绝' }),
+  ]
+
+  // 13.1 心情缺省 / null / 未知 key → 与不传 mood 的权重完全一致
+  const base = tagLayers(dishes, {})
+  const wOf = (arr) => arr.map((d) => d._weight).join(',')
+  assert(wOf(tagLayers(dishes, { mood: null })) === wOf(base), 'mood=null 时权重与旧版完全一致')
+  assert(wOf(tagLayers(dishes, { mood: undefined })) === wOf(base), 'mood 未传时权重与旧版完全一致')
+  assert(wOf(tagLayers(dishes, { mood: 'happy' })) === wOf(base), 'happy（无权重条目）不改分布')
+  assert(wOf(tagLayers(dishes, { mood: 'not-a-mood' })) === wOf(base), '未知心情 key 不改分布')
+  assert(base.every((d) => d._flags.mood === 1), '中性心情下 _flags.mood 记为 1')
+
+  // 13.2 想躺平：快手菜 > 费事菜（同层）
+  assert(moodBiasFor({ name: '凉拌黄瓜', category: '素菜', description: '爽口' }, 'tired') === MOOD_WEIGHTS.tired.quick, 'tired 抬快手菜')
+  assert(moodBiasFor({ name: '酸菜白肉锅', category: '东北菜', description: '越炖越香' }, 'tired') === MOOD_WEIGHTS.tired.slow, 'tired 压费事菜')
+  assert(moodBiasFor({ name: '未知新品', category: '其他', description: '' }, 'tired') === MOOD_WEIGHTS.tired.neutral, 'tired 判不出费事度时中性')
+  // 有 cook_time / steps 真值时优先真值（MOOD_EFFORT_CUT 门槛）
+  assert(moodBiasFor({ name: 'X', cook_time: 10 }, 'tired') === MOOD_WEIGHTS.tired.quick, 'cook_time 短→快手（真值优先）')
+  assert(moodBiasFor({ name: 'X', cook_time: 90 }, 'tired') === MOOD_WEIGHTS.tired.slow, 'cook_time 长→费事')
+  assert(moodBiasFor({ name: 'X', steps: [1, 2, 3] }, 'tired') === MOOD_WEIGHTS.tired.quick, 'steps 少→快手')
+  assert(moodBiasFor({ name: 'X', steps: Array.from({ length: 12 }) }, 'tired') === MOOD_WEIGHTS.tired.slow, 'steps 多→费事')
+  assert(effortClassOf({ name: 'X', recipe: { steps: Array.from({ length: 12 }) } }) === 'slow', 'recipe.steps 也认')
+  assert(MOOD_EFFORT_CUT.quickMaxMin === 20 && MOOD_EFFORT_CUT.slowMinMin === 45, '费事度门槛可调且已导出')
+
+  // 13.3 想吃辣 / 想清淡 / 想来点甜
+  assert(moodBiasFor({ name: '水煮牛肉', category: '川菜', description: '红油翻滚，麻辣过瘾' }, 'spicy') === MOOD_WEIGHTS.spicy.hot, 'spicy 抬辣口')
+  assert(moodBiasFor({ name: '紫菜蛋花汤', category: '汤类', description: '热乎乎的一碗刚刚好' }, 'spicy') === MOOD_WEIGHTS.spicy.cool, 'spicy 压清汤')
+  assert(moodBiasFor({ name: '清蒸鲈鱼', category: '粤菜', description: '原汁清蒸' }, 'light') === MOOD_WEIGHTS.light.clean, 'light 抬蒸煮')
+  assert(moodBiasFor({ name: '炸鸡小拼', category: '小吃', description: '酥脆可口' }, 'light') === MOOD_WEIGHTS.light.heavy, 'light 压炸物')
+  assert(moodBiasFor({ name: '草莓酸奶杯', category: '水果', description: '饭后甜甜收尾' }, 'sweet') === MOOD_WEIGHTS.sweet.sweet, 'sweet 抬甜品')
+  // 与 nightRules 不打架：咸口夜宵（烤串）在 sweet 心情下不降权，正餐咸口才降
+  assert(moodBiasFor({ name: '羊肉烤串', category: '小吃', description: '孜然辣椒面' }, 'sweet') === MOOD_WEIGHTS.sweet.nightKeep, 'sweet 不动咸口夜宵（不与夜宵池打架）')
+  assert(moodBiasFor({ name: '土豆炖排骨', category: '硬菜', description: '软糯土豆吸满肉香' }, 'sweet') === MOOD_WEIGHTS.sweet.other, 'sweet 轻微压正餐咸口')
+
+  // 13.4 心情倍率乘在三层权重之上，且不会掀翻 A/B 层（取值纪律）
+  const abPool = [
+    D2(11, { name: '炸鸡小拼', category: '小吃', description: '酥脆' }),
+    D2(12, { name: '清蒸鲈鱼', category: '粤菜', description: '清蒸' }),
+  ]
+  const light = tagLayers(abPool, { favoriteIds: [11], mood: 'light' })
+  const fav = light.find((d) => d.id === 11), clean = light.find((d) => d.id === 12)
+  assert(fav._layer === 'A' && fav._weight === Math.round(CLAW_WEIGHTS.A * MOOD_WEIGHTS.light.heavy * 100) / 100, 'A 层收藏的炸物被心情降权但仍留在 A 层')
+  assert(clean._weight > fav._weight, 'light 心情下清蒸确实排到炸物前面')
+  assert(MOOD_WEIGHTS.sweet.sweet >= 1 && MOOD_WEIGHTS.tired.quick >= 1, '倍率表可读：>1 提权 <1 降权')
 }
 
 console.log(failed === 0 ? '\n[clawPool] 全部通过' : `\n[clawPool] ${failed} 项失败`)

@@ -153,8 +153,9 @@ export default function Home() {
     return pool.length ? pool : dishes
   }, [dishes, popular])
 
-  /* 智能三层池（白天版）：从 rotSource 聚合收藏/常点/愿望加权，并把当天纪念日绑定菜并入 B 层。 */
-  const { pool: clawPool } = useClawSignals(rotSource, { todayDishId: todayHit?.dish_id ?? null })
+  /* 智能三层池（白天版）：从 rotSource 聚合收藏/常点/愿望加权，并把当天纪念日绑定菜并入 B 层。
+     批 9：再把「今日心情」作为第四源喂进去（clawPool.MOOD_WEIGHTS）；心情为空时分布与接入前一致。 */
+  const { pool: clawPool } = useClawSignals(rotSource, { todayDishId: todayHit?.dish_id ?? null, mood })
 
   // 撤销一次"抓取即加购"：按抓取那一刻的人格快照减数量
   const undoCatch = useCallback((dish) => {

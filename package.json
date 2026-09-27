@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node scripts/test_mockApi.mjs && node scripts/test_clawPool.mjs",
+    "test": "node scripts/test_mockApi.mjs && node scripts/test_clawPool.mjs && node scripts/test_dishRating.mjs",
     "export:seeds": "node scripts/export-seeds.mjs",
     "thumbs": "node scripts/build_thumbs.mjs",
     "pack:exe": "node scripts/pack-exe.mjs",

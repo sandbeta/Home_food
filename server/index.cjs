@@ -77,7 +77,7 @@ function initState() {
   }
   if (!state || !Array.isArray(state.dishes)) {
     /* 批 1 新增：fresh state 一并给 anniversaries / wishes 空表 + 序列号（与 mockApi 一比一复刻） */
-    state = { dishes: [...dishes], orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, sharedCart: { items: [], sharedBy: null, sharedAt: null } }
+    state = { dishes: [...dishes], orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, ratings: [], nextRatingId: 1, sharedCart: { items: [], sharedBy: null, sharedAt: null } }
     saveState()
     console.log('[init] 已从种子创建 state.json（%d 道菜）', state.dishes.length)
   } else {
@@ -105,6 +105,9 @@ function initState() {
     if (!Number.isFinite(state.nextWishId)) state.nextWishId = 1
     /* 批 5 新增 · sharedCart（跨设备分享购物车，家庭"手动分享+拉取合并"） */
     if (!state.sharedCart || typeof state.sharedCart !== 'object') state.sharedCart = { items: [], sharedBy: null, sharedAt: null }
+    /* 批 9 新增 · ratings 表（星级评分/制作记录，与 mockApi 一比一） */
+    if (!Array.isArray(state.ratings)) state.ratings = []
+    if (!Number.isFinite(state.nextRatingId)) state.nextRatingId = 1
   }
 }
 
@@ -119,6 +122,20 @@ function sendJson(res, data, status = 200) {
   const body = JSON.stringify(data)
   res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body) })
   res.end(body)
+}
+// 星级归一：一比一复刻 src/lib/dishRating.normalizeStars（1–5、半格步进、非法→null）。
+// 服务端是 CJS、lib 是 ESM，require 不过来，故此处留一份并靠注释绑住口径 ——
+// 改 RATING_RULES 必须同时改这里（test_mockApi 与下面的家庭模式冒烟都会覆盖到）。
+// 修（2026-09-27 复核）：补齐 lib 开头的 null/''/undefined 挡板。少了它时
+// Number(null)===0 会被钳成 1 星并 201 落库，本地轨(mockApi)却返回 400 —— 双轨不一致，
+// 一条脏请求就静默记成「这道菜很难吃」污染均分。越界数字仍是钳制（99→5、0→1），只有非数字才 400。
+function normStars(v) {
+  if (v === null || v === undefined || v === '') return null
+  const n = Number(v)
+  if (!Number.isFinite(n)) return null
+  const clamped = Math.min(5, Math.max(1, n))
+  const stepped = Math.round(clamped / 0.5) * 0.5
+  return Math.round(stepped * 10) / 10
 }
 function readJsonBody(req) {
   return new Promise((resolve) => {
@@ -343,6 +360,38 @@ async function handleApi(req, res, url) {
     state.wishes = state.wishes.filter((w) => w.id !== id)
     saveState()
     return sendJson(res, { ok: true })
+  }
+
+  /* —— 批 9 新增 · 星级评分 ratings（与 mockApi 一比一）——
+     一餐一条记录，同一道菜可反复记；写操作不进 needsAdminGuard（家人打分＝点餐级别的日常动作）。 */
+  if (pathname === '/api/ratings' && method === 'GET') {
+    const dishId = searchParams.get('dish_id')
+    const limit = Number(searchParams.get('limit'))
+    let list = [...state.ratings].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    if (dishId && Number.isFinite(Number(dishId))) list = list.filter((r) => Number(r.dish_id) === Number(dishId))
+    if (Number.isFinite(limit) && limit > 0) list = list.slice(0, limit)
+    return sendJson(res, list)
+  }
+  if (pathname === '/api/ratings' && method === 'POST') {
+    const body = await readJsonBody(req)
+    const dishId = Number(body.dish_id)
+    const dish = state.dishes.find((d) => Number(d.id) === dishId)
+    if (!dish) return sendJson(res, { message: 'unknown dish_id', dish_id: body.dish_id }, 400)
+    const stars = normStars(body.stars)
+    if (stars == null) return sendJson(res, { message: 'stars must be 1-5 (half stars allowed)', got: body.stars }, 400)
+    const item = {
+      id: state.nextRatingId++,
+      dish_id: Number(dish.id),
+      dish_name: dish.name || '',
+      stars,
+      note: String(body.note || '').slice(0, 60),
+      by: body.by === 'partner' ? 'partner' : 'me',
+      order_id: Number.isFinite(Number(body.order_id)) ? Number(body.order_id) : null,
+      created_at: new Date().toISOString(),
+    }
+    state.ratings.unshift(item)
+    saveState()
+    return sendJson(res, item, 201)
   }
 
   /* —— 批 4a · 结算单（与 mockApi 一比一） —— */

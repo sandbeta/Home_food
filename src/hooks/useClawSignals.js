@@ -14,10 +14,11 @@ import { requestJson } from '../lib/request'
 
 /**
  * @param {Array} dishes  当前页面的候选菜（Home=剔除网格后 rotSource；NightHome=夜宵池），裸 dish 对象数组
- * @param {object} opts   { workingSet?:number=48, promotedIds?:Set|Array, todayDishId?:number|null }
+ * @param {object} opts   { workingSet?:number=48, promotedIds?:Set|Array, todayDishId?:number|null,
+ *                          mood?:string|null  ← 批 9：今日心情倍率（见 clawPool.MOOD_WEIGHTS），不传=不改分布 }
  * @returns {{ pool:Array, signalsOk:boolean }} pool=带 _layer/_weight/_flags 的工作集
  */
-export function useClawSignals(dishes, { workingSet = 48, promotedIds, todayDishId } = {}) {
+export function useClawSignals(dishes, { workingSet = 48, promotedIds, todayDishId, mood } = {}) {
   const { favorites } = useFavorites()
   const [wishes, setWishes] = useState([])
   const [orders, setOrders] = useState([])
@@ -48,9 +49,10 @@ export function useClawSignals(dishes, { workingSet = 48, promotedIds, todayDish
       promotedIds: promotedIds ? (promotedIds instanceof Set ? promotedIds : new Set(promotedIds.map(Number))) : undefined,
       todayDishId: todayDishId != null ? Number(todayDishId) : null,
       eatenIds,
+      mood: mood || null,
     })
     return trimPoolToWorkingSet(tagged, workingSet)
-  }, [dishes, orders, wishes, favorites, promotedIds, todayDishId, workingSet])
+  }, [dishes, orders, wishes, favorites, promotedIds, todayDishId, mood, workingSet])
 
   return { pool, signalsOk }
 }

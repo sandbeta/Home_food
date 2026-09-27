@@ -826,7 +826,25 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 **已知小瑕（记 §8）**：`姜 / 生姜`、`大蒜 / 蒜末` 同物异名会在采购清单里各占一行——旧语料本就混用（裸名「姜」旧 40 次、新 14 次），非本批引入，未做统一以免与既有 342 条风格打架。
 
+## 7.32 第八批 · 融入批次 1：心情接入选菜 + 星级评分（2026-09-27，含复核修复）
+
+所有者给了外部项目 NiniMenu 作参照。**授权红线先钉死**：其 `README.md:75` 是 "Private — All Rights Reserved" 且无 LICENSE，故本批及后续批次一律**只抄规则、自己实现**，未引入任何外部代码，未搬其 632 道菜谱数据。盘点后确认真缺口只有 3 个（周计划 / 星级评分 / 照片墙），娃娃机、购物清单、成就、夜宵、家庭双人都是已落地功能——外部调研极易把它误判成"从零做"。
+
+- **心情真正影响选菜**（`clawPool.js` 加第四加权源）：`MOOD_WEIGHTS`/`MOOD_EFFORT_CUT`/`moodBiasFor`，心情倍率**乘在既有三层权重之上**而非另起体系。取值 `tired{quick 1.7, slow 0.5}`、`spicy{hot 1.8, cool 0.7}`、`light{clean 1.6, heavy 0.5}`、`sweet{sweet 1.55, other 0.85, nightKeep 1}`；上限 1.8 / 下限 0.5 是算出来的——A(6)、B(5) 两层乘完仍 ≥ C 层乘完的最大值(3×1.8=5.4)，即心情只决定同类里谁靠前，不会把收藏/常点/纪念日那条故事线掀翻。**未选 / happy / hungry / emo → 倍率 1，抽取分布与接入前逐字节一致**（`test_clawPool` 有断言）。费事度优先读 `cook_time/steps` 真值，但**全库没有 `cook_time` 字段**（实测确认），故落回关键词表判定。`sweet` 的 `nightKeep=1` 是刻意的：咸口夜宵不降权，免得与 `nightRules.js` 的时段选池打架。
+- **星级评分 + 制作记录**：`src/lib/dishRating.js`（零依赖纯函数，规则全收在 `RATING_RULES`：≥3 星计「完成」、=5 星计「超级好评」、同菜累计 3 次 5 星标「拿手菜」，措辞自写）+ `RatingPicker.jsx`（5 星热区 + ½ 单独开关 + 评语）+ 双轨接口 `GET/POST /api/ratings`（服务端快照 `dish_name`；查无此菜与非数字星级 400）。**设计决策：打分是家人日常动作，故意不纳入 `needsAdminGuard`**（不是遗漏）。UI 落在 `OrderDetail`（completed 态逐道打分）、`KitchenCalendar`（☆×N 待评角标 + 点开补分）、`Profile`（喂给徽章墙）。`achievements.js` 加第 13 枚，签名改为 `computeAchievements(orders, dishCats, ratings, dishNames)`，**不传 ratings 时结果与原先逐字节相同**（有断言保护）。
+- **复核修了三处**（本批由另一次会话实现，本次逐文件读码 + 隔离实例实探）：
+  1. `server/index.cjs` 的 `normStars` 是前端 `normalizeStars` 的 CJS 手抄副本，**漏了开头 null 挡板** → `Number(null)===0` 被钳成 1 星并 201 落库，而本地轨同请求返回 400：**双轨不一致**，一条脏请求就静默记成"这道菜很难吃"污染均分。已补挡板，并在 `test_mockApi` 加 5 条护栏（`null`/空串/缺字段/文字 → 400 且表长不变）。顺带纠正一处口径误记：**越界是钳制（99→5、0→1），只有非数字才 400**。
+  2. `RatingPicker` 布局：菜名/说明与星星同列，选中星级后 ½ 按钮一出现就把左列压到 ~184px，`"完成 6 次"` 被劈成 `"完/成"` 折三行（两态都有）。改为菜名+章与星+½ 同行、**说明文案独立整行** → 实测回到 1 行、卡片与页面横向溢出均为 0。
+  3. 令牌与热区复核：拿手菜章走不反相实底 `--color-caramel-deep` + `--color-on-dark`，文字只吃 bone/ash/mist/caramel，`--color-clay-text` 在夜宵已有 clay-30 覆盖 → 符合两向铁律。
+- **校验（四件套全绿 + 两态实测）**：lint 9 warning / 0 error（全在既有文件）/ 三套测试全过（含新增 5 条脏星级断言）/ build ✅ 4.37s / `p6_static_gate.py` 色值泄露 0、暗色残留 0、断头路 0。**day/night 两态实测**：内置浏览器面板不可见时截图被拒，改走 headless Chrome + 自写 CDP（Node 24 自带 WebSocket，零依赖），用应用自己的 `couple_order_theme` + 时段身份戳强制两态，页内逐元素算 WCAG → 8 个视图态 **未达 AA 0 处**，最低 4.52:1（`记下这口`，沿用全站 `d3-btn-primary` 体系），拿手菜章两态 6.11:1、`☆×N` light 4.87 / night 8.17。
+- **实探写接口的正确姿势**（本批踩过的坑，务必传下去）：`DATA_DIR` 硬编码 `path.join(__dirname,'data')`、**没有 env 覆盖**，直接起 `npm run family` 打写接口就会脏线上 `server/data/state.json`（该文件已 gitignore，**`git diff` 永远是干净的，不能拿它自证**）。正解=把 `server/` 连 `data/` 三个 JSON 拷到仓库外跑副本，并前后比 SHA256。另：实现代理收尾时执行过 `taskkill /IM node.exe`，会连带杀掉所有者其它 node 进程——**禁止**。
+
+**未推送**：本机到 `github.com` 的 git 端点被重置（`git ls-remote` → `Recv failure: Connection was reset`；curl 根路径虽 200，`/info/refs` 超时），故本批只完成本地 commit，`push origin master` 与 gh-pages 镜像待网络可用时补做。
+
 ## 8. 已知待办 / 候选项
+
+- 【全项目】触摸区名义 44px 实际 41.25px：根字号是 15px，`h-11`/`w-11` = 2.75rem = **41.25px**。全站 `h-11` 43 处、`w-11` 38 处与 `min-h-[44px]` 84 种混用；`.hit-pad-y`（纵向各扩 8px、视觉不变）已实现但只用了 1 处。新控件要达 44 请用 px 或 `hit-pad-y`，**别照抄 `h-11` 再在注释里写"44px"**。属既有写法、非批次 1 引入，待单开一轮统一整改。
+- 【批次 2–5 工单】周计划候选池已实测钉死：432 道是**单一池**（`seedMenuExtra.js` 342 与夜宵 25 都是它的按 id 真子集，不存在跨来源合并），真图 231 / 占位 201，去重后可用池 223，20 个 category，**唯一瓶颈是汤类（真图仅 9 道）**。去重键 = `canon(name)` 业务唯一键 + `id` 存储主键，近似同名靠 DECOR/FLAVOR/CORE 三张词表短路裁定、禁止按相似度直接并，**只读建池不动 `dishes[]` 与历史订单引用**。施工图见会话目录 `批次2-周计划工单.md` 与 `菜品去重交叉比对.md`。顺带白捡：`904 孜然烤鸡翅`/`919 麻辣拌` 的真图（含 thumb/w800）已在库、只差 `image_url` 一个字段 → 231→233。
 
 - ~~【最紧要·未完成】§7.25e 的 13 个 UI 审查修复未提交~~ ✅ 本轮（2026-09-25）已随 §7.26 娃娃机整改一并 commit（`5365e6b25`）+ 推 master + 镜像 gh-pages（`53d4495ab`）+ 线上 hash 核对一致（`index-C99AJePq.js`）。
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。

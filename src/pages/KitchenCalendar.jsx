@@ -11,6 +11,7 @@ import { HERO_IMAGES } from '../theme/images'
 import { orderStatusOf } from '../theme/persona'
 import { requestJson } from '../lib/request'
 import { pickOne } from '../lib/sweetCopy'
+import RatingPicker from '../components/RatingPicker'
 import useDialogA11y from '../lib/useDialogA11y'
 
 /* ============================================================
@@ -62,21 +63,35 @@ export default function KitchenCalendar() {
   }, [])
   const dishCats = useMemo(() => new Map(dishes.map(d => [Number(d.id), d.category])), [dishes])
 
+  /* 批 9 · 评分：拉一次全表按天分桶。日历格子上标「已评 N 单 / 待评 N 单」，
+     点某天 → 底部 sheet 在每张订单卡下面直接逐道打分（补分入口，不限于当天）。 */
+  const [ratings, setRatings] = useState([])
+  useEffect(() => {
+    requestJson('/api/ratings').then(r => r.json())
+      .then(d => setRatings(Array.isArray(d) ? d : []))
+      .catch(() => setRatings([]))
+  }, [])
+  const ratedOrderIds = useMemo(() => new Set(ratings.map(r => Number(r && r.order_id))), [ratings])
+
   /* 按 YYYY-MM-DD 分桶，一天可能多单；同时统计每天 category 分布决定圆点色 */
   const dayMap = useMemo(() => {
     const map = {}
     for (const o of orders) {
       if (!o.created_at) continue
       const key = o.created_at.slice(0, 10)
-      if (!map[key]) map[key] = { orders: [], cats: new Set() }
+      if (!map[key]) map[key] = { orders: [], cats: new Set(), rated: 0, unrated: 0 }
       map[key].orders.push(o)
+      if (o.status === 'completed') {
+        if (ratedOrderIds.has(Number(o.id))) map[key].rated += 1
+        else map[key].unrated += 1
+      }
       for (const it of (o.items || [])) {
         const cat = it.category || dishCats.get(Number(it.dish_id)) || '' /* 修 P0-3：老数据兜底 */
         if (cat) map[key].cats.add(cat)
       }
     }
     return map
-  }, [orders, dishCats])
+  }, [orders, dishCats, ratedOrderIds])
 
   /* 月历网格：从当月 1 号所在周一起铺，共 42 格（6 周） */
   const cells = useMemo(() => {
@@ -90,7 +105,7 @@ export default function KitchenCalendar() {
       const inMonth = d.getMonth() === viewMonth
       const day = dayMap[key]
       const isToday = key === ymdStr(today)
-      out.push({ key, inMonth, dayNum: d.getDate(), has: day && day.orders.length, count: day ? day.orders.length : 0, cats: day ? Array.from(day.cats) : [], isToday, future: d > today })
+      out.push({ key, inMonth, dayNum: d.getDate(), has: day && day.orders.length, count: day ? day.orders.length : 0, rated: day ? day.rated : 0, unrated: day ? day.unrated : 0, cats: day ? Array.from(day.cats) : [], isToday, future: d > today })
     }
     return out
   }, [viewYear, viewMonth, dayMap, today])
@@ -144,7 +159,7 @@ export default function KitchenCalendar() {
                   onClick={() => c.has && setSelectedDay(c.key)}
                   aria-disabled={!c.has}
                   tabIndex={c.has || c.isToday ? 0 : -1}
-                  aria-label={c.has ? `${c.dayNum} 日，${c.count} 单，点看详情` : `${c.dayNum} 日，没下单`}
+                  aria-label={c.has ? `${c.dayNum} 日，${c.count} 单${c.unrated ? `，${c.unrated} 单待评分` : ''}，点看详情` : `${c.dayNum} 日，没下单`}
                   className="relative aspect-square min-h-[44px] rounded-[var(--radius-tile)] flex flex-col items-center justify-center transition-colors"
                   style={{
                     background: c.has
@@ -156,6 +171,10 @@ export default function KitchenCalendar() {
                   }}
                 >
                   <span className="font-serif font-bold text-sm tabular-nums text-[var(--color-bone)]">{c.dayNum}</span>
+                  {c.unrated > 0 && (
+                    <span aria-hidden className="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[9px] leading-none font-bold"
+                      style={{ color: 'var(--color-clay-text)' }}>☆×{c.unrated}</span>
+                  )}
                   {c.has && (
                     <span className="flex gap-0.5 mt-0.5" aria-hidden>
                       {Array.from(new Set(c.cats)).slice(0, 3).map(cat => (
@@ -176,7 +195,7 @@ export default function KitchenCalendar() {
 
             {/* 图例 */}
             <p className="text-[11px] text-[var(--color-ash)] mt-3 leading-relaxed">
-              点了菜的日子会亮起来 · 圆点=那天最多吃了三类菜（玫粉同色） · 数字角标代表那天一共下了几单
+              点了菜的日子会亮起来 · 圆点=那天最多吃了三类菜（玫粉同色） · 数字角标代表那天一共下了几单 · ☆×N 代表还有 N 单没打分，点开就能补
             </p>
           </>
         )}
@@ -210,7 +229,36 @@ export default function KitchenCalendar() {
                 <div className="px-5 space-y-3 overflow-y-auto" style={{ paddingBottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 12px)' }}>
                   {selectedOrders.map(o => {
                     const st = orderStatusOf(o.status)
-                    return <OrderCard key={o.id} order={o} status={{ ...st, bar: st.ring[1] }} variant="user" />
+                    /* 批 9 · 这天的菜去重后逐道打分（同日重复点的菜只打一次） */
+                    const seen = new Set()
+                    const dishes = []
+                    for (const it of (o.items || [])) {
+                      const id = Number(it.dish_id)
+                      if (!Number.isFinite(id) || seen.has(id)) continue
+                      seen.add(id)
+                      dishes.push({ id, name: it.dish_name || `菜#${id}` })
+                    }
+                    return (
+                      <div key={o.id} className="space-y-3">
+                        <OrderCard order={o} status={{ ...st, bar: st.ring[1] }} variant="user" />
+                        {o.status === 'completed' && dishes.length > 0 && (
+                          <div className="d3-card-face" style={{ padding: 'var(--space-card-p)' }}>
+                            <p className="text-xs font-bold text-[var(--color-bone)] mb-2.5">⭐ 这顿吃得咋样（可补分）</p>
+                            <div className="space-y-4">
+                              {dishes.map(d => (
+                                <RatingPicker
+                                  key={d.id}
+                                  dish={d}
+                                  orderId={o.id}
+                                  ratings={ratings.filter(r => Number(r.dish_id) === d.id)}
+                                  onSaved={(rec) => setRatings(prev => [rec, ...prev])}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
                   })}
                 </div>
               </div>

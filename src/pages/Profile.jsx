@@ -74,8 +74,19 @@ export default function Profile() {
       .then(d => setDishes(Array.isArray(d) ? d : []))
       .catch(() => setDishes([]))
   }, [])
+  /* 批 9 · 评分表：给「拿手菜」徽章供数（失败静默，只是这枚算不出） */
+  const [ratings, setRatings] = useState([])
+  useEffect(() => {
+    requestJson('/api/ratings').then(r => r.json())
+      .then(d => setRatings(Array.isArray(d) ? d : []))
+      .catch(() => setRatings([]))
+  }, [])
   const dishCats = useMemo(() => new Map(dishes.map(d => [Number(d.id), d.category])), [dishes])
-  const achievements = useMemo(() => computeAchievements(allOrders, dishCats), [allOrders, dishCats])
+  const dishNames = useMemo(() => new Map(dishes.map(d => [Number(d.id), d.name])), [dishes])
+  const achievements = useMemo(
+    () => computeAchievements(allOrders, dishCats, ratings, dishNames),
+    [allOrders, dishCats, ratings, dishNames],
+  )
   const unlockedCount = ACHIEVEMENTS.filter(a => achievements[a.key]?.unlocked).length
 
   return (
@@ -348,7 +359,7 @@ export default function Profile() {
               const st = achievements[a.key]
               const unlocked = !!st?.unlocked
               return (
-                <div key={a.key} title={unlocked ? `达成于 ${new Date(st.at).toLocaleDateString('zh-CN')}` : a.desc}
+                <div key={a.key} title={unlocked ? `达成于 ${new Date(st.at).toLocaleDateString('zh-CN')}${st.dish_name && st.dish_name !== a.title ? ` · ${st.dish_name}` : ''}` : a.desc}
                   className="flex items-center gap-2 px-2.5 py-2 rounded-lg"
                   style={{
                     background: unlocked ? 'color-mix(in srgb, var(--color-sage) 14%, var(--surface))' : 'color-mix(in srgb, var(--color-ash) 6%, transparent)',

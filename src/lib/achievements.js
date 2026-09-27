@@ -3,9 +3,11 @@
  * ------------------------------------------------------------
  * 全部基于 /api/orders 前端本地计算（家庭订单量 <千级）；
  * 服务端无需改动，成就进度实时刷新；未来要持久化"首次达成时间"可挪到 state.achievements。
- * 12 枚徽章：开张/深夜/请客/老饕/10 单/50 单/100 单/菜系/连火/共事/四季/周年
+ * 13 枚徽章：开张/深夜/请客/老饕/10 单/50 单/100 单/菜系/连火/共事/四季/周年/拿手菜
+ * 批 9：最后一枚「拿手菜」改读 /api/ratings（其余 12 枚口径不动）。
  * ============================================================ */
-import { isNightSnack } from './nightRules'
+import { isNightSnack } from './nightRules.js'
+import { summarizeByDish, isSuperLike, RATING_RULES, SIGNATURE_BADGE } from './dishRating.js'
 
 const EIGHT_CUISINES = ['川菜', '粤菜', '湘菜', '鲁菜', '苏菜', '浙菜', '闽菜', '徽菜']
 
@@ -22,6 +24,8 @@ export const ACHIEVEMENTS = [
   { key: 'duo',        title: '双人共事', icon: '🐱🐑', desc: '同一单里你俩都点过菜' },
   { key: 'seasons',    title: '四季同吃', icon: '🍂', desc: '跨 4 个自然月都有下单' },
   { key: 'anniversary',title: '一周年了', icon: '💍', desc: '第一单至今满 365 天' },
+  /* 批 9 新增 · 由 /api/ratings 判定（其余 12 枚仍只看订单，行为不变） */
+  { key: 'signature',  title: SIGNATURE_BADGE.label, icon: '⭐', desc: `同一道菜攒满 ${RATING_RULES.signatureStars} 颗五星` },
 ]
 
 /**
@@ -29,9 +33,42 @@ export const ACHIEVEMENTS = [
  * @param {Array} orders 历史订单
  * @param {Map<number,string>} [dishCats] 修 P0-3：dish_id → category 映射，
  *   给「下单时才快照 category」之前的老订单兜底；省略时行为与原先一致
+ * @param {Array} [ratings] 批 9：/api/ratings 记录。省略时「拿手菜」不解锁，
+ *   其余徽章结果与接入前完全一致（老调用方零改动）
+ * @param {Map<number,string>} [dishNames] 可选：dish_id → 菜名，给解锁提示用
  */
-export function computeAchievements(orders, dishCats) {
+export function computeAchievements(orders, dishCats, ratings, dishNames) {
   const out = {}
+  /* 批 9 · 「拿手菜」：同一道菜攒满 signatureStars 颗五星即解锁。
+     放在 orders 早退之前——它只依赖评分表；ratings 缺省（老调用方）时整段跳过，其余徽章结果不变。 */
+  if (Array.isArray(ratings) && ratings.length) {
+    const sums = summarizeByDish(ratings)
+    const fiveTimesByDish = new Map()
+    for (const r of ratings) {
+      if (!isSuperLike(r)) continue
+      const id = Number(r && r.dish_id)
+      if (!Number.isFinite(id)) continue
+      const arr = fiveTimesByDish.get(id) || []
+      arr.push(r.created_at || '')
+      fiveTimesByDish.set(id, arr)
+    }
+    let at = null, hitId = null
+    sums.forEach((s, id) => {
+      if (!s.isSignature) return
+      /* 达成时刻 = 第 N 颗五星落下的那条记录（取最早达成的那道菜） */
+      const stamp = (fiveTimesByDish.get(id) || []).slice().sort()[RATING_RULES.signatureStars - 1]
+      if (!stamp) return
+      if (at === null || new Date(stamp) < new Date(at)) { at = stamp; hitId = id }
+    })
+    if (at) {
+      out.signature = {
+        unlocked: true,
+        at,
+        dish_id: hitId,
+        dish_name: (dishNames && typeof dishNames.get === 'function' ? dishNames.get(hitId) : '') || SIGNATURE_BADGE.label,
+      }
+    }
+  }
   if (!Array.isArray(orders) || orders.length === 0) return out
   /* 修 P0-3：老订单 items 无 category 快照 → 有 dishCats 时按 dish_id 兜底（有值时行为不变） */
   const catOf = (it) => it.category || (dishCats && typeof dishCats.get === 'function' ? dishCats.get(Number(it.dish_id)) : '') || ''
