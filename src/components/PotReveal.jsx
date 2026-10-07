@@ -23,11 +23,14 @@ import { motor, winJingle, vibrate } from '../lib/sfx'
 // reduced-motion 直接 served + label + 1600ms 换菜（仍会换下一道）。
 // ============================================================
 
-/** B 层专属文案（与 ClawMachine 同源：纪念日/愿望/主推加权命中的心动一击） */
+/** B 层专属文案（愿望/主推命中的一击）。
+ *  ⚠ 刻意不接 `f.today`：纪念日命中日 Home 已有页头标题 + 副标题 + AnniversaryBanner 三处
+ *     整页级表达，浮标再说第四遍是过曝而不是惊喜。夜宵轨这三处都没有（AnniversaryBanner 只挂
+ *     Home），所以 ClawMachine 那份 blessingOf 仍保留 today 分支 —— 两份**故意不同源**，
+ *     改一处别忘了想另一处。 */
 function blessingOf(dish) {
   const f = dish && dish._flags
   if (!f) return null
-  if (f.today) return '这个，他早想给你安排上了 ❤'
   if (f.wish) return '你许过的愿望，端上来了'
   if (f.promo) return '今日他替你挑的一道'
   return null
