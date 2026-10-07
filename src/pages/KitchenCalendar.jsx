@@ -28,12 +28,6 @@ const CAL_TITLES = ['我们一起吃过的日子', '厨房日历', '翻开这本
 function pad2(n) { return String(n).padStart(2, '0') }
 function ymdStr(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}` }
 
-// 从日期字符串"YYYY-MM-DD..."取 y/m/d
-function parseYmd(s) {
-  const y = Number(s.slice(0, 4)), m = Number(s.slice(5, 7)) - 1, d = Number(s.slice(8, 10))
-  return new Date(y, m, d)
-}
-
 export default function KitchenCalendar() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState([])
@@ -222,7 +216,7 @@ export default function KitchenCalendar() {
                     <p className="text-[11px] text-[var(--color-ash)]">{selectedOrders.length} 单 · 我们一起吃了这些</p>
                   </div>
                   <button onClick={() => setSelectedDay(null)} aria-label="关闭"
-                    className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] border-2 border-[var(--color-line)] bg-[var(--color-glass)]">
+                    className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] glass-op glass-op--ctl">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                   </button>
                 </div>

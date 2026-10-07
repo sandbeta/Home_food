@@ -46,7 +46,7 @@ export default function DishRow({
           onClick={(e) => { e.stopPropagation(); onToggleFav(dish) }}
           aria-label={favorited ? '取消收藏' : '收藏'}
           aria-pressed={favorited}
-          className="absolute top-2 right-[calc(var(--space-card-p)_+_4px)] z-20 w-11 h-11 rounded-full flex items-center justify-center glass"
+          className="absolute top-2 right-[calc(var(--space-card-p)_+_4px)] z-20 w-11 h-11 rounded-full flex items-center justify-center ctl-plate"
         >
           <motion.span
             animate={favorited ? { scale: [1, 1.3, 1] } : { scale: 1 }}

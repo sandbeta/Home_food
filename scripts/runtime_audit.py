@@ -4,18 +4,30 @@ import os, re, sys
 from pathlib import Path
 from collections import defaultdict
 
-ROOT = Path(r'E:/晨光厨房-交付包-qoderwork/extracted')
+ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / 'src'
+if not SRC.is_dir():
+    print(f'[runtime_audit] 数据源失效：SRC 不存在 {SRC}，疑似路径迁移，拒绝报绿', file=sys.stderr)
+    sys.exit(1)
 
+_read_failures = []
 def read(p):
-    try: return p.read_text(encoding='utf-8')
-    except: return ''
+    try: return Path(p).read_text(encoding='utf-8')
+    except Exception as e:
+        print(f'[runtime_audit] 读失败: {p}: {e}', file=sys.stderr)
+        _read_failures.append(str(p))
+        return None
 
 files = []
 for ext in ('*.jsx', '*.js'):
     for f in SRC.rglob(ext):
         if any(x in str(f) for x in ('seedMenuExtra', 'seedNightExtra', 'seedRecipes', 'hotRecipes')): continue
         files.append(f)
+
+# 空数据必须 fail，不能 pass（门禁通用原则）：扫到 0 文件说明路径/采集失效
+if len(files) == 0:
+    print('[runtime_audit] 门禁数据源为空（files==0），疑似路径失效，拒绝报绿', file=sys.stderr)
+    sys.exit(1)
 
 # ---------- A. 未 import 的 JSX 组件（改进：default+named 混合、注释剥离） ----------
 JSX_TAG = re.compile(r'<([A-Z][A-Za-z0-9_]*)[\s/>]')
@@ -54,6 +66,7 @@ def strip_comments(src):
 a_issues = []
 for f in files:
     src = read(f)
+    if src is None: continue
     src_nc = strip_comments(src)
     if '<' not in src_nc: continue
     known = set()
@@ -66,11 +79,12 @@ for f in files:
     if missing: a_issues.append((str(f.relative_to(ROOT)), missing))
 
 # ---------- B. API 端点 ----------
-MOCK = read(SRC / 'lib' / 'mockApi.js')
-SERVER = read(ROOT / 'server' / 'index.cjs')
+MOCK = read(SRC / 'lib' / 'mockApi.js') or ''
+SERVER = read(ROOT / 'server' / 'index.cjs') or ''
 client_endpoints = set()
 for f in files:
     src = read(f)
+    if src is None: continue
     for m in re.finditer(r"""(?:fetch|requestJson|getJson)\s*\(\s*['"](/api/[^'"]+)['"]""", src):
         path = re.sub(r'/\d+$', '/:id', m.group(1))
         client_endpoints.add(path)
@@ -83,6 +97,12 @@ def server_paths(src):
     for m in re.finditer(r"""pathname === ['"](/api/[^'"]+)['"]""", src): out.add(m.group(1))
     for m in re.finditer(r"""pathname\.match\(\/\^\\?\/api\\?\/(\w+)\\?\/\(""", src): out.add('/api/' + m.group(1) + '/:id')
     for m in re.finditer(r"""pathname\.match\(\/\^\\?\/api\\?\/(\w+)\\?\/\(\.\+\)\\?\$""", src): out.add('/api/' + m.group(1) + '/:id')
+    # 双段路径如 /^\/api\/orders\/(\d+)\/status$/ → /api/orders/:id/status
+    for m in re.finditer(r"""pathname\.match\(\/\^\\?\/api\\?\/(\w+)\\?\/[^/]*?\/(\w+)\$""", src):
+        out.add('/api/' + m.group(1) + '/:id/' + m.group(2))
+    # needsAdminGuard / test() 里的 /^\/api\/xxx\/\d+\/status$/ 形态
+    for m in re.finditer(r"""/\^\\?/api\\?/(\w+)\\?/\\?d\+\\?/(\w+)\$""", src):
+        out.add('/api/' + m.group(1) + '/:id/' + m.group(2))
     return out
 mock_paths = server_paths(MOCK)
 srv_paths = server_paths(SERVER)
@@ -99,11 +119,13 @@ b_mock = sorted(p for p in client_endpoints if not covered(p, mock_paths))
 b_srv = sorted(p for p in client_endpoints if not covered(p, srv_paths))
 
 # ---------- C. 路由（改进：剥 query） ----------
-APP = read(SRC / 'App.jsx')
+APP = read(SRC / 'App.jsx') or ''
 routes = set(re.findall(r"""<Route\s+path=['"](/[^'"]+)['"]""", APP))
 nav_paths = set()
 for f in files:
-    src = strip_comments(read(f))
+    _s = read(f)
+    if _s is None: continue
+    src = strip_comments(_s)
     for m in re.finditer(r"""(?:to|href)=['"](/[^'"$]+)['"]""", src): nav_paths.add(m.group(1).split('?')[0])
     for m in re.finditer(r"""navigate\(\s*['"`](/[^'"`$]+)""", src): nav_paths.add(m.group(1).split('?')[0])
 def route_matches(p, routes):
@@ -115,12 +137,14 @@ def route_matches(p, routes):
     return False
 c_missing = sorted(p for p in nav_paths if not route_matches(p, routes) and not p.startswith('/api/'))
 
-# ---------- D. CSS 变量 ----------
-CSS = read(SRC / 'index.css')
+# ---------- D. CSS 变量（先剥注释：注释里的 var(--x)/var(--glass-*) 示例不是真实消费） ----------
+CSS = read(SRC / 'index.css') or ''
 defined = set(re.findall(r'(--[a-z][a-z0-9-]*)\s*:', CSS))
 used = defaultdict(list)
 for f in files:
     src = read(f)
+    if src is None: continue
+    src = strip_comments(src)
     for m in re.finditer(r'var\((--[a-z][a-z0-9-]*)', src):
         tok = m.group(1)
         if tok.startswith('--tw-'): continue
@@ -128,26 +152,44 @@ for f in files:
 d_missing = {k: sorted(set(v)) for k, v in used.items()}
 
 # ---------- E. Icon name（改进：value 是 ( 或 < 或 '） ----------
-ICONS = read(SRC / 'components' / 'ui' / 'Icons.jsx')
+ICONS = read(SRC / 'components' / 'ui' / 'Icons.jsx') or ''
 icon_names = set(re.findall(r'^\s*([a-zA-Z][a-zA-Z0-9]*):\s*[\(\'<`]', ICONS, re.MULTILINE))
+# 空数据必须 fail：读到 0 个定义说明采集失效，历史上曾因此静默假绿
+if len(icon_names) == 0:
+    print('[runtime_audit] 门禁数据源为空（icon_names==0），疑似路径失效，拒绝报绿', file=sys.stderr)
+    sys.exit(1)
 used_icons = defaultdict(list)
 for f in files:
     src = read(f)
+    if src is None: continue
     for m in re.finditer(r"""<Icon\s+name=['"]([a-zA-Z][a-zA-Z0-9]*)['"]""", src):
         if m.group(1) not in icon_names: used_icons[m.group(1)].append(f.name)
 e_missing = {k: sorted(set(v)) for k, v in used_icons.items()}
 
-# ---------- F. localStorage key 拼写：同一 key 是否被 read 与 write 都用同一字面 ----------
+# ---------- F. localStorage key（字面 + 常量间接：全站多用 CART_KEY/THEME_KEY 等常量） ----------
 LS_KEYS = defaultdict(set)
+_CONST_DEF = {}  # (文件名, 常量名) → 字面key；另记全局兜底（同名常量在多文件复用 KEY 时按文件区分）
 for f in files:
     src = read(f)
-    for m in re.finditer(r"""localStorage\.(?:getItem|setItem|removeItem)\(\s*['"]([^'"]+)['"]""", src):
+    if src is None: continue
+    _nc = strip_comments(src)
+    for m in re.finditer(r"""(?:const|let|var)\s+([A-Z][A-Z0-9_]*)\s*=\s*['"]([^'"]+)['"]""", _nc):
+        if 'KEY' not in m.group(1): continue
+        _CONST_DEF.setdefault((f.name, m.group(1)), m.group(2))
+        _CONST_DEF.setdefault(('__any__', m.group(1)), m.group(2))
+for f in files:
+    src = read(f)
+    if src is None: continue
+    _nc = strip_comments(src)
+    for m in re.finditer(r"""localStorage\.(?:getItem|setItem|removeItem)\(\s*['"]([^'"]+)['"]""", _nc):
         LS_KEYS[m.group(1)].add(f.name)
+    for m in re.finditer(r"""localStorage\.(?:getItem|setItem|removeItem)\(\s*([A-Z][A-Z0-9_]*)\s*\)""", _nc):
+        _lit = _CONST_DEF.get((f.name, m.group(1))) or _CONST_DEF.get(('__any__', m.group(1)), f'const:{m.group(1)}')
+        LS_KEYS[_lit].add(f.name)
 # 只报"某 key 只被 getItem 从未 setItem"（可能是拼错，写入用了别的 key）
 get_only = []
 set_only = []
 for k, fs in LS_KEYS.items():
-    srcs = [read(ROOT / 'src' / 'x') for _ in []]  # placeholder
     # 简化：不做深入分析，只列出所有 key 供人工核对
     pass
 

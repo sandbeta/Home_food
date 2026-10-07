@@ -112,11 +112,28 @@
   --sage-80: #62835D;
   --sage-90: #557351;
 
+  /* —— 竹屉色（PotReveal 方向 B · 竹蒸笼，2026-10 所有者选定）——
+     竹编本色三档 + 描边走现成的 --color-caramel-deep（焦糖实底 #8A4E56），
+     系带走 clay 家族；此处只立竹色， consumption 见 PotReveal。 */
+  --bamboo-hi: #EBD9B4;
+  --bamboo: #D9B98A;
+  --bamboo-deep: #B98F5E;
+  /* 竹笼舞台台面顶色：夜宵块配套覆盖为 ink-800（不反相则夜宵页顶部会留一条粉亮带）。
+     竹屉本身是真物不反相，罩内彩点/蒸汽照旧。 */
+  --pot-stage-hi: #FDEFF4;
+
   /* —— 图鉴盘底（V3 设计稿：菜品/角色的圆形图鉴位）——
      必须单独成令牌：早期写法 `radial-gradient(on-dark → surface)` 在夜宵下
      会从奶油白渐变到夜纸黑，渲染成一颗"灰球"（on-dark 不反相、surface 反相，
      两个端点分属不同色系）。这里两端都取同族表面色，双主题各自成立。 */
   --plate-bg: radial-gradient(circle at 50% 34%, var(--color-on-dark), var(--color-ink-850) 78%);
+
+  /* —— 壳层颗粒底（给玻璃「有东西可糊」）——
+     实测依据：单色粉纸底上任何玻璃配方都退化成描边矩形（glass-preview2.png 下排）。
+     玻璃是减法视觉——背后没有高频细节，就没有透射感。~4.5% 细噪点是最便宜的解：
+     肉眼看纸面几乎无变化，但「玻璃区更滑、纸区有颗粒」的对比立刻成立。
+     走 background 栈顶图层，不新增 DOM、不动 z-index 层叠。 */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.045'/%3E%3C/svg%3E");
 
   /* —— 签名拟物装饰色（StoveStage / ClawMachine · 走 @theme static 落实单源纪律）——
      这五组是 DESIGN.md「签名件」的拟物世界色（灶台/火苗/玻璃罩顶），刻意不随夜宵反相：
@@ -192,6 +209,75 @@
   --dock-gap: 12px;  /* 球与药丸之间的间距 */
   --glass-strong: #FFF8FB; /* 停靠层药丸底色：操作层最亮纸 */
   --surface: #FFF4F8; /* 内容层卡面：浅粉纸（第六轮随纸面提浅） */
+
+  /* —— 操作层真玻璃（2026-09-27）——
+     既有 .glass / --color-glass 白天是**不透明实色**，挂在它下面的 backdrop-filter
+     等于白烧 GPU：什么都透不过来，所以白天从来没有真的玻璃。
+     本组令牌只服务「导航 / 操作层」（玻璃退后律允许的层），内容层一律不引用：
+       药丸面板 .glass-op--panel / 悬浮控件 .glass-op--ctl / 模态遮罩 .glass-op--scrim
+     全部由既有令牌（on-dark / ink-850 / ink-800 / bone / line / ink-fixed）派生，
+     不新造色值；夜宵档在 [data-theme="night"] 段整组覆盖。
+     ⚠ tint 的 alpha 是对比度的下限护栏，改之前先跑 scripts/glass_contrast_gate.py。 */
+  --glass-blur-panel: 9px;   /* iOS 的玻璃是「透」不是「糊」：模糊一大就变磨砂塑料（实测见 glass-preview2.png ②vs③） */
+  --glass-blur-ctl: 6px;
+  --glass-sat: 138%;         /* 中等提饱和：够让透出来的内容染色，又不至于变油画 */
+  --glass-bright: 1;         /* 透过来内容的亮度系数：白天不压，夜宵必须压（见 [data-theme="night"]） */
+  /* veil 从 0.52 砍到 0.22：白纱是「不像 iOS」的主因。
+     代价是可读性从「底衬着字」变成「晕衬着字」——所以 .glass-halo 从可选变成必需。 */
+  --glass-tint-panel: color-mix(in srgb, var(--color-on-dark) 22%, transparent);
+  --glass-tint-ctl: color-mix(in srgb, var(--color-on-dark) 20%, transparent);
+  --glass-tint-scrim: color-mix(in srgb, var(--color-ink-fixed) 34%, transparent);
+  /* 厚玻璃的光学参数。⚠ 这一组同时被 CSS(.glass-op) 与 WebGL(LiquidGlass) 消费，
+     是唯一真值 —— 组件里不允许再出现第二份数字，否则两种实现会观感不一致。 */
+  --glass-lens-panel: 12px;  /* 边缘把背景往里挤的位移幅度 */
+  --glass-lens-ctl: 6px;
+  --glass-ca-panel: 0.016;   /* 色散：三通道压缩率的相对差 */
+  --glass-ca-ctl: 0.010;
+  --glass-frost-panel: 0.16; /* 内壁雾光强度 */
+  --glass-frost-ctl: 0.10;
+  --glass-spec: 1;           /* 镜面高光强度 */
+  /* 上缘高光的颜色，单独成令牌：CSS 侧拼进 --glass-rim-hi，
+     WebGL 侧要用探针解析成 rgba —— 阴影值解析不了，必须有个纯颜色令牌。 */
+  --glass-rim-color: color-mix(in srgb, var(--color-on-dark) 95%, transparent);
+  /* 高光线宽：CSS 与 WebGL 共用同一个真源。以前 WebGL 里写死 1.5，
+     改一处就得记得改另一处 —— 令牌化之后 shader 只读不猜。 */
+  --glass-rim-w: 1.5px;
+  /* 厚玻璃的三道光学痕迹：上缘高光、下缘沉边、内壁雾光。
+     粉纸底上「像不像玻璃」基本全靠这三条（实测：平底时 veil 大小已看不出差别）。 */
+  --glass-rim-hi: inset 0 var(--glass-rim-w) 0 var(--glass-rim-color);
+  --glass-rim-lo: inset 0 -1.5px 0 color-mix(in srgb, var(--color-ink-fixed) 12%, transparent);
+  --glass-inner-frost: inset 0 0 7px color-mix(in srgb, var(--color-on-dark) 22%, transparent);
+  --glass-sheen: linear-gradient(168deg,
+      color-mix(in srgb, var(--color-on-dark) 30%, transparent) 0%,
+      transparent 36%, transparent 100%);
+  /* 图标光晕（halo）：让中间调/浅色图标在「背后内容不可控」的玻璃上仍然读得出。
+     两层 drop-shadow：内层 1.5px 描出笔画轮廓，外层 5px 铺一圈柔光。
+     ⚠ 方向随主题反相，不是笔误：白天图标是深墨 ash，背后压到暗照片时要靠**亮晕**抬起；
+     夜宵图标是浅字 ash，背后是白盘菜照片时要靠**暗晕**压住。两态各治一种失效方向。 */
+  /* ⚠ 用 8 个 1px 偏移的 drop-shadow 叠出**实心描边**，不是一个高斯柔光：
+     实测柔光晕只能把笔画紧邻环从 L 0.065 抬到 0.17~0.35（等效 lift 0.32），
+     veil 0.22 下 ash 图标只有 1.90:1 不达标；换硬描边后同一 veil 到 3.5:1。
+     柔光好看但不顶用。 */
+  --glass-halo-c: color-mix(in srgb, var(--color-on-dark) 96%, transparent);
+  --glass-halo-soft: color-mix(in srgb, var(--color-on-dark) 55%, transparent);
+  --glass-halo:
+    drop-shadow(1px 0 0 var(--glass-halo-c)) drop-shadow(-1px 0 0 var(--glass-halo-c))
+    drop-shadow(0 1px 0 var(--glass-halo-c)) drop-shadow(0 -1px 0 var(--glass-halo-c))
+    drop-shadow(0.75px 0.75px 0 var(--glass-halo-c)) drop-shadow(-0.75px 0.75px 0 var(--glass-halo-c))
+    drop-shadow(0.75px -0.75px 0 var(--glass-halo-c)) drop-shadow(-0.75px -0.75px 0 var(--glass-halo-c))
+    drop-shadow(0 0 2px var(--glass-halo-soft));
+  --glass-halo-rgb: var(--color-on-dark);  /* 白天亮晕的色，供门禁取用 */
+  /* 光晕抬升系数 —— 实测值，不是估的（halo_profile2.cjs）。
+     按 22px/strokeWidth 2 的真实尺度光栅化图标笔画，平移复现上面 8 个 offset drop-shadow，
+     量紧贴笔画 1–2px 的环：veil 0.22 下平均 L 从床色 0.065 抬到 0.814 ⇒ 等效 lift 0.84；
+     个别间隙像素只到 0.03（8 个方向偏移之间有盖不到的缝）。取 **0.70** 作保守判定值：
+     既不用孤立的最差像素自欺，也不用平均像素虚高。
+     对照：旧的柔光晕（sigma 1.5 + 5 两层）实测平均只有 0.32，veil 0.22 下 ash 仅 1.90:1 不达标
+     —— 那才是「lift 全靠拍脑袋」翻车的地方（我曾填过 0.62 把门禁买通，别再干这事）。 */
+  --glass-halo-lift: 0.70;
+  /* 照片上实心盘的底（.ctl-plate）：与玻璃共用令牌，好让对比度门禁量的是同一个值。
+     白天取不透明浅纸，夜宵取夜纸实底 —— 都是既有令牌，零新色。 */
+  --ctl-plate-bed: var(--color-glass);
   --safe-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
   --bottom-inset: calc(var(--dock-h) + var(--safe-bottom) + 16px);
   --bottom-inset-compact: calc(var(--safe-bottom) + 24px);
@@ -236,8 +322,11 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
-  /* 晨光粉纸底：顶部微亮、四周轻 vignette，让美食图成为最亮处 */
+  overflow-x: clip; /* P0-1 吸顶修复：hidden 让 body 成滚动容器，sticky 相对它而非视口（/menu 滚后页头 rect.y=-265）；clip 只裁剪不建滚动容器，sticky 回到视口。首行 hidden 留作旧浏览器回退 */
+  /* 晨光粉纸底：顶部微亮、四周轻 vignette，让美食图成为最亮处；
+     栈顶那层 --grain 是给玻璃准备的可糊细节（见 @theme static 里的说明） */
   background:
+    var(--grain),
     var(--body-bg);
 }
 
@@ -322,6 +411,78 @@ input, textarea { caret-color: var(--color-clay); }
   border: 1px solid color-mix(in srgb, var(--sage-40) 40%, transparent);
   background: linear-gradient(180deg, color-mix(in srgb, var(--sage-40) 10%, transparent) 0%, rgba(255,235,243,0.05) 100%);
   box-shadow: 0 10px 30px rgba(43, 36, 41, 0.10), inset 0 0 0 1px color-mix(in srgb, var(--sage-40) 10%, transparent);
+}
+
+/* ========== 操作层真玻璃（2026-09-27）==========
+   与上面 .glass 的实质区别：.glass 白天吃的是不透明实色，挂在它下面的
+   backdrop-filter 什么都没透过来 —— 本组类走 --glass-tint-*（带 alpha），
+   把「透过去 → 糊掉 → 提饱和 → 边缘光学」四件事一次做齐。
+   允许落位：导航药丸、吸顶栏、照片上的悬浮控件、模态遮罩 —— 即玻璃退后律
+   放行的操作层。内容层（GlassCard / .d3-card-face / .d3-input）禁止引用。
+   刻意不做流动高光动画：列表里同类元素可能同时出现 20+，backdrop-filter
+   已是逐元素离屏合成，再挂 animation 等于给低端机下战书。 */
+.glass-op {
+  background: var(--glass-tint-panel);
+  border: 2px solid var(--color-line);
+  -webkit-backdrop-filter: blur(var(--glass-blur-panel)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+  backdrop-filter: blur(var(--glass-blur-panel)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+  /* 四道叠一条 box-shadow：上缘受光亮边、下缘沉边、内壁雾光、外部落影（暖墨，非纯黑） */
+  box-shadow: var(--glass-rim-hi), var(--glass-rim-lo), var(--glass-inner-frost), var(--shadow-3);
+}
+/* 表面斜向反光带。::before 在 DOM 序里先于子节点，定位子节点自然盖在它上面，
+   故不需要给 children 强设 z-index/position（那会打断既有的 absolute 定位）。 */
+.glass-op::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-sheen);
+  pointer-events: none;
+}
+/* 小控件：糊 10px 就够，重的是内壁雾光别叠上去（小面积会糊成一团白） */
+.glass-op--ctl {
+  background: var(--glass-tint-ctl);
+  -webkit-backdrop-filter: blur(var(--glass-blur-ctl)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+  backdrop-filter: blur(var(--glass-blur-ctl)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+  box-shadow: var(--glass-rim-hi), var(--glass-rim-lo), var(--shadow-1);
+}
+/* 照片上的实心盘（**故意不是玻璃**）：收藏心形用 love/mist，而 love 在浅底上的
+   对比度天花板实测只有 3.43:1 —— 一旦底下透出暗照片就跌破图形件 3:1 线。
+   要保住情感色语义（不改 #D96488），这层就不能透：只保留 rim 高光与发丝边，
+   去掉 backdrop-filter。取舍写进 DESIGN.md 的「玻璃退后」补充条。 */
+.ctl-plate {
+  background: var(--ctl-plate-bed);
+  border: 2px solid var(--color-line);
+  box-shadow: var(--glass-rim-hi), var(--glass-rim-lo), var(--shadow-1);
+}
+/* 图标光晕：挂在玻璃层里的图标容器上（不是图标本身，避免对 svg 重复触发滤镜合成）。
+   它让"中间调图标 + 背后内容不可控"这对矛盾成立，是 panel alpha 能从 0.87 放到 0.52 的前提。 */
+.glass-halo { filter: var(--glass-halo); }
+
+/* 吸顶栏：它自带 --scrim-top 渐隐渐变，所以这里只提供光学链路，不给底和边
+   （给了会盖掉渐隐效果）。夜宵的亮度压制同样要走，否则吸顶标题压在
+   亮照片上时，反相后的亮字会被吃掉。 */
+.glass-op--sticky {
+  /* 模糊半径必须和 WebGL 那边同源：shader 的 panel 档读 --glass-blur-panel，
+     这里原先写死 14px → 同一块吸顶栏两条链路糊得不一样，实测亮度差 0.087。 */
+  -webkit-backdrop-filter: blur(var(--glass-blur-panel)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+  backdrop-filter: blur(var(--glass-blur-panel)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+}
+/* 模态遮罩：糊 + 压暗，让抽屉浮起来；alpha 两态分别校准（夜纸要压得住得比白天浓） */
+.glass-op--scrim {
+  background: var(--glass-tint-scrim);
+  -webkit-backdrop-filter: blur(var(--glass-blur-panel)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+  backdrop-filter: blur(var(--glass-blur-panel)) saturate(var(--glass-sat)) brightness(var(--glass-bright));
+}
+/* ⚠ 操作层玻璃统一在 **sRGB** 里做滤镜，四个表面一个都不能漏。
+   filter 原语的 color-interpolation-filters 初始值是 linearRGB，于是 CSS 这条
+   backdrop-filter 的 saturate/brightness 在**线性光**里算，而 WebGL shader 的 sat3()
+   在 sRGB 编码值上算 —— 同一组令牌得出两个结果：实测浅粉底上 CSS 玻璃比 WebGL
+   玻璃暗 0.06 亮度（「纯玻璃」对照，已排除图标稀释），降级↔接管瞬间会跳一档。
+   写死 sRGB 之后：两条链路同一色彩空间，且 glass_contrast_gate 的建模（按 sRGB
+   通道算 saturate/brightness）才成立。 */
+.glass-op, .glass-op--ctl, .glass-op--sticky, .glass-op--scrim {
+  color-interpolation-filters: sRGB;
 }
 
 /* ========== Card ========== */
@@ -559,6 +720,7 @@ input, textarea { caret-color: var(--color-clay); }
    表面/文字/玻璃/遮罩令牌，clay(玫瑰粉)/sage 双人格色与 love/caramel 点缀保持不变，
    让"温度对比"在夜里依然是同一对情侣的颜色。 */
 [data-theme="night"] {
+  --pot-stage-hi: #3A2B33;   /* 竹笼舞台台面顶：随夜纸反相（漏这档夜宵页顶会留一条粉亮带） */
   /* 表面：深莓紫（保留粉相，不用死黑） */
   --color-ink-900: #241B21;
   --color-ink-850: #2E2229;
@@ -574,6 +736,12 @@ input, textarea { caret-color: var(--color-clay); }
   --color-glass-border: rgba(243, 236, 239, 0.16);
   /* 糖果描边夜宵档：由 bone 反相值派生（20% 混色合成 ≈ #4D4347），不另立色值 */
   --color-line: color-mix(in srgb, var(--color-bone) 20%, transparent);
+  /* —— 壳层颗粒底（给玻璃「有东西可糊」）——
+     实测依据：单色粉纸底上，任何玻璃配方都退化成描边矩形（见 glass-preview2.png 下排）——
+     玻璃是减法视觉，背后没有高频细节就没有透射感。一层 ~4.5% 的细噪点是最便宜的解：
+     肉眼看纸面几乎无变化，但玻璃一糊，「玻璃区更滑、纸区有颗粒」的对比立刻成立。
+     用 background 栈顶图层实现，不新增 DOM 节点、不影响 z-index 层叠。 */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E"); /* 夜宵降到 3%：暗底上灰噪点会成可见白斑 */
   /* 图鉴盘底夜宵档：两端都是暗底同族表面色，不再用 on-dark（它不反相，会泛灰ball） */
   --plate-bg: radial-gradient(circle at 50% 34%, var(--color-ink-800), var(--color-ink-900) 78%);
   /* —— 订单状态 chip 文字夜宵档：深字压暗底不达 4.5:1，换浅色档（暗底上 clay-30/sage-30/浅梅灰均 ≥4.5） */
@@ -587,6 +755,47 @@ input, textarea { caret-color: var(--color-clay); }
   /* 遮罩与背景反相 */
   --scrim-top: rgba(36, 27, 33, 0.85);
   --glass-strong: rgba(46, 34, 41, 0.90); /* 停靠药丸：夜宵改为暗玻璃 */
+  /* —— 操作层真玻璃 · 夜宵档 ——
+     亮底玻璃靠「白雾 + 上缘高光」，暗底反过来：靠「边缘提亮 + 内壁微光」才读得出厚度。
+     tint 全部取夜纸同族（ink-850/800/900），不新造色；alpha 由对比度门禁守住。 */
+  --glass-blur-panel: 12px;
+  --glass-blur-ctl: 8px;
+  --glass-sat: 120%;  /* 夜宵提饱和会脏（暗底噪点被放大），只轻一档 */
+  /* 夜宵把「透过来的内容」整体压暗，而不是把 tint 拉厚。
+     第一版把 tint 推到 0.91 换对比度，结果是「看不见的假玻璃」——用户实测反馈零效果。
+     正解是 tint 放开到 0.48、用 brightness 掐输入端亮度：既真透，又保住浅色图标。 */
+  --glass-bright: 0.5;
+  /* ⚠ 夜宵档必须写字面 rgba，不能用 color-mix(… var(--color-ink-850) …)。
+     坑：Tailwind v4 的 Lightning CSS 会给 color-mix 额外生成一条「已算好的」静态回退，
+     而它按 :root 的值求 var()——**看不见 [data-theme="night"] 的覆盖**。
+     结果：不支持 color-mix 的浏览器（Safari <16.2 / 老 WebView）在夜宵态拿到的是
+     白天那档浅粉色，玻璃底变浅粉、亮字直接消失。实测证据见构建产物：
+     写 color-mix 时夜宵回退成 --glass-tint-panel:#fadce9e8（白天的 ink-850）。
+     既有 --glass-strong / --color-glass 夜宵档同样是字面 rgba，正是同一个规避手法。
+     需要「随主题反相 + 带 alpha」时，用字面值；只引用不反相的令牌（on-dark /
+     ink-fixed）时，color-mix 才安全。这条由 glass_contrast_gate.py 静态把关。 */
+  --glass-tint-panel: rgba(46, 34, 41, 0.26);   /* = 夜宵 ink-850 #2E2229 · veil 砍薄，可读性交给 brightness + halo */
+  --glass-tint-ctl: rgba(58, 43, 51, 0.24);     /* = 夜宵 ink-800 #3A2B33 */
+  --glass-tint-scrim: rgba(36, 27, 33, 0.62);   /* = 夜宵 ink-900 #241B21 */
+  /* 上缘高光：夜宵取 bone 的字面 rgba（不能对反相令牌用 color-mix，见文件内说明）。
+     --glass-rim-hi 在 :root 里写作 var(--glass-rim-color)，自定义属性是晚绑定，
+     所以这里只换颜色、不必再写一遍 inset。 */
+  --glass-rim-color: rgba(243, 236, 239, 0.55);
+  --glass-lens-panel: 14px;
+  --glass-lens-ctl: 7px;
+  --glass-ca-panel: 0.012;
+  --glass-frost-panel: 0.10;
+  --glass-spec: 0.9;
+  --glass-rim-lo: inset 0 -1.5px 0 rgba(36, 27, 33, 0.60);
+  --glass-inner-frost: inset 0 0 7px rgba(243, 236, 239, 0.10);
+  /* 夜宵光晕转成暗晕（治的是「白盘菜照片把玻璃抬亮、浅图标消失」那个方向）。
+     只覆盖颜色，--glass-halo 的定义留在 :root 用 var() 间接引用，避免两态各写一份。
+     字面值理由同 tint：不能对会反相的令牌用 color-mix。 */
+  --glass-halo-c: rgba(36, 27, 33, 0.96);
+  --glass-halo-soft: rgba(36, 27, 33, 0.55);
+  --glass-halo-rgb: #241B21;  /* 夜宵暗晕的色（字面，理由同 tint） */
+  --glass-sheen: linear-gradient(168deg, rgba(243, 236, 239, 0.12) 0%, transparent 36%, transparent 100%);
+  --ctl-plate-bed: var(--color-ink-850);
   --hero-wash-functional: rgba(36, 27, 33, 0.72);
   --hero-wash-immersive: linear-gradient(180deg, rgba(36,27,33,0.55) 0%, rgba(36,27,33,0.76) 22%, rgba(36,27,33,0.92) 46%, rgba(36,27,33,0.97) 100%);
   --body-bg: radial-gradient(120% 80% at 50% 0%, #33242C 0%, var(--color-ink-900) 55%, #1C1419 100%);
@@ -610,6 +819,32 @@ input, textarea { caret-color: var(--color-clay); }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   [data-theme="night"] .glass,
   [data-theme="night"] .d3-card-face { background: rgba(46, 34, 41, 0.94) !important; }
+  /* 操作层真玻璃的两态实底退路：没 blur 就没透明可谈，全部退回不透明纸面。
+     夜宵必须专门给暗档 —— --color-glass 夜宵值是 8% 白雾，脱离 blur 会直接透明掉。 */
+  .glass-op { background: var(--glass-strong); box-shadow: none; }
+  .glass-op--ctl { background: var(--color-glass); box-shadow: none; }
+  .glass-op--scrim { background: var(--glass-tint-scrim); }
+  [data-theme="night"] .glass-op { background: var(--color-ink-850); }
+  [data-theme="night"] .glass-op--ctl { background: var(--color-ink-800); }
+}
+
+/* 用户要求减少透明效果（macOS/iOS「降低透明度」）：玻璃让位给可读性。
+   这条比 @supports 回退更要紧 —— 它是真有人在系统里开着的开关。 */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-op,
+  .glass-op--ctl {
+    background: var(--color-glass);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+  .glass-op::before { display: none; }
+  .glass-op--scrim {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  [data-theme="night"] .glass-op,
+  [data-theme="night"] .glass-op--ctl { background: var(--color-ink-850); }
 }
 
 /* 输入框：亮底是"压暗 4%"，暗底改为"提亮 5%" */

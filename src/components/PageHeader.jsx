@@ -1,6 +1,8 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import Character from './ui/Character'
+import LiquidGlass from './LiquidGlass'
+import { useGlassRect, glassLayerStyle } from '../hooks/useGlassRect'
 import { useTheme } from '../theme/useTheme'
 
 /**
@@ -14,11 +16,15 @@ import { useTheme } from '../theme/useTheme'
  * 3. 返回钮/徽记容器统一糖果描边（2px）。
  * 4. 眉题 + 衬线大标题 + 底部贯通发丝线三件套不变（编辑杂志语言保留）。
  *
+ * 材质：`.glass-op--sticky` 的 CSS 玻璃保留（首帧 + WebGL2 不可用时的降级态），
+ * 其上再叠一层 WebGL 折射，页面下滚时菜品照片才能从栏底「弯」进来。
+ *
  * 注意：本组件的 sticky 依赖「页面包裹层不带 transform」，见 motion.js 的 pageEnter 说明。
  */
 export default function PageHeader({ title, eyebrow, subtitle, back = false, backTo, right, onBack }) {
   const navigate = useNavigate()
   const location = useLocation()
+  const { targetRef, rect } = useGlassRect()
   /* 批4 修 P1：分享单号/直接敲 #/dish/5 冷启动时这是首条历史，navigate(-1)=退出站点或死键；
      location.key==='default' 即"落地页无来路"，返回一律回首页。 */
   const goBack = () => {
@@ -30,17 +36,29 @@ export default function PageHeader({ title, eyebrow, subtitle, back = false, bac
 
   return (
     <motion.div
+      ref={targetRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
-      className="sticky top-0 z-40 overflow-hidden"
-      style={{
-        background:
-          'linear-gradient(180deg, var(--scrim-top) 0%, rgba(0,0,0,0) 100%)',
-        backdropFilter: 'blur(14px)',
-        WebkitBackdropFilter: 'blur(14px)',
-      }}
+      className="sticky top-0 z-40 overflow-hidden glass-op--sticky"
     >
+      {/* 通栏是直角条 → radius 显式给 0，别用组件默认的 --radius-card（那是内容卡 24px，
+          会在屏幕两侧露出圆角与 CSS 方的边对不上）。 */}
+      <LiquidGlass rect={rect} variant="panel" radius={0} style={glassLayerStyle} />
+
+      {/* 吸顶渐隐：从 .glass-op--sticky 的宿主背景**搬进来成独立子层**。
+          宿主背景画在负 z 的玻璃层**之下**（CSS 绘制顺序：宿主背景 → 负 z 子层 →
+          内容），所以写在宿主 style 上时，88% 的 scrim 会被 WebGL 玻璃整个盖掉，
+          吸顶栏在浅色页顶上糊成一条深灰带。改成兄弟节点后：玻璃在下、渐隐在上，
+          WebGL 缺席时这块渐变照样在（降级态不变样）。 */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(180deg, var(--scrim-top) 0%, rgba(0,0,0,0) 100%)',
+        }}
+      />
+
       {/* 羊毛机顶：云朵下缘朝下卷进页头 */}
       <div className="wool-edge" aria-hidden="true" />
 

@@ -60,8 +60,8 @@ function NotFound() {
   return (
     <div className="flex flex-col items-center justify-center text-center" style={{ gap: 10, padding: '22vh var(--space-page-x) 0' }}>
       <div style={{ fontSize: 40 }} aria-hidden>🧭</div>
-      <p className="font-serif text-xl font-bold text-[var(--color-bone)]">这条走道没连着厨房</p>
-      <p className="text-xs text-[var(--color-ash)]">地址页不存在，回首页点菜吧~</p>
+      <p className="font-serif text-xl font-bold text-[var(--color-bone)]" style={{ textWrap: 'balance' }}>这条走道没连着厨房</p>
+      <p className="text-xs text-[var(--color-ash)]" style={{ textWrap: 'balance' }}>地址页不存在，回首页点菜吧~</p>
       <a href="#/home" role="button"
         className="d3-btn d3-btn-primary font-bold text-sm no-underline"
         style={{ marginTop: 10, padding: '10px 26px', minHeight: 44, color: 'var(--color-on-dark)' }}>
@@ -104,7 +104,10 @@ function App() {
     <CartProvider>
       {/* M-k1：全站 framer 动画在系统 reduced-motion 下自动禁 transform、保留 opacity，兑现 PRODUCT.md 承诺 */}
       <MotionConfig reducedMotion="user">
+      {/* data-bd-layer：这块纸底会整屏盖住 html/body 的 --body-bg + 颗粒，
+          WebGL 玻璃按文档顺序重放层叠时必须包含它，否则采到的是被盖住的底。 */}
       <div
+        data-bd-layer=""
         className="min-h-screen mx-auto relative border-x border-[var(--color-glass-border)] bg-[var(--color-ink-900)]"
         style={{ maxWidth: 'var(--shell-w)' }}
       >

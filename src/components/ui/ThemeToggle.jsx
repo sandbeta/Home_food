@@ -10,6 +10,11 @@ import Icon from './Icons'
  */
 export default function ThemeToggle() {
   const { isNight, toggle } = useTheme()
+  /* 这块**刻意不接 WebGL 玻璃**，只留 CSS 那层。实测理由：
+     41px 的圆钮上 lensW≈1 铺满整块表面，shader 按「边缘清、中心糊」在那里显示的是
+     **未糊**的场景，而 CSS 降级层糊 6px —— 两条链路在「身后是文字」时差 −0.106 亮度
+     （measure_glass_gap light /menu y=0 .glass-op--ctl，纯玻璃一趟）。
+     根因是场景纹理里没有字形（见 progress.txt US-004 末节）。等纹理补齐文字层再接。 */
   return (
     <motion.button
       whileTap={{ scale: 0.9 }}
@@ -17,15 +22,12 @@ export default function ThemeToggle() {
       role="switch"
       aria-checked={isNight}
       aria-label={isNight ? '切回晨光模式' : '开启夜宵模式'}
-      className="w-11 h-11 rounded-full flex items-center justify-center"
-      style={{
-        background: 'var(--color-glass)',
-        border: '2px solid var(--color-line)',
-        boxShadow: 'var(--shadow-1)',
-        color: isNight ? 'var(--color-love)' : 'var(--color-clay)',
-      }}
+      className="relative w-11 h-11 rounded-full flex items-center justify-center glass-op glass-op--ctl"
+      style={{ color: isNight ? 'var(--color-love)' : 'var(--color-clay)' }}
     >
-      <Icon name={isNight ? 'moon' : 'sun'} size={20} strokeWidth={1.9} filled={isNight} />
+      <span className="glass-halo">
+        <Icon name={isNight ? 'moon' : 'sun'} size={20} strokeWidth={1.9} filled={isNight} />
+      </span>
     </motion.button>
   )
 }

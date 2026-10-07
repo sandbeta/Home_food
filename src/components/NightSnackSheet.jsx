@@ -28,6 +28,19 @@ const shuffleTake = (arr, n) => {
   return a.slice(0, n)
 }
 
+/* 交接 §5：本抽屉夜宵自动弹出、且整晚高频出现，实底卡面把停靠药丸整块盖住——
+   用户夜里想切页必须先关掉推荐。改成悬浮在停靠行之上（bottom 用 --bottom-inset，
+   正是为「CTA 避开 dock 行」而生的令牌），药丸在遮罩下可见可读；点击仍归模态管。
+   升起动画随之定制：sheetUp 的 y:'100%' 只在贴底（bottom-0）时完全出屏，
+   抬了 --bottom-inset 就要多走这段距离——150% 要求卡高 ≥ (16+72+safe-bottom)/0.5 ≈ 208px，
+   实际卡体（标题行 + 六宫格两行 + CTA）300px 起，位移后整张沉到屏底之下、从药丸背后退出。 */
+const sheetUpDocked = {
+  initial: { y: '150%' },
+  animate: { y: 0 },
+  exit: { y: '150%' },
+  transition: sheetUp.transition,
+}
+
 export default function NightSnackSheet() {
   const { isNight } = useTheme()
   const { addItem } = useCart()
@@ -65,6 +78,7 @@ export default function NightSnackSheet() {
 
   const panelRef = useDialogA11y(open, close)
 
+
   if (!dishes.length) return null
 
   return createPortal(
@@ -73,17 +87,15 @@ export default function NightSnackSheet() {
         <>
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={close} className="fixed inset-0 z-50"
-            style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,36,41,0.35)' }}
-          />
+            onClick={close} className="fixed inset-0 z-50 glass-op--scrim" />
           <motion.div
             ref={panelRef}
             role="dialog" aria-modal="true" aria-label="深夜食堂宵夜推荐" tabIndex={-1}
-            {...(reduced ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
-            className="fixed bottom-0 left-0 right-0 mx-auto z-50 focus:outline-none"
-            style={{ maxWidth: 'var(--shell-w)' }}
+            {...(reduced ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUpDocked)}
+            className="fixed left-0 right-0 mx-auto z-50 focus:outline-none"
+            style={{ maxWidth: 'var(--shell-w)', bottom: 'var(--bottom-inset)' }}
           >
-            <div className="d3-card-face rounded-t-3xl overflow-hidden" style={{ borderRadius: 'var(--radius-sheet) var(--radius-sheet) 0 0' }}>
+            <div className="d3-card-face overflow-hidden" style={{ borderRadius: 'var(--radius-sheet)', maxHeight: 'calc(100dvh - var(--bottom-inset) - 12px)', overflowY: 'auto' }}>
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-12 h-1.5 rounded-full" style={{ background: 'linear-gradient(90deg, color-mix(in srgb, var(--color-clay) 14%, transparent), var(--color-clay), color-mix(in srgb, var(--color-clay) 14%, transparent))' }} />
               </div>
@@ -102,7 +114,7 @@ export default function NightSnackSheet() {
                   </div>
                 </div>
                 <button onClick={close} aria-label="关闭夜宵推荐"
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform border-2 border-[var(--color-line)] bg-[var(--color-glass)]">
+                  className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform glass-op glass-op--ctl">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                 </button>
               </div>
@@ -126,9 +138,9 @@ export default function NightSnackSheet() {
                 ))}
               </div>
 
-              {/* 批4 修 P1：原 pb-7(28px) 顶不过 iPhone 34px 手势条——主 CTA 下沿落进上滑手势带，
-                  与同族其余四张 sheet 的 safe-area 算法对齐 */}
-              <div className="px-5 pt-3" style={{ paddingBottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 12px)' }}>
+              {/* 悬浮卡不再贴手势条：批4 的 max(env(safe-area-inset-bottom),16px)+12 由整卡的
+                  bottom:--bottom-inset 统一避让，卡内只留常规 16px 收边 */}
+              <div className="px-5 pt-3 pb-4">
                 <motion.button whileTap={tapScale} onClick={goAll}
                   className="d3-btn d3-btn-primary w-full py-3 text-sm">
                   去菜单看全店夜宵 →

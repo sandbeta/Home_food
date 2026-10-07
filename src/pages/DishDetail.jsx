@@ -55,6 +55,7 @@ export default function DishDetail() {
         setFetchErr(notfound ? 'notfound' : 'network')
         setLoading(false)
       })
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- 有意只依赖 id/reload：dish 是本 effect 自己 set 的状态，加进 deps 会无限重取；缓存命中不闪加载态靠此保证
   }, [id, reload])
 
   const handleAdd = () => {
@@ -112,7 +113,7 @@ export default function DishDetail() {
             onClick={() => toggle(dish)}
             aria-label={has(dish.id) ? '取消收藏' : '收藏'}
             aria-pressed={has(dish.id)}
-            className="w-11 h-11 rounded-full flex items-center justify-center glass"
+            className="w-11 h-11 rounded-full flex items-center justify-center ctl-plate"
           >
             <motion.span
               animate={has(dish.id) ? { scale: [1, 1.3, 1] } : { scale: 1 }}

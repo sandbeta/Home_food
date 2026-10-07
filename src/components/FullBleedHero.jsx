@@ -37,9 +37,13 @@ export default function FullBleedHero({ src, variant = 'immersive', alt = '', ch
             : 'var(--hero-filter-immersive)',
         }}
       />
-      {/* 晨光浅叠层：顶部保留照片氛围，往下溶入暖骨白，避免花哨底图与玻璃卡硬碰硬 */}
+      {/* 晨光浅叠层：顶部保留照片氛围，往下溶入暖骨白，避免花哨底图与玻璃卡硬碰硬。
+          data-bd-layer 是给 WebGL 玻璃看的标记 —— 玻璃身后是什么颜色由这层决定
+          （白天 74% 粉、夜宵 72% 黑），纹理不重现它，折射采到的就是没洗过的原片。 */}
       <div
+        data-bd-layer=""
         className="absolute inset-0"
+        aria-hidden="true"
         style={{
           background: functional
             ? 'var(--hero-wash-functional)'

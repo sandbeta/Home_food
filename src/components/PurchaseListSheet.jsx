@@ -62,8 +62,7 @@ export default function PurchaseListSheet({ open, onClose, items }) {
   return createPortal(
     <AnimatePresence>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        onClick={onClose} className="fixed inset-0 z-50"
-        style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,36,41,0.35)' }} />
+        onClick={onClose} className="fixed inset-0 z-50 glass-op--scrim" />
       <motion.div ref={panelRef}
         role="dialog" aria-modal="true" aria-label="采购清单" tabIndex={-1}
         {...(reduce ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
@@ -83,7 +82,7 @@ export default function PurchaseListSheet({ open, onClose, items }) {
               </p>
             </div>
             <button onClick={onClose} aria-label="关闭采购清单"
-              className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] border-2 border-[var(--color-line)] bg-[var(--color-glass)]">
+              className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] glass-op glass-op--ctl">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
             </button>
           </div>
