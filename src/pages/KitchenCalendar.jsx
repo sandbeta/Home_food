@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
@@ -195,8 +196,10 @@ export default function KitchenCalendar() {
         )}
       </PageContainer>
 
-      {/* 某日订单底部 sheet */}
-      <AnimatePresence>
+      {/* 某日订单底部 sheet —— 必须 portal：本页在 <main class="relative z-10"> 的层叠上下文内，
+          而 sheet 是 fixed bottom-0，不逃到 body 就会被兄弟节点 DockLayer(z-50) 永久盖住底部补分区 */}
+      {createPortal(
+        <AnimatePresence>
         {selectedDay && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -259,7 +262,9 @@ export default function KitchenCalendar() {
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   )
 }

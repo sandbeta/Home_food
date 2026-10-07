@@ -122,16 +122,25 @@ export default function Menu() {
   // 批4 修 P1：场景/分类筛选在收藏签同样生效（收藏快照带 category；夜宵按名判定也成立）——
   // 原实现收藏签下 chip 可点、有激活态、还白发一次请求，但列表纹丝不动 = 一排死控件。
   const [allDishes, setAllDishes] = useState([])   // 批4：收藏签刷新快照用（与 catCounts 同一次请求）
+  /* 该请求是「静默位点」（失败只不动 catCounts），但收藏签的 join 拿它当唯一真源——
+     未落地时 allDishes 是空数组，直接 join 会把每条收藏都映射成 null 被滤光。 */
+  const [allDishesReady, setAllDishesReady] = useState(false)
   const filteredDishes = useMemo(() => {
     const q = keyword.trim().toLowerCase()
     let base
     if (isFavScope) {
       // 批4 修 P1：收藏是快照存储——用 /api/dishes/all 现物刷新（改名/改价跟随，
-      // 下架或已删除的从列表摘除，不再"能看见、点得到、下不了单"）
-      const live = new Map(allDishes.map(d => [Number(d.id), d]))
-      base = favorites
-        .map(f => { const l = live.get(Number(f.id)); return l ? { ...f, ...l } : null })
-        .filter(d => d && Number(d.available) !== 0)
+      // 下架或已删除的从列表摘除，不再"能看见、点得到、下不了单"）。
+      // 但刷新源未落地/请求失败时宁可短暂陈旧，也不能把收藏整块吞掉（收藏是 PRODUCT.md
+      // 写明不可移除的核心语义）——空数组当 join 源会把每条收藏都映射成 null。
+      if (allDishesReady) {
+        const live = new Map(allDishes.map(d => [Number(d.id), d]))
+        base = favorites
+          .map(f => { const l = live.get(Number(f.id)); return l ? { ...f, ...l } : null })
+          .filter(d => d && Number(d.available) !== 0)
+      } else {
+        base = [...favorites]
+      }
       if (activeScene) base = scenePick(base, activeScene)
       if (activeCategory === '夜宵') base = base.filter(isNightSnack)
       else if (activeCategory && activeCategory !== '全部') base = base.filter(d => d.category === activeCategory)
@@ -140,7 +149,7 @@ export default function Menu() {
     }
     if (!q) return base
     return base.filter(d => `${d.name} ${d.category} ${d.description || ''}`.toLowerCase().includes(q))
-  }, [isFavScope, favorites, dishes, keyword, activeScene, activeCategory, allDishes])
+  }, [isFavScope, favorites, dishes, keyword, activeScene, activeCategory, allDishes, allDishesReady])
 
   // /favorites 旧链接会重定向到 /menu?fav=1；若此时已停在 /menu（组件未重挂载），这里热同步页签
   useEffect(() => {
@@ -168,7 +177,7 @@ export default function Menu() {
       const m = {}
       list.forEach(d => { if (Number(d.available) !== 0) m[d.category] = (m[d.category] || 0) + 1 })
       setCatCounts(m)
-    }).catch(() => {})
+    }).catch(() => {}).finally(() => setAllDishesReady(true))
   }, [])
   const visibleCats = (items) => (catCounts ? items.filter(cat => cat === '全部' || cat === '夜宵' || (catCounts[cat] || 0) > 0) : items)
 

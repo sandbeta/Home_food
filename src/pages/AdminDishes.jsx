@@ -335,9 +335,13 @@ export default function AdminDishes() {
               style={{ background: 'color-mix(in srgb, var(--color-ash) 24%, transparent)', color: 'var(--color-on-dark)', border: '2px solid color-mix(in srgb, var(--color-ash) 40%, transparent)' }}>
               下架
             </button>
+            {/* 取消是这条批量条唯一的退出口，必须是全条最易读的字。
+                原写法 on-dark + opacity .8 且自身无底，直接压在 --anchor-ink 上——
+                而那个令牌其实是 clay-60→clay-80 的玫瑰渐变（不是墨底），
+                实算 3.47:1（顶部白高光处更低），两态同不达标。给它实底 chip 后与兄弟钮同构。 */}
             <button onClick={() => { setSelected(new Set()); setBatchMode(false) }}
               className="px-3 py-2 min-h-[44px] rounded-full text-xs font-bold"
-              style={{ color: 'var(--color-on-dark)', opacity: 0.8 }}>取消</button>
+              style={{ background: 'var(--clay-deep)', color: 'var(--color-on-dark)' }}>取消</button>
           </motion.div>
         )}
       </AnimatePresence>

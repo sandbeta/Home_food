@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import useDialogA11y from '../lib/useDialogA11y'
 import { sheetUp, usePrefersReducedMotion } from '../theme/motion'
@@ -44,7 +45,10 @@ export default function WishFormModal({ open, onClose, onSubmitted }) {
     }
   }
 
-  return (
+  /* createPortal 是必需的：本组件挂在 <main class="relative z-10"> 内，那个 z-index
+     会造层叠上下文，sheet 内部写多高的 z 都出不去；而 DockLayer 是 main 的兄弟 + z-50，
+     于是「送到他的厨房」提交钮会被导航药丸永久盖住（sheet 是 fixed，滚窗口也躲不开）。 */
+  return createPortal(
     <AnimatePresence>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="fixed inset-0 z-50 glass-op--scrim" />
@@ -99,6 +103,7 @@ export default function WishFormModal({ open, onClose, onSubmitted }) {
           </form>
         </div>
       </motion.div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   )
 }
