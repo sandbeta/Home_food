@@ -172,7 +172,7 @@ export default function NightHome() {
             }
           />
         )}
-        {/* 深夜主推 —— 娃娃机宵夜变体：无泡泡时钟（安静陪吃），堆里随机抓、抓走的补货 */}
+        {/* 深夜主推 —— 娃娃机夜市限定：白天首页已换掀锅盖，这台机只在深夜开张；无泡泡时钟（安静陪吃），堆里随机抓、抓走的补货 */}
         {pool.length > 0 && (
           <div>
             <ClawMachine
@@ -182,8 +182,8 @@ export default function NightHome() {
               onOpen={activeDish ? () => navigate(`/dish/${activeDish.id}`) : undefined}
               onActiveChange={setActiveDish}
               showClock={false}
-              title="深夜宵夜机"
-              note="深夜主推 · 安静陪吃"
+              title="深夜娃娃机 · 夜市限定"
+              note="深夜主推 · 夜市限定，安静陪吃"
             />
             {/* 批 3c · 分享"上一个抓到的菜"（与白天 Home 对齐） */}
             {activeDish && (

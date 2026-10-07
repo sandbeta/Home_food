@@ -20,7 +20,7 @@ web
 - 只服务一个家庭：数据不出家门（本地 Node 服务端 + state.json 原子持久化），可选双击 exe 启动。
 - 双人格机制：我(🐱) / TA(🐑) 两套人格色贯穿购物车、买单（AA/我请/TA请）、收藏。
 - 男朋友视角文案：所有页头标题/情话从 `sweetCopy.js` 文案池随机抽取，昵称固定「懒洋洋」。
-- 真实内容量级：432 道菜（含 25 道夜宵种子）、342 份懒加载菜谱（原料/步骤/难度/卡路里），菜品预览图 231/432 为真实照片（HowToCook 实拍 + Wikimedia CC），其余 emoji 占位。
+- 真实内容量级：432 道菜（含 25 道夜宵种子）、432 份懒加载菜谱全覆盖（原料/步骤/难度/卡路里，批7 起老种子菜也补齐），菜品预览图 235/432 为真实照片（HowToCook 实拍 + Wikimedia CC，REAL_IMAGE_OVERRIDES 82 条），其余 emoji 占位。
 
 ## Operating Context
 
@@ -49,7 +49,7 @@ web
 ## Evidence on Hand
 
 - 代码仓库：`E:\晨光厨房-交付包\extracted`（HEAD 见 git log；工作区状态以 git 为准）。
-- 数据：432 道菜种子、342 份菜谱、真实图 231 张（`public/dish-images/`：htc/ 169、real/ 35、dish-*.webp 11）。
+- 数据：432 道菜种子、432 份菜谱全覆盖、真实图 235/432（`public/dish-images/`：htc/ 169、real/ 55、dish-*.webp 11 实拍覆盖；REAL_IMAGE_OVERRIDES 82 条）。
 - 文档：`PROJECT-HANDOFF-晨光厨房.md`（全量）+ 两份会话交接（2026-09-17 / 09-18）。
 - 组件资产：`ui/LazySheep.jsx`（自绘懒羊羊 v2，四表情）、`ui/Icons.jsx`（细线 SVG 图标集）。
 - 参考图：所有者提供的 10 张懒羊羊官方设计图（抓娃娃机主题 + 治愈养成图鉴主题，©ALPHA，已授权本项目使用）。

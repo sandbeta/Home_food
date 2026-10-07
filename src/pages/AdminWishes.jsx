@@ -39,6 +39,7 @@ export default function AdminWishes() {
       .then(d => { setWishes(Array.isArray(d) ? d : []); setLoading(false) })
       .catch(() => { setLoading(false); setErr('愿望池没加载出来') })
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- 有意只依赖 tab：load 是每渲染新建的函数，加进 deps 会重复请求；tab 切换才需重载
   useEffect(() => { load() }, [tab])
 
   const markAdded = (w) => {

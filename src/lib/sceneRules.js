@@ -8,9 +8,11 @@
 
 export const SCENES = [
   // 辣系：麻辣香辣酸辣 + 剁椒/水煮/麻婆等显性辣菜
-  { key: 'spicy', label: '今晚吃辣', re: /(辣|椒|剁椒|水煮|麻婆|毛血旺|干煸|麻辣|火鸭|泰式|咖喱|螺蛳|泡椒|剁椒|爆炒|辣炒)/ },
+  // P2 误伤排除：水煮蛋/水煮鸡蛋含"水煮"但本身不辣（白水煮蛋），不进吃辣
+  { key: 'spicy', label: '今晚吃辣', re: /(辣|椒|剁椒|水煮|麻婆|毛血旺|干煸|麻辣|火鸭|泰式|咖喱|螺蛳|泡椒|剁椒|爆炒|辣炒)/, exclude: /^(水煮蛋|水煮鸡蛋)$/ },
   // 清淡：蒸煮灼拌与素汤系
-  { key: 'light', label: '清淡点', re: /(清蒸|白灼|凉拌|沙拉|丝瓜|冬瓜|黄瓜|生菜|木耳|豆腐脑|豆腐|蒸蛋|水蒸|汤|粥|焯)/ },
+  // P2 误伤排除：麻婆豆腐含"豆腐"但重麻重辣，不进清淡
+  { key: 'light', label: '清淡点', re: /(清蒸|白灼|凉拌|沙拉|丝瓜|冬瓜|黄瓜|生菜|木耳|豆腐脑|豆腐|蒸蛋|水蒸|汤|粥|焯)/, exclude: /(麻婆|麻辣)/ },
   // 快手：十分钟内出锅的家常快手与半成品
   { key: 'quick', label: '快手菜', re: /(炒蛋|蛋炒饭|炒饭|炒面|炒粉|炒河粉|拌面|凉面|凉皮|泡面|方便面|煎蛋|蒸蛋|紫菜|蛋汤|三明治|吐司|速冻|微波|手抓饼|煎饺|蛋包饭|炒年糕)/ },
   // 仪式感：宴客硬菜与海陆珍馐
@@ -21,5 +23,5 @@ export const SCENES = [
 export function scenePick(dishes, key) {
   const scene = SCENES.find((s) => s.key === key)
   if (!scene) return dishes || []
-  return (dishes || []).filter((d) => d.name && scene.re.test(d.name))
+  return (dishes || []).filter((d) => d.name && scene.re.test(d.name) && !(scene.exclude && scene.exclude.test(d.name)))
 }

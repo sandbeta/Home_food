@@ -73,7 +73,7 @@ export default function EmptyState({ emoji = '🍽️', icon, who, title, desc, 
         <p className="text-base text-[var(--color-bone)] mb-1 font-bold relative z-10" style={isError ? { color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' } : undefined}>{title}</p>
       )}
       {desc && (
-        <p className="text-sm text-[var(--color-ash)] mb-6 relative z-10 text-center px-6 leading-relaxed">
+        <p className="text-sm text-[var(--color-ash)] mb-6 relative z-10 text-center px-6 leading-relaxed" style={{ textWrap: 'balance' }}>
           {desc}
         </p>
       )}

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
-import ClawMachine from '../components/ClawMachine'
+import PotReveal from '../components/PotReveal'
 import KissIcon from '../components/KissIcon'
 import PageContainer from '../components/ui/PageContainer'
 import SectionHeader from '../components/ui/SectionHeader'
@@ -21,6 +21,7 @@ import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 import { useCart } from '../components/CartContext'
 import { useClawSignals } from '../hooks/useClawSignals'
 import { requestJson } from '../lib/request'
+import { vibrate } from '../lib/sfx'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -41,12 +42,12 @@ function chefOfFrom(eatStats, dish) {
 }
 
 /**
- * 首页 —— 「娃娃机 + 常点的网格 + 最近订单」，约 1 屏出头。
+ * 首页 —— 「掀锅盖 + 常点的网格 + 最近订单」，约 1 屏出头。
  *
- * 批 8（V4 现实娃娃机）：娃娃机内部自己管理"堆里 8 个槽位 + 随机抓一个 + 抓走的槽刷新补货"，
- * Home 只负责把候选池 rotSource 传下去（pool）、接住"上一个抓到的菜"（onActiveChange，供分享卡/跳详情），
- * 以及加购/撤销。旧的 rotIdx 顺序轮换、自动换主推、播放/暂停钮全部移除——现实娃娃机不会自己抓。
- * 「常点的」网格保持静止（那是"你家稳定爱吃的那几道"——真实订单份数聚合，够 6 道才配这个标题）。
+ * 签名件为掀锅盖上菜（娃娃机已退守深夜食堂做夜市限定）：
+ * PotReveal 内部管理"当前主推 + 揭晓演出 + 落袋加购"，Home 只负责把候选池
+ * rotSource 传下去、接住"上一道端上的菜"（onActiveChange，供分享卡/跳详情），
+ * 以及加购/撤销。「常点的」网格保持静止（那是"你家稳定爱吃的那几道"——真实订单份数聚合，够 6 道才配这个标题）。
  */
 export default function Home() {
   const [recentOrders, setRecentOrders] = useState([])
@@ -70,7 +71,7 @@ export default function Home() {
       setSweetNote(pickOne(ANNIVERSARY_NOTES))
     }
   }, [todayHit])
-  // 纪念日绑定的"回忆里那道菜"（横幅跳详情用，独立于娃娃机）
+  // 纪念日绑定的"回忆里那道菜"（横幅跳详情用，独立于锅里主推）
   const hitDish = useMemo(() => {
     if (!todayHit || !todayHit.dish_id) return null
     return dishes.find(d => d.id === Number(todayHit.dish_id)) || null
@@ -87,9 +88,9 @@ export default function Home() {
 
   const navigate = useNavigate()
   const { addItem, items, whoAmI, updateQuantity } = useCart()
-  // M-s2：撤销按【抓取那一刻】的人格快照减，避免浮标窗口内切人格错减
+  // M-s2：撤销按【端上那一刻】的人格快照减，避免浮标窗口内切人格错减
   const lastCatchPersonaRef = useRef(whoAmI)
-  /* 批 8 · 娃娃机"上一个抓到的菜"由 ClawMachine 内部随机抓取产生，回传给 Home 供分享卡/跳详情 */
+  /* 批 8 · 锅里"上一道端上的菜"由 PotReveal 揭晓演出产生，回传给 Home 供分享卡/跳详情 */
   const [activeDish, setActiveDish] = useState(null)
   const [shareOpen, setShareOpen] = useState(false)
 
@@ -104,7 +105,7 @@ export default function Home() {
       .catch(() => { setRecentOrders([]); setOrdersAll([]) })
     requestJson('/api/dishes?category=全部').then(r => r.json())
       .then(d => {
-        // 带实拍图的菜排前，娃娃机堆/主推更有图；Fisher-Yates 无偏洗牌
+        // 带实拍图的菜排前，锅里主推更有图；Fisher-Yates 无偏洗牌
         const shuf = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]] } return a }
         const list = [...shuf(d.filter(x => getDishImage(x))), ...shuf(d.filter(x => !getDishImage(x)))]
         setDishes(list); cacheList('home', list)
@@ -146,7 +147,7 @@ export default function Home() {
   const gridIsFrequent = useMemo(
     () => dishes.filter((d) => (eatStats.get(Number(d.id))?.qty || 0) > 0).length >= 6,
     [dishes, eatStats])
-  // 网格占用的菜从娃娃机候选池剔除（按 id 集合，避免同菜同时出现在网格和堆里）
+  // 网格占用的菜从候选池剔除（按 id 集合，避免同菜同时出现在网格和锅里）
   const rotSource = useMemo(() => {
     const ids = new Set(popular.map((d) => Number(d.id)))
     const pool = dishes.filter((d) => !ids.has(Number(d.id)))
@@ -157,7 +158,7 @@ export default function Home() {
      批 9：再把「今日心情」作为第四源喂进去（clawPool.MOOD_WEIGHTS）；心情为空时分布与接入前一致。 */
   const { pool: clawPool } = useClawSignals(rotSource, { todayDishId: todayHit?.dish_id ?? null, mood })
 
-  // 撤销一次"抓取即加购"：按抓取那一刻的人格快照减数量
+  // 撤销一次"端上即加购"：按端上那一刻的人格快照减数量
   const undoCatch = useCallback((dish) => {
     const personaAt = lastCatchPersonaRef.current
     const cur = items.find(i => i.dish_id === dish.id && i.added_by === personaAt)?.quantity ?? 0
@@ -199,10 +200,10 @@ export default function Home() {
             onOpenDish={hitDish ? () => navigate(`/dish/${hitDish.id}`) : undefined}
           />
         )}
-        {/* 批 8 · 现实娃娃机：堆里 8 个槽位随机抓、抓走的补货；Home 传候选池 + 接住抓到的菜 */}
+        {/* 掀锅盖上菜：锅里扣着今日主推，点盖揭晓、落袋加购；Home 传候选池 + 接住端上的菜 */}
         {rotSource.length > 0 && (
           <div>
-            <ClawMachine
+            <PotReveal
               pool={clawPool}
               onCatch={onCatch}
               onUndo={undoCatch}
@@ -273,8 +274,6 @@ export default function Home() {
                     key={dish.id}
                     whileTap={{ scale: 0.97 }}
                     onClick={(e) => morphTo(navigate, `/dish/${dish.id}`, e, dish, '/home')}
-                    role="button" tabIndex={0} aria-label={`查看${dish.name}详情`}
-                    onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); navigate(`/dish/${dish.id}`) } }}
                     className="vt-dish-host d3-card-face cursor-pointer flex items-center gap-3 relative"
                     style={{ padding: 'var(--space-card-p)' }}
                   >
@@ -303,12 +302,27 @@ export default function Home() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-[var(--color-bone)] truncate">{dish.name}</p>
+                      <button type="button"
+                        onClick={(e) => { e.stopPropagation(); morphTo(navigate, `/dish/${dish.id}`, e, dish, '/home') }}
+                        aria-label={`查看${dish.name}详情`}
+                        className="text-sm font-bold text-[var(--color-bone)] truncate text-left w-full"
+                        style={{ background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}>
+                        {dish.name}
+                      </button>
                       <div className="flex items-center gap-1 mt-0.5">
                         <KissIcon className="w-3 h-3 text-[var(--color-love)]" />
                         <span className="font-serif text-sm font-bold text-[var(--color-caramel)] tabular-nums"><span className="text-[0.75em] mr-px">¥</span>{dish.price}</span>
                       </div>
                     </div>
+                    <motion.button
+                      whileTap={{ scale: 0.92 }}
+                      onClick={(e) => { e.stopPropagation(); addItem(dish); vibrate(12); try { window.__cgAnnounce?.(`已加购${dish.name}`) } catch {} }}
+                      aria-label={`加购${dish.name}`}
+                      className="w-11 h-11 rounded-full shrink-0 flex items-center justify-center text-xl font-bold text-[var(--color-on-dark)]"
+                      style={{ background: 'var(--color-clay)' }}
+                    >
+                      +
+                    </motion.button>
                   </motion.div>
                 )
               })}
@@ -363,7 +377,7 @@ export default function Home() {
       <div aria-hidden="true" style={{ flex: '1 1 auto', minHeight: 'var(--space-section)' }} />
       <div aria-hidden="true" className="grass-hem relative z-[2]" />
 
-      {/* 批 3c · 今日菜卡分享（分享"上一个抓到的菜"） */}
+      {/* 批 3c · 今日菜卡分享（分享"上一道端上的菜"） */}
       <DishShareCard
         open={shareOpen}
         onClose={() => setShareOpen(false)}

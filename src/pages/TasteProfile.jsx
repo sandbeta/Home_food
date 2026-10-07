@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import PageHeader from '../components/PageHeader'
 import PageContainer from '../components/ui/PageContainer'
 import FullBleedHero from '../components/FullBleedHero'

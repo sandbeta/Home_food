@@ -411,6 +411,7 @@ export default function ClawMachine({
         <div className="relative mx-3">
           <motion.div
             ref={caseRef}
+            data-bd-layer=""
             className="claw-case relative overflow-hidden cursor-pointer"
             style={{ height: 264, border: '2px solid var(--color-line)', borderRadius: 'var(--radius-tile)' }}
             animate={shakeControls}
@@ -618,7 +619,7 @@ export default function ClawMachine({
               </span>
             </div>
             <motion.button whileTap={{ scale: 0.93 }} onClick={(e) => { e.stopPropagation(); runGrab(-1) }} disabled={grabbing}
-              aria-label="随机领取一道" className="font-serif text-sm font-bold px-4 py-2.5 rounded-full inline-flex items-center justify-center min-h-[44px]"
+              aria-label="随机领取一道（夜市限定机）" className="font-serif text-sm font-bold px-4 py-2.5 rounded-full inline-flex items-center justify-center min-h-[44px]"
               style={{ background: 'var(--color-clay)', color: 'var(--color-on-dark)', border: '2px solid var(--clay-deep)',
                 boxShadow: '0 4px 12px color-mix(in srgb, var(--color-clay) 30%, transparent), inset 0 1px 0 rgba(255,255,255,0.25)', opacity: grabbing ? 0.6 : 1 }}>
               {grabbing ? '抓取中…' : '领取'}

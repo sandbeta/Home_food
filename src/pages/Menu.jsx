@@ -24,6 +24,11 @@ import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 import { requestJson } from '../lib/request'
 import { EASE, usePrefersReducedMotion } from '../theme/motion'
 
+/* +1 飘升粒子的 id 源：模块级递增计数器。
+   替代旧的 Date.now()+Math.random()——该写法在 1.7e12 量级上双精度低位被舍掉，
+   同毫秒连点能撞出同一个 id（实测 React "two children with the same key"），见 spawnParticle。 */
+let particleSeq = 0
+
 /* M-k3 修：读屏用户完全听不出当前谁在点菜——这是全站加购归属人格的关键状态。
    改 role=radiogroup + role=radio + aria-checked，emoji span aria-hidden 避免「猫脸」被朗读。
    M-t3 修：两钮 min-h-[44px]（原 py-2 高约 38，未达触摸线）。 */
@@ -170,7 +175,10 @@ export default function Menu() {
   const spawnParticle = (x, y) => {
     tap()
     vibrate(8)
-    const id = Date.now() + Math.random()
+    // ⚠ 别改回 Date.now()+Math.random()：1.7e12 量级上双精度间隔≈0.000244，
+    //   随机数低位被舍掉，同毫秒连点能撞出完全相同的 id（实测 "two children with the same key"）。
+    //   递增计数器与时间无关，绝对唯一；粒子 620ms 即清除，seq 只增不减也不会复用。
+    const id = ++particleSeq
     const orb = document.getElementById('cart-orb')
     let tx, ty
     if (orb) { const r = orb.getBoundingClientRect(); tx = r.left + r.width / 2; ty = r.top + r.height / 2 }

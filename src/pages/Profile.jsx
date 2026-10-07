@@ -16,7 +16,6 @@ import LazySheep from '../components/ui/LazySheep'
 import { requestJson } from '../lib/request'
 import { nextAnniversary, anniversariesToday, formatAnniDate } from '../lib/anniversary'
 import { PRESET_AVOIDS, readAvoids, writeAvoids } from '../lib/avoid'
-import { readFridge } from '../lib/fridge'
 import { computeAchievements, ACHIEVEMENTS } from '../lib/achievements'
 import Chip from '../components/ui/Chip'
 

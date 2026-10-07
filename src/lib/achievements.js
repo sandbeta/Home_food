@@ -74,7 +74,6 @@ export function computeAchievements(orders, dishCats, ratings, dishNames) {
   const catOf = (it) => it.category || (dishCats && typeof dishCats.get === 'function' ? dishCats.get(Number(it.dish_id)) : '') || ''
   const sorted = [...orders].sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
   const first = sorted[0]
-  const last = sorted[sorted.length - 1]
 
   // first
   out.first = { unlocked: true, at: first.created_at }

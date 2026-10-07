@@ -237,6 +237,7 @@ const REAL_IMAGE_OVERRIDES = {
   906: '/dish-images/real/906.webp',
   907: '/dish-images/real/907.webp',
   908: '/dish-images/real/908.webp',
+  909: '/dish-images/real/909.webp',
   911: '/dish-images/real/911.webp',
   912: '/dish-images/real/912.webp',
   913: '/dish-images/real/913.webp',
@@ -245,6 +246,7 @@ const REAL_IMAGE_OVERRIDES = {
   916: '/dish-images/real/916.webp',
   917: '/dish-images/real/917.webp',
   919: '/dish-images/real/919.webp',
+  921: '/dish-images/real/921.webp',
   923: '/dish-images/real/923.webp',
   924: '/dish-images/real/924.webp',
 }
