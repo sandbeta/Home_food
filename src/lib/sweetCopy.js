@@ -253,12 +253,18 @@ export const MOOD_NIGHT_NOTES = {
 }
 
 // 批 1 新增 · 纪念日命中日的页头池（Home 顶栏替换常规问候）
+/* 页头 h1 是 display 级（--text-display 2.5rem，15px 根字号下 = 37.5px），390px 视口实测
+   可用宽只有 239px ≈ 6 个汉字。原先这组 8–12 字全溢出，命中日必然被 truncate 成
+   「今天是我们…」——而它恰恰是最该被看全的一行。长句交给 ANNIVERSARY_NOTES（11px 放得下）
+   和 AnniversaryBanner（已带「第 N 年 · 纪念日名」），标题只留短句。
+   ⚠ 池内 '第 N 个今天' 的 N 由 Home 用 hit.years + 1 替换，新增条目可以带 N，
+   但**别再加超过 6 个汉字的句子**（超宽会静默截断，肉眼在长句上才看得出）。 */
 export const ANNIVERSARY_TITLES = [
-  '今天是我们的日子',
-  '这个日子，值得好好吃一顿',
-  '又一年，还是我们俩',
-  '这一天，厨房为你开小灶',
-  '属于我们的第 N 个今天',
+  '我们的日子',
+  '又一年啦',
+  '为你开小灶',
+  '今天该吃好的',
+  '第 N 个今天',
 ]
 export const ANNIVERSARY_NOTES = [
   '这一年又走过啦，今晚我掌勺',

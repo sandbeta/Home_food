@@ -67,7 +67,7 @@ export default function Home() {
   useEffect(() => {
     if (todayHit && !anniversaryAppliedRef.current) {
       anniversaryAppliedRef.current = true
-      setPageTitle(pickOne(ANNIVERSARY_TITLES))
+      setPageTitle(pickOne(ANNIVERSARY_TITLES).replace('N', todayHit.years + 1))
       setSweetNote(pickOne(ANNIVERSARY_NOTES))
     }
   }, [todayHit])
