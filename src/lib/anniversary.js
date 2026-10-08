@@ -12,10 +12,12 @@
  * 距离下一个：未来 N 天内最近的一个；若都过完（非 annual 且过期）返回 null。
  * ============================================================ */
 
-const MS_PER_DAY = 86400000
+// 补零与日期键的唯一定义在 dateKey.js（本文件直接用它的 ymd，不再本地重拼一遍）。
+// 注意：src/lib/*.js 有可能被 scripts/*.mjs 直接 import 进 node 跑（见 backdropTexture.js
+// 用 './cssColor.js' 的同款写法），所以 lib 内部互相引用**必须带 .js**，否则 Vite 能过而 node 报 ERR_MODULE_NOT_FOUND。
+import { ymd } from './dateKey.js'
 
-function pad(n) { return String(n).padStart(2, '0') }
-function ymd(d) { return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` }
+const MS_PER_DAY = 86400000
 
 /** 今日命中的纪念日（可能多个，都返回） */
 export function anniversariesToday(list, today = new Date()) {

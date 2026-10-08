@@ -6,6 +6,7 @@ import { sheetUp, usePrefersReducedMotion, tapScale } from '../theme/motion'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import Icon from './ui/Icons'
 import { NICKNAME } from '../lib/sweetCopy'
+import { pad2 } from '../lib/dateKey'
 
 /* ============================================================
  * 批 3c · 今日菜卡分享
@@ -21,8 +22,6 @@ import { NICKNAME } from '../lib/sweetCopy'
  *      .share-img-callout 见 index.css）。
  * ============================================================ */
 const W = 800, H = 1000
-
-function pad2(n) { return String(n).padStart(2, '0') }
 
 /** dataURL → Blob（浏览器不支援或 tainted 返回 null，调用方回退 dataURL 预览） */
 function dataUrlToBlob(dataUrl) {

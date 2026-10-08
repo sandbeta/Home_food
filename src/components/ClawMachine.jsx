@@ -5,6 +5,7 @@ import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
 import { EASE, contentEnter, usePrefersReducedMotion } from '../theme/motion'
 import { buildInitialSlots, refillOne, pickBuddyA, buildTimeline, decideOutcome, aimSlotIdx, CLAW_TIMING } from '../lib/clawPool'
 import { useClawAim } from '../hooks/useClawAim'
+import BubbleClock from './ui/BubbleClock'
 import { motor, clank, chuteThud, winJingle, vibrate } from '../lib/sfx'
 
 // ============================================================
@@ -54,26 +55,6 @@ function blessingOf(dish) {
   if (f.wish) return '你许过的愿望，被抓到了'
   if (f.promo) return '今日他替你挑的一道'
   return null
-}
-
-/** 泡泡时钟：实时时间糖牌（宵夜档 visible=false 不渲染） */
-function BubbleClock({ visible = true }) {
-  const [now, setNow] = useState(() => new Date())
-  useEffect(() => {
-    if (!visible) return undefined
-    const t = setInterval(() => setNow(new Date()), 30000)
-    return () => clearInterval(t)
-  }, [visible])
-  if (!visible) return null
-  const hh = String(now.getHours()).padStart(2, '0')
-  const mm = String(now.getMinutes()).padStart(2, '0')
-  const iso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}T${hh}:${mm}`
-  return (
-    <time className="claw-clock shrink-0" dateTime={iso} aria-label={`${now.getMonth() + 1}月${now.getDate()}日 ${hh}:${mm}`}>
-      <span className="time">{hh}:{mm}</span>
-      <span className="date">{now.getMonth() + 1}-{String(now.getDate()).padStart(2, '0')}<br />周{'日一二三四五六'[now.getDay()]}</span>
-    </time>
-  )
 }
 
 /** 三指爪钩。swing=行进中挂钟摆类（缆线顶端为轴心）；carDur=小车横移动画秒数（巡游停爪时短距对位） */

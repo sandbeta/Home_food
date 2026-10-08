@@ -14,6 +14,7 @@ import { requestJson } from '../lib/request'
 import { pickOne } from '../lib/sweetCopy'
 import RatingPicker from '../components/RatingPicker'
 import useDialogA11y from '../lib/useDialogA11y'
+import { ymd } from '../lib/dateKey'
 
 /* ============================================================
  * 批 3a · 菜谱日历（月历视图回看每天吃了什么）
@@ -25,9 +26,6 @@ import useDialogA11y from '../lib/useDialogA11y'
  * ============================================================ */
 const WEEKDAYS = ['一', '二', '三', '四', '五', '六', '日']
 const CAL_TITLES = ['我们一起吃过的日子', '厨房日历', '翻开这本别册', '每一格都是一顿饭']
-
-function pad2(n) { return String(n).padStart(2, '0') }
-function ymdStr(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}` }
 
 export default function KitchenCalendar() {
   const navigate = useNavigate()
@@ -96,10 +94,10 @@ export default function KitchenCalendar() {
     const out = []
     for (let i = 0; i < 42; i++) {
       const d = new Date(viewYear, viewMonth, 1 - offset + i)
-      const key = ymdStr(d)
+      const key = ymd(d)
       const inMonth = d.getMonth() === viewMonth
       const day = dayMap[key]
-      const isToday = key === ymdStr(today)
+      const isToday = key === ymd(today)
       out.push({ key, inMonth, dayNum: d.getDate(), has: day && day.orders.length, count: day ? day.orders.length : 0, rated: day ? day.rated : 0, unrated: day ? day.unrated : 0, cats: day ? Array.from(day.cats) : [], isToday, future: d > today })
     }
     return out
