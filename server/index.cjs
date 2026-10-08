@@ -79,7 +79,27 @@ function initState() {
   RECIPES = recipes
   SEED_DISHES = dishes
   if (fs.existsSync(STATE_FILE)) {
-    try { state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) } catch { state = null }
+    /* 读失败不再当"没有 state"。旧写法 catch 后 state=null，于是走进 fresh 分支
+       从种子重建并覆盖写回——全部订单/愿望/评分/纪念日/共享购物车/自建菜一次性消失，
+       而且只留一行像正常首启的日志、没有备份，事后无法恢复（7.29 复盘定的"真实数据
+       不可再生"在这里被违反）。
+       现在：先把坏文件改名留存再中止启动。家庭场景下让主人看到"文件坏了、旧文件在哪、
+       怎么恢复"，远好过悄悄换一份空账本。 */
+    try {
+      /* 剥掉 BOM 再解析：JSON.parse 不认 U+FEFF，中文Windows 上用记事本/PowerShell
+         打开 state.json 看过一眼再保存就会多一个 BOM，那样连内容完好也会被判成损坏、
+         服务端直接停机。自己writeFileSync 写的文件不带 BOM，所以这是纯外部扰动兜底。 */
+      const raw = fs.readFileSync(STATE_FILE, 'utf8').replace(/^\uFEFF/, '')
+      state = JSON.parse(raw)
+    } catch (e) {
+      const bad = STATE_FILE + '.corrupt-' + new Date().toISOString().replace(/[:.]/g, '-')
+      try { fs.renameSync(STATE_FILE, bad) } catch { /* 改名也失败就保持原样 */ }
+      fatal('state.json 读不出来（' + (e && e.message ? e.message : '未知错误') + '），已停止启动以免覆盖你的订单。\n' +
+            '  原文件已留存为：' + bad + '\n' +
+            '  处理办法：确认该文件确属损坏后，把它改名回 state.json 即可恢复；\n' +
+            '            若确要重置，把它移走再启动，服务端会从种子重建空账本。\n' +
+            '  （种子在 server/data/seed-dishes.json + seed-recipes.json，菜品不会少。）')
+    }
   }
   if (!state || !Array.isArray(state.dishes)) {
     /* 批 1 新增：fresh state 一并给 anniversaries / wishes 空表 + 序列号（与 mockApi 一比一复刻）
@@ -92,14 +112,32 @@ function initState() {
   } else {
     /* 修（§7.15 M-d2 双键去重）+ 批3 双端同步（与 mockApi 一比一）：
        ① deletedSeedIds 墓碑——真删掉的种子菜不再重启复活；
-       ② nextDishId 重算过滤非有限值——脏 id 不再把它传染成 NaN。 */
+       ② nextDishId 重算过滤非有限值——脏 id 不再把它传染成 NaN。
+       ③ 回填键从 `${id}|${name}` 改为 Number(id) 单键：双键的用意是区分
+          「同id 不同名」的夜宵改名（905/907/915 扬州炒饭→深夜扬州炒饭），但代价是
+          **改个名就算「种子缺失」→ 同 id 复活一份 → state 里出现重复 id**。
+          find(id) 只返回首个匹配，详情页与订单快照会静默解析到另一道菜。
+          单键后改名不再复活（保住用户改动），新增种子仍按新 id 正常补入。 */
     if (!Array.isArray(state.deletedSeedIds)) state.deletedSeedIds = []
     const tomb = new Set(state.deletedSeedIds.map(Number))
-    const existing = new Set(state.dishes.map((d) => `${d.id}|${d.name}`))
-    const missing = dishes.filter((d) => !existing.has(`${d.id}|${d.name}`) && !tomb.has(Number(d.id)))
+    const existing = new Set(state.dishes.map((d) => Number(d.id)))
+    const missing = dishes.filter((d) => !existing.has(Number(d.id)) && !tomb.has(Number(d.id)))
     if (missing.length) {
       state.dishes.push(...missing)
       console.log('[init] 补齐新增种子菜品 %d 道', missing.length)
+    }
+    /* 存量行不回填字段：initState 只补「缺失的行」，已有行的 image_url 永远停在写入那天。
+       实测 state.json 有 4 道（904/909/919/921）种子已带真实图、存量仍是空串——
+       同一道菜在详情页和缩略图管线上表现不一致。这里按「种子有值且本地为空」单向补齐，
+       绝不覆盖本地已有值（后台改名/换图/自定义不能被种子倒灌）。 */
+    {
+      const byId = new Map(dishes.map((d) => [Number(d.id), d]))
+      let healed = 0
+      for (const d of state.dishes) {
+        const s = byId.get(Number(d.id))
+        if (s && !d.image_url && s.image_url) { d.image_url = s.image_url; healed++ }
+      }
+      if (healed) console.log('[init] 回填存量菜品缺失的图片地址 %d 道', healed)
     }
     {
       const ids = state.dishes.map((d) => Number(d.id)).filter(Number.isFinite)
@@ -121,9 +159,24 @@ function initState() {
 }
 
 function saveState() {
+  /* 原子落盘：写 tmp → fsync(tmp) → rename → fsync(目录)。
+     原写法只有 writeFileSync + renameSync。rename 本身原子，但没落盘保证：断电/磁盘满
+     时rename 已生效而数据块还在页缓存里，重启就得到半截 JSON —— 而上面读不出来时
+     旧逻辑会当"没有state"从种子重建，等于静默清空全部订单/愿望/评分/用户自建菜。
+     fsync 代价是一次落盘，家庭单实例量级（state.json 约 90KB）完全可接受。 */
   const tmp = STATE_FILE + '.tmp'
-  fs.writeFileSync(tmp, JSON.stringify(state), 'utf8')
+  const fd = fs.openSync(tmp, 'w')
+  try {
+    fs.writeFileSync(fd, JSON.stringify(state), 'utf8')
+    fs.fsyncSync(fd)
+  } finally {
+    fs.closeSync(fd)
+  }
   fs.renameSync(tmp, STATE_FILE)
+  try {
+    const dfd = fs.openSync(path.dirname(STATE_FILE), 'r')
+    try { fs.fsyncSync(dfd) } finally { fs.closeSync(dfd) }
+  } catch { /* 某些文件系统不允许对目录 fsync，失败不影响 rename 已生效 */ }
 }
 
 // —— 响应工具 ——
@@ -490,7 +543,20 @@ function serveStatic(res, urlPath) {
 }
 function streamFile(res, abs, type) {
   res.writeHead(200, { 'Content-Type': type, 'Cache-Control': type.includes('image') || type.includes('font') ? 'public, max-age=86400' : 'no-cache' })
-  fs.createReadStream(abs).pipe(res)
+  /*必须挂 error 监听：createReadStream 到 pipe 之间、以及 open 之后的读错误，
+     都会以 EventEmitter 'error' 抛出。没有监听时它冒泡成 uncaughtException →
+     fatal() → process.exit(1)，整个家庭服务端当场退出。触发条件在中文Windows 上很常见：
+     Defender 实时扫描对 dist/*.js|html|json 的瞬时占用、坚果云/OneDrive 同步、
+     杀毒软件隔离与读取赛跑。existsSync 过了不代表 open 一定成功（EBUSY/EACCES/ENOENT）。
+     处置：只回这一个请求 404/500，服务端继续活着——一个文件读不出来不是停服的理由。 */
+  const stream = fs.createReadStream(abs)
+  stream.on('error', (e) => {
+    console.error('[static] 读取失败 %s：%s', path.basename(abs), e.message)
+    if (res.headersSent) { res.destroy(); return }
+    res.writeHead(e.code === 'ENOENT' ? 404 : 500, { 'Content-Type': 'text/plain; charset=utf-8' })
+    res.end('文件暂时读不出来，请重试')
+  })
+  stream.pipe(res)
 }
 
 // —— 家庭模式标记注入 ——
@@ -550,6 +616,7 @@ function needsAdminGuard(pathname, method) {
   if (pathname === '/api/anniversaries') return true              // 建纪念日 = 管理动作
   if (/^\/api\/anniversaries\/\d+$/.test(pathname)) return true   // 改/删纪念日
   if (/^\/api\/wishes\/\d+$/.test(pathname)) return true          // 处理愿望（婉拒 PUT/删除/变出来回写）；她许愿走 POST /api/wishes 不拦
+  if (pathname === '/api/cart/share') return true                 // 补漏：共享购物车是「覆盖全家」级写入
   return false
 }
 const crypto = require('node:crypto')

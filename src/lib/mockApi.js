@@ -123,17 +123,29 @@ function loadState() {
   if (state) {
     /* M-d2 修（不可变文件 · 改动记入 PROJECT-HANDOFF §4 台账）：
        原按 name 去重导致夜宵版 905/907/915 与灌库版 735/767/713 同名时被跳过，
-       老设备夜宵池永远少 3 道定向种子。改成 (id,name) 双键判等 —— 灌库版在场不影响夜宵版补齐，
-       夜宵版也不会因名同灌库版被误去重。
-       批3 修 P1「删不掉」：deletedSeedIds 墓碑——用户真删掉的内置种子不再刷新复活（下架 available=0 不受影响）。 */
+       老设备夜宵池永远少 3 道定向种子。
+       批3 修 P1「删不掉」：deletedSeedIds 墓碑——用户真删掉的内置种子不再刷新复活（下架 available=0 不受影响）。
+       键从 (id,name) 双键改为 id 单键（与 server/index.cjs 同步）：双键虽然能放过
+       「同 id 不同名」，但代价是**改名即视为种子缺失 → 同 id 复活一份 → 重复 id**，
+       而 find(id) 只返回首个匹配。name 相撞的那 3 对是灌库版 735/767/713 与夜宵版
+       905/907/915 id 本就不同，单键同样不会误去重，不需要双键来保护。 */
     let dirty = false
     if (!Array.isArray(state.deletedSeedIds)) { state.deletedSeedIds = []; dirty = true }
     const tombstone = new Set(state.deletedSeedIds.map(Number))
-    const existing = new Set((state.dishes || []).map(d => `${d.id}|${d.name}`))
-    const missingSeed = seedDishes.filter(d => !existing.has(`${d.id}|${d.name}`) && !tombstone.has(Number(d.id)))
+    const existing = new Set((state.dishes || []).map(d => Number(d.id)))
+    const missingSeed = seedDishes.filter(d => !existing.has(Number(d.id)) && !tombstone.has(Number(d.id)))
     if (missingSeed.length) {
       state.dishes = [...(state.dishes || []), ...missingSeed]
       dirty = true
+    }
+    /* 存量行 image_url 单向补齐（与 server 同）：种子已带真实图、本地仍为空串时补上，
+       绝不覆盖本地已有值——后台换图/改名不能被种子倒灌。 */
+    {
+      const seedById = new Map(seedDishes.map(d => [Number(d.id), d]))
+      for (const d of state.dishes || []) {
+        const s = seedById.get(Number(d && d.id))
+        if (s && !d.image_url && s.image_url) { d.image_url = s.image_url; dirty = true }
+      }
     }
     /* 老 state 兼容补齐（anniversaries / wishes 两表 + 序列号 + sharedCart） */
     if (!Array.isArray(state.anniversaries)) { state.anniversaries = []; dirty = true }

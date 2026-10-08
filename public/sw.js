@@ -4,11 +4,12 @@
  * 无需预缓存构建产物名（哈希每次变），改运行期缓存策略更稳：
  *   · 导航请求（打开页面）—— network-first，命中新鲜壳；离线/隧道抖动回退缓存的 index，
  *     再由 HashRouter 走本地 mock，离线照样点菜（订单在本地，联网后家庭服务端可再同步）。
+ *   · /api/* —— 完全不接管（见下）。服务端是唯一真值，缓存它就等于自造第二份账本。
  *   · 同源静态资源（JS/CSS/图片/字体）—— cache-first，二次访问秒开、省电省流。
  *   · 跨域请求 —— 直通不接管。
  * 版本化：CACHE 名带 v，activate 清旧桶，避免缓存无限增长。
  */
-const CACHE = 'chengguang-v1'
+const CACHE = 'chengguang-v2'
 
 self.addEventListener('install', () => self.skipWaiting())
 
@@ -25,6 +26,16 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return
   const url = new URL(req.url)
   if (url.origin !== self.location.origin) return
+
+  /* /api/* 直通，绝不接管。
+     原实现只特判了 req.mode === 'navigate'，其余同源 GET 全落进下面的 cache-first
+     静态分支并被 c.put 进 CacheStorage —— 也就是说家庭服务端的 /api/dishes、
+     /api/orders 也会被缓存，且一直命中到 CACHE 名换代为止。后果不是"慢"而是"错"：
+     手机上加的菜，TA 手机上按缓存的旧列表看不到；下的单也延迟才出现。
+     这里早退（不调 respondWith）即完全不介入，走浏览器默认网络行为。
+     CACHE 同步升到 v2：v1 桶里已躺着一批 /api 响应，让 activate 的清旧桶把它们带走。
+     另有背景：服务端对 API 不发任何 cache 头，浏览器本就不会缓存，SW 是唯一的污染源。 */
+  if (url.pathname.startsWith('/api/')) return
 
   // 导航：网络优先，失败回退缓存壳（离线可用的关键）
   if (req.mode === 'navigate') {
