@@ -41,6 +41,4 @@ export const PAYER = {
   me:       { label: '我请', emoji: '🙋', border: 'color-mix(in srgb, var(--clay-50) 60%, transparent)',  glow: '0 0 0 3px color-mix(in srgb, var(--clay-50) 20%, transparent)', fill: 'var(--clay-70)' },
   partner:  { label: 'TA请', emoji: '💝', border: 'color-mix(in srgb, var(--sage-40) 60%, transparent)', glow: '0 0 0 3px color-mix(in srgb, var(--sage-40) 20%, transparent)', fill: 'var(--sage-60)' },
 }
-export const personaOf = (k) => PERSONA[k] || PERSONA.me
 export const orderStatusOf = (k) => ORDER_STATUS[k] || ORDER_STATUS.pending
-export const payerOf = (k) => PAYER[k] || PAYER.aa

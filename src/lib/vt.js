@@ -13,7 +13,6 @@ const dishCache = new Map()
 const listCache = new Map()
 
 export const setMorphTarget = (t) => { target = t }
-export const getMorphTarget = () => target
 /** 该菜品是否为当前形变主角 → 是则该卡面容器挂 dish-hero 名 */
 export const heroNameFor = (id) => (target && id != null && Number(id) === target.id ? 'dish-hero' : undefined)
 

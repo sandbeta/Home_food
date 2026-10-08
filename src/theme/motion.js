@@ -52,12 +52,6 @@ export const glowPulse = (color = 'color-mix(in srgb, var(--clay-50) 22%, transp
   transition: { duration: 2.4, repeat: Infinity, ease: 'easeInOut' },
 })
 
-/** 列表错峰编排容器 */
-export const stagger = (staggerChildren = 0.06, delayChildren = 0) => ({
-  hidden: {},
-  show: { transition: { staggerChildren, delayChildren } },
-})
-
 export function usePrefersReducedMotion() {
   return useReducedMotion()
 }

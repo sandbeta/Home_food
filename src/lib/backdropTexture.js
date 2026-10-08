@@ -646,9 +646,6 @@ export function rectOf(el) {
   return { x: r.left, y: r.top, w: r.width, h: r.height }
 }
 
-/** 纹理相对视口的缩放，供 shader 做坐标换算 */
-export function getTexScale() { return TEX_SCALE }
-
 let bound = false
 let imgEls = []
 let observers = []

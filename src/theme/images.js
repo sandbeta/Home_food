@@ -49,7 +49,3 @@ export function heroFallback(e, index = 0) {
     el.src = ''
   }
 }
-
-export function resolveHero(key, index = 0) {
-  return HERO_IMAGES[key] || LOCAL_FALLBACKS[index % LOCAL_FALLBACKS.length]
-}

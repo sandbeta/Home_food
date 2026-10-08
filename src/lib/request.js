@@ -40,8 +40,3 @@ export async function getJson(url, opts) {
   const res = await requestJson(url, opts)
   return res.json()
 }
-
-/* 判断 AbortError（fetch 挂起时 ac.abort 或用户主动中断，都会以 AbortError 冒出） */
-export function isAbort(err) {
-  return err && (err.name === 'AbortError' || err.code === 20)
-}
