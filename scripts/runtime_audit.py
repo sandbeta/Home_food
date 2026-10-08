@@ -4,6 +4,14 @@ import os, re, sys
 from pathlib import Path
 from collections import defaultdict
 
+# 中文 Windows 的 GBK 控制台打印 '✓' 会抛 UnicodeEncodeError，门禁以崩溃收场。
+# 结果虽是"红"，但报的是崩溃而不是结论，反而让人以为是脚本坏了 —— 与 p6/glass 同款处理。
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / 'src'
 if not SRC.is_dir():
