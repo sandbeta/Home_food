@@ -177,7 +177,10 @@ export default function Menu() {
       const m = {}
       list.forEach(d => { if (Number(d.available) !== 0) m[d.category] = (m[d.category] || 0) + 1 })
       setCatCounts(m)
-    }).catch(() => {}).finally(() => setAllDishesReady(true))
+      /* 只有成功路径才点亮就绪位：失败时 allDishes 会永久停在空数组，
+         若也点亮就绪，收藏签的 join 就又会把每条收藏滤光（= 本要修的原 bug）。 */
+      setAllDishesReady(true)
+    }).catch(() => {})
   }, [])
   const visibleCats = (items) => (catCounts ? items.filter(cat => cat === '全部' || cat === '夜宵' || (catCounts[cat] || 0) > 0) : items)
 
