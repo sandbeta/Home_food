@@ -27,6 +27,11 @@ server/public-mode.txt
 server/晨光厨房服务端.exe
 sea-prep.blob
 
+# 陈旧构建产物基线：2026-09-25 粉色版回滚时留的 dist 快照（commit 44ec7a7）。
+# 零代码引用，内容已在该提交的历史里；dist/ 本身就是 gitignored 的，
+# 只有这个手工快照被误提交过。入库只会让每次 clone 都白拉一份陈旧产物。
+dist_bak_2508/
+
 # 玻璃基线脚本产物（frametime/verify_scrims 手动跑的截图与 chrome profile，不入库）
 .tmp-glass/
 
