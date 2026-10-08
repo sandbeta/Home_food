@@ -25,6 +25,20 @@ const proc = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${PORT}`,
   '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader',
   '--no-first-run', '--no-default-browser-check', '--hide-scrollbars', 'about:blank'], { stdio: 'ignore' })
 const sleep = ms => new Promise(r => setTimeout(r, ms))
+
+/* 前置检查：dev server 没起时，Page.navigate 会静默失败，Runtime.evaluate 拿回
+   undefined，旧代码照样打印一行并 exit(0) —— 「什么都没测到所以通过」。
+   与静态门禁同原则：空数据必须 fail。失败时给出可直接照做的修复动作。 */
+const APP_ORIGIN = 'http://localhost:5173'
+async function requireDevServer() {
+  for (let i = 0; i < 10; i++) {
+    try { const r = await fetch(APP_ORIGIN + '/'); if (r.ok) return true } catch { /* 未起 */ }
+    await sleep(600)
+  }
+  console.error('[frametime] 前置失败：dev server 没在 %s 上。', APP_ORIGIN)
+  console.error('[frametime] 请先在项目目录跑 npm run dev（或 npm run preview），再重跑本脚本。')
+  return false
+}
 let ws, id = 0
 const p = new Map()
 const send = (m, q = {}) => new Promise((res, rej) => { const i = ++id; p.set(i, { res, rej }); ws.send(JSON.stringify({ id: i, method: m, params: q })) })
@@ -70,9 +84,11 @@ const expr = String.raw`(async () => {
   };
 })()`
 
+if (!await requireDevServer()) { proc.kill('SIGTERM'); process.exit(1) }
 try {
   let ready = null
   for (let i = 0; i < 60 && !ready; i++) { await sleep(400); try { ready = await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json() } catch { ready = null } }
+  if (!ready) { console.error('[frametime] Chrome 没起来（%s）', CHROME); proc.kill('SIGTERM'); process.exit(1) }
   ws = new WebSocket(ready.find(t => t.type === 'page').webSocketDebuggerUrl)
   await new Promise((r, j) => { ws.onopen = r; ws.onerror = j })
   ws.onmessage = e => { const d = JSON.parse(e.data); if (d.id && p.has(d.id)) { const x = p.get(d.id); p.delete(d.id); if (d.error) x.rej(new Error(d.error.message)); else x.res(d.result) } }
@@ -84,10 +100,24 @@ try {
   })
   // deviceScaleFactor=2：真手机是 2/3 倍图，画布 buffer 尺寸按它算，测出来的帧时才可比
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 2, mobile: true })
-  await send('Page.navigate', { url: `http://localhost:5173/${ROUTE}` })
+  await send('Page.navigate', { url: `${APP_ORIGIN}/${ROUTE}` })
   await sleep(9000)
   const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true })
-  console.log(THEME, ROUTE, JSON.stringify(r.result.value, null, 1))
-} catch (e) { console.error('FAILED ' + e.message) }
+  const v = r.result && r.result.value
+  /* 同样拒绝空测量：页面没渲染出来时 value 是 undefined，旧代码会打印 undefined 且退出码 0。
+     另外要求帧数与重画数都 >0，否则说明循环没跑起来（例如页面被 ErrorBoundary 换掉）。 */
+  if (!v || !v.frame || !v.repaint) {
+    console.error('[frametime] 测量失败：拿不到 %s%s 的帧时数据（页面可能没渲染）。', THEME, ROUTE)
+    console.error('[frametime] value =', v)
+    try { await send('Browser.close') } catch {}
+    proc.kill('SIGTERM'); process.exit(1)
+  }
+  if (v.frame.n === 0 || v.repaint.n === 0) {
+    console.error('[frametime] 测量无效：帧数 %d、重画数 %d —— 循环没跑起来，不作基线。', v.frame.n, v.repaint.n)
+    try { await send('Browser.close') } catch {}
+    proc.kill('SIGTERM'); process.exit(1)
+  }
+  console.log(THEME, ROUTE, JSON.stringify(v, null, 1))
+} catch (e) { console.error('FAILED ' + e.message); try { await send('Browser.close') } catch {}; proc.kill('SIGTERM'); process.exit(1) }
 try { await send('Browser.close') } catch {}
 proc.kill('SIGTERM'); process.exit(0)
