@@ -197,8 +197,8 @@ export default function Cart() {
           try {
             const r = await requestJson(`/api/dishes/${i.dish_id}`)
             const d = await r.json()
-            return { name: i.name, recipe: d && d.recipe }
-          } catch { return { name: i.name, recipe: null } }
+            return { id: i.dish_id, name: i.name, recipe: d && d.recipe }
+          } catch { return { id: i.dish_id, name: i.name, recipe: null } }
         }))
         const hits = scanDishes(withRecipe, avoids)
         if (hits.length > 0) {
@@ -523,8 +523,10 @@ export default function Cart() {
                 }}>
                 <p className="text-xs font-bold mb-1.5 flex items-center gap-1"><span aria-hidden>🌿</span> 这几道里有忌口，看看要不要换</p>
                 <ul className="text-[11px] leading-relaxed space-y-0.5" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  /* key 用 dish_id：scanDishes 已按 id 去重，这里天然唯一。
+                   原来用 dishName，同一道菜我和 TA 各加一次就撞键。 */
                   {avoidHit.map(h => (
-                    <li key={h.dishName}>
+                    <li key={h.id}>
                       <span className="font-bold">{h.dishName}</span>
                       <span className="opacity-70"> · {h.hits.map(x => x.keyword).join('、')}</span>
                     </li>

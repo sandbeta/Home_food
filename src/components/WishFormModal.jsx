@@ -49,10 +49,14 @@ export default function WishFormModal({ open, onClose, onSubmitted }) {
      会造层叠上下文，sheet 内部写多高的 z 都出不去；而 DockLayer 是 main 的兄弟 + z-50，
      于是「送到他的厨房」提交钮会被导航药丸永久盖住（sheet 是 fixed，滚窗口也躲不开）。 */
   return createPortal(
+    /* AnimatePresence 的每个直接子元素都必须自带 key：它把子元素包进 PresenceChild 时
+       会显式传 key，子元素没给 key 就一律成 ""，两个以上直接子元素就撞
+       （React: Encountered two children with the same key）。与业务无关的纯结构要求。 */
     <AnimatePresence>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      <motion.div key="wish-scrim"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="fixed inset-0 z-50 glass-op--scrim" />
-      <motion.div ref={panelRef}
+      <motion.div key="wish-panel" ref={panelRef}
         role="dialog" aria-modal="true" aria-label="告诉他想吃什么" tabIndex={-1}
         {...(reduce ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
         className="fixed bottom-0 left-0 right-0 mx-auto z-50 focus:outline-none"

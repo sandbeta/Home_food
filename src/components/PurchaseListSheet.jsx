@@ -61,9 +61,11 @@ export default function PurchaseListSheet({ open, onClose, items }) {
 
   return createPortal(
     <AnimatePresence>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      {/* 两个直接子元素都要 key：AnimatePresence 把子元素包进 PresenceChild 时会显式传 key，
+         没给 key 一律成 ""，两个以上就撞（见 WishFormModal 同款注释）。 */}
+      <motion.div key="purchase-scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="fixed inset-0 z-50 glass-op--scrim" />
-      <motion.div ref={panelRef}
+      <motion.div key="purchase-panel" ref={panelRef}
         role="dialog" aria-modal="true" aria-label="采购清单" tabIndex={-1}
         {...(reduce ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
         className="fixed bottom-0 left-0 right-0 mx-auto z-50 focus:outline-none"

@@ -59,12 +59,23 @@ export function matchAvoid(ingredients, avoidList) {
   return hits
 }
 
-/** 一屏扫多道菜：返回 [{ dishName, hits: [...] }]（只保留命中的） */
+/** 一屏扫多道菜：返回 [{ id, dishName, hits: [...] }]（只保留命中的）
+ * 按 dish_id 去重：购物车 items 的去重键是 (dish_id, added_by)，所以同一道菜
+ * 我和 TA 各加一次会进来两条。这道菜只该被提醒一次（列两遍纯噪音），
+ * 而且渲染方要拿 id 当 React key —— 不去重就是 duplicate key，React 无法
+ * 正确 reconcile 这一列。合并时把 hits 也并起来，忌口关键词不丢。
+ * 注意按 id 而非菜名去重：735 螺蛳粉 与 907 深夜螺蛳粉同名不同 id，须分别提示。 */
 export function scanDishes(dishesWithRecipe, avoidList) {
-  const out = []
+  const byId = new Map()
   for (const d of dishesWithRecipe) {
     const hits = matchAvoid(d?.recipe?.ingredients, avoidList)
-    if (hits.length) out.push({ dishName: d.name, hits })
+    if (!hits.length) continue
+    const prev = byId.get(d.id)
+    if (prev) {
+      for (const h of hits) if (!prev.hits.some((x) => x.keyword === h.keyword)) prev.hits.push(h)
+    } else {
+      byId.set(d.id, { id: d.id, dishName: d.name, hits: [...hits] })
+    }
   }
-  return out
+  return [...byId.values()]
 }

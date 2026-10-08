@@ -219,10 +219,12 @@ export default function DishShareCard({ open, onClose, dish, indexNo = 1 }) {
 
   return createPortal(
     <AnimatePresence>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      {/* 两个直接子元素都要 key：AnimatePresence 内部 PresenceChild 会显式传 key，
+         子元素不给 key 就都是 ""，多子元素即撞键（同 PurchaseListSheet / WishFormModal）。 */}
+      <motion.div key="share-scrim" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         onClick={onClose} className="fixed inset-0 z-50"
         style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,36,41,0.55)' }} />
-      <motion.div ref={panelRef}
+      <motion.div key="share-panel" ref={panelRef}
         role="dialog" aria-modal="true" aria-label="今日菜卡分享" tabIndex={-1}
         {...(reduce ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } } : sheetUp)}
         className="fixed bottom-0 left-0 right-0 mx-auto z-50 focus:outline-none"
