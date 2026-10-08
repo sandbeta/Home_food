@@ -68,16 +68,25 @@ function loadSeeds() {
 
 let state
 let RECIPES = {}
+/* 种子菜品清单提到模块作用域：DELETE /api/dishes/:id 的墓碑判定要问「这个 id 是不是
+   种子菜」，而 loadSeeds()/initState() 里的 const dishes 出函数就没了。
+   原写法在 handleApi 里直接引用 dishes → ReferenceError，且 build/lint/test 全绿
+   （没人起服务端，runtime_audit 的双端比对只做路径文本匹配，看不见运行期引用错误）。 */
+let SEED_DISHES = []
 function initState() {
   fs.mkdirSync(DATA_DIR, { recursive: true })
   const { dishes, recipes } = loadSeeds()
   RECIPES = recipes
+  SEED_DISHES = dishes
   if (fs.existsSync(STATE_FILE)) {
     try { state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')) } catch { state = null }
   }
   if (!state || !Array.isArray(state.dishes)) {
-    /* 批 1 新增：fresh state 一并给 anniversaries / wishes 空表 + 序列号（与 mockApi 一比一复刻） */
-    state = { dishes: [...dishes], orders: [], nextDishId: 10000, nextOrderId: 1001, anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, ratings: [], nextRatingId: 1, sharedCart: { items: [], sharedBy: null, sharedAt: null } }
+    /* 批 1 新增：fresh state 一并给 anniversaries / wishes 空表 + 序列号（与 mockApi 一比一复刻）
+       补 deletedSeedIds 空表：旧写法漏了它，而下面的墓碑判定要 .includes()——fresh 分支下
+       state.deletedSeedIds 是 undefined，首次 DELETE 会从 ReferenceError 换成 TypeError，
+       等于没修。else 分支的补齐只在第二次启动才跑，救不了首轮。 */
+    state = { dishes: [...dishes], orders: [], nextDishId: 10000, nextOrderId: 1001, deletedSeedIds: [], anniversaries: [], wishes: [], nextAnniversaryId: 1, nextWishId: 1, ratings: [], nextRatingId: 1, sharedCart: { items: [], sharedBy: null, sharedAt: null } }
     saveState()
     console.log('[init] 已从种子创建 state.json（%d 道菜）', state.dishes.length)
   } else {
@@ -196,8 +205,13 @@ async function handleApi(req, res, url) {
     const id = Number(dishM[1])
     const idx = state.dishes.findIndex((d) => Number(d.id) === id)
     if (idx === -1) return sendJson(res, { message: 'Not found' }, 404)
+    /* ① 墓碑判定改用模块级 SEED_DISHES（原引用函数内的 dishes → ReferenceError）
+       ② 墓碑推进挪到 splice 之前：旧顺序下 splice 先执行、墓碑那行再抛，结果是
+          客户端收到 500「删除失败」，菜却已从内存消失，且 saveState() 永远到不了
+          → 重启即复活。墓碑是唯一可能抛的地方，放最前面保证失败时状态零变更。 */
+    const isSeed = id < 10000 && SEED_DISHES.some((d) => Number(d.id) === id)
+    if (isSeed && !state.deletedSeedIds.includes(id)) state.deletedSeedIds.push(id)
     state.dishes.splice(idx, 1)
-    if (id < 10000 && dishes.some((d) => Number(d.id) === id) && !state.deletedSeedIds.includes(id)) state.deletedSeedIds.push(id)
     saveState()
     return sendJson(res, { ok: true })
   }

@@ -352,11 +352,14 @@ export function installMockApi() {
       const id = Number(dishMatch[1])
       const idx = state.dishes.findIndex(d => Number(d.id) === id)
       if (idx === -1) return json({ message: 'Not found' }, 404)     // 修 P1：删除假成功
-      state.dishes.splice(idx, 1)
-      /* 批3 墓碑：内置种子（id<10000 且在 seed 名单里）被真删后不再刷新复活 */
+      /* 批3 墓碑：内置种子（id<10000 且在 seed 名单里）被真删后不再刷新复活。
+         顺序与 server/index.cjs 对齐：墓碑推进放在 splice 之前——墓碑判定是唯一可能抛的行，
+         放后面一旦抛就会「客户端收到失败、菜已从内存消失、saveState() 到不了 → 下次读又回来」。
+         双端语义必须一比一。 */
       if (id < 10000 && seedDishes.some(d => Number(d.id) === id) && !state.deletedSeedIds.includes(id)) {
         state.deletedSeedIds.push(id)
       }
+      state.dishes.splice(idx, 1)
       saveState(state)
       return json({ ok: true })
     }
