@@ -35,6 +35,14 @@ dist_bak_2508/
 # 玻璃基线脚本产物（frametime/verify_scrims 手动跑的截图与 chrome profile，不入库）
 .tmp-glass/
 
+# 工具残留与某一批的过程文件（2026-10-08 起一律不进仓，历史内容已出库到
+# research/20261008-过程文件出库/；这里只是防止再被顺手 add 进来）
+.superpowers/
+.tmp_gate*/
+spark-output/
+preview-all-features.html
+progress.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

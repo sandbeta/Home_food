@@ -2,7 +2,7 @@
 
 > **给接力的 AI / 开发者**：本文档自包含，读完即可接手。
 > **协作铁律：每一次代码/数据/文案修改，都必须同步更新本文档（进度表、文件地图、坑清单按需），随代码一起提交。** 这是项目所有者定的规矩。
-> 最后更新：2026-09-24　交付包顶层路径全部英文化并重命名为 `E:\home-food-delivery`（详见 §0.1）；代码 HEAD：master f802a59b + 本轮第四轮全量整改（未提交）　工作区：脏（spark-output/ + .impeccable/critique/ 未追踪 + 大量源码改动）
+> 最后更新：2026-10-08　交付包根目录已**改回中文名** `E:\点餐小程序—抓娃娃机`（§0.1 与全文路径已同步更正，见到 `home-food-delivery` 的旧截图/文档按此对号）；代码 HEAD：`ui-audit-batch1`（比 master 多九个提交，本轮已 fast-forward 并推远端）；工作区：本轮清理后只余门禁脚本产物（`.tmp-glass/` 已 gitignore）
 > **状态：2026-09-23 第四轮 impeccable critique 全量整改已落地**（4 blocker + 32 major + 26/32 minor，四件套全绿）。详见 §7.15。核心新立规矩见 §4 第 10–13 条：令牌变更 checklist / sub-44 逐消费者验证 / mockApi↔server 自动 diff / PRODUCT.md 承诺自动核查。
 > 上一轮 V3 曾回滚（见台账「懒羊羊换装（已回滚）」），本轮为按所有者审阅通过的独立原型（`../design/prototype-lazy-claw/index.html`）重新落地，首页在娃娃机签名交互之下仍保留「常点的」快捷网格与「最近订单」，兼顾主题与点菜效率。
 > 注：本文档自身的 docs 提交在代码 HEAD 之后，仓库实际 HEAD 会多一笔，属正常。
@@ -12,14 +12,14 @@
 ## 0. 项目身份与位置
 
 - **是什么**：情侣点餐 H5 小程序（480px 手机竖屏框）。**男朋友视角的文案，写给女朋友——昵称「懒洋洋」**，所有面向用户的标题/情话都按此人设写。
-- **位置（2026-08-29 已迁移）**：`E:\home-food-delivery\extracted`（应用仓库）；交付包根目录已按用途归类为 `docs/`、`design/`、`research/`、`archives/` 四个归档夹（本文档副本 `PROJECT-HANDOFF-晨光厨房.md` 在 `docs/` 下，与仓库内本文档保持同步；5 个历史 zip 快照在 `archives/` 下）——详见 §0.1。
+- **位置**：`E:\点餐小程序—抓娃娃机\extracted`（应用仓库，2026-10-08 已从早先的英文名 `E:\home-food-delivery` 改回中文名）；交付包根目录按用途归类为 `docs/`、`design/`、`research/`、`archives/` 四个归档夹。**本文档唯一真源就是仓库内这一份**：原先 `docs/PROJECT-HANDOFF-晨光厨房.md` 那个"保持同步"的外层副本已确认陈旧（缺 7.27–7.32 与 §10 共 7 个小节、内容停在 2026-09-25），2026-10-08 归档进 `research/20261008-过程文件出库/` 不再维护副本 —— 要读就读仓库内这份，别再去 `docs/` 找。`archives/` 下现存 1 个 8-29 全量 zip（24MB）+ 一个 20261007 工作树快照，不是早期记录的 5 个 zip。详见 §0.1。
 - **当前状态**：重构（P0–P6）已完成验收；之后又经多轮实测打磨（视觉层次、文案个性化、HowToCook 数据源灌库、菜谱卡）。处于**个人使用 + 持续迭代**状态。
 
 ## 0.1 目录结构（2026-09-24 整理后）
 
 顶层路径已全部英文化，与旧的中文路径不再兼容：
 
-- `E:\home-food-delivery\` — 交付包根（旧 `E:\晨光厨房-交付包` / `E:\晨光厨房-交付包-qoderwork`）
+- `E:\点餐小程序—抓娃娃机\` — 交付包根（旧 `E:\晨光厨房-交付包` / `E:\晨光厨房-交付包-qoderwork`）
 - `extracted\` — 应用仓库 + git 工作树（未动，本 `PROJECT-HANDOFF.md` 就在这里）
 - `docs\` — 顶层 .md 归档（含本文件的镜像副本 `PROJECT-HANDOFF-晨光厨房.md`、四份会话交接、产品审查报告、娃娃机游戏化设计方案）
 - `design\` — 设计原型与产出（`design-proposals/`、`prototype-lazy-claw/`、`prototype-claw-pile/`、`lazy-theme-design-20260921T064417653Z/`、`pdf/`、`_shots/`、`scripts-tmp/`）
@@ -30,7 +30,7 @@
 
 **换机 / 换路径注意**：
 
-1. QoderWork 的"选中文件夹"授权是按路径锁的；改名后要在 QoderWork 里重新指到 `E:\home-food-delivery`，否则下会话会没权限读写。
+1. QoderWork 的"选中文件夹"授权是按路径锁的；改名后要在 QoderWork 里重新指到 `E:\点餐小程序—抓娃娃机`，否则下会话会没权限读写。
 2. `.ghp-deploy\.git` 与 `extracted\.git\worktrees\-ghp-deploy\gitdir` 曾写死旧绝对路径，已由 `git worktree repair` 修复；下次若再改名或移动，重跑 `git -C <新路径>\extracted worktree repair <新路径>\.ghp-deploy` 即可。（改名首次 `mv` 若报 `Device or resource busy` 通常是瞬时句柄占用，重试即可。）
 3. 跨平台拷贝建议先删 `extracted\node_modules\` 再 `npm install`；同 Windows x64 之间直接可用。
 4. `.tmp/`（2.9G）与 顶层 `.impeccable/` 目前在 Windows 回收站，确认无误后清空才能真正释放那 2.9G。
@@ -39,7 +39,7 @@
 ## 1. 跑起来
 
 ```bash
-cd E:\home-food-delivery\extracted
+cd E:\点餐小程序—抓娃娃机\extracted
 npm install        # 仅首次/换机器
 npm run dev        # http://127.0.0.1:5173/
 npm run build      # 构建验证（也可 --outDir 任意临时目录）
@@ -73,7 +73,7 @@ React 19 + Vite 8 + Tailwind v4（`@theme` 令牌）+ React Router 7 + Framer Mo
 
 **编辑杂志换装（2026-09-17）**：在晨光厨房色板与四大核心语义不变的前提下换装为「编辑杂志质感」——卡片由半透玻璃改为暖纸实底（`--color-glass: #FFF9FB`）+ 发丝边框 + 浅投影；圆角整体收敛（card 28→20px）；品牌渐变从 135° 粉橙对改为 180° 深梅粉/深鼠尾草（低饱和"专色"感）；页面边距 16→20px、区块节奏 20→26px、行高 1.6→1.7、display 字阶 34→40px 收紧字距；PageHeader 改为眉题（kicker 大写字距）+ 大衬线标题 + 底部贯通发丝线；SectionHeader 前缀梅粉短线；首页主推卡徽章改 No.xx 编号眉题。夜宵模式与 reduced-motion 降级逻辑未动。若所有者不喜欢，revert 本轮提交即可整体回退。
 
-**懒羊羊抓娃娃主题 V3 换装（2026-09-21，本轮）** —— 设计稿 `懒羊羊抓娃娃主题设计稿 V3 · 粉色基调`（源文件 `E:\home-food-delivery\design\lazy-theme-design-20260921T064417653Z\懒羊羊抓娃娃主题设计稿.html`，PDF 同目录 `design\pdf\20260921\`）落地为**形态层**，色板与圆角标尺**逐值吻合、零改动**：
+**懒羊羊抓娃娃主题 V3 换装（2026-09-21，本轮）** —— 设计稿 `懒羊羊抓娃娃主题设计稿 V3 · 粉色基调`（源文件 `E:\点餐小程序—抓娃娃机\design\lazy-theme-design-20260921T064417653Z\懒羊羊抓娃娃主题设计稿.html`，PDF 同目录 `design\pdf\20260921\`）落地为**形态层**，色板与圆角标尺**逐值吻合、零改动**：
 
 | 层 | 内容 |
 |---|---|
@@ -202,7 +202,7 @@ scripts/
 | 后台分页 | AdminDishes 同款「初始 30 条 + 加载更多」（407 行全量渲染是第二遍体检的唯一新发现） | 见 fix(admin) 提交 |
 | WeUI 试点（已回滚） | 尝试微信 iOS 风（#EDEDED/品牌绿/系统字体/扁平白卡）于首页+点菜页；所有者确认**不好看**，整体 revert。结论：本项目设计语言仍为晨光厨房，勿再提议 WeUI/扁平风 | `5d2a066` |
 | 迁移 | 项目迁至 E:\晨光厨房-交付包（本目录） | （无代码变更） |
-| 迁移 | 2026-09-24 交付包根目录改名 `E:\晨光厨房-交付包` → `E:\home-food-delivery`，顶层归入 `docs/` `design/` `research/` `archives/` 四归档夹；`.tmp/` 与 顶层 `.impeccable/` 移到 Windows 回收站；`.ghp-deploy/` worktree 已 `git worktree repair` 迁移 | （无代码变更） |
+| 迁移 | 2026-09-24 交付包根目录改名 `E:\晨光厨房-交付包` → `E:\点餐小程序—抓娃娃机`，顶层归入 `docs/` `design/` `research/` `archives/` 四归档夹；`.tmp/` 与 顶层 `.impeccable/` 移到 Windows 回收站；`.ghp-deploy/` worktree 已 `git worktree repair` 迁移 | （无代码变更） |
 | 旧命名清零 | AddDishModal 全量迁移新令牌（新增 --color-clay-deep 深赤陶）；index.css 删除全部历史别名定义（cream 系 13 处用法迁至 ink-900/850）；Icons 新增 gear 并推广到后台快捷入口 + Profile（3 调用点）| 本轮 |
 | 质量体检轮 | 全工程审计后修复：灵感卡打字乱跳（改吃全量池）、死 Fredoka 字体、死端点 categories 移除、Fisher-Yates 无偏洗牌、featIdx 归零、状态 emoji 统一 🎉、Menu 列表分页（初始 30+加载更多）、mockApi 内存态缓存；新增 mockApi 冒烟测试 8 项（npm test）；README 重写 + prd.md 标注历史；preview 同步最新视觉 | 本轮 |
 | 编辑杂志换装 | 全站视觉换装「编辑杂志质感」（所有者选定）：纸面卡/收圆角/深专色渐变/松间距/大衬线/眉题页头/编号主推卡；StoveStage、HotDishes 两处硬编码色收编令牌；DishDetail 价格补对齐 caramel 原则。build/lint/test/静态门禁全过 | 本轮 |
@@ -261,6 +261,7 @@ scripts/
 | 部署 + 服务端轨首验 + 清理（2026-10-07 下午） | 所有者对"重推 / 重启 / 清理"三点点头。**① 上线**：`npm run build` → dist 整体镜像进 `.ghp-deploy`（先 `rm -rf assets` 再 `cp -r ../extracted/dist/. .`）→ `d903b8982` 推 gh-pages（17 新增 / 15 删除 / 26 rename，git 认出的哈希块相似度高至 96%）→ **curl 线上 `index.html` 与本地 dist 逐字节同哈希**（`index-nHgalkQC.js` / `index-C5seFDHX.css`），竹笼上菜与液态玻璃折射层首次到手机。顺带核过 PWA 不会卡旧版：`public/sw.js` 导航走 network-first、静态资源 cache-first 且键是哈希名，`CACHE='chengguang-v1'` 固定名只会留孤儿条目、不会供错内容。**② 家庭后端**：`node server/index.cjs` 以 Start-Process 独立进程起在 `0.0.0.0:8787`（Bash 起的后台进程会被回收，这条仍是正解）。**先备份再启动**（`archives\20261007-工作树快照\state.json.before-restart-1449`），结果 **启动前后 `state.json` SHA256 一致 `c2be040e…`** —— 旧记忆里"启动即重写 state、基线数字会漂"已不成立（`5b22f452f` 之后 `loadState` 只在真补齐/修复时落盘）。新写 `research\20261007-全量状态体检\scripts\verify-family-track.mjs` 做只读实测：**mock 未安装**（`main.jsx:19` 见到 `location.port==='8787'` 主动让位，双轨切换是真的）、`/api/dishes|orders|anniversaries|wishes` 四条全 200、PotReveal 用真后端数据渲染出「芥末黄油罗氏虾」、console 0 报错 → 体检报告里"服务端轨未验证"那条缺口已补上。**⚠ 顺手查出两处双轨数据漂移，都要所有者定**：(a) 第十批给 904/909/919/921 补的 4 张实拍图**只在 Pages/local 轨生效**，family 轨读 `state.json`，那 4 行 `image_url` 实测仍是 `""` —— 根因是 `initState()` 只 append 缺失行、**不回填既有行**；(b) `state.json` 435 道 vs seed 432 道，`id=905/907/915` 各有「深夜X」与无前缀两条（**同 id 不同名，`${id}|${name}` 判重键拦不住**），family 轨的菜单与娃娃机池会出重复项。处置边界沿用既有结论：只能读侧建池去重，绝不动 `dishes[]` 本体（历史订单 `items[].dish_id` 与 `favorites`/`wishes.added_dish_id` 都指向这些 id）。**③ 清理**：删 `prd.json`、`tasks/`、`.impeccable/critique/`，删前把 5 个文件与快照 `cmp` 逐字节核对一致再动手；`.impeccable/{config,design,live,review}` 共 12M **没动**（本就 gitignored，且 `review/` 是 09-21 那批审查截图、含换装回滚血案的 `rollback-menu.png`）。工作树现**彻底干净**（`git status` 空）。门禁复跑：lint 2w/0e、build ✓、p6 0/0/0 | 2026-10-07 |
 | 收口纪念日浮标（2026-10-07 傍晚） | 给家庭轨种真数据，好把"懂她"这条线跑通而不是测空转：`POST /api/wishes`×2（麻辣鸭脖→917、龟苓膏→569，都挑带实拍图的）+ `PUT` 标 `added` 并回填 `added_dish_id`（B 层只认这两个字段，见 `useClawSignals.js:44`，光许愿不"变进菜单"是不进权重的）；`POST /api/anniversaries` 一条（`2025-10-07` + `annual:true` → 今日正好命中，绑 633 淄博烧烤）。**名字和日期是我造的**，撤销走 `research\20261007-全量状态体检\scripts\seed-wishes-anniversary.mjs --undo`（只删 note 带 `[seed-20261007]` 的）。全程走应用自己的接口、不手拼 `state.json`，所以顶层多出 anniversaries/wishes/ratings/sharedCart 四张表属 `saveState()` 正常落盘，`dishes` 仍 435 道未动。**实测加权池的真实杠杆**：管线是 `tagLayers → trimPoolToWorkingSet(48) → 洗牌`，B 层标签等于**保送进 48 道工作集**（29.8%→100%），"进一笼前 6 可见位"的概率 **4.0%→46.9%**。⚠ 我第一版量成 6.6%，是 harness 漏走裁剪步骤造成的**低估**，纠正后才成立——**权重不是杠杆，准入才是**。种子数据一进去立刻暴露：纪念日命中日页面**同时说四遍**（页头标题「这个日子，…」+ 副标题「从今天开始，下一年也一起」+ `AnniversaryBanner` + 笼内浮标「这个，他早想给你安排上了」）。所有者定 **留锚卡、砍浮标**：`PotReveal.blessingOf` 删 `f.today` 分支，命中日纪念日菜改走通用「端上「X」」。**夜宵轨那份刻意保留** —— `AnniversaryBanner` 只挂 Home，夜里那三处都没有，跟着砍纪念日就彻底没人说；两份 `blessingOf` **从此故意不同源**（`PotReveal.jsx:26` 注释 + DESIGN 签名件段都钉了这条，别再"顺手统一"回去）。新增 `verify-blessing-scope.mjs` 三断言实测：锚卡在位 ✓ / 淄博烧烤浮标 = `端上「淄博烧烤」`（「安排」不再出现）✓ / 麻辣鸭脖浮标 = `你许过的愿望，端上来了`（愿望文案没被误伤）✓，console 0 报错。六件套全绿（lint 2w/0e、test、build 4.65s、p6 0/0/0、glass、runtime）。**撞出一条既有缺陷未动**：页头标题在 390px 下被截成「这个日子，…」，而纪念日恰恰是最该被看全的一行。**再记一个待决**：`CLAW_WEIGHTS` A 层 6 > B 层 5，现在 A 层是空的（零收藏、订单 1 条 < `HOT_THRESHOLD` 2）所以看不出来，等收藏攒起来**她许的愿会被她自己常点的菜压下去**——而愿望的语义是"她自己吃不到的东西"，与"常吃"不该比大小 | 2026-10-07 |
 | 修纪念日标题截断 + 裸 N（2026-10-07 傍晚，紧接上一条） | 预览时页头两次截成「今天是我们…」，量出来根因比预想大：`--text-display: 2.5rem` 在 15px 根字号下 = **37.5px**，而 `PageHeader` 的 h1 在 390px 视口实测**可用只有 239px ≈ 6 个汉字**，`truncate` 是 `nowrap + overflow-hidden`，所以原先五句纪念日标题（8–12 字、需要 303–454px）**必然**被截。同时抓出第二个缺陷：池里 `'属于我们的第 N 个今天'` 的 **N 从来没被替换过**（`Home.jsx:70` 直接 `pickOne` 当标题，年数只有 `AnniversaryBanner` 会算），命中日有 1/5 概率页头显示字面大写 N。**两处都在文案层修，零布局风险**：`ANNIVERSARY_TITLES` 换成五句 ≤6 字（我们的日子 / 又一年啦 / 为你开小灶 / 今天该吃好的 / 第 N 个今天），长句交给 11px 的 `ANNIVERSARY_NOTES` 与锚卡；`Home.jsx` 补 `.replace('N', todayHit.years + 1)` 让模板句真出数；池子上方写了禁令注释（别再塞超 6 字的句子，超宽是静默截断，肉眼只在长句上才看得出）。**两条路都没选，理由记下**：折行会把 `sticky overflow-hidden` 的屋顶从 115px 撑到 155px（心情行 top 112→151，实测），常驻吸顶时白吃 18% 视口；缩字号要压到 19.7px 才放得下 12 字句，那标题就不成标题了。**⚠ 顺带量出一个更大的既有问题（未动，待所有者定）**：日常问候「下午好，懒洋洋」7 字需要 265px > 可用 239px，**溢出 26px —— 首页标题在 390px 手机上常年带省略号**，15:00 那张 Pages 实截确实是「下午好，懒…」；但 14:17 dev server 那张是完整的，怀疑与 Playfair Display 加载时序有关，需单独查，别顺手改字阶。验证：`measure-header.mjs` 五句新标题 `over` 全为 0，实截 `shots/header-after-fix.png` 显示「第 2 个今天」完整无省略号、副标题与锚卡同时在位。六件套全绿（lint 2w/0e、test、build 7.28s、p6 0/0/0、glass、runtime）。小瑕疵待评：标题「第 2 个今天」与锚卡「第 2 年」同屏出现两个"第 2" | 2026-10-07 |
+| 冗余复核与清理（2026-10-08，本轮） | 所有者看完 `docs/2026-10-08-冗余文件与代码复核.md` 后点头「A 加 B 全做」，并选「原图部署时剔除」。**代码**：新增 `src/lib/dateKey.js`（pad2 与 ymd 的唯一定义，收编 anniversary、KitchenCalendar 的 ymdStr、DishShareCard 三份）与 `src/components/ui/BubbleClock.jsx`（娃娃机与蒸笼各一份、逐字节相同的时钟合一），删七个全项目零调用的导出（backdropTexture.getTexScale、request.isAbort、vt.getMorphTarget、images.resolveHero、motion.stagger、persona.personaOf、persona.payerOf），十六个「只是 export 多余、本文件内在用」的按原结论留作调试钩子不动。**配置**：package.json 摘掉 @types 两件套（全仓无 TS 也无 tsconfig）、vite.config.js 删 cssCodeSplit 与 minify 与 sourcemap 三条默认值并订正「cssCodeSplit 会 tree-shake CSS」的错归因、给形同虚设的 /api 代理写明原因。**构建**：新增 `scripts/prune-dist-images.mjs` 接进 build，dist 从 22.28MB 降到 11.03MB（htc 与 real 与根层 dish-*.webp 共 235 张 11.23MB 原图线上零请求，因为 getDishImage 的 orig 档没有任何调用方；脚本带前置门，thumb 与 w800 两档数量不等或为 0 时一张不删并 exit 1，宁可构建红也不给线上留 404）。**出库**：preview-all-features.html 与 progress.txt 与 spark-output 与 extracted 内 docs 七份八月治理文档，逐字节 cmp 后 git rm，落到 `research/20261008-过程文件出库/`（含 MANIFEST.md 说明去向与理由），上级七份审查 md 归进 `docs/`，`.gitignore` 补 .superpowers 与 .tmp_gate 系列与 spark-output 等；删掉 .superpowers 与 .tmp_gate 与 .tmp-glass 与 public 根层三个零引用文件 icons.svg 与 _redirects 与 edgeone.json。**验证**：六件套全绿（lint 2w 0e、test 四套全过、build 4.19s 加 prune 11.23MB、p6 0/0/0、glass 两态全通过、runtime A–F 无缺项），并在剪后 dist 的 4173 preview 上跑十一条路由：零破图、零 console 报错、日历 42 格恰好一格今日描边、菜卡海报 canvas 出图正常。**重要更正一条**：`WEEKDAYS` 与 `STATUS_FILTERS` 经逐行比对**不是重复**（AnnualReport 用「周日」全量且周日起算、KitchenCalendar 用「一」且周一排头；MyOrders 是四档粗筛带 match 数组、AdminOrders 是七档含今日待做），扫描器的同名启发式在此误报，保持两份。**遗留待所有者表态**：`useGlassSurface.jsx` 仍无消费者（删掉还是真把重复迁上去）、六组同字节菜品图（htc 653 与 654、real 49 与 50、thumb 与 w800 的 735 与 905）是共用还是错图、88.16MB 服务端 exe 是否留作不带 Node 的部署退路。 | 2026-10-08 |
 
 ## 7.9 impeccable 全站审查 + colorize + audit + harden（2026-09-22，本轮）
 
@@ -769,7 +770,7 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 ## 7.28 穷尽式审查（86 文件逐行）与四批修复（2026-09-25）
 
-所有者要求"作为产品经理重新验证审查一遍项目 → 所有功能、每一行代码"。执行方式：86 源文件切 7 个互斥分片逐行审计（覆盖清单与全量发现落盘在**仓库外** `E:\点餐小程序—抓娃娃机\穷尽式审查报告-2026-09-25.md` + 附录 I/II，勿提交），P0 级指控逐条回代码/线上复核。**结论：P0×9 / P1×32 / P2×60+**；修复分四批全部落地。
+所有者要求"作为产品经理重新验证审查一遍项目 → 所有功能、每一行代码"。执行方式：86 源文件切 7 个互斥分片逐行审计（覆盖清单与全量发现落盘在**仓库外** `E:\点餐小程序—抓娃娃机\docs\穷尽式审查报告-2026-09-25.md` + 附录 I/II，勿提交），P0 级指控逐条回代码/线上复核。**结论：P0×9 / P1×32 / P2×60+**；修复分四批全部落地。
 
 **第一批+第二批（commit `76252fa1a`）· 止血与真实**：
 - **P0-1 拖拽瞄准断线**（§7.27 引入的接线错：hook 返回 `handlers` 嵌套、消费点顶层取 → 拖拽零绑定，已随 `53d4495ab` 上线过！）：改 spread `aim.handlers`；`useClawAim` 记真实 pointerId（原 `el._pid` 从未赋值=释放捕获空转）、多指忽略；线上实测拖拽端到端（瞄准播报→抓到→撤销浮标）全通。**教训：交互改动必须行为级实测，"build+测试全绿"不等于手势活着。**
@@ -860,7 +861,7 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 - ~~【最紧要·未完成】§7.25e 的 13 个 UI 审查修复未提交~~ ✅ 本轮（2026-09-25）已随 §7.26 娃娃机整改一并 commit（`5365e6b25`）+ 推 master + 镜像 gh-pages（`53d4495ab`）+ 线上 hash 核对一致（`index-C99AJePq.js`）。
 - **Hero 大图取舍（待所有者拍板，2026-09-21）**：V3 设计稿六屏全部是纯粉纸、无底片大图，而本项目 Menu / DishDetail / Cart / Orders / Profile / Hot 六页仍保留 `FullBleedHero`。两种走法：①保留（现状，编辑杂志身份的既有语言，糖果描边坐在照片上略吵但读得清）②全部摘除对齐设计稿（需把 DishDetail 的大图改成设计稿的「图鉴卡 hero-plate」，并把 VT 共享元素形变名 `heroNameFor(dish.id)` 从 `FullBleedHero` 挪到那块 hero-plate 上，否则菜卡→详情的形变会失效；另外 `theme/images.js` + `--hero-wash-*` / `--hero-filter-*` 令牌会一并变成死代码，要连着清）。**做之前先问所有者**——这是观感级决策，且上一轮已有"换装做完当天被要求回滚"的先例。
 - 测试覆盖：mockApi 冒烟（现含 category 快照 / 愿望回写持久化 / 下单校验等，11 项）+ clawPool 纯函数（aimSlotIdx 吸附真逻辑已补测试）；UI 组件仍无自动化测试——demo 可接受，引入框架时优先补 DishRow/OrderCard 的 a11y 与娃娃机事件绑定冒烟（P0-1 类接线错只有运行时能抓）。
-- **穷尽审查遗留 P2 长尾**：全量清单见仓库外 `E:\点餐小程序—抓娃娃机\穷尽式审查报告-2026-09-25.md` + 附录 I/II（86 文件逐行、按 P0/P1/P2 分级带 file:line）。四批已清 P0×9 + 精选 P1；余 P2（死令牌/死导出清理、sweetCopy 全量迁移、UTC/本地分桶统一、@layer 收编、VT target 清理、AdminDishes dish_id 选择器、anniversary 2/29、seed 价格规则语义化、avoid 词表修订、假注释批量订正）待排期。
+- **穷尽审查遗留 P2 长尾**：全量清单见仓库外 `E:\点餐小程序—抓娃娃机\docs\穷尽式审查报告-2026-09-25.md` + 附录 I/II（86 文件逐行、按 P0/P1/P2 分级带 file:line）。四批已清 P0×9 + 精选 P1；余 P2（死令牌/死导出清理、sweetCopy 全量迁移、UTC/本地分桶统一、@layer 收编、VT target 清理、AdminDishes dish_id 选择器、anniversary 2/29、seed 价格规则语义化、avoid 词表修订、假注释批量订正）待排期。
 - 官方角色素材（`public/lazy-assets/`）为本人非商用家庭自用；若要对外分发，需替换为自绘 LazySheep 或取得授权。
 - ~~D3StatusRing 内圈一处 rgba(0,0,0,0.5) 暗影为有意保留~~ ✅ 组件整体已删（死文件零引用，见台账"机械债清零"）；--ring-size 令牌仍由 StoveStage 消费。
 - ~~AddDishModal 旧命名残留~~ ✅ 已清零（见台账「旧命名清零」）；~~preview 落后~~ ✅ 已同步（但 clay-60 回退与色阶绑定后的 preview 仍未重建，观感等价影响小）。
@@ -876,7 +877,7 @@ build ✓ 1.96s / lint 9 warnings 0 errors（新增 3 条来自新页面组件�
 
 **部署三步（在家电脑上）**：
 ```bash
-cd E:\home-food-delivery\extracted
+cd E:\点餐小程序—抓娃娃机\extracted
 npm run build          # 产出 dist/（服务端直接托管）
 npm run family         # 启动，控制台打印局域网地址
 ```
@@ -912,7 +913,7 @@ npm run family         # 启动，控制台打印局域网地址
 停靠药丸与吸顶栏已接并实测对齐（亮度差 ≤0.006，逐像素 3.4%–60% 说明折射真在动）；
 4 个模态遮罩与主题开关圆钮**量完后退回纯 CSS 玻璃**（+0.125 / −0.106 会跳）。
 根因与待决事项、七条已踩过的坑、验证脚本清单一并写在
-**`docs/2026-09-28-液态玻璃对齐iOS会话交接.md`**，实测细节在 `extracted/progress.txt`。
+**`docs/2026-09-28-液态玻璃对齐iOS会话交接.md`**，实测细节在 `research/20260928-液态玻璃对齐iOS/progress.txt`（2026-10-08 从仓库根出库，见 `research/20261008-过程文件出库/MANIFEST.md`）。
 
 ✅ 2026-10-07 已落盘：玻璃本体（新 lib/hooks/组件 + `index.css` + package.json + 玻璃门禁与实截
 脚本 + `runtime_audit.py` 假绿修复）随**第九批 `32cdaaad7`** 提交，与玻璃无关的 P0/P1 整改随
@@ -922,4 +923,4 @@ p6 0/0/0、glass、runtime A–F 无缺项）。另发现两处与玻璃无关�
 
 ## 11. 给接力的开场白模板
 
-> 请先读 `E:\home-food-delivery\extracted\PROJECT-HANDOFF.md`。遵守第 4 节架构约定与第 5/9 节的坑，改动前跑 `npm run build`、`npm run lint`、`npm test`、`python scripts/p6_static_gate.py` 复验。**每次修改同步更新本文档（进度台账 + 文件地图 + 坑清单），随代码一起提交。** 文案改 `src/lib/sweetCopy.js`，菜品/菜谱数据用 `scripts/build_htc_seed.py` 重新生成。
+> 请先读 `E:\点餐小程序—抓娃娃机\extracted\PROJECT-HANDOFF.md`。遵守第 4 节架构约定与第 5/9 节的坑，改动前跑 `npm run build`、`npm run lint`、`npm test`、`python scripts/p6_static_gate.py` 复验。**每次修改同步更新本文档（进度台账 + 文件地图 + 坑清单），随代码一起提交。** 文案改 `src/lib/sweetCopy.js`，菜品/菜谱数据用 `scripts/build_htc_seed.py` 重新生成。
