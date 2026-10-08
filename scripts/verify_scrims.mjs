@@ -64,8 +64,16 @@ const hardFailures = []
    （backdropTexture 只采 img / 实色卡面 / 渐变遮罩，不采字形），玻璃压在标题上就必然
    有差 —— 这是 US-004/005 记录在案、等所有者拍板的开放项，不是新回归。
    所以这里只把措辞写清楚（标注为已知偏差），绝不为让输出变绿而放宽阈值。 */
-const KNOWN_GLYPH_GAP = 0.05   // progress.txt 实测：pill +0.049 / scrim +0.125
-const send = (m, q = {}) => new Promise((res, rej) => { const i = ++id; p.set(i, { res, rej }); ws.send(JSON.stringify({ id: i, method: m, params: q })) })
+const KNOWN_GLYPH_GAP = 0.05   // 实测：pill +0.049 / scrim +0.125（原始记录已出库到 research/20260928-液态玻璃对齐iOS/progress.txt）
+const send = (m, q = {}) => new Promise((res, rej) => {
+  const i = ++id
+  /* CDP 超时：Browser.close 之后浏览器就没了，它的响应永远不会回来，
+     await 会永远挂住 → Node 以 13（unsettled top-level await）退出，
+     于是同一份代码时而 0 时而 13，门禁没法拿退出码判断。所有调用统一加兜底。 */
+  const timer = setTimeout(() => { p.delete(i); rej(new Error('CDP 超时：' + m)) }, 15000)
+  p.set(i, { res: (v) => { clearTimeout(timer); res(v) }, rej: (e) => { clearTimeout(timer); rej(e) } })
+  ws.send(JSON.stringify({ id: i, method: m, params: q }))
+})
 
 async function lum(box) {
   const s = await send('Page.captureScreenshot', { format: 'png' })
@@ -181,7 +189,7 @@ try {
       if (withinTol) mark = '✓'
       else if (Math.abs(diff) <= KNOWN_GLYPH_GAP) {
         mark = '△'
-        note = ' ← 已知偏差（US-004/005 开放项：场景纹理不含字形，玻璃压字时两条链路必然有差；见 progress.txt）'
+        note = ' ← 已知偏差（US-004/005 开放项：场景纹理不含字形，玻璃压字时两条链路必然有差；实测记录见 research/20260928-液态玻璃对齐iOS/progress.txt）'
       } else { mark = '✗'; note = ' ← 超出已知字形缺口区间，可能是真回归' }
     } else {
       const dims = css.lum < bed.lum - 0.02
