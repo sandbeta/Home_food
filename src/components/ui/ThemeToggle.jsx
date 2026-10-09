@@ -17,7 +17,7 @@ export default function ThemeToggle() {
      根因是场景纹理里没有字形（见 progress.txt US-004 末节）。等纹理补齐文字层再接。 */
   return (
     <motion.button
-      whileTap={{ scale: 0.9 }}
+      whileTap={{ scale: 0.94 }}
       onClick={toggle}
       role="switch"
       aria-checked={isNight}

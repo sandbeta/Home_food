@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import Icon from './Icons'
 import { STICKER } from '../../lib/sweetCopy'
+import { tapScale } from '../../theme/motion'
 
 /* ============================================================
  * 批 1 新增 · 便签留言条编辑器（贴在购物车与订单详情之间）
@@ -76,13 +77,14 @@ export default function StickerEditor({ value, onChange, collapsedLabel = STICKE
           >{v.pin}</span>
 
           {/* 关闭（收起）：视觉小叉 + 44px 命中框 */}
-          <button
+          <motion.button
             type="button"
+            whileTap={tapScale}
             onClick={() => onChange(null)}
             aria-label={STICKER.collapse}
             className="absolute top-0 right-0 w-11 h-11 grid place-items-center rounded-full"
             style={{ color: 'inherit' }}
-          ><span className="text-[13px] font-bold opacity-60 hover:opacity-100" aria-hidden>×</span></button>
+          ><span className="text-[13px] font-bold opacity-60 hover:opacity-100" aria-hidden>×</span></motion.button>
 
           <label htmlFor="sticker-msg" className="sr-only">{STICKER.content}</label>
           <textarea
@@ -102,9 +104,10 @@ export default function StickerEditor({ value, onChange, collapsedLabel = STICKE
           {/* 底色与图钉选择器：外层钮 44×44，视觉点尺寸不变 */}
           <div className="flex items-center gap-0.5 mt-2 pt-2" style={{ borderTop: '1px dashed var(--sticker-ink-hair)' }}>
             {BGS.map(b => (
-              <button
+              <motion.button
                 key={b.key}
                 type="button"
+                whileTap={tapScale}
                 onClick={() => set({ bg: b.key })}
                 aria-label={`底色 ${b.name}`}
                 aria-pressed={v.bg === b.key}
@@ -118,13 +121,14 @@ export default function StickerEditor({ value, onChange, collapsedLabel = STICKE
                     transform: v.bg === b.key ? 'scale(1.12)' : 'none',
                   }}
                 />
-              </button>
+              </motion.button>
             ))}
             <span className="mx-0.5 opacity-30" aria-hidden>·</span>
             {PINS.map(p => (
-              <button
+              <motion.button
                 key={p.g}
                 type="button"
+                whileTap={tapScale}
                 onClick={() => set({ pin: p.g })}
                 aria-label={`图钉：${p.n}`}
                 aria-pressed={v.pin === p.g}
@@ -133,7 +137,7 @@ export default function StickerEditor({ value, onChange, collapsedLabel = STICKE
                   background: v.pin === p.g ? 'var(--sticker-ink-tint)' : 'transparent',
                   outline: v.pin === p.g ? '1.5px solid var(--sticker-ink)' : 'none',
                 }}
-              >{p.g}</button>
+              >{p.g}</motion.button>
             ))}
           </div>
         </motion.div>

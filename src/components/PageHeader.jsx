@@ -83,7 +83,7 @@ export default function PageHeader({ title, eyebrow, subtitle, back = false, bac
 
           {back && (
             <motion.button
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.94 }}
               onClick={onBack || goBack}
               aria-label="返回"
               /* M-t1 修：原 w-10 h-10 = 40×40 不达 PRODUCT.md 承诺的 44px 触摸底线。

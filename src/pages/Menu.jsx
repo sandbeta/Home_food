@@ -22,7 +22,7 @@ import { pickOne, MENU_TITLES, MENU_NOTES, RETRY_NOTES } from '../lib/sweetCopy'
 import { tap, vibrate } from '../lib/sfx'
 import { morphTo, heroNameFor, cacheList, getCachedList } from '../lib/vt'
 import { requestJson } from '../lib/request'
-import { EASE, usePrefersReducedMotion } from '../theme/motion'
+import { EASE, DUR, tapScale, usePrefersReducedMotion } from '../theme/motion'
 
 /* +1 飘升粒子的 id 源：模块级递增计数器。
    替代旧的 Date.now()+Math.random()——该写法在 1.7e12 量级上双精度低位被舍掉，
@@ -253,12 +253,10 @@ export default function Menu() {
           className={`d3-card-face flex items-center gap-2 px-4 py-2 transition-[box-shadow,border-color] duration-300 ${searchFocused ? 'ring-[3px] ring-[var(--color-clay)]/25 border-[var(--color-clay)]/40' : ''}`}
           style={{ borderRadius: '999px', background: 'var(--surface)' }}>
           <label htmlFor="menu-search" className="sr-only">搜菜名或食材</label>
-          <motion.svg className={`w-4 h-4 shrink-0 text-[var(--color-ash)] transition-colors duration-300 ${searchFocused ? 'text-[var(--color-clay)]' : ''}`}
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"
-            animate={searchFocused ? { rotate: 90 } : { rotate: 0 }}
-            transition={{ duration: 0.4, ease: EASE }}>
+          <svg className={`w-4 h-4 shrink-0 text-[var(--color-ash)] transition-colors duration-300 ${searchFocused ? 'text-[var(--color-clay)]' : ''}`}
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
-          </motion.svg>
+          </svg>
           <input id="menu-search" value={keyword} onChange={e => setKeyword(e.target.value)}
             onFocus={() => setSearchFocused(true)}
             onBlur={() => setSearchFocused(false)}
@@ -269,9 +267,9 @@ export default function Menu() {
           <AnimatePresence>
             {keyword && (
               <motion.button onClick={() => setKeyword('')} aria-label="清空搜索"
-                initial={{ opacity: 0, scale: 0.9, width: 0 }}
-                animate={{ opacity: 1, scale: 1, width: 'auto' }}
-                exit={{ opacity: 0, scale: 0.8, width: 0 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
                 transition={{ duration: 0.22, ease: EASE }}
                 className="min-h-[44px] text-xs text-[var(--color-clay-text)] font-bold px-2 whitespace-nowrap overflow-hidden shrink-0">清空</motion.button>
             )}
@@ -322,7 +320,7 @@ export default function Menu() {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: EASE }}
+                transition={{ duration: DUR.base, ease: EASE }}
                 className="overflow-hidden"
               >
                 <div className="pt-2 space-y-1.5">
@@ -363,7 +361,7 @@ export default function Menu() {
               border: '2px solid color-mix(in srgb, var(--color-danger) 40%, transparent)',
             }}>
             <span className="text-sm font-semibold" style={{ color: 'color-mix(in srgb, var(--color-danger) 70%, var(--color-bone))' }}>⚠️ 这个分类没刷出来，先展示上一次的列表</span>
-            <button onClick={() => setRetryToken(t => t + 1)} aria-label="重试加载分类" className="text-xs font-bold shrink-0 min-h-[44px] px-3 rounded-full" style={{ color: 'var(--color-ash)' }}>再试一次</button>
+            <motion.button whileTap={tapScale} onClick={() => setRetryToken(t => t + 1)} aria-label="重试加载分类" className="text-xs font-bold shrink-0 min-h-[44px] px-3 rounded-full" style={{ color: 'var(--color-ash)' }}>再试一次</motion.button>
           </div>
         ) : null}
         {loadError && dishes.length === 0 ? (
@@ -480,7 +478,7 @@ export default function Menu() {
               ? { x: p.x, y: p.y - 40, opacity: 0, scale: 1.3 }
               : { x: [p.x, (p.x + p.tx) / 2, p.tx - 10], y: [p.y, Math.min(p.y, p.ty) - 52, p.ty - 10], opacity: [1, 1, 0.9], scale: [0.8, 1.15, 0.55] }}
             exit={{ opacity: 0 }}
-            transition={{ duration: reduced ? 0.4 : 0.55, ease: EASE, times: [0, 0.55, 1] }}
+            transition={{ duration: 0.4, ease: EASE, times: [0, 0.55, 1] }}
             className="fixed z-[100] pointer-events-none"
             style={{ left: 0, top: 0 }}
           >

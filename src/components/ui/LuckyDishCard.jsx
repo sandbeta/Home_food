@@ -119,7 +119,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
           </span>
           {/* 音效开关：全站唯一入口，控制签筒声与加购反馈音 */}
           <motion.button
-            whileTap={{ scale: 0.85 }}
+            whileTap={{ scale: 0.94 }}
             onClick={() => {
               const next = !soundOn
               setSfxEnabled(next)
@@ -156,7 +156,7 @@ export default function LuckyDishCard({ dishes, onAdd, spawnParticle }) {
         </motion.div>
 
         {/* 信息区：滚动中做轻微模糊，落定后清晰弹出 */}
-        <div className={`flex-1 min-w-0 transition-all duration-200 ${drawing ? 'blur-[1.5px] opacity-70' : ''}`}>
+        <div className={`flex-1 min-w-0 transition-[filter,opacity] duration-200 ${drawing ? 'blur-[1.5px] opacity-70' : ''}`}>
           {/* m-10：菜品名是数据条目非版面主角，h3 → <p> 与 DishRow/Cart 保持一致的读屏层级 */}
           <p className="font-serif font-bold text-xl leading-snug text-[var(--color-bone)] truncate m-0">{dish.name}</p>
           <p className="text-xs text-[var(--color-ash)] mt-0.5 line-clamp-1">{dish.description || '好吃的~'}</p>

@@ -269,7 +269,13 @@ export default function ClawMachine({
       const p = (((performance.now() - cruiseT0Ref.current) % 6800) / 6800)
       const tri = p < 0.25 ? 4 * p : p < 0.75 ? 2 - 4 * p : 4 * p - 4
       setCruiseX(59 + 29 * tri)
-    }, 50)
+    // 50ms 一 tick = 每秒 20 次 React 重渲染，只为挪一个装饰性小车。
+    // 小车本体由 framer 以 0.5s ease-out 追值（transition 走 retarget，不是逐 tick 重启），
+    // 100ms 采样在 6.8s 周期上仍是连续视觉运动，渲染开销直接减半。
+    // 注：小车横移仍走 `left`（绝对定位逐帧重排）—— 改成 transform 需要 caseW 像素量测，
+    // 而这条抓取机构的坐标是逐像素验算过的；抓取段是一次性 320-550ms 位移，成本可忽略。
+    // 真要收口，得先有真机帧时基线（本机 swiftshader 的 frametime 数字不可比）。
+    }, 100)
     return () => clearInterval(iv)
   }, [cruise, reduced])
 

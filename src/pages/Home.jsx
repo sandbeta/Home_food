@@ -13,7 +13,7 @@ import LoadingState from '../components/ui/LoadingState'
 import AnniversaryBanner from '../components/AnniversaryBanner'
 import DishShareCard from '../components/DishShareCard'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
-import { contentEnter } from '../theme/motion'
+import { contentEnter, tapScale } from '../theme/motion'
 import { NICKNAME, pickOne, HOME_NOTES, RETRY_NOTES, ANNIVERSARY_TITLES, ANNIVERSARY_NOTES, MOOD_HOME_NOTES } from '../lib/sweetCopy'
 import { anniversariesToday } from '../lib/anniversary'
 import { MOODS, readMood, writeMood } from '../lib/mood'
@@ -176,7 +176,8 @@ export default function Home() {
           {MOODS.map(m => {
             const active = mood === m.key
             return (
-              <button key={m.key} onClick={() => handleMood(m.key)} role="radio" aria-checked={active}
+              <motion.button key={m.key} onClick={() => handleMood(m.key)} role="radio" aria-checked={active}
+                whileTap={tapScale}
                 className="shrink-0 px-2.5 py-1 min-h-[44px] rounded-full text-xs font-bold flex items-center gap-1 transition-colors"
                 style={{
                   background: active ? 'var(--color-clay)' : 'var(--surface)',
@@ -184,12 +185,13 @@ export default function Home() {
                   border: `2px solid ${active ? 'var(--clay-deep)' : 'var(--color-line)'}`,
                 }}>
                 <span aria-hidden>{m.emoji}</span>{m.label}
-              </button>
+              </motion.button>
             )
           })}
           {mood && (
-            <button onClick={() => handleMood(mood)} aria-label="取消心情"
-              className="shrink-0 px-2 py-1 min-h-[44px] text-[11px] text-[var(--color-ash)] font-bold">清除</button>
+            <motion.button onClick={() => handleMood(mood)} aria-label="取消心情"
+              whileTap={tapScale}
+              className="shrink-0 px-2 py-1 min-h-[44px] text-[11px] text-[var(--color-ash)] font-bold">清除</motion.button>
           )}
         </div>
         {/* 批 1 · 纪念日横幅 */}
@@ -211,14 +213,15 @@ export default function Home() {
               onActiveChange={setActiveDish}
             />
             {activeDish && (
-              <button
+              <motion.button
+                whileTap={tapScale}
                 onClick={() => setShareOpen(true)}
                 aria-label={`分享菜卡：${activeDish.name}`}
                 className="w-full mt-3 min-h-[44px] py-2 text-xs font-bold text-[var(--color-clay-text)] flex items-center justify-center gap-1 rounded-full"
                 style={{ border: '2px dashed var(--color-line)' }}
               >
                 <span aria-hidden>📸</span> 分享这张菜卡给 TA 看
-              </button>
+              </motion.button>
             )}
           </div>
         )}
@@ -264,7 +267,7 @@ export default function Home() {
             <SectionHeader
               index={1}
               title={gridIsFrequent ? '常点的' : '今天想吃'}
-              action={<button onClick={() => navigate('/menu')} className="min-h-[44px] px-2 -mx-2 text-xs text-[var(--color-clay-text)] font-bold rounded-full inline-flex items-center">全部 →</button>}
+              action={<motion.button whileTap={tapScale} onClick={() => navigate('/menu')} className="min-h-[44px] px-2 -mx-2 text-xs text-[var(--color-clay-text)] font-bold rounded-full inline-flex items-center">全部 →</motion.button>}
             />
             <div className="grid grid-cols-2 gap-3 mt-3">
               {popular.map((dish) => {
@@ -336,7 +339,7 @@ export default function Home() {
             <SectionHeader
               index={2}
               title="最近订单"
-              action={<button onClick={() => navigate('/orders')} className="min-h-[44px] px-2 -mx-2 text-xs text-[var(--color-clay-text)] font-bold rounded-full inline-flex items-center">全部</button>}
+              action={<motion.button whileTap={tapScale} onClick={() => navigate('/orders')} className="min-h-[44px] px-2 -mx-2 text-xs text-[var(--color-clay-text)] font-bold rounded-full inline-flex items-center">全部</motion.button>}
             />
             <div className="space-y-2.5 mt-3">
               {recentOrders.map((order) => (

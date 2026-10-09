@@ -15,6 +15,7 @@ import { pickOne } from '../lib/sweetCopy'
 import RatingPicker from '../components/RatingPicker'
 import useDialogA11y from '../lib/useDialogA11y'
 import { ymd } from '../lib/dateKey'
+import { sheetUp } from '../theme/motion'
 
 /* ============================================================
  * 批 3a · 菜谱日历（月历视图回看每天吃了什么）
@@ -153,7 +154,7 @@ export default function KitchenCalendar() {
                   aria-disabled={!c.has}
                   tabIndex={c.has || c.isToday ? 0 : -1}
                   aria-label={c.has ? `${c.dayNum} 日，${c.count} 单${c.unrated ? `，${c.unrated} 单待评分` : ''}，点看详情` : `${c.dayNum} 日，没下单`}
-                  className="relative aspect-square min-h-[44px] rounded-[var(--radius-tile)] flex flex-col items-center justify-center transition-colors"
+                  className="relative aspect-square min-h-[44px] rounded-[var(--radius-tile)] flex flex-col items-center justify-center transition-[background-color,border-color,color,scale] duration-150 active:scale-[0.97]"
                   style={{
                     background: c.has
                       ? 'color-mix(in srgb, var(--clay-50) 12%, var(--surface))'
@@ -205,8 +206,7 @@ export default function KitchenCalendar() {
               style={{ backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', background: 'rgba(43,36,41,0.35)' }} />
             <motion.div
               ref={daySheetRef}
-              initial={{ y: 400, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 400, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 26 }}
+              {...sheetUp}
               role="dialog" aria-modal="true" aria-label="当日订单" tabIndex={-1}
               className="fixed bottom-0 left-0 right-0 mx-auto z-50"
               style={{ maxWidth: 'var(--shell-w)' }}>

@@ -56,7 +56,7 @@ export default function FloatingPillNav() {
             to={tab.path}
             aria-label={tab.label}
             aria-current={active ? 'page' : undefined}
-            className="relative flex items-center justify-center flex-1 h-[48px] rounded-full"
+            className="relative flex items-center justify-center flex-1 h-[48px] rounded-full transition-transform duration-150 active:scale-[0.96]"
           >
             {active && (
               <motion.div

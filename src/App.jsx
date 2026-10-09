@@ -7,7 +7,7 @@ import NightSnackSheet from './components/NightSnackSheet'
 import AmbientLightCanvas from './components/AmbientLightCanvas'
 import ErrorBoundary from './components/ErrorBoundary'
 import { useTheme } from './theme/useTheme'
-import { pageEnter } from './theme/motion'
+import { pageEnter, EASE } from './theme/motion'
 import LazySheep, { SheepZzz } from './components/ui/LazySheep'
 // m-12：全局 announce 桥副作用引入（内部挂 window.__cgAnnounce），App 不再导出非组件符号避免 react-refresh 警告
 import './lib/announce'
@@ -38,6 +38,9 @@ function PageLoader() {
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="relative">
         <div className="w-8 h-8 border-2 border-[var(--color-clay)]/20 border-t-[var(--color-clay)] rounded-full animate-spin" />
+        {/* 降级下转圈被全局 animation 兜底停成静止圆环 = 加载反馈归零。
+            补一行不依赖运动的文字回执（只在 reduce 下占位，正常用户看不到）。 */}
+        <p className="hidden motion-reduce:block text-[11px] font-bold text-[var(--color-ash)] mt-2 whitespace-nowrap">载入中…</p>
         {/* 转圈也挡不住困：懒羊羊陪等 */}
         <div className="absolute inset-0 flex items-center justify-center text-[var(--color-sage)]">
           <LazySheep size={22} mood="sleep" bib={false} breathe={false} />
@@ -102,8 +105,10 @@ function App() {
 
   return (
     <CartProvider>
-      {/* M-k1：全站 framer 动画在系统 reduced-motion 下自动禁 transform、保留 opacity，兑现 PRODUCT.md 承诺 */}
-      <MotionConfig reducedMotion="user">
+      {/* M-k1：全站 framer 动画在系统 reduced-motion 下自动禁 transform、保留 opacity，兑现 PRODUCT.md 承诺。
+          transition 兜底：此前不设全局默认，27+ 处 whileTap 全跑 framer 的 300ms 慢起 tween——
+          按压反馈应有的档位是 100-160ms。自带 transition 的（含全部 repeat:Infinity 循环）不受波及。 */}
+      <MotionConfig reducedMotion="user" transition={{ duration: 0.16, ease: EASE }}>
       {/* data-bd-layer：这块纸底会整屏盖住 html/body 的 --body-bg + 颗粒，
           WebGL 玻璃按文档顺序重放层叠时必须包含它，否则采到的是被盖住的底。 */}
       <div

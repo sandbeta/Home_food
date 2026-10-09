@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import useDialogA11y from '../lib/useDialogA11y'
-import { sheetUp, usePrefersReducedMotion } from '../theme/motion'
+import { sheetUp, usePrefersReducedMotion, tapScale } from '../theme/motion'
 import { requestJson } from '../lib/request'
 import { useCart } from './CartContext'
 import { tap, vibrate } from '../lib/sfx'
@@ -70,10 +70,10 @@ export default function WishFormModal({ open, onClose, onSubmitted }) {
               <h2 className="text-lg font-bold text-[var(--color-bone)]">许个愿 🌠</h2>
               <p className="text-xs text-[var(--color-ash)] mt-0.5">想吃什么菜单没有？说给他，他给你变出来。</p>
             </div>
-            <button onClick={onClose} aria-label="关闭"
+            <motion.button whileTap={tapScale} onClick={onClose} aria-label="关闭"
               className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] glass-op glass-op--ctl">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-            </button>
+            </motion.button>
           </div>
           <form onSubmit={submit} className="px-5 space-y-3"
             style={{ paddingBottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 16px)' }}>

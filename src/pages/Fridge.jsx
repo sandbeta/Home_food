@@ -120,17 +120,17 @@ export default function Fridge() {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <button onClick={() => bump(k, -1)} aria-label={`减少 ${k}`}
-                      className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-bone)]"
+                      className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-bone)] transition-transform duration-150 active:scale-[0.97]"
                       style={{ background: 'var(--color-ink-850)', border: '2px solid var(--color-line)' }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /></svg>
                     </button>
                     <button onClick={() => bump(k, 1)} aria-label={`增加 ${k}`}
-                      className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-on-dark)]"
+                      className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-on-dark)] transition-transform duration-150 active:scale-[0.97]"
                       style={{ background: 'var(--color-clay)', border: '2px solid var(--clay-deep)' }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
                     </button>
                     <button onClick={() => remove(k)} aria-label={pendingRemove === k ? `再次点击确认移除 ${k}` : `移除 ${k}`}
-                      className="w-11 h-11 rounded-full flex items-center justify-center ml-1 text-xs font-bold shrink-0 px-1"
+                      className="w-11 h-11 rounded-full flex items-center justify-center ml-1 text-xs font-bold shrink-0 px-1 transition-transform duration-150 active:scale-[0.97]"
                       style={{
                         background: pendingRemove === k ? 'var(--color-danger)' : 'transparent',
                         color: pendingRemove === k ? 'var(--color-on-dark)' : 'var(--color-danger)',

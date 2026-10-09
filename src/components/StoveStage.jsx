@@ -117,20 +117,20 @@ export default function StoveStage({ statusKey = 'pending', createdAt }) {
                 <>
                   <motion.span
                     className="absolute -left-3 -top-2 text-lg"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.9] }}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: [0.5, 1.2, 1], opacity: [0, 1, 0.9] }}
                     transition={{ delay: 0.85, duration: 0.5 }}
                   >✨</motion.span>
                   <motion.span
                     className="absolute -right-3 top-0 text-sm"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.9] }}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: [0.5, 1.2, 1], opacity: [0, 1, 0.9] }}
                     transition={{ delay: 1.0, duration: 0.5 }}
                   >✨</motion.span>
                   <motion.span
                     className="absolute left-1/2 -top-5 -translate-x-1/2 text-base"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0.9] }}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: [0.5, 1.2, 1], opacity: [0, 1, 0.9] }}
                     transition={{ delay: 0.95, duration: 0.5 }}
                   >🎉</motion.span>
                 </>

@@ -20,7 +20,7 @@ import { useCart } from '../components/CartContext'
 import { useClawSignals } from '../hooks/useClawSignals'
 import { nightPickInfo } from '../lib/nightRules'
 import { getCategoryEmoji, getDishImage } from '../lib/categoryIcons'
-import { contentEnter, cardEntrance, usePrefersReducedMotion } from '../theme/motion'
+import { contentEnter, cardEntrance, tapScale, usePrefersReducedMotion } from '../theme/motion'
 import { pickOne, NIGHT_HOME_TITLES, NIGHT_HOME_NOTES, RETRY_NOTES, MOOD_NIGHT_NOTES } from '../lib/sweetCopy'
 import { MOODS, readMood, writeMood } from '../lib/mood'
 import { vibrate } from '../lib/sfx'
@@ -120,7 +120,8 @@ export default function NightHome() {
           {MOODS.map(m => {
             const active = mood === m.key
             return (
-              <button key={m.key} onClick={() => handleMood(m.key)} role="radio" aria-checked={active}
+              <motion.button key={m.key} onClick={() => handleMood(m.key)} role="radio" aria-checked={active}
+                whileTap={tapScale}
                 className="shrink-0 px-2.5 py-1 min-h-[44px] rounded-full text-xs font-bold flex items-center gap-1 transition-colors"
                 style={{
                   background: active ? 'var(--color-clay)' : 'var(--surface)',
@@ -128,12 +129,13 @@ export default function NightHome() {
                   border: `2px solid ${active ? 'var(--clay-deep)' : 'var(--color-line)'}`,
                 }}>
                 <span aria-hidden>{m.emoji}</span>{m.label}
-              </button>
+              </motion.button>
             )
           })}
           {mood && (
-            <button onClick={() => handleMood(mood)} aria-label="取消心情"
-              className="shrink-0 px-2 py-1 min-h-[44px] text-[11px] text-[var(--color-ash)] font-bold">清除</button>
+            <motion.button onClick={() => handleMood(mood)} aria-label="取消心情"
+              whileTap={tapScale}
+              className="shrink-0 px-2 py-1 min-h-[44px] text-[11px] text-[var(--color-ash)] font-bold">清除</motion.button>
           )}
         </div>
         {loading && !pool.length && <LoadingState text="开灯备宵夜…" />}
@@ -187,14 +189,15 @@ export default function NightHome() {
             />
             {/* 批 3c · 分享"上一个抓到的菜"（与白天 Home 对齐） */}
             {activeDish && (
-              <button
+              <motion.button
+                whileTap={tapScale}
                 onClick={() => setShareOpen(true)}
                 aria-label={`分享菜卡：${activeDish.name}`}
                 className="w-full mt-3 min-h-[44px] py-2 text-xs font-bold text-[var(--color-clay-text)] flex items-center justify-center gap-1 rounded-full"
                 style={{ border: '2px dashed var(--color-line)' }}
               >
                 <span aria-hidden>📸</span> 分享这张菜卡给 TA 看
-              </button>
+              </motion.button>
             )}
           </div>
         )}
@@ -208,7 +211,7 @@ export default function NightHome() {
                 <div className="flex items-center gap-2">
                   {/* m-26：nightPick 命中<6 回退整池 → 明示"这些不是纯宵夜"，避免佛跳墙/剁椒鱼头等正餐混入被误当深夜推荐 */}
                   {fallback && <span className="text-[11px] text-[var(--color-ash)] whitespace-nowrap">宵夜供给少，先看这些~</span>}
-                  <button onClick={() => navigate('/menu?cat=夜宵')} className="min-h-[44px] px-2 -mx-2 text-xs text-[var(--color-clay-text)] font-bold rounded-full inline-flex items-center">全店夜宵 →</button>
+                  <motion.button whileTap={tapScale} onClick={() => navigate('/menu?cat=夜宵')} className="min-h-[44px] px-2 -mx-2 text-xs text-[var(--color-clay-text)] font-bold rounded-full inline-flex items-center">全店夜宵 →</motion.button>
                 </div>
               }
             />
@@ -217,6 +220,7 @@ export default function NightHome() {
                 <motion.div
                   key={dish.id}
                   {...cellEnter(idx)}
+                  whileTap={tapScale}
                   className="vt-dish-host d3-card-face relative flex flex-col cursor-pointer"
                   style={{ padding: 'var(--space-card-p)' }}
                   onClick={(e) => morphTo(navigate, `/dish/${dish.id}`, e, dish, '/home')}

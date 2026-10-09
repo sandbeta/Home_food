@@ -240,10 +240,9 @@ export default function AdminDishes() {
                   <>
                     {/* 管理端 quieter：行内次级动作全部中性化（安静纸面按钮），
                         人格色让位给右上角唯一主操作「+ 添加」；删除保留 danger 语义色 */}
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
+                    <button
                       onClick={() => handleToggle(dish)}
-                      className="flex-1 min-h-[44px] px-2 text-xs font-bold"
+                      className="flex-1 min-h-[44px] px-2 text-xs font-bold transition-transform duration-150 active:scale-[0.97]"
                       style={{
                         borderRadius: 'var(--radius-ctl)',
                         background: 'var(--surface)',
@@ -252,12 +251,11 @@ export default function AdminDishes() {
                       }}
                     >
                       {dish.available ? '✓ 上架' : '已下架'}
-                    </motion.button>
+                    </button>
 
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
+                    <button
                       onClick={() => { setPendingDel(null); setEditingDish(dish); setShowModal(true) }}
-                      className="flex-1 min-h-[44px] px-2 text-xs font-bold"
+                      className="flex-1 min-h-[44px] px-2 text-xs font-bold transition-transform duration-150 active:scale-[0.97]"
                       style={{
                         borderRadius: 'var(--radius-ctl)',
                         background: 'var(--surface)',
@@ -266,12 +264,11 @@ export default function AdminDishes() {
                       }}
                     >
                       编辑
-                    </motion.button>
+                    </button>
 
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
+                    <button
                       onClick={() => handleDelete(dish.id)}
-                      className="flex-1 min-h-[44px] px-2 text-xs font-bold"
+                      className="flex-1 min-h-[44px] px-2 text-xs font-bold transition-transform duration-150 active:scale-[0.97]"
                       style={{
                         borderRadius: 'var(--radius-ctl)',
                         background: pendingDel === dish.id ? 'var(--color-danger)' : 'var(--surface)',
@@ -280,7 +277,7 @@ export default function AdminDishes() {
                       }}
                     >
                       {pendingDel === dish.id ? '确认删除？' : '删除'}
-                    </motion.button>
+                    </button>
                   </>
                 }
               />

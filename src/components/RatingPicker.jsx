@@ -4,6 +4,7 @@ import { starCells, starCopy, summarizeDish, summaryCopy, SIGNATURE_BADGE, RATIN
 import { requestJson } from '../lib/request'
 import { settle, vibrate } from '../lib/sfx'
 import { useCart } from './CartContext'
+import { tapScale } from '../theme/motion'
 
 /* ============================================================
  * 批 9 新增 · 星级评分器（一餐吃完在订单详情里逐道打分）
@@ -83,9 +84,10 @@ export default function RatingPicker({ dish, ratings = [], orderId = null, onSav
         {/* 五颗星 = 5 个 44×44 热区；半分单独一个开关（拆 10 个半格热区会低于 44px 铁律） */}
         <div className="flex items-center" role="group" aria-label={`给「${dish.name}」打分`}>
           {cells.map((state, i) => (
-            <button
+            <motion.button
               key={i}
               type="button"
+              whileTap={tapScale}
               onClick={() => { setStars(i + 1); setErr(''); vibrate(8) }}
               aria-label={`打 ${i + 1} 星${starCopy(i + 1) ? `：${starCopy(i + 1)}` : ''}`}
               aria-pressed={stars === i + 1}
@@ -93,12 +95,13 @@ export default function RatingPicker({ dish, ratings = [], orderId = null, onSav
               style={{ background: state === 'empty' ? 'transparent' : 'color-mix(in srgb, var(--color-caramel) 10%, transparent)' }}
             >
               <StarGlyph state={state} />
-            </button>
+            </motion.button>
           ))}
         </div>
         {stars != null && (
-          <button
+          <motion.button
             type="button"
+            whileTap={tapScale}
             onClick={() => setStars(Number.isInteger(stars)
               ? Math.max(RATING_RULES.min, stars - RATING_RULES.halfStep)
               : Math.min(RATING_RULES.max, stars + RATING_RULES.halfStep))}
@@ -108,7 +111,7 @@ export default function RatingPicker({ dish, ratings = [], orderId = null, onSav
             style={{ border: '2px solid var(--color-line)', color: 'var(--color-clay-text)' }}
           >
             ½ 半分
-          </button>
+          </motion.button>
         )}
       </div>
 

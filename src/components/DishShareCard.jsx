@@ -237,10 +237,10 @@ export default function DishShareCard({ open, onClose, dish, indexNo = 1 }) {
               <h2 className="text-base font-bold font-serif text-[var(--color-bone)] leading-tight">今日菜卡</h2>
               <p className="text-[11px] text-[var(--color-ash)]">发到家庭群，或长按图片存进相册</p>
             </div>
-            <button onClick={onClose} aria-label="关闭"
+            <motion.button whileTap={tapScale} onClick={onClose} aria-label="关闭"
               className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] glass-op glass-op--ctl">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-            </button>
+            </motion.button>
           </div>
           <div className="px-5 flex-1 overflow-y-auto" style={{ paddingBottom: 'calc(max(env(safe-area-inset-bottom, 0px), 16px) + 12px)' }}>
             {drawing ? (

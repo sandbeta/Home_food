@@ -83,10 +83,10 @@ export default function PurchaseListSheet({ open, onClose, items }) {
                   : '打开冰箱会自动划掉家里有的'}
               </p>
             </div>
-            <button onClick={onClose} aria-label="关闭采购清单"
+            <motion.button whileTap={tapScale} onClick={onClose} aria-label="关闭采购清单"
               className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] glass-op glass-op--ctl">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-            </button>
+            </motion.button>
           </div>
 
           {/* 批 6a · 三档 tab（要买/家里有/全部）：仅在有冰箱数据时给 */}
@@ -95,7 +95,8 @@ export default function PurchaseListSheet({ open, onClose, items }) {
               {[['need', '要买'], ['home', '家里有'], ['all', '全部']].map(([k, l]) => {
                 const count = k === 'need' ? state.list.filter(e => !e.hasAtHome).length : k === 'home' ? state.list.filter(e => e.hasAtHome).length : state.list.length
                 return (
-                  <button key={k} onClick={() => setTab(k)} aria-pressed={tab === k}
+                  <motion.button key={k} onClick={() => setTab(k)} aria-pressed={tab === k}
+                    whileTap={tapScale}
                     className="px-3 py-1.5 min-h-[44px] rounded-full text-xs font-bold flex-1"
                     style={{
                       background: tab === k ? 'var(--color-clay)' : 'transparent',
@@ -103,7 +104,7 @@ export default function PurchaseListSheet({ open, onClose, items }) {
                       border: `2px solid ${tab === k ? 'var(--clay-deep)' : 'var(--color-line)'}`,
                     }}>
                     {l} {count}
-                  </button>
+                  </motion.button>
                 )
               })}
             </div>

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import KissIcon from './KissIcon'
 import { getDishImage, getCategoryEmoji } from '../lib/categoryIcons'
-import { EASE, contentEnter, usePrefersReducedMotion } from '../theme/motion'
+import { EASE, contentEnter, tapFade, usePrefersReducedMotion } from '../theme/motion'
 import BubbleClock from './ui/BubbleClock'
 import { motor, winJingle, vibrate } from '../lib/sfx'
 
@@ -79,6 +79,9 @@ export default function PotReveal({
   const [label, setLabel] = useState(null)
   const [serveCount, setServeCount] = useState(0)
   const [served, setServed] = useState([])     // 今晚已端上（小盘堆，最近 6 道）
+  // 托盘小字的真值锚：current 在 idle 相位会被换成下一道，只凭 serveCount>0 就说
+  // 「上一道端上的」会在演出尾段说谎（连拍第 4-6 帧实测）。存下刚端上那道的身分来判。
+  const [servedId, setServedId] = useState(null)
   const timersRef = useRef([])
   const currentRef = useRef(current)
   currentRef.current = current
@@ -101,6 +104,7 @@ export default function PotReveal({
     motor(320)
     vibrate(12)
     setServeCount((c) => c + 1)
+    setServedId(target.id)
     onCatch?.(target)   // 乐观加购（防动画中途卸载丢失，与 ClawMachine 同语义 M-s7）
     setCurrent(target)
     if (reduced) {
@@ -128,7 +132,9 @@ export default function PotReveal({
     timersRef.current.push(setTimeout(() => {
       setPhase('idle')
       setCurrent((prev) => pickNext(pool, prev && prev.id) || prev)
-    }, 2900))
+    // 演出在 720ms（served）就讲完了，2900ms 之前笼盖与「端上来」一直禁用 = 2.2s 纯等待。
+    // 规则：慢只慢在用户决策的地方，系统响应要快。撤销浮标的 4200ms 窗口是功能件，保留不动。
+    }, 1800))
   }, [busy, reduced, onCatch, pool])
 
   // 换一道：只预览下一道，不加购（对应旧首页"换一道"语言）
@@ -271,7 +277,7 @@ export default function PotReveal({
                 className="absolute inset-0"
                 initial={false}
                 animate={lit ? { scale: 0.85 } : { scale: 0.55 }}
-                transition={{ duration: 0.35, ease: EASE }}
+                transition={{ duration: 0.25, ease: EASE }}
               >
                 <DishPlate dish={current} size={108} />
                 {/* 笼内压暗：独立遮罩做透明度（framer 的 filter 字符串插值在此处会卡死整组 tween，
@@ -282,7 +288,7 @@ export default function PotReveal({
                   style={{ borderRadius: '50%', background: 'var(--color-bone)', pointerEvents: 'none' }}
                   initial={false}
                   animate={{ opacity: lit ? 0 : 0.45 }}
-                  transition={{ duration: 0.35, ease: EASE }}
+                  transition={{ duration: 0.25, ease: EASE }}
                 />
               </motion.div>
               <motion.span
@@ -303,7 +309,7 @@ export default function PotReveal({
               onClick={() => serve()}
               disabled={busy || !current}
               aria-label={current ? `掀开笼盖，端上「${current.name}」` : '笼里还没备菜'}
-              whileTap={reduced ? {} : { scale: 0.96 }}
+              whileTap={reduced ? tapFade : { scale: 0.96 }}
               animate={phase === 'idle' ? { y: 0, rotate: 0, opacity: 1 } : { y: -52, rotate: 14, opacity: 0.96 }}
               transition={{ duration: reduced ? 0.15 : 0.45, ease: EASE }}
               className="absolute left-1/2 flex items-center justify-center disabled:cursor-default"
@@ -328,11 +334,14 @@ export default function PotReveal({
             <AnimatePresence>
               {label && (
                 <motion.div key={label.key} className="absolute z-40"
-                  style={{ left: '50%', top: 158 }}
+                  /* 158 时浮标上沿正好切掉笼身「晨光厨房」烫字的下半（连拍放大帧已核实），
+                     下移 10px 让开：烫字基线在 155.5，浮标 168 起、212 收，仍在 264 高的舞台内，
+                     且照旧"短暂压一下笼沿"（笼体下缘 234）。 */
+                  style={{ left: '50%', top: 168 }}
                   initial={{ x: '-50%', opacity: 0, y: 8, scale: 0.9 }}
                   animate={{ x: '-50%', opacity: 1, y: -8, scale: 1 }}
-                  exit={{ x: '-50%', opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3, ease: EASE }}
+                  exit={{ x: '-50%', opacity: 0, y: -20, transition: { duration: 0.16, ease: EASE } }}
+                  transition={{ duration: 0.25, ease: EASE }}
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => e.stopPropagation()}
                   onAnimationComplete={() => setTimeout(() => setLabel((l) => (l && l.key === label.key ? null : l)), 4200)}>
@@ -359,7 +368,7 @@ export default function PotReveal({
         {/* 出菜面板：菜名点看做法 + 价格 + 换一道/端上来 */}
         <div className="claw-tray flex items-end justify-between gap-3 px-5 pt-3 pb-4">
           <div className="min-w-0">
-            <p className="text-[11px] font-bold truncate" style={{ letterSpacing: '0.05em', color: 'var(--color-ash)' }}>{serveCount === 0 ? note : '上一道端上的'}</p>
+            <p className="text-[11px] font-bold truncate" style={{ letterSpacing: '0.05em', color: 'var(--color-ash)' }}>{serveCount === 0 ? note : (current && Number(current.id) === Number(servedId) ? '上一道端上的' : '下一道候着')}</p>
             <button onClick={onOpen} disabled={!current} className="font-serif text-2xl font-bold text-[var(--color-bone)] truncate mt-0.5 max-w-full min-h-[44px] text-left" style={{ textUnderlineOffset: 3 }}>
               {current ? current.name : '笼里还没备菜'}
             </button>

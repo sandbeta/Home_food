@@ -42,9 +42,9 @@ export default function D3CartOrb() {
       </div>
       <motion.span
         key={totalCount}
-        initial={{ scale: 0.3, rotate: -20 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+        initial={{ scale: 0.9, opacity: 0.6 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 30 }}
         className="absolute -top-1 -right-1 min-w-[22px] h-[22px] rounded-full text-[var(--color-on-dark)] text-xs font-bold flex items-center justify-center px-1 border-2 border-[var(--color-ink-900)]"
         style={{ background: 'color-mix(in srgb, var(--color-love) 55%, var(--clay-deep))', boxShadow: '0 2px 8px color-mix(in srgb, var(--color-love) 45%, transparent)' }}
       >

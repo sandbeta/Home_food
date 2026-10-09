@@ -8,7 +8,7 @@ import KissIcon from '../components/KissIcon'
 import PageContainer from '../components/ui/PageContainer'
 import SectionHeader from '../components/ui/SectionHeader'
 import { getCategoryEmoji, getDishImage } from '../lib/categoryIcons'
-import { contentEnter } from '../theme/motion'
+import { contentEnter, EASE } from '../theme/motion'
 import { HERO_IMAGES } from '../theme/images'
 import { HOT_TRENDS, matchTrendDish } from '../lib/hotRecipes'
 import { tap, vibrate } from '../lib/sfx'
@@ -206,7 +206,7 @@ export default function HotDishes() {
                         菜谱
                       </motion.button>
                       <motion.button
-                        whileTap={{ scale: 0.9 }}
+                        whileTap={{ scale: 0.94 }}
                         onClick={() => addDish(dish)}
                         aria-label={`点一份${t.name}`}
                         className="w-11 h-11 rounded-full flex items-center justify-center"
@@ -243,8 +243,8 @@ export default function HotDishes() {
             role="status" aria-live="polite"
             initial={{ opacity: 0, y: 16, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            exit={{ opacity: 0, y: 8, transition: { duration: 0.16, ease: EASE } }}
+            transition={{ duration: 0.22, ease: EASE }}
             className="fixed left-1/2 -translate-x-1/2 z-[90] pointer-events-none"
             style={{ bottom: 'calc(var(--bottom-inset) + 8px)' }}
           >

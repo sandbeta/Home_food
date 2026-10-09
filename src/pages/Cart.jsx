@@ -48,9 +48,9 @@ function CartRow({ item, onUpdate, onRemove }) {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: -15 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 15, height: 0 }}
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0, transition: { duration: 0.2, ease: EASE } }}
+      exit={{ opacity: 0, x: 12, height: 0, transition: { duration: 0.16, ease: EASE } }}
       className="flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-tile)]"
       style={{ background: 'var(--surface)', border: '2px solid var(--color-line)' }}
     >
@@ -496,9 +496,9 @@ export default function Cart() {
               <span className="text-[var(--color-on-dark)] font-semibold">合计</span>
               <motion.span
                 key={totalPrice}
-                initial={{ scale: 1.3, y: -4 }}
-                animate={{ scale: 1, y: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                initial={{ opacity: 0.7, scale: 1.06, y: -2 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ type: 'spring', stiffness: 420, damping: 30 }}
                 className="font-serif text-display font-bold text-[var(--color-on-dark)] tabular-nums"
               >
                 <span className="text-[0.6em] mr-1">¥</span>{totalPrice}

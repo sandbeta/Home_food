@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { tapScale } from '../../theme/motion'
 import { useRef, useEffect } from 'react'
 
 /**
@@ -31,7 +32,7 @@ export default function Stepper({ value, onChange, min = 1, size = 44, className
     <div className={`flex items-center gap-1.5 ${className}`} role="group" aria-label={`调整${nameSuffix}`}>
       <motion.button
         type="button"
-        whileTap={{ scale: 0.92 }}
+        whileTap={tapScale}
         onClick={dec}
         disabled={value <= min}
         aria-label={name ? `减少${name}数量，当前 ${value} 份` : `减少${nameSuffix}数量，当前 ${value} 份`}
@@ -63,7 +64,7 @@ export default function Stepper({ value, onChange, min = 1, size = 44, className
 
       <motion.button
         type="button"
-        whileTap={{ scale: 0.92 }}
+        whileTap={tapScale}
         onClick={inc}
         aria-label={name ? `增加${name}数量，当前 ${value} 份` : `增加${nameSuffix}数量，当前 ${value} 份`}
         className="rounded-full flex items-center justify-center text-[var(--color-on-dark)]"

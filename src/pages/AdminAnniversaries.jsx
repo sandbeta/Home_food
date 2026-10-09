@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { EASE, DUR } from '../theme/motion'
 import AdminShell from '../components/ui/AdminShell'
 import Icon from '../components/ui/Icons'
 import EmptyState from '../components/ui/EmptyState'
@@ -153,7 +154,8 @@ function AnniversaryField({ id, label, ...rest }) {
 }
 
 function AnniversaryForm({ form, setForm, onSave, onCancel, saving }) {
-  const motion_props = { initial: { opacity: 0, height: 0 }, animate: { opacity: 1, height: 'auto' }, exit: { opacity: 0, height: 0 }, className: 'overflow-hidden mt-3 pt-3', style: { borderTop: '1px dashed var(--color-line)' } }
+  // 保持 height:'auto' 原机制（0fr→1fr 替代方案本会话无法验证，见报告 §5）
+  const motion_props = { initial: { opacity: 0, height: 0 }, animate: { opacity: 1, height: 'auto' }, exit: { opacity: 0, height: 0 }, transition: { duration: DUR.base, ease: EASE }, className: 'overflow-hidden mt-3 pt-3', style: { borderTop: '1px dashed var(--color-line)' } }
   return (
     <motion.form onSubmit={onSave} {...motion_props}>
       <div className="space-y-2.5">

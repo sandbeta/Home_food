@@ -14,7 +14,7 @@ import { nightPick } from '../lib/nightRules'
 import { getCategoryEmoji } from '../lib/categoryIcons'
 import LazySheep from './ui/LazySheep'
 import { pickOne, NIGHT_SNACK_NOTES, NIGHT_SNACK_TITLE } from '../lib/sweetCopy'
-import { sheetUp, cardEntrance, glowPulse, tapScale, usePrefersReducedMotion } from '../theme/motion'
+import { sheetUp, sheetExit, cardEntrance, glowPulse, tapScale, usePrefersReducedMotion } from '../theme/motion'
 import useDialogA11y from '../lib/useDialogA11y'
 import { requestJson } from '../lib/request'
 
@@ -37,7 +37,7 @@ const shuffleTake = (arr, n) => {
 const sheetUpDocked = {
   initial: { y: '150%' },
   animate: { y: 0 },
-  exit: { y: '150%' },
+  exit: { y: '150%', transition: sheetExit },
   transition: sheetUp.transition,
 }
 
@@ -114,7 +114,7 @@ export default function NightSnackSheet() {
                   </div>
                 </div>
                 <button onClick={close} aria-label="关闭夜宵推荐"
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform glass-op glass-op--ctl">
+                  className="w-11 h-11 rounded-full flex items-center justify-center text-[var(--color-ash)] active:scale-95 transition-transform ease-[var(--ease-soft)] glass-op glass-op--ctl">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
                 </button>
               </div>
@@ -129,7 +129,7 @@ export default function NightSnackSheet() {
                       <p className="text-xs font-bold text-[var(--color-bone)] truncate">{d.name}</p>
                       <p className="text-xs font-serif font-bold text-[var(--color-caramel)]"><span className="text-[0.75em]">¥</span>{d.price}</p>
                     </div>
-                    <motion.button whileTap={{ scale: 0.9 }} onClick={() => addItem(d)} aria-label={`加购${d.name}`}
+                    <motion.button whileTap={tapScale} onClick={() => addItem(d)} aria-label={`加购${d.name}`}
                       className="w-11 h-11 rounded-full shrink-0 flex items-center justify-center text-lg font-bold text-[var(--color-on-dark)]"
                       style={{ background: 'var(--color-clay)' }}>
                       +

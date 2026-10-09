@@ -300,6 +300,10 @@
   --dur-fast: 0.15s;
   --dur-base: 0.25s;
   --dur-slow: 0.45s;
+  /* Tailwind 所有 transition-* 工具类的默认缓动。此前是框架自带的
+     cubic-bezier(0.4,0,0.2,1)（慢起），与全站"快起慢收"的 --ease-soft 是两套标准；
+     在这里钉一次，胜过在 60 个调用点各写一遍 ease-[]。 */
+  --default-transition-timing-function: var(--ease-soft);
 }
 
 /* ========== Reset & Base ========== */
@@ -496,7 +500,23 @@ input, textarea { caret-color: var(--color-clay); }
   -webkit-backdrop-filter: blur(8px) saturate(110%);
   backdrop-filter: blur(8px) saturate(110%);
   box-shadow: 0 2px 10px rgba(43, 36, 41, 0.05);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, background-color var(--dur-slow) var(--ease-soft), border-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft);
+  /* transform 刻意不列：全站没有任何 CSS 规则改本类 transform，写在这里只会被
+     Framer 的内联 transform 触发（cardEntrance 的 y、whileTap 的 scale），
+     等于给 JS 动画再套一层 250ms CSS 插值 → 按压反馈被抹成橡皮感。
+     transform 全部交给 motion.js。 */
+  transition: box-shadow var(--dur-base) ease, background-color var(--dur-slow) var(--ease-soft), border-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft);
+}
+/* 纯 CSS 按压的卡面（不是 motion 组件的那些，如 Profile 的五张入口卡）：
+   .d3-card-face 本体刻意不带 scale/transform 过渡（见上），而本文件是**未分层**的作者样式，
+   会盖掉 Tailwind 分层里的 .transition-transform 工具类 → 只写 active:scale 会瞬时跳一下。
+   用这个修饰类把 150ms 反馈补回 transition 列表。**motion 组件不要挂它**，否则重新踩双驱动。 */
+.d3-card-face--press {
+  transition: scale var(--dur-fast) var(--ease-soft),
+    transform var(--dur-fast) var(--ease-soft),
+    box-shadow var(--dur-base) ease,
+    background-color var(--dur-slow) var(--ease-soft),
+    border-color var(--dur-slow) var(--ease-soft),
+    color var(--dur-slow) var(--ease-soft);
 }
 .d3-card:hover .d3-card-face {
   box-shadow: 0 6px 20px rgba(43, 36, 41, 0.08);
@@ -507,7 +527,11 @@ input, textarea { caret-color: var(--color-clay); }
   position: relative;
   border-radius: var(--radius-btn);
   font-weight: 700;
-  transition: opacity 0.15s ease, transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease, background-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft);
+  /* transform 不列：见 .d3-card-face 同款理由。全站主按钮几乎都是
+     <motion.button class="d3-btn" whileTap={…}>，CSS 再插值一次就把按压缩成 150ms 橡皮。
+     纯 <button>/<a> 走 .d3-btn-primary:active / .d3-btn-sm:active 的瞬时缩放（2-3% 幅度，
+     瞬时反而是更干脆的确认）。 */
+  transition: opacity 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease, background-color var(--dur-slow) var(--ease-soft), color var(--dur-slow) var(--ease-soft);
 }
 .d3-btn-primary {
   background: var(--color-clay);
@@ -528,7 +552,7 @@ input, textarea { caret-color: var(--color-clay); }
   font-size: 0.8125rem;
   background: var(--surface); /* 对比度修复：默认实底，小字不再浮在照片上 */
   border: 2px solid var(--color-line);
-  transition: opacity 0.15s ease, transform 0.15s ease, background 0.2s ease, color 0.2s ease;
+  transition: opacity 0.15s ease, background 0.2s ease, color 0.2s ease;   /* transform 见 .d3-btn 注释 */
 }
 .d3-btn-sm:active { transform: scale(0.97); opacity: 0.85; }
 
@@ -1091,14 +1115,24 @@ body { transition: background-color var(--dur-slow) var(--ease-soft), color var(
 .status-seg.is-now { background: var(--color-clay); color: var(--color-on-dark); border-color: var(--clay-deep); }
 .status-seg.is-done { background: var(--color-sage); color: var(--color-on-sage); border-color: var(--sage-60); }
 
-/* ========== 动效降级 ========== */
+/* ========== 动效降级 ==========
+   「减少动效」= 去掉位移/缩放/循环，不是去掉一切过渡。
+   透明度与颜色承载的是"状态变了"这件事本身，一刀切成 0.001ms 会让界面
+   在降级模式下变成没有回执的静默面板。framer 侧由 MotionConfig
+   reducedMotion="user" 负责（它同样只砍 transform/布局，保留 opacity），
+   两层分工必须一致，所以这里改成"只允许淡入淡出"而不是"全部掐掉"。 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-property: opacity, color, background-color, border-color, fill, stroke !important;
+    transition-duration: var(--dur-fast) !important;
     scroll-behavior: auto !important;
   }
+  /* 滚动驱动显影的进度来自 view() 时间线，不吃 animation-duration，
+     上面那条对它无效——必须点名把时间线与关键帧一起摘掉，否则降级用户
+     滚动时仍会看到一条横向抽出的线。 */
+  .ink-reveal-line { animation-name: none !important; animation-timeline: none !important; transform: none !important; }
 }
 
 /* ========== 打印样式（批 4c · 年度别册一键存 PDF） ==========

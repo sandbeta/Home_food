@@ -109,7 +109,7 @@ export default function DishDetail() {
         onBack={morphFrom ? () => morphBack(navigate, morphFrom) : undefined}
         right={
           <motion.button
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.94 }}
             onClick={() => toggle(dish)}
             aria-label={has(dish.id) ? '取消收藏' : '收藏'}
             aria-pressed={has(dish.id)}

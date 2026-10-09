@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import KissIcon from '../KissIcon'
 import Icon from './Icons'
 import { getCategoryEmoji, getDishImage } from '../../lib/categoryIcons'
+import { tapScale } from '../../theme/motion'
 
 /**
  * 菜品行 —— 已接入：Menu / AdminDishes（Home 重排后用网格卡、Favorites 页已删除，
@@ -42,7 +43,7 @@ export default function DishRow({
     >
       {showFav && onToggleFav && (
         <motion.button
-          whileTap={{ scale: 0.9 }}
+          whileTap={{ scale: 0.94 }}
           onClick={(e) => { e.stopPropagation(); onToggleFav(dish) }}
           aria-label={favorited ? '取消收藏' : '收藏'}
           aria-pressed={favorited}
@@ -126,7 +127,7 @@ export default function DishRow({
 
             {variant === 'default' && onAdd && (
               <motion.button
-                whileTap={{ scale: 0.92 }}
+                whileTap={tapScale}
                 onClick={(e) => { e.stopPropagation(); onAdd(dish, e) }}
                 aria-label={addLabel || `添加${dish.name}`}
                 className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"

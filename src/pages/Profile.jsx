@@ -18,6 +18,7 @@ import { nextAnniversary, anniversariesToday, formatAnniDate } from '../lib/anni
 import { PRESET_AVOIDS, readAvoids, writeAvoids } from '../lib/avoid'
 import { computeAchievements, ACHIEVEMENTS } from '../lib/achievements'
 import Chip from '../components/ui/Chip'
+import { EASE, DUR, tapScale } from '../theme/motion'
 
 export default function Profile() {
   const [stats, setStats] = useState({ orders: 0, total: 0 })
@@ -166,7 +167,7 @@ export default function Profile() {
 
         {/* 批 1 新增 · 我们的日子（纪念日预览卡，管理入口走 Admin） */}
         <Link to="/admin/anniversaries"
-          className="d3-card-face flex items-center gap-3 no-underline mt-3"
+          className="d3-card-face d3-card-face--press flex items-center gap-3 no-underline mt-3 active:scale-[0.97]"
           style={{ padding: 'var(--space-card-p)', color: 'inherit' }}>
           <span aria-hidden
             className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
@@ -205,7 +206,7 @@ export default function Profile() {
 
         {/* 批 3a 新增 · 厨房日历入口（月历视图回看每天吃了啥） */}
         <Link to="/calendar"
-          className="d3-card-face flex items-center gap-3 no-underline mt-3"
+          className="d3-card-face d3-card-face--press flex items-center gap-3 no-underline mt-3 active:scale-[0.97]"
           style={{ padding: 'var(--space-card-p)', color: 'inherit' }}>
           <span aria-hidden
             className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
@@ -223,7 +224,7 @@ export default function Profile() {
 
         {/* 批 3b 新增 · 口味画像入口（五维雷达 + TOP5 最爱） */}
         <Link to="/taste"
-          className="d3-card-face flex items-center gap-3 no-underline mt-3"
+          className="d3-card-face d3-card-face--press flex items-center gap-3 no-underline mt-3 active:scale-[0.97]"
           style={{ padding: 'var(--space-card-p)', color: 'inherit' }}>
           <span aria-hidden
             className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
@@ -241,7 +242,7 @@ export default function Profile() {
 
         {/* 批 4c 新增 · 年度别册入口（可打印的年终总结） */}
         <Link to="/report"
-          className="d3-card-face flex items-center gap-3 no-underline mt-3"
+          className="d3-card-face d3-card-face--press flex items-center gap-3 no-underline mt-3 active:scale-[0.97]"
           style={{ padding: 'var(--space-card-p)', color: 'inherit' }}>
           <span aria-hidden
             className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
@@ -259,7 +260,7 @@ export default function Profile() {
 
         {/* 批 6a 新增 · 厨房冰箱入口（家庭"我们家有啥菜"） */}
         <Link to="/fridge"
-          className="d3-card-face flex items-center gap-3 no-underline mt-3"
+          className="d3-card-face d3-card-face--press flex items-center gap-3 no-underline mt-3 active:scale-[0.97]"
           style={{ padding: 'var(--space-card-p)', color: 'inherit' }}>
           <span aria-hidden
             className="w-11 h-11 rounded-full flex items-center justify-center text-xl shrink-0"
@@ -304,8 +305,9 @@ export default function Profile() {
           <AnimatePresence initial={false}>
             {avoidsOpen && (
               <motion.div key="avoid-panel" id="avoid-panel"
+                /* 保持 height:'auto' 与原结构不变；0fr→1fr 的替代方案本会话无法验证（见报告 §5） */
                 initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.28 }}
+                transition={{ duration: DUR.base, ease: EASE }}
                 className="overflow-hidden">
                 <div className="pt-3 mt-3" style={{ borderTop: '1px solid var(--color-glass-border)' }}>
                   <p className="text-xs text-[var(--color-ash)] mb-2">点选不吃什么 · Cart 提交前会温柔提示（不阻断）</p>
@@ -394,7 +396,7 @@ export default function Profile() {
                 保留视觉尺寸不变，用 py + 负 margin 撑热区到 ≥44（48×44）。 */}
             <motion.button
               onClick={toggleThemeMode}
-              whileTap={{ scale: 0.92 }}
+              whileTap={tapScale}
               role="switch"
               aria-checked={isNight}
               aria-label="切换夜宵模式"
