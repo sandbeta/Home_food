@@ -1,0 +1,1 @@
+function e(e){return String(e).padStart(2,`0`)}function t(t){return`${t.getFullYear()}-${e(t.getMonth()+1)}-${e(t.getDate())}`}export{t as n,e as t};
