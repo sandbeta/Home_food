@@ -1,0 +1,193 @@
+/* ============================================================
+   懒懒的厨房 · 设计令牌
+   两轨共用一套令牌：
+   - 装饰轨（今天页）用页面底 / 手绘场景 / 贴纸，容器零描边。
+   - 功能轨（菜单、锅巴、我的、后台）用白卡 + 暖棕软投影 + 实底文字，
+     禁止容器描边，层级靠留白与投影。
+   颜色只在这里定义，组件层与页面层不允许出现十六进制字面量。
+   ============================================================ */
+
+:root {
+  color-scheme: light;
+
+  /* —— 表面 —— */
+  --page: #FDEBF2;
+  --canvas: #EFC9D8;
+  --card: #FFFBFD;
+  --card-2: #FFF3F8;
+  --field: #F8DFEA;
+  --seg-active: #FFFBFD;
+  --sheet: #FFF7FA;
+  --dock: #F5C7D8;
+  --dock-active: #FFD8E5;
+
+  /* —— 品牌色 —— */
+  --caramel: #F5C7D8;
+  --honey: #F6BFD2;
+  --honey-deep: #E7A3BB;
+  --sage: #B4C3A4;
+  --sage-soft: #E3EBDD;
+  --sage-deep: #6E7D62;
+  --coral: #D95C7A;
+  --coral-text: #B03C59;
+  --coral-soft: #FBE0E8;
+  --blush: #F7C6D3;
+  --sky: #DAEFF9;
+
+  /* —— 文字（只有两档承载信息） —— */
+  --ink: #4A3A26;
+  --ink-2: #6F5A41;
+  --ink-3: #8A7358;      /* 装饰文字专用：不承载必要信息 */
+  --on-honey: #4A3A26;
+  --on-cta: #FFF6E8;
+
+  /* —— 线 / 阴影 —— */
+  --line: rgba(90, 40, 60, .12);
+  --line-strong: rgba(90, 40, 60, .22);
+  --shadow-sm: 0 1px 2px rgba(150, 80, 110, .08);
+  --shadow: 0 6px 18px rgba(150, 80, 110, .12);
+  --shadow-lg: 0 18px 44px rgba(150, 80, 110, .18);
+  --scrim: rgba(70, 30, 45, .34);
+
+  /* —— 主操作（每屏最多一个实底深色面） —— */
+  --cta-bg: #4A3A26;
+  --cta-fg: #FFF6E8;
+
+  /* —— 状态 —— */
+  --danger: #9E2F22;
+  --danger-soft: #F7E0DB;
+  --success: #4F6438;
+  --success-soft: #E8EFDF;
+  --warn: #7A4E12;
+  --warn-soft: #F9EBCF;
+
+  /* —— 照片统一滤镜（§7.1 实测可用下限，不许再压深） —— */
+  --photo-fx: saturate(.72) sepia(.16) brightness(1.03);
+
+  /* —— 场景 / 菜品插画（装饰层，不承载信息） —— */
+  --scene-bg: #FDE3EE;
+  --art-hi: #FFFDF3;
+  --dish-warm: #E8B478;
+  --dish-grain: #F3E2A4;
+  --dish-honey: #F7DCAE;
+  --dish-green: #D9E4A5;
+  --dish-blue: #D8EEF8;
+  --dish-rose: #D4A08A;
+  --dish-coral: #E8A090;
+  --dish-sage: #B3C2A3;
+  --dish-pink: #F6C6C8;
+
+  /* —— 字体 —— */
+  --font: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-num: ui-rounded, "SF Pro Rounded", "PingFang SC", var(--font);
+
+  /* —— 字阶：只许用这七档 —— */
+  --fs-display: 1.875rem;
+  --fs-title: 1.375rem;
+  --fs-h2: 1.1875rem;
+  --fs-body: .9375rem;
+  --fs-note: .8125rem;
+  --fs-micro: .6875rem;
+  --fs-price: 1.25rem;
+
+  --lh-tight: 1.12;
+  --lh-title: 1.22;
+  --lh-body: 1.55;
+  --lh-note: 1.45;
+
+  /* —— 间距：4px 基线，只许用这十档 —— */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 20px;
+  --s6: 24px;
+  --s7: 32px;
+  --s8: 40px;
+  --s9: 48px;
+  --s10: 64px;
+
+  /* —— 圆角 —— */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 20px;
+  --r-xl: 24px;
+  --r-2xl: 28px;
+  --r-pill: 999px;
+
+  /* —— 触控与停靠 —— */
+  --tap: 44px;
+  --shell-w: 480px;
+  --dock-h: 64px;
+  --page-x: var(--s5);
+  --bottom-inset: calc(var(--dock-h) + env(safe-area-inset-bottom, 0px) + var(--s6));
+
+  /* —— 动效（服从全站 ≤300ms / bounce ≤.2） —— */
+  --dur-fast: 150ms;
+  --dur-base: 240ms;
+  --dur-slow: 300ms;
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-soft: cubic-bezier(.32, .72, 0, 1);
+}
+
+/* ============================================================
+   夜间：宵夜是一种外观，不是一个页面
+   同族加深加彩，不搬色相族；线变成最亮的东西，主操作反相为暖亮面。
+   ============================================================ */
+[data-theme="night"] {
+  color-scheme: dark;
+
+  --page: #2A1520;
+  --canvas: #190C12;
+  --card: #3B2230;
+  --card-2: #452839;
+  --field: #4E3038;
+  --seg-active: #5A3A47;
+  --sheet: #3B2230;
+  --dock: #4A2F3C;
+  --dock-active: #C9A24A;
+
+  --caramel: #4A2F3C;
+  --honey: #C9A24A;
+  --honey-deep: #B48C3B;
+  --sage: #7E9A76;
+  --sage-soft: #3A4A38;
+  --sage-deep: #BFD3B5;
+  --coral: #E77F6C;
+  --coral-text: #F09B8B;
+  --coral-soft: #4E2A2A;
+  --blush: #8E4A57;
+  --sky: #5A7C8C;
+
+  --ink: #F2C993;
+  --ink-2: #D6BECD;
+  --ink-3: #B79AAE;
+  --on-honey: #2A1520;
+  --on-cta: #2A1520;
+
+  --line: rgba(242, 201, 147, .16);
+  --line-strong: rgba(242, 201, 147, .30);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, .26);
+  --shadow: 0 6px 18px rgba(0, 0, 0, .30);
+  --shadow-lg: 0 18px 44px rgba(0, 0, 0, .44);
+  --scrim: rgba(8, 3, 6, .58);
+
+  --cta-bg: #F2C993;
+  --cta-fg: #2A1520;
+
+  --danger: #FFB3A3;
+  --danger-soft: #64251F;
+  --success: #A9C395;
+  --success-soft: #33402D;
+  --warn: #E8C27C;
+  --warn-soft: #4A361F;
+
+  --photo-fx: saturate(.82) sepia(.08) brightness(.86);
+  --scene-bg: #3B2230;
+}
+
+/* 大字号：字号升一档，行高与间距跟着 rem 走；触控下限仍是绝对像素 */
+html[data-text="lg"] {
+  font-size: 18px;
+}
