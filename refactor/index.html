@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFF2E1" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="懒懒的厨房 · 两个人的点餐本" />
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <title>懒懒的厨房</title>
+  <script>
+    // 主题先于首帧写入，避免夜间打开时闪一下亮色
+    (function () {
+      try {
+        var saved = localStorage.getItem('lamb_theme')
+        var hour = new Date().getHours()
+        var night = saved === 'night' || (saved !== 'day' && (hour >= 21 || hour < 5))
+        document.documentElement.dataset.theme = night ? 'night' : 'day'
+        document.querySelector('meta[name=theme-color]').setAttribute('content', night ? '#2A1520' : '#FFF2E1')
+        var text = localStorage.getItem('lamb_text')
+        if (text === 'lg') document.documentElement.dataset.text = 'lg'
+        var motion = localStorage.getItem('lamb_motion')
+        if (motion === 'reduce') document.documentElement.dataset.motion = 'reduce'
+      } catch (e) {}
+    })()
+  </script>
+  <script type="module" crossorigin src="./assets/index-CbmiOg3u.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/jsx-runtime-CH4uNR7A.js">
+  <link rel="stylesheet" crossorigin href="./assets/style-B9hmCwbM.css">
+</head>
+<body>
+  <div id="root"></div>
+  <noscript>这间厨房要点火才能开，先把浏览器的 JavaScript 打开。</noscript>
+</body>
+</html>
