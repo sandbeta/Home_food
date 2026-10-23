@@ -204,7 +204,6 @@ export default function Today() {
             <p className="t-micro">今天想吃什么</p>
             <h1 className="hero-card__title">锅已热，<span className="t-coral">就等你</span>点菜</h1>
           </div>
-          <span className="hero-card__days t-num">{companion ? `${pad3(companion.days)} 天` : `${orders.length} 顿`}</span>
         </div>
       </section>
 

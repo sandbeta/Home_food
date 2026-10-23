@@ -153,14 +153,9 @@
 .hero-card__img {
   width: 100%;
   height: auto;
-  max-height: 340px;
+  max-height: 300px;
   object-fit: cover;
   object-position: center 42%;
-}
-
-.hero-card--pray .hero-card__img,
-.hero-card--steal .hero-card__img {
-  max-height: none;
 }
 
 .hero-card__status {
@@ -228,14 +223,6 @@
   font-weight: 800;
   letter-spacing: -.014em;
   margin-top: 4px;
-}
-
-.hero-card__days {
-  flex: none;
-  font-size: var(--fs-note);
-  font-weight: 800;
-  color: var(--ink-2);
-  padding-bottom: 3px;
 }
 
 .today__error {
@@ -895,6 +882,53 @@
   margin-top: var(--s1);
 }
 
+.cart-payer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s4);
+}
+
+.cart-payer__seg {
+  min-width: 170px;
+}
+
+.cart-page--checkout {
+  padding-bottom: 80px;
+}
+
+.cart-checkout {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  width: min(calc(100% - 24px), 448px);
+  min-height: 64px;
+  padding: var(--s2) var(--s3) var(--s2) var(--s4);
+  border-radius: var(--r-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  z-index: 39;
+}
+
+.cart-checkout__sum {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cart-checkout__sum .price {
+  font-size: var(--fs-h2);
+}
+
+.cart-checkout__btn {
+  margin-left: auto;
+  min-width: 150px;
+}
+
 .cart-hint {
   text-align: center;
   font-size: var(--fs-micro);
@@ -926,22 +960,6 @@
   font-size: var(--fs-body);
 }
 
-.cart-total {
-  margin-top: var(--s4);
-  padding: var(--s4);
-  border-radius: var(--r-lg);
-  background: var(--card);
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  gap: var(--s3);
-}
-
-.cart-total__hint {
-  text-align: center;
-  font-size: var(--fs-micro);
-  color: var(--ink-2);
-}
 
 /* ============================================================
    订单
@@ -1853,10 +1871,38 @@
     width: 46px;
     height: 46px;
   }
-  .timeline__label {
-    font-size: 10px;
+  .hero-card__img {
+    max-height: 200px;
+  }
+  .cart-payer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--s3);
+  }
+  .cart-payer__seg {
+    width: 100%;
+    min-width: 0;
+  }
+  .admin-dish {
+    gap: var(--s1);
+  }
+  .admin-dish .grow {
+    flex: 1 1 60px;
   }
   .hero-card__bubble {
     max-width: 70%;
   }
+}
+
+
+/* 横向滚动的可发现性：右缘 28px 渐隐，尾部留 44px，最后一项能滚出渐隐区 */
+.menu-cats,
+.admin-tabs,
+.admin-filters,
+.badge-row,
+.fridge-presets,
+.mood-block__chips {
+  padding-right: 44px;
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 28px), transparent 100%);
 }

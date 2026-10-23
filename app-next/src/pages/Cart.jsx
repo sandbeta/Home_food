@@ -114,7 +114,7 @@ export default function Cart() {
         )}
       />
 
-      <div className="page cart-page">
+      <div className={`page cart-page${items.length ? ' cart-page--checkout' : ''}`}>
         {sharedVisible ? (
           <div className="banner banner--honey cart__shared">
             <Icon name="users" size={18} />
@@ -180,12 +180,12 @@ export default function Cart() {
             <p className="cart-hint">左滑一行可以删掉</p>
 
             <section className="card card--pad cart-block">
-              <div className="row row--between">
+              <div className="cart-payer">
                 <div>
                   <p className="t-micro">谁买单</p>
                   <p className="t-note">{payer === 'aa' ? '按谁点的各付各的' : payer === 'me' ? '这顿我来' : '这顿 TA 来'}</p>
                 </div>
-                <div className="seg seg--compact" style={{ minWidth: 170 }}>
+                <div className="seg seg--compact cart-payer__seg">
                   <button type="button" className="seg__item" aria-pressed={payer === 'aa'} onClick={() => setPayer('aa')}>AA</button>
                   <button type="button" className="seg__item" aria-pressed={payer === 'me'} onClick={() => setPayer('me')}>我请</button>
                   <button type="button" className="seg__item" aria-pressed={payer === 'partner'} onClick={() => setPayer('partner')}>TA 请</button>
@@ -224,20 +224,19 @@ export default function Cart() {
               </div>
             ) : null}
 
-            <div className="cart-total">
-              <div className="row row--between">
-                <span className="t-note">合计</span>
+            <div className="cart-checkout" role="region" aria-label="结算">
+              <div className="cart-checkout__sum">
+                <span className="t-micro">合计</span>
                 <span className="price">{money(total)}</span>
               </div>
               <button
                 type="button"
-                className="btn btn--primary btn--block"
+                className="btn btn--primary cart-checkout__btn"
                 onClick={submit}
                 disabled={submitting || !items.length}
               >
                 {submitting ? '点上火…' : `下单 · ${money(total)}`}
               </button>
-              <p className="cart-total__hint">下单后厨房会收到，好了会出现在订单里。</p>
             </div>
           </>
         )}

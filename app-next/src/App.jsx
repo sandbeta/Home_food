@@ -4,6 +4,7 @@ import { MotionConfig } from 'framer-motion'
 import Dock from './components/Dock.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { useSettings } from './state/SettingsContext.jsx'
+import { useCart } from './state/CartContext.jsx'
 import Today from './pages/Today.jsx'
 import Menu from './pages/Menu.jsx'
 import Cart from './pages/Cart.jsx'
@@ -41,11 +42,19 @@ function PageFallback() {
 export default function App() {
   const location = useLocation()
   const { settings } = useSettings()
+  const { count } = useCart()
   const hasDock = DOCK_PATHS.has(location.pathname)
 
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [location.pathname])
+
+  useEffect(() => {
+    const body = document.body
+    body.dataset.dock = hasDock ? 'dock' : 'none'
+    if (location.pathname === '/cart' && count > 0) body.dataset.cart = 'checkout'
+    else delete body.dataset.cart
+  }, [hasDock, location.pathname, count])
 
   return (
     <MotionConfig reducedMotion={settings.motion === 'reduce' ? 'always' : 'user'}>

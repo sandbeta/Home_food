@@ -659,6 +659,14 @@
 }
 
 /* ---------------- 吐司 ---------------- */
+body[data-dock="none"] .toast {
+  bottom: calc(var(--s6) + env(safe-area-inset-bottom, 0px));
+}
+
+body[data-cart="checkout"] .toast {
+  bottom: calc(154px + env(safe-area-inset-bottom, 0px));
+}
+
 .toast {
   position: fixed;
   left: 50%;
