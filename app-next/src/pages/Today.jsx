@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Icon from '../components/Icon.jsx'
-import DishArt from '../components/DishArt.jsx'
+import DishThumb from '../components/DishThumb.jsx'
 import { Avatar, LambImage } from '../components/LambImage.jsx'
 import { useData } from '../state/DataContext.jsx'
 import { useSettings } from '../state/SettingsContext.jsx'
@@ -14,7 +14,6 @@ import { anniversariesToday, nextAnniversary } from '../lib/anniversary.js'
 import { pickDaily, computeEatSignals } from '../lib/pick.js'
 import { countThisWeek, daysBetween, money, monthDay, pad3, timeHM, weekdayCN, ymd } from '../lib/format.js'
 import { readFridge } from '../lib/fridge.js'
-import { dishImage } from '../lib/assetUrl.js'
 
 const MOODS = [
   { key: 'happy', label: '开心' },
@@ -141,7 +140,6 @@ export default function Today() {
       ? `一起吃过 ${orders.length} 顿`
       : '第一顿，等你点菜'
 
-  const src = dishImage(dish)
 
   return (
     <div className="page page--top today">
@@ -232,7 +230,7 @@ export default function Today() {
             </div>
           </div>
           <button type="button" className="pick__media" onClick={() => openDish(dish)} aria-label={`看 ${dish.name}`}>
-            {src ? <img src={src} alt="" loading="eager" /> : <DishArt dish={dish} size={104} />}
+            <DishThumb dish={dish} size={104} eager />
           </button>
         </section>
       ) : loading ? (

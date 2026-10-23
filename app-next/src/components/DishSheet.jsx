@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import Sheet from './Sheet.jsx'
 import Icon from './Icon.jsx'
-import DishArt from './DishArt.jsx'
+import DishThumb from './DishThumb.jsx'
 import Stepper from './Stepper.jsx'
 import { api } from '../lib/api.js'
-import { dishImage } from '../lib/assetUrl.js'
 import { money } from '../lib/format.js'
 import { isNightSnack } from '../lib/nightRules.js'
 import { summarizeDish } from '../lib/dishRating.js'
@@ -45,7 +44,7 @@ export default function DishSheet({ dishId, open, onClose }) {
     return () => { alive = false }
   }, [open, dishId])
 
-  const src = dishImage(dish)
+  const src = Boolean(dish?.image_url)
   const available = !dish || Number(dish.available) !== 0
   const night = dish ? isNightSnack(dish) : false
 
@@ -72,7 +71,7 @@ export default function DishSheet({ dishId, open, onClose }) {
       ) : (
         <>
           <div className={`dish-sheet__hero${src ? ' has-photo' : ''}`}>
-            {src ? <img src={src} alt={dish.name} decoding="async" /> : <DishArt dish={dish} size={150} />}
+            <DishThumb dish={dish} size={150} alt={dish.name} eager />
             <button type="button" className="icon-btn dish-sheet__close" aria-label="关闭" onClick={onClose}>
               <Icon name="close" size={20} />
             </button>

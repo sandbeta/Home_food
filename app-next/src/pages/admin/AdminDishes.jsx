@@ -5,12 +5,11 @@ import Icon from '../../components/Icon.jsx'
 import Dialog from '../../components/Dialog.jsx'
 import ConfirmDialog from '../../components/ConfirmDialog.jsx'
 import Switch from '../../components/Switch.jsx'
-import DishArt from '../../components/DishArt.jsx'
+import DishThumb from '../../components/DishThumb.jsx'
 import EmptyState from '../../components/EmptyState.jsx'
 import { useData } from '../../state/DataContext.jsx'
 import { useToast } from '../../state/ToastContext.jsx'
 import { api } from '../../lib/api.js'
-import { dishImage } from '../../lib/assetUrl.js'
 import { money } from '../../lib/format.js'
 
 const CATS = ['家常菜', '主食', '素菜', '小吃', '硬菜', '汤类', '饮品', '川菜', '粤菜', '湘菜', '东北菜', '西北菜', '云贵菜', '徽菜', '闽菜', '浙菜', '苏菜', '鲁菜', '水果', '其他']
@@ -162,12 +161,11 @@ export default function AdminDishes() {
         ) : (
           <div className="admin-rows">
             {list.map((d) => {
-              const src = dishImage(d)
               const off = Number(d.available) === 0
               return (
                 <div key={d.id} className={`admin-dish${off ? ' is-off' : ''}`}>
                   <span className="admin-dish__media">
-                    {src ? <img src={src} alt="" loading="lazy" /> : <DishArt dish={d} size={38} />}
+                    <DishThumb dish={d} size={38} />
                   </span>
                   <div className="grow">
                     <p className="admin-dish__name">{d.name}</p>

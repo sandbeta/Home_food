@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PageHeader from '../components/PageHeader.jsx'
 import Icon from '../components/Icon.jsx'
-import DishArt from '../components/DishArt.jsx'
+import DishThumb from '../components/DishThumb.jsx'
 import Stepper from '../components/Stepper.jsx'
 import SwipeRow from '../components/SwipeRow.jsx'
 import EmptyState from '../components/EmptyState.jsx'
@@ -11,7 +11,6 @@ import { useCart } from '../state/CartContext.jsx'
 import { useData } from '../state/DataContext.jsx'
 import { useToast } from '../state/ToastContext.jsx'
 import { api } from '../lib/api.js'
-import { dishImage } from '../lib/assetUrl.js'
 import { money, monthKey, monthLabel } from '../lib/format.js'
 
 export default function Cart() {
@@ -145,7 +144,6 @@ export default function Cart() {
                 <div className="cart-rows">
                   {g.items.map((item) => {
                     const current = dishesById.get(Number(item.dish_id))
-                    const img = dishImage(current || item)
                     return (
                       <SwipeRow
                         key={`${item.dish_id}-${item.added_by}`}
@@ -156,8 +154,8 @@ export default function Cart() {
                         }}
                       >
                         <div className="cart-row">
-                          <span className={`cart-row__media${img ? ' has-photo' : ''}`}>
-                            {img ? <img src={img} alt="" loading="lazy" decoding="async" /> : <DishArt dish={current || item} size={48} />}
+                          <span className={`cart-row__media${current?.image_url || item.image_url ? ' has-photo' : ''}`}>
+                            <DishThumb dish={current || item} size={48} />
                           </span>
                           <div className="cart-row__text">
                             <p className="cart-row__name">{item.name}</p>

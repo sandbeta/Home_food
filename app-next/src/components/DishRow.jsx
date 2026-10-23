@@ -1,19 +1,14 @@
-import DishArt from './DishArt.jsx'
+import DishThumb from './DishThumb.jsx'
 import Icon from './Icon.jsx'
-import { dishImage } from '../lib/assetUrl.js'
 import { money } from '../lib/format.js'
 
 export default function DishRow({ dish, onOpen, onAdd, flag = null, faved = false }) {
-  const src = dishImage(dish)
+  const src = Boolean(dish?.image_url)
   return (
     <article className="dish-row">
       <button type="button" className="dish-row__main" onClick={() => onOpen?.(dish)} aria-label={`看 ${dish.name}`}>
         <span className={`dish-row__media${src ? ' has-photo' : ''}`}>
-          {src ? (
-            <img src={src} alt="" loading="lazy" decoding="async" />
-          ) : (
-            <DishArt dish={dish} size={58} />
-          )}
+          <DishThumb dish={dish} size={58} />
         </span>
         <span className="dish-row__text">
           <span className="dish-row__name-line">
