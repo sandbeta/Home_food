@@ -122,6 +122,12 @@
   margin-top: 4px;
 }
 
+.home-top__theme {
+  display: grid;
+  margin-top: 6px;
+  margin-left: auto;
+}
+
 .today__banner {
   margin-bottom: var(--s3);
 }

@@ -1,0 +1,11 @@
+import { launchChrome, openAndSettle, evaluate, screenshot, closeChrome, sleep } from './cdp.mjs'
+const stamp=Date.now(); const port=9997-(stamp%7)
+const chrome=await launchChrome(port,`E:/tmp-lamb-theme/p${stamp}`)
+const { client } = await openAndSettle({ port, url:'http://localhost:5180/#/today', width:390, height:844, dpr:2, wait:3000 })
+const before=await evaluate(client, `({theme:document.documentElement.dataset.theme, btn:document.querySelector('.home-top__theme')?.getAttribute('aria-label')})`)
+await evaluate(client, `document.querySelector('.home-top__theme')?.click()`)
+await sleep(700)
+const after=await evaluate(client, `({theme:document.documentElement.dataset.theme, btn:document.querySelector('.home-top__theme')?.getAttribute('aria-label'), toast:document.querySelector('.toast')?.textContent})`)
+console.log(JSON.stringify({before,after}))
+await screenshot(client,'E:/点餐小程序—抓娃娃机/research/20261023-全部重构/shots-pink/theme-toggle.png')
+await closeChrome(chrome); process.exit(0)

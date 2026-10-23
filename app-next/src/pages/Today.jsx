@@ -36,7 +36,7 @@ const LINES = {
 
 export default function Today() {
   const { dishes, orders, anniversaries, wishes, loading, errors, reload } = useData()
-  const { settings, night } = useSettings()
+  const { settings, night, setTheme } = useSettings()
   const { addItem, count: cartCount } = useCart()
   const { openDish } = useDishSheet()
   const toast = useToast()
@@ -128,6 +128,12 @@ export default function Today() {
     writeTodayMood(dateKey, next)
   }
 
+  const toggleTheme = () => {
+    const next = night ? 'day' : 'night'
+    setTheme(next)
+    toast(next === 'night' ? '切到宵夜' : '切到白天')
+  }
+
   const addToday = () => {
     if (!dish) return
     addItem(dish)
@@ -154,6 +160,14 @@ export default function Today() {
         <div className="home-top__right">
           <p className="home-top__clock t-num">{timeHM(now)}</p>
           <p className="home-top__date">{monthDay(now)} 周{weekdayCN(now)}</p>
+          <button
+            type="button"
+            className="icon-btn icon-btn--surface home-top__theme"
+            aria-label={night ? '切换到白天' : '切换到宵夜'}
+            onClick={toggleTheme}
+          >
+            <Icon name={night ? 'sun' : 'moon'} size={20} />
+          </button>
         </div>
       </header>
 
